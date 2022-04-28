@@ -11,34 +11,78 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using OpenTS2.Content.Interfaces;
+using OpenTS2.Common.Utils;
 
 namespace OpenTS2.Content
 {
+    /// <summary>
+    /// Handles device filesystem interfacing and path parsing
+    /// </summary>
     public class Filesystem
     {
         string _DataDirectory;
         string _UserDirectory;
         string _BinDirectory;
-        public string DataDirectory
+
+        public string UserDataDirectory
         {
-            get { return _DataDirectory; }
+            get { return "%UserDataDirectory%"; }
         }
 
-        public string UserDirectory
+        public string DataDirectory
         {
-            get { return _UserDirectory; }
+            get { return "%DataDirectory%"; }
         }
 
         public string BinDirectory
         {
-            get { return _BinDirectory; }
+            get { return "%BinDirectory%"; }
         }
 
         public Filesystem(IPathProvider pathProvider)
         {
-            _DataDirectory = pathProvider.GetGameRootPath() + "/TSData";
-            _UserDirectory = pathProvider.GetUserPath();
-            _BinDirectory = pathProvider.GetGameRootPath() + "/TSBin";
+            _DataDirectory = FileUtils.CleanPath(pathProvider.GetGameRootPath()) + "/TSData/";
+            _UserDirectory = FileUtils.CleanPath(pathProvider.GetUserPath()) + "/";
+            _BinDirectory = FileUtils.CleanPath(pathProvider.GetGameRootPath()) + "/TSBin/";
+        }
+
+        /// <summary>
+        /// Returns short relative path. (Eg. Replaces the game's directory with the %DataDirectory% shorthand)
+        /// </summary>
+        /// <param name="path">Path to shorten</param>
+        /// <returns>Fake short path</returns>
+        public string GetShortPath(string path)
+        {
+            path = FileUtils.CleanPath(path)+"/";
+            path = path.Replace(_DataDirectory, DataDirectory);
+            path = path.Replace(_UserDirectory, UserDataDirectory);
+            path = path.Replace(_BinDirectory, BinDirectory);
+            path = FileUtils.CleanPath(path);
+            return path;
+        }
+
+        /// <summary>
+        /// Returns fully parsed path. (Eg. Replaces %DataDirectory% with actual data directory path)
+        /// </summary>
+        /// <param name="path">Path to parse</param>
+        /// <returns>Real path</returns>
+        public string GetRealPath(string path)
+        {
+            path = FileUtils.CleanPath(path);
+            path = path.Replace(DataDirectory, _DataDirectory);
+            path = path.Replace(UserDataDirectory, _UserDirectory);
+            path = path.Replace(BinDirectory, _BinDirectory);
+            return path;
+        }
+
+        /// <summary>
+        /// Opens a file for reading.
+        /// </summary>
+        /// <param name="path">Unparsed path</param>
+        /// <returns>A FileStream</returns>
+        public FileStream OpenRead(string path)
+        {
+            return File.OpenRead(GetRealPath(path));
         }
     }
 }

@@ -8,6 +8,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using OpenTS2.Common;
+using OpenTS2.Files.Formats.DBPF;
+using System.IO;
 
 namespace OpenTS2.Unity.Tests
 {
@@ -16,8 +18,19 @@ namespace OpenTS2.Unity.Tests
         // Start is called before the first frame update
         void Start()
         {
+            var packageLocation = "C:/Users/Duchess/Documents/EA Games/The Sims™ 2 Ultimate Collection/Downloads/ld_HeightCheater.package";
+            Debug.Log("making group from " + Path.GetFileNameWithoutExtension(packageLocation));
             var reftg = new TGI("HeightCheater_cres", 0x1C050000, 0xE519C933);
-            Debug.Log(reftg.ToString());
+            var package = new DBPFFile(packageLocation);
+            var entry = package.GetItemByTGI(reftg);
+            if (entry != null)
+                Debug.Log("Found HeightCheater_cres!");
+            var objectTGI = new TGI(0x000041A7, "ld_HeightCheater", 0x4F424A44);
+            Debug.Log(objectTGI);
+            var entry2 = package.GetItemByTGI(objectTGI);
+            if (entry2 != null)
+                Debug.Log("Found Object!");
+            //Debug.Log(reftg.ToString());
         }
     }
 }

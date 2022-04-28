@@ -18,6 +18,12 @@ namespace OpenTS2.Common
     /// </summary>
     public class TGI
     {
+        public static TGI Default
+        {
+            get { return _Default; }
+        }
+        static TGI _Default = new TGI(0, 0, 0);
+
         private uint _InstanceID;
         private uint _InstanceHigh;
         private uint _GroupID;
@@ -150,7 +156,7 @@ namespace OpenTS2.Common
 
         public bool Equals(TGI obj)
         {
-            return obj != null && obj.GetHashCode() == this.GetHashCode();
+            return (InstanceHigh == obj.InstanceHigh && InstanceID == obj.InstanceID && GroupID == obj.GroupID && TypeID == obj.TypeID);
         }
 
         public override string ToString()

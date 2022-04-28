@@ -17,13 +17,18 @@ namespace OpenTS2.Content
     {
         public IPathProvider pathProvider;
     }
+    /// <summary>
+    /// Manages the game's asset saving/loading/caching and its filesystem.
+    /// </summary>
     public static class ContentManager
     {
-        public static Filesystem fileSystem;
+        public static Filesystem FileSystem;
+        public static ContentProvider TS2ContentProvider;
 
         public static void Initialize(ContentInitializationArgs args)
         {
-            fileSystem = new Filesystem(args.pathProvider);
+            FileSystem = new Filesystem(args.pathProvider);
+            TS2ContentProvider = new ContentProvider();
         }
     }
 }

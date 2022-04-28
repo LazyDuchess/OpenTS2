@@ -15,6 +15,19 @@ namespace OpenTS2.Common.Utils
     public static class FileUtils
     {
         /// <summary>
+        /// Cleans up a path to use normal slashes and cut off the slash at the end if there is one.
+        /// </summary>
+        /// <param name="path">Path to clean up</param>
+        /// <returns>Cleaned up path</returns>
+        public static string CleanPath(string path)
+        {
+            path = path.Trim();
+            path = path.Replace('\\', '/');
+            if (path[path.Length - 1] == '/')
+                path = path.Substring(0, path.Length - 1);
+            return path;
+        }
+        /// <summary>
         /// Generates a CRC32 Hash for High Instance IDs out of a string.
         /// </summary>
         /// <param name="name">String to hash.</param>

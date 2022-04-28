@@ -4,21 +4,19 @@
  * http://mozilla.org/MPL/2.0/. 
  */
 
-using OpenTS2.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OpenTS2.Content
+namespace OpenTS2.Client
 {
     /// <summary>
-    /// Represents a saveable DBPF asset.
+    /// Stores global user specific settings such as language.
     /// </summary>
-    public abstract class AbstractAsset
+    public static class GlobalSettings
     {
-        public TGI tgi = TGI.Default;
-        public string sourceFile = "";
+        public static byte language = 1;
     }
 }
