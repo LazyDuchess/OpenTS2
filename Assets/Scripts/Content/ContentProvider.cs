@@ -50,7 +50,7 @@ namespace OpenTS2.Content
             }
             return null;
         }
-        
+
         /// <summary>
         /// Caches an asset into the content system and returns it.
         /// </summary>
@@ -147,7 +147,7 @@ namespace OpenTS2.Content
 
         public void Dispose()
         {
-            foreach(var element in _contentEntries)
+            foreach (var element in _contentEntries)
             {
                 element.file.Dispose();
             }
