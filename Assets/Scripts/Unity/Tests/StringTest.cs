@@ -20,13 +20,13 @@ namespace OpenTS2.Unity.Tests
             var stopWatchSTR = new Stopwatch();
             var stopWatchSTR2 = new Stopwatch();
             stopWatch.Start();
-            ContentManager.TS2ContentProvider.AddPackage(packagePath);
+            ContentManager.Provider.AddPackage(packagePath);
             stopWatch.Stop();
             stopWatchSTR.Start();
-            var stringTable = ContentManager.TS2ContentProvider.GetAsset<StringTable>(new TGI(0x0000012D, "ld_heightcheater", 0x53545223));
+            var stringTable = ContentManager.Provider.GetAsset<StringTable>(new TGI(0x0000012D, "ld_heightcheater", 0x53545223));
             stopWatchSTR.Stop();
             stopWatchSTR2.Start();
-            ContentManager.TS2ContentProvider.GetAsset<StringTable>(new TGI(0x0000012D, "ld_heightcheater", 0x53545223));
+            ContentManager.Provider.GetAsset<StringTable>(new TGI(0x0000012D, "ld_heightcheater", 0x53545223));
             stopWatchSTR2.Stop();
             text.text = stringTable.GetString(8);
             if (!seconds)

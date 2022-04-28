@@ -45,18 +45,6 @@ namespace OpenTS2.Files.Formats.DBPF
         {
             return strings[language][id].value;
         }
-        string readstr(IoBuffer reader)
-        {
-            var stri = new List<byte>();
-            byte byt = 1;
-            do
-            {
-                byt = reader.ReadByte();
-                stri.Add(byt);
-            }
-            while (byt != 0);
-            return System.Text.Encoding.UTF8.GetString(stri.ToArray());
-        }
 
         /// <summary>
         /// Constructs a new STR instance.
@@ -74,15 +62,14 @@ namespace OpenTS2.Files.Formats.DBPF
         {
             var stream = new MemoryStream(bytes);
             var reader = IoBuffer.FromStream(stream, ByteOrder.LITTLE_ENDIAN);
-            fileName = readstr(reader);
+            fileName = reader.ReadNullTerminatedUTF8();
             reader.Seek(SeekOrigin.Begin, 66);
             var stringSets = reader.ReadUInt16();
             for (var i = 0; i < stringSets; i++)
             {
-                //Iobuffer's Read variable length pascal string messes up here for some reason? - This comment is leftover from when I was an idiot, look into changing this.
                 var languageCode = reader.ReadByte();
-                var value = readstr(reader);
-                var desc = readstr(reader);
+                var value = reader.ReadNullTerminatedUTF8();
+                var desc = reader.ReadNullTerminatedUTF8();
                 if (!strings.ContainsKey(languageCode))
                     strings[languageCode] = new List<StringSet>();
                 strings[languageCode].Add(new StringSet(value, desc));

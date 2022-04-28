@@ -23,12 +23,12 @@ namespace OpenTS2.Content
     public static class ContentManager
     {
         public static Filesystem FileSystem;
-        public static ContentProvider TS2ContentProvider;
+        public static ContentProvider Provider;
 
         public static void Initialize(ContentInitializationArgs args)
         {
             FileSystem = new Filesystem(args.pathProvider);
-            TS2ContentProvider = new ContentProvider();
+            Provider = new ContentProvider();
         }
     }
 }

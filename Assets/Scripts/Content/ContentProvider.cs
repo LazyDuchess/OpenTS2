@@ -24,7 +24,7 @@ namespace OpenTS2.Content
             get { return file.GroupID; }
         }
     }
-    public class ContentProvider
+    public class ContentProvider : IDisposable
     {
         public List<ContentEntry> ContentEntries
         {
@@ -98,6 +98,7 @@ namespace OpenTS2.Content
         /// <param name="package">Content entry for the package to remove.</param>
         public void RemovePackage(ContentEntry package)
         {
+            package.file.Dispose();
             _contentEntries.Remove(package);
             entryByGroupID.Remove(package.GroupID);
             entryByPath.Remove(package.path);
@@ -142,6 +143,14 @@ namespace OpenTS2.Content
                 return entryByPath[path];
             else
                 return null;
+        }
+
+        public void Dispose()
+        {
+            foreach(var element in _contentEntries)
+            {
+                element.file.Dispose();
+            }
         }
     }
 }
