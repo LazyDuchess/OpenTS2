@@ -1,5 +1,5 @@
 <h1 align="center">OpenTS2</h1>
-OpenTS2 is an Open-Source Reimplementation of The Sims 2, using the Unity game engine. Also provides a number of modular libraries for working with TS2 formats in a C# environment.
+OpenTS2 is an Open-Source Reimplementation of The Sims 2, using the Unity game engine. Also aims to provide a number of modular libraries for working with TS2 formats in a C# environment.
 
 ## Progress
 Currently resource management, asset loading and saving and other engine code is being worked on. There is no playable build yet.
