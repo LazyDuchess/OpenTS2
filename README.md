@@ -9,10 +9,14 @@ Currently resource management, asset loading and saving and other engine code is
 * [Visual Studio 2019](https://visualstudio.microsoft.com/vs/)
 * A copy of The Sims 2 Ultimate Collection
 
+## Acknowledgements
+* [InvertedTomato.CRC](https://github.com/invertedtomato/crc)
+
 ## Similar Projects
 * [FreeSO](https://github.com/RHY3756547/FreeSO) - Open Source reimplementation of The Sims Online using C# and Monogame. OpenTS2 borrows a lot of code and structure from this project.
 * [Las Marionetas](https://github.com/OmniBlade/LasMarionetas) - Similar project, aiming to reimplement The Sims 2 by reverse engineering its binary code into C/C++ source code.
 * [OpenTPW](https://github.com/ThemeParkWorld/OpenTPW) - Open Source reimplementation of Sim Theme Park / Theme Park World.
+* [SimUnity2](https://github.com/LazyDuchess/SimUnity2) - Earlier attempt at a TS2 reimplementation in the Unity engine. Abandoned, succeeded by this project.
 
 ## License
 This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
