@@ -14,7 +14,7 @@ using OpenTS2.Common;
 
 namespace OpenTS2.Files.Formats.DBPF
 {
-    
+
     /// <summary>
     /// STR file reading codec.
     /// </summary>

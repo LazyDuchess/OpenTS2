@@ -12,7 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OpenTS2.Files.Formats
+namespace OpenTS2.Files.Formats.DBPF
 {
     public abstract class AbstractCodec
     {
