@@ -8,14 +8,14 @@ namespace OpenTS2.Files.Formats.DBPF
 {
     public static class Codecs
     {
-        static Dictionary<uint, Type> codecsByTypeID = new Dictionary<uint, Type>()
+        static Dictionary<uint, AbstractCodec> codecsByTypeID = new Dictionary<uint, AbstractCodec>()
         {
-            { Types.STR, typeof(STR) }
+            { Types.STR, new STR() }
         };
 
         public static AbstractCodec GetCodecInstanceForType(uint type)
         {
-            return (AbstractCodec)Activator.CreateInstance(codecsByTypeID[type]);
+            return codecsByTypeID[type];
         }
     }
 }

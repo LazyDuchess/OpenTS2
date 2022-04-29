@@ -44,13 +44,12 @@ namespace OpenTS2.Content
                 if (itemByTGI != null)
                 {
                     var codec = Codecs.GetCodecInstanceForType(tgi.TypeID);
-                    codec.Deserialize(itemByTGI);
-                    return codec.BuildAsset();
+                    return codec.Deserialize(itemByTGI, tgi,element.path);
                 }
             }
             return null;
         }
-
+        
         /// <summary>
         /// Caches an asset into the content system and returns it.
         /// </summary>
@@ -147,7 +146,7 @@ namespace OpenTS2.Content
 
         public void Dispose()
         {
-            foreach (var element in _contentEntries)
+            foreach(var element in _contentEntries)
             {
                 element.file.Dispose();
             }

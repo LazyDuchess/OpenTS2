@@ -15,23 +15,53 @@ using OpenTS2.Client;
 namespace OpenTS2.Content
 {
     /// <summary>
+    /// A string set with a value and a description.
+    /// </summary>
+    public class StringSet
+    {
+        public string value;
+        public string description;
+
+        public StringSet(string value, string description)
+        {
+            this.value = value;
+            this.description = description;
+        }
+    }
+    public class StringTableData
+    {
+        public string fileName;
+        public Dictionary<byte, List<StringSet>> strings = new Dictionary<byte, List<StringSet>>();
+
+        /// <summary>
+        /// Gets a string by its ID and in the specified language.
+        /// </summary>
+        /// <param name="id">ID of the string to retrieve.</param>
+        /// <param name="language">Language bytecode.</param>
+        /// <returns>Localized string.</returns>
+        public string GetString(int id, byte language)
+        {
+            return strings[language][id].value;
+        }
+    }
+    /// <summary>
     /// Contains game strings. Asset wrapper around the STR file format.
     /// </summary>
     public class StringTable : AbstractAsset
     {
-        public STR Str
+        public StringTableData StringData
         {
-            get { return _Str; }
+            get { return _StringData; }
         }
-        STR _Str;
+        StringTableData _StringData;
 
         /// <summary>
-        /// Constructs a StringTable from a deserialized STR.
+        /// Constructs a StringTable from StringTableData.
         /// </summary>
         /// <param name="str">STR to use</param>
-        public StringTable(STR str)
+        public StringTable(StringTableData stringData)
         {
-            this._Str = str;
+            this._StringData = stringData;
         }
 
         /// <summary>
@@ -41,7 +71,7 @@ namespace OpenTS2.Content
         /// <returns>Localized string</returns>
         public string GetString(int id)
         {
-            return _Str.GetString(id, GlobalSettings.language);
+            return _StringData.GetString(id, GlobalSettings.language);
         }
     }
 }
