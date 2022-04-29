@@ -13,7 +13,7 @@ using System.IO;
 using OpenTS2.Content.Interfaces;
 using OpenTS2.Common.Utils;
 
-namespace OpenTS2.Content
+namespace OpenTS2.Files
 {
     /// <summary>
     /// Handles device filesystem interfacing and path parsing
@@ -53,7 +53,7 @@ namespace OpenTS2.Content
         /// <returns>Fake short path</returns>
         public string GetShortPath(string path)
         {
-            path = FileUtils.CleanPath(path)+"/";
+            path = FileUtils.CleanPath(path) + "/";
             path = path.Replace(_DataDirectory, DataDirectory);
             path = path.Replace(_UserDirectory, UserDataDirectory);
             path = path.Replace(_BinDirectory, BinDirectory);

@@ -44,7 +44,7 @@ namespace OpenTS2.Content
                 if (itemByTGI != null)
                 {
                     var codec = Codecs.GetCodecInstanceForType(tgi.TypeID);
-                    return codec.Deserialize(itemByTGI, tgi,element.path);
+                    return codec.Deserialize(itemByTGI, tgi, element.path);
                 }
             }
             return null;
