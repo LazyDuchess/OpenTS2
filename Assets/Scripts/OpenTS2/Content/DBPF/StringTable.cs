@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 using OpenTS2.Files.Formats.DBPF;
 using OpenTS2.Client;
 
-namespace OpenTS2.Content
+namespace OpenTS2.Content.DBPF
 {
     /// <summary>
     /// A string set with a value and a description.
@@ -61,7 +61,7 @@ namespace OpenTS2.Content
         /// <param name="str">STR to use</param>
         public StringTable(StringTableData stringData)
         {
-            this._StringData = stringData;
+            _StringData = stringData;
         }
 
         /// <summary>

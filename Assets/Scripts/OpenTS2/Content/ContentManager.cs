@@ -17,6 +17,16 @@ namespace OpenTS2.Content
     public class ContentInitializationArgs
     {
         public IPathProvider pathProvider;
+        public AbstractTextureFactory textureFactory;
+
+        public static ContentInitializationArgs Default
+        {
+            get
+            {
+                var ini = new ContentInitializationArgs();
+                return ini;
+            }
+        }
     }
     /// <summary>
     /// Manages the game's asset saving/loading/caching and its filesystem.
@@ -25,11 +35,13 @@ namespace OpenTS2.Content
     {
         public static Filesystem FileSystem;
         public static ContentProvider Provider;
+        public static AbstractTextureFactory TextureFactory;
 
         public static void Initialize(ContentInitializationArgs args)
         {
             FileSystem = new Filesystem(args.pathProvider);
             Provider = new ContentProvider();
+            TextureFactory = args.textureFactory;
         }
     }
 }

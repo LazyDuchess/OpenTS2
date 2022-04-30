@@ -27,6 +27,10 @@ namespace OpenTS2.Files.Utils
     /// </summary>
     public class IoBuffer : IDisposable, BCFReadProxy
     {
+        public long Position
+        {
+            get { return Reader.BaseStream.Position; }
+        }
         public Stream Stream;
         private BinaryReader Reader;
         public ByteOrder ByteOrder = ByteOrder.BIG_ENDIAN;

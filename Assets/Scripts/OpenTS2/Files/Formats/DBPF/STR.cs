@@ -11,6 +11,7 @@ using System;
 using OpenTS2.Files.Utils;
 using OpenTS2.Content;
 using OpenTS2.Common;
+using OpenTS2.Content.DBPF;
 
 namespace OpenTS2.Files.Formats.DBPF
 {

@@ -24,6 +24,10 @@ namespace OpenTS2.Content
             get { return file.GroupID; }
         }
     }
+
+    /// <summary>
+    /// Provides access to reading and writing to assets in packages.
+    /// </summary>
     public class ContentProvider : IDisposable
     {
         public List<ContentEntry> ContentEntries

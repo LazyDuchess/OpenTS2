@@ -11,6 +11,7 @@ using UnityEngine.UI;
 using OpenTS2.Content;
 using OpenTS2.Common;
 using System.Diagnostics;
+using OpenTS2.Content.DBPF;
 
 namespace OpenTS2.Unity.Tests
 {

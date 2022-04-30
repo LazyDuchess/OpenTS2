@@ -12,6 +12,9 @@ using System.Threading.Tasks;
 
 namespace OpenTS2.Files.Formats.DBPF
 {
+    /// <summary>
+    /// Codecs for DBPF archives.
+    /// </summary>
     public static class Codecs
     {
         static Dictionary<uint, AbstractCodec> codecsByTypeID = new Dictionary<uint, AbstractCodec>()

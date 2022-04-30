@@ -16,6 +16,7 @@ namespace OpenTS2.Unity.Game
         {
             var contentInitializeArgs = new ContentInitializationArgs();
             contentInitializeArgs.pathProvider = new JSONPathProvider();
+            contentInitializeArgs.textureFactory = new TextureFactory();
             ContentManager.Initialize(contentInitializeArgs);
         }
     }

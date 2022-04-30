@@ -84,5 +84,19 @@ namespace OpenTS2.Files
         {
             return File.OpenRead(GetRealPath(path));
         }
+
+        /// <summary>
+        /// Writes a byte array into a file.
+        /// </summary>
+        /// <param name="path">Path to output file.</param>
+        /// <param name="bytes">Byte array to write.</param>
+        public void Write(string path, byte[] bytes)
+        {
+            var realPath = GetRealPath(path);
+            var dir = Path.GetDirectoryName(realPath);
+            if (!Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+            File.WriteAllBytes(realPath, bytes);
+        }
     }
 }
