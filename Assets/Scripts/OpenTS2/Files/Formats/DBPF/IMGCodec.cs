@@ -37,30 +37,33 @@ namespace OpenTS2.Files.Formats.DBPF
         /// <param name="bytes">Bytes to parse</param>
         public override AbstractAsset Deserialize(byte[] bytes, TGI tgi, string sourceFile)
         {
+            // 0: TGA, 1: PNG, 2: JPG
+            var fileType = 0;
             var pngCheck = Encoding.UTF8.GetString(bytes, 1, 3);
             var jpgCheck = Encoding.UTF8.GetString(bytes, 6, 4);
+            if (pngCheck == "PNG")
+                fileType = 1;
+            else if (jpgCheck == "JFIF")
+                fileType = 2;
             var textureAsset = new TextureAsset();
             object texture;
-            if (pngCheck != "PNG" && jpgCheck != "JFIF")
+            switch (fileType)
             {
+                case 0:
                 texture = ContentManager.TextureFactory.CreateTGATexture(bytes);
                 textureAsset.engineTexture = texture;
                 return textureAsset;
-            }
-            if (pngCheck == "PNG")
-            {
+
+                case 1:
                 texture = ContentManager.TextureFactory.CreatePNGTexture(bytes);
                 textureAsset.engineTexture = texture;
                 return textureAsset;
-            }
-            if (jpgCheck == "JFIF")
-            {
+
+                case 2:
                 texture = ContentManager.TextureFactory.CreateJPGTexture(bytes);
                 textureAsset.engineTexture = texture;
                 return textureAsset;
             }
-            texture = ContentManager.TextureFactory.CreateJPGTexture(bytes);
-            textureAsset.engineTexture = texture;
             return textureAsset;
         }
     }
