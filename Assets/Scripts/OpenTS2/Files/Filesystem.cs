@@ -26,7 +26,7 @@ namespace OpenTS2.Files
 
         public string UserDataDirectory
         {
-            get { return "%UserDataDirectory%"; }
+            get { return "%UserDataDir%"; }
         }
 
         public string DataDirectory

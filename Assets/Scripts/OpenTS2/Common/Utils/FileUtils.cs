@@ -21,8 +21,29 @@ namespace OpenTS2.Common.Utils
         /// <returns>Cleaned up path</returns>
         public static string CleanPath(string path)
         {
+            //Trim whitespaces
             path = path.Trim();
-            path = path.Replace('\\', '/');
+            //Remove double slashes
+            var finalPath = "";
+            var lastwasSlash = false;
+            for(var i=0;i<path.Length;i++)
+            {
+                var cha = path[i];
+                if (cha == '\\' || cha == '/')
+                {
+                    if (!lastwasSlash)
+                    {
+                        finalPath += "/";
+                        lastwasSlash = true;
+                    }
+                }
+                else
+                {
+                    lastwasSlash = false;
+                    finalPath += cha;
+                }
+            }
+            //Remove slash if there is a redundant one at the end
             if (path[path.Length - 1] == '/')
                 path = path.Substring(0, path.Length - 1);
             return path;

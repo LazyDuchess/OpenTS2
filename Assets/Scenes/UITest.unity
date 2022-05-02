@@ -610,7 +610,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   image: {fileID: 683157549}
-  packageToLoad: E:/Origin/The Sims 2 Ultimate Collection/Double Deluxe/Base/TSData/Res/UI/ui.package
+  packageToLoad: E:/what.package
 --- !u!4 &1947281170
 Transform:
   m_ObjectHideFlags: 0

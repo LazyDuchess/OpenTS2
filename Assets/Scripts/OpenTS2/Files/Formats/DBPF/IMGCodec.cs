@@ -53,6 +53,12 @@ namespace OpenTS2.Files.Formats.DBPF
                 textureAsset.engineTexture = texture;
                 return textureAsset;
             }
+            if (jpgCheck == "JFIF")
+            {
+                texture = ContentManager.TextureFactory.CreateJPGTexture(bytes);
+                textureAsset.engineTexture = texture;
+                return textureAsset;
+            }
             texture = ContentManager.TextureFactory.CreateJPGTexture(bytes);
             textureAsset.engineTexture = texture;
             return textureAsset;
