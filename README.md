@@ -11,6 +11,7 @@ Currently resource management, asset loading and saving and other engine code is
 
 ## Acknowledgements
 * [InvertedTomato.CRC](https://github.com/invertedtomato/crc)
+* [TGA Image Reader](https://www.codeproject.com/Articles/31702/NET-Targa-Image-Reader)
 
 ## Similar Projects
 * [FreeSO](https://github.com/RHY3756547/FreeSO) - Open Source reimplementation of The Sims Online using C# and Monogame. OpenTS2 borrows a lot of code and structure from this project.
