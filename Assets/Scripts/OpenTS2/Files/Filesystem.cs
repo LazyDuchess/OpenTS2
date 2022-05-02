@@ -68,10 +68,10 @@ namespace OpenTS2.Files
         /// <returns>Real path</returns>
         public string GetRealPath(string path)
         {
-            path = FileUtils.CleanPath(path);
             path = path.Replace(DataDirectory, _DataDirectory);
             path = path.Replace(UserDataDirectory, _UserDirectory);
             path = path.Replace(BinDirectory, _BinDirectory);
+            path = FileUtils.CleanPath(path);
             return path;
         }
 
