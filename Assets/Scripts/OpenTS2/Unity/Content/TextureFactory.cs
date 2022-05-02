@@ -17,6 +17,9 @@ using UnityEngine;
 
 namespace OpenTS2.Unity.Content
 {
+    /// <summary>
+    /// Constructs Unity Texture2D resources.
+    /// </summary>
     public class TextureFactory : ITextureFactory
     {
         public override object CreateJPGTexture(byte[] source)
