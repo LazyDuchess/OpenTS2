@@ -17,21 +17,21 @@ namespace OpenTS2.Content.DBPF
     /// <summary>
     /// A string set with a value and a description.
     /// </summary>
-    public class StringSet
+    public class StringValue
     {
         public string value;
         public string description;
 
-        public StringSet(string value, string description)
+        public StringValue(string value, string description)
         {
             this.value = value;
             this.description = description;
         }
     }
-    public class StringTableData
+    public class StringSetData
     {
         public string fileName;
-        public Dictionary<byte, List<StringSet>> strings = new Dictionary<byte, List<StringSet>>();
+        public Dictionary<byte, List<StringValue>> strings = new Dictionary<byte, List<StringValue>>();
 
         /// <summary>
         /// Gets a string by its ID and in the specified language.
@@ -47,19 +47,19 @@ namespace OpenTS2.Content.DBPF
     /// <summary>
     /// Contains game strings. Asset wrapper around the STR file format.
     /// </summary>
-    public class StringTable : AbstractAsset
+    public class StringSetAsset : AbstractAsset
     {
-        public StringTableData StringData
+        public StringSetData StringData
         {
             get { return _StringData; }
         }
-        StringTableData _StringData;
+        StringSetData _StringData;
 
         /// <summary>
         /// Constructs a StringTable from StringTableData.
         /// </summary>
         /// <param name="str">STR to use</param>
-        public StringTable(StringTableData stringData)
+        public StringSetAsset(StringSetData stringData)
         {
             _StringData = stringData;
         }

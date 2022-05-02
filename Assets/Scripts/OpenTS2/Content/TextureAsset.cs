@@ -17,6 +17,6 @@ namespace OpenTS2.Content
     /// </summary>
     public class TextureAsset : AbstractAsset
     {
-        public AbstractEngineTexture Texture;
+        public object engineTexture;
     }
 }

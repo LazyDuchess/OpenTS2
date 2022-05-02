@@ -19,13 +19,13 @@ namespace OpenTS2.Files.Formats.DBPF
     /// <summary>
     /// STR file reading codec.
     /// </summary>
-    public class STR : AbstractCodec
+    public class STRCodec : AbstractCodec
     {
 
         /// <summary>
         /// Constructs a new STR instance.
         /// </summary>
-        public STR()
+        public STRCodec()
         {
 
         }
@@ -36,7 +36,7 @@ namespace OpenTS2.Files.Formats.DBPF
         /// <param name="bytes">Bytes to parse</param>
         public override AbstractAsset Deserialize(byte[] bytes, TGI tgi, string sourceFile)
         {
-            var stringTableData = new StringTableData();
+            var stringTableData = new StringSetData();
             var stream = new MemoryStream(bytes);
             var reader = IoBuffer.FromStream(stream, ByteOrder.LITTLE_ENDIAN);
             stringTableData.fileName = reader.ReadNullTerminatedUTF8();
@@ -48,12 +48,12 @@ namespace OpenTS2.Files.Formats.DBPF
                 var value = reader.ReadNullTerminatedUTF8();
                 var desc = reader.ReadNullTerminatedUTF8();
                 if (!stringTableData.strings.ContainsKey(languageCode))
-                    stringTableData.strings[languageCode] = new List<StringSet>();
-                stringTableData.strings[languageCode].Add(new StringSet(value, desc));
+                    stringTableData.strings[languageCode] = new List<StringValue>();
+                stringTableData.strings[languageCode].Add(new StringValue(value, desc));
             }
             stream.Dispose();
             reader.Dispose();
-            var ast = new StringTable(stringTableData);
+            var ast = new StringSetAsset(stringTableData);
             return ast; 
         }
     }

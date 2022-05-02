@@ -19,7 +19,8 @@ namespace OpenTS2.Files.Formats.DBPF
     {
         static Dictionary<uint, AbstractCodec> codecsByTypeID = new Dictionary<uint, AbstractCodec>()
         {
-            { Types.STR, new STR() }
+            { Types.STR, new STRCodec() },
+            { Types.IMG, new IMGCodec() }
         };
 
         public static AbstractCodec GetCodecInstanceForType(uint type)

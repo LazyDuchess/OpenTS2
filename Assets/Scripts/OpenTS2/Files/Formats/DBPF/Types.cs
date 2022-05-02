@@ -15,5 +15,6 @@ namespace OpenTS2.Files.Formats.DBPF
     public static class Types
     {
         public const uint STR = 0x53545223;
+        public const uint IMG = 0x856DDBAC;
     }
 }

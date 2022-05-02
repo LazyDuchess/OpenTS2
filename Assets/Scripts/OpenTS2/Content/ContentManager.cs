@@ -17,7 +17,7 @@ namespace OpenTS2.Content
     public class ContentInitializationArgs
     {
         public IPathProvider pathProvider;
-        public AbstractTextureFactory textureFactory;
+        public ITextureFactory textureFactory;
 
         public static ContentInitializationArgs Default
         {
@@ -35,7 +35,7 @@ namespace OpenTS2.Content
     {
         public static Filesystem FileSystem;
         public static ContentProvider Provider;
-        public static AbstractTextureFactory TextureFactory;
+        public static ITextureFactory TextureFactory;
 
         public static void Initialize(ContentInitializationArgs args)
         {

@@ -22,18 +22,22 @@ namespace OpenTS2.Unity.Tests
     {
         public string ARCPath;
         public string TargetFolder;
-        public string extension;
-
-        public string texture = "200_motive_icon_hunger_black";
 
         private void Start()
         {
+            var codec = new ARCTextureCodec();
             using (var archive = new ARCFile(ARCPath))
             {
-
-                var imageFile = archive.GetItemByName(texture);
-                var texture2 = new ARCTextureCodec().Deserialize(imageFile).Texture as UnityTexture;
-                ContentManager.FileSystem.Write(Path.Combine(TargetFolder, texture+".png"), texture2.texture.EncodeToPNG());
+                foreach (var element in archive.Entries)
+                {
+                    try
+                    {
+                        var imageFile = archive.GetEntryNoHeader(element);
+                        var texture2 = codec.Deserialize(imageFile);
+                        ContentManager.FileSystem.Write(Path.Combine(TargetFolder, element.FileName + ".png"), ((Texture2D)texture2.engineTexture).EncodeToPNG());
+                    }
+                    catch (Exception e) { }
+                }
             }
         }
     }

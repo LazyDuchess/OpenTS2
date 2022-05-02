@@ -11,18 +11,24 @@ using System.Text;
 using System.Threading.Tasks;
 using OpenTS2.Files.Formats.ARC;
 
-namespace OpenTS2.Content
+namespace OpenTS2.Content.Interfaces
 {
     /// <summary>
     /// Generates engine textures from deserialized game textures.
     /// </summary>
-    public abstract class AbstractTextureFactory
+    public abstract class ITextureFactory
     {
         /// <summary>
         /// Creates an engine texture out of a palettized ARC Texture.
         /// </summary>
         /// <param name="source">ARC Texture source.</param>
         /// <returns></returns>
-        public abstract AbstractEngineTexture CreateTexture(PalettizedARCTexture source);
+        public abstract object CreateTexture(PalettizedARCTexture source);
+
+        public abstract object CreateTGATexture(byte[] source);
+
+        public abstract object CreatePNGTexture(byte[] source);
+
+        public abstract object CreateJPGTexture(byte[] source);
     }
 }

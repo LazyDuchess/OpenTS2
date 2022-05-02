@@ -155,7 +155,6 @@ namespace OpenTS2.Files.Formats.DBPF
         public byte[] GetEntry(DBPFEntry entry)
         {
             m_Reader.Seek(SeekOrigin.Begin, entry.FileOffset);
-
             return m_Reader.ReadBytes((int)entry.FileSize);
         }
 
