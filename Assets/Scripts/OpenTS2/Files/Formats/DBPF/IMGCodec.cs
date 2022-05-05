@@ -37,6 +37,7 @@ namespace OpenTS2.Files.Formats.DBPF
         /// <param name="bytes">Bytes to parse</param>
         public override AbstractAsset Deserialize(byte[] bytes, TGI tgi, string sourceFile)
         {
+            // TODO - figure out JFIF ALFA block.
             // 0: TGA, 1: PNG, 2: JPG
             var fileType = 0;
             var pngCheck = Encoding.UTF8.GetString(bytes, 1, 3);
