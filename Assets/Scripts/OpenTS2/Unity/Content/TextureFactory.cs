@@ -23,6 +23,10 @@ namespace OpenTS2.Unity.Content
     /// </summary>
     public class TextureFactory : ITextureFactory
     {
+        public TextureFactory()
+        {
+            ContentManager.TextureFactory = this;
+        }
         public override object CreateJPGTexture(byte[] source)
         {
             Texture2D fTex = new Texture2D(1, 1);

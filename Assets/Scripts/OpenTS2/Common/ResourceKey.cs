@@ -16,13 +16,13 @@ namespace OpenTS2.Common
     /// <summary>
     /// Type, Group and Instance ID reference for packaged resources.
     /// </summary>
-    public class TGI
+    public class ResourceKey
     {
-        public static TGI Default
+        public static ResourceKey Default
         {
             get { return _Default; }
         }
-        static TGI _Default = new TGI(0, 0, 0);
+        static ResourceKey _Default = new ResourceKey(0, 0, 0);
 
         private uint _InstanceID;
         private uint _InstanceHigh;
@@ -55,7 +55,7 @@ namespace OpenTS2.Common
         /// <param name="instanceID">Instance ID</param>
         /// <param name="groupID">Group ID</param>
         /// <param name="typeID">Type ID</param>
-        public TGI(uint instanceID, uint groupID, uint typeID)
+        public ResourceKey(uint instanceID, uint groupID, uint typeID)
         {
             this._InstanceID = instanceID;
             this._InstanceHigh = 0x00000000;
@@ -70,7 +70,7 @@ namespace OpenTS2.Common
         /// <param name="instanceHigh">High Instance ID</param>
         /// <param name="groupID">Group ID</param>
         /// <param name="typeID">Type ID</param>
-        public TGI(uint instanceID, uint instanceHigh, uint groupID, uint typeID)
+        public ResourceKey(uint instanceID, uint instanceHigh, uint groupID, uint typeID)
         {
             this._InstanceID = instanceID;
             this._InstanceHigh = instanceHigh;
@@ -85,7 +85,7 @@ namespace OpenTS2.Common
         /// <param name="filename">Filename for Instance ID</param>
         /// <param name="groupID">Group ID</param>
         /// <param name="typeID">Type ID</param>
-        public TGI(string filename, uint groupID, uint typeID)
+        public ResourceKey(string filename, uint groupID, uint typeID)
         {
             this._InstanceID = FileUtils.LowHash(filename);
             this._InstanceHigh = FileUtils.HighHash(filename);
@@ -99,7 +99,7 @@ namespace OpenTS2.Common
         /// <param name="filename">Filename for Instance ID</param>
         /// <param name="groupName">Group name/Package name for Group ID</param>
         /// <param name="typeID">Type ID</param>
-        public TGI(string filename, string groupName, uint typeID)
+        public ResourceKey(string filename, string groupName, uint typeID)
         {
             this._InstanceID = FileUtils.LowHash(filename);
             this._InstanceHigh = FileUtils.HighHash(filename);
@@ -114,7 +114,7 @@ namespace OpenTS2.Common
         /// <param name="instanceHigh">High Instance ID</param>
         /// <param name="groupName">Group name/Package name for Group ID</param>
         /// <param name="typeID">Type ID</param>
-        public TGI(uint instanceID, uint instanceHigh, string groupName, uint typeID)
+        public ResourceKey(uint instanceID, uint instanceHigh, string groupName, uint typeID)
         {
             this._InstanceID = instanceID;
             this._InstanceHigh = instanceHigh;
@@ -128,7 +128,7 @@ namespace OpenTS2.Common
         /// <param name="instanceID">Instance ID</param>
         /// <param name="groupName">Group name/Package name for Group ID</param>
         /// <param name="typeID">Type ID</param>
-        public TGI(uint instanceID, string groupName, uint typeID)
+        public ResourceKey(uint instanceID, string groupName, uint typeID)
         {
             this._InstanceID = instanceID;
             this._InstanceHigh = 0x00000000;
@@ -151,10 +151,10 @@ namespace OpenTS2.Common
 
         public override bool Equals(object obj)
         {
-            return Equals(obj as TGI);
+            return Equals(obj as ResourceKey);
         }
 
-        public bool Equals(TGI obj)
+        public bool Equals(ResourceKey obj)
         {
             return (InstanceHigh == obj.InstanceHigh && InstanceID == obj.InstanceID && GroupID == obj.GroupID && TypeID == obj.TypeID);
         }

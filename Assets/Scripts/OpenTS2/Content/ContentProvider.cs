@@ -40,7 +40,7 @@ namespace OpenTS2.Content
         private Dictionary<string, ContentEntry> entryByPath = new Dictionary<string, ContentEntry>();
         private ContentCache contentCache = new ContentCache();
 
-        AbstractAsset InternalLoadAsset(TGI tgi)
+        AbstractAsset InternalLoadAsset(ResourceKey tgi)
         {
             foreach (var element in _contentEntries)
             {
@@ -62,7 +62,7 @@ namespace OpenTS2.Content
         /// </summary>
         /// <param name="tgi">TGI of the resource.</param>
         /// <returns>The asset.</returns>
-        public AbstractAsset GetAsset(TGI tgi)
+        public AbstractAsset GetAsset(ResourceKey tgi)
         {
             return contentCache.GetOrAdd(tgi, InternalLoadAsset);
         }
@@ -73,7 +73,7 @@ namespace OpenTS2.Content
         /// <typeparam name="T">The Type of asset to return.</typeparam>
         /// <param name="tgi">TGI of the resource.</param>
         /// <returns>The asset.</returns>
-        public T GetAsset<T>(TGI tgi) where T : AbstractAsset
+        public T GetAsset<T>(ResourceKey tgi) where T : AbstractAsset
         {
             return GetAsset(tgi) as T;
         }

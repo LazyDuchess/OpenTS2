@@ -20,12 +20,12 @@ namespace OpenTS2.Unity.Tests
         {
             var packageLocation = "C:/Users/Duchess/Documents/EA Games/The Sims™ 2 Ultimate Collection/Downloads/ld_HeightCheater.package";
             Debug.Log("making group from " + Path.GetFileNameWithoutExtension(packageLocation));
-            var reftg = new TGI("HeightCheater_cres", 0x1C050000, 0xE519C933);
+            var reftg = new ResourceKey("HeightCheater_cres", 0x1C050000, 0xE519C933);
             var package = new DBPFFile(packageLocation);
             var entry = package.GetItemByTGI(reftg);
             if (entry != null)
                 Debug.Log("Found HeightCheater_cres!");
-            var objectTGI = new TGI(0x000041A7, "ld_HeightCheater", 0x4F424A44);
+            var objectTGI = new ResourceKey(0x000041A7, "ld_HeightCheater", 0x4F424A44);
             Debug.Log(objectTGI);
             var entry2 = package.GetItemByTGI(objectTGI);
             if (entry2 != null)

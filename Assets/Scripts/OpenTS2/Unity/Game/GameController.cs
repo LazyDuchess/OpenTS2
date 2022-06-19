@@ -5,8 +5,7 @@
  */
 
 using UnityEngine;
-using OpenTS2.Content;
-using OpenTS2.Unity.Content;
+using OpenTS2.Unity.Core;
 
 namespace OpenTS2.Unity.Game
 {
@@ -14,10 +13,7 @@ namespace OpenTS2.Unity.Game
     {
         private void Awake()
         {
-            var contentInitializeArgs = new ContentInitializationArgs();
-            contentInitializeArgs.pathProvider = new JSONPathProvider();
-            contentInitializeArgs.textureFactory = new TextureFactory();
-            ContentManager.Initialize(contentInitializeArgs);
+            ResourceManagement.Initialize();
         }
     }
 }

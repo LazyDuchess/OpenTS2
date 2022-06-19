@@ -437,10 +437,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a1092c98476c1942a0da4bf5b962e6e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ARCPath: F:/Sims 2, The/TEXTURES.ARC
-  TargetFolder: F:/Sims 2, The/TEXTURES
-  extension: tex
-  texture: af_base_face
+  ARCPath: F:/Sims 2, The/AUDIOSTR.ARC
+  TargetFolder: F:/Sims 2, The/AUDIOSTR
+  textureMode: 0
 --- !u!4 &1947281170
 Transform:
   m_ObjectHideFlags: 0

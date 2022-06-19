@@ -34,7 +34,7 @@ namespace OpenTS2.Files.Formats.DBPF
         /// Parses STR from an array of bytes.
         /// </summary>
         /// <param name="bytes">Bytes to parse</param>
-        public override AbstractAsset Deserialize(byte[] bytes, TGI tgi, string sourceFile)
+        public override AbstractAsset Deserialize(byte[] bytes, ResourceKey tgi, string sourceFile)
         {
             var stringTableData = new StringSetData();
             var stream = new MemoryStream(bytes);

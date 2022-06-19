@@ -16,6 +16,6 @@ namespace OpenTS2.Files.Formats.DBPF
 {
     public abstract class AbstractCodec
     {
-        public abstract AbstractAsset Deserialize(byte[] bytes, TGI tgi, string sourceFile);
+        public abstract AbstractAsset Deserialize(byte[] bytes, ResourceKey tgi, string sourceFile);
     }
 }

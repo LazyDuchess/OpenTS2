@@ -25,7 +25,7 @@ namespace OpenTS2.Unity.Tests
         void Start()
         {
             ContentManager.Provider.AddPackage(packageToLoad);
-            var texture = ContentManager.Provider.GetAsset<TextureAsset>(new TGI(0x00000001, "N010_FamilyThumbnails", 0x8C3CE95A));
+            var texture = ContentManager.Provider.GetAsset<TextureAsset>(new ResourceKey(0x00000001, "N010_FamilyThumbnails", 0x8C3CE95A));
             image.texture = texture.engineTexture as Texture2D;
         }
     }

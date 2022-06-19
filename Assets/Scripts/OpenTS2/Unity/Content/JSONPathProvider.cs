@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using OpenTS2.Content.Interfaces;
 using UnityEngine;
 using System.IO;
+using OpenTS2.Content;
 
 namespace OpenTS2.Unity.Content
 {
@@ -34,6 +35,7 @@ namespace OpenTS2.Unity.Content
         {
             var dir = new DirectoryInfo(Application.dataPath).Parent.FullName;
             config = JsonUtility.FromJson<JSONConfig>(File.ReadAllText(Path.Combine(dir, "config.json")));
+            ContentManager.FileSystem = new Files.Filesystem(this);
         }
         public List<string> GetGameDataPaths()
         {

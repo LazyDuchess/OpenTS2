@@ -33,7 +33,7 @@ namespace OpenTS2.Files.Formats.DBPF
         private IoBuffer m_Reader;
 
         private List<DBPFEntry> m_EntriesList = new List<DBPFEntry>();
-        private Dictionary<TGI, DBPFEntry> m_EntryByTGI = new Dictionary<TGI, DBPFEntry>();
+        private Dictionary<ResourceKey, DBPFEntry> m_EntryByTGI = new Dictionary<ResourceKey, DBPFEntry>();
         private Dictionary<uint, List<DBPFEntry>> m_EntriesByType = new Dictionary<uint, List<DBPFEntry>>();
 
         private IoBuffer Io;
@@ -62,7 +62,7 @@ namespace OpenTS2.Files.Formats.DBPF
         /// <param name="stream">The stream to read from.</param>
         public void Read(Stream stream)
         {
-            m_EntryByTGI = new Dictionary<TGI, DBPFEntry>();
+            m_EntryByTGI = new Dictionary<ResourceKey, DBPFEntry>();
             m_EntriesList = new List<DBPFEntry>();
 
             var io = IoBuffer.FromStream(stream, ByteOrder.LITTLE_ENDIAN);
@@ -131,7 +131,7 @@ namespace OpenTS2.Files.Formats.DBPF
                 var InstanceID = io.ReadUInt32();
                 if (IndexMinorVersion >= 2)
                     instanceHigh = io.ReadUInt32();
-                entry.tgi = new TGI(InstanceID, instanceHigh, EntryGroupID, TypeID);
+                entry.tgi = new ResourceKey(InstanceID, instanceHigh, EntryGroupID, TypeID);
                 entry.FileOffset = io.ReadUInt32();
                 entry.FileSize = io.ReadUInt32();
 
@@ -163,7 +163,7 @@ namespace OpenTS2.Files.Formats.DBPF
         /// </summary>
         /// <param name="tgi">The TGI of the entry.</param>
         /// <returns>The entry's data.</returns>
-        public byte[] GetItemByTGI(TGI tgi)
+        public byte[] GetItemByTGI(ResourceKey tgi)
         {
             if (m_EntryByTGI.ContainsKey(tgi))
                 return GetEntry(m_EntryByTGI[tgi]);
@@ -176,15 +176,15 @@ namespace OpenTS2.Files.Formats.DBPF
         /// </summary>
         /// <param name="Type">The Type of the entry.</param>
         /// <returns>The entry data, paired with its TGI.</returns>
-        public List<KeyValuePair<TGI, byte[]>> GetItemsByType(uint Type)
+        public List<KeyValuePair<ResourceKey, byte[]>> GetItemsByType(uint Type)
         {
 
-            var result = new List<KeyValuePair<TGI, byte[]>>();
+            var result = new List<KeyValuePair<ResourceKey, byte[]>>();
 
             var entries = m_EntriesByType[Type];
             for (int i = 0; i < entries.Count; i++)
             {
-                result.Add(new KeyValuePair<TGI, byte[]>(entries[i].tgi, GetEntry(entries[i])));
+                result.Add(new KeyValuePair<ResourceKey, byte[]>(entries[i].tgi, GetEntry(entries[i])));
             }
             return result;
         }

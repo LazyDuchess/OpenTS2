@@ -53,7 +53,7 @@ namespace OpenTS2.Files.Formats.DBPF
     public class DBPFEntry
     {
         //ID of file, type and group
-        public TGI tgi = TGI.Default;
+        public ResourceKey tgi = ResourceKey.Default;
 
         //A 4-byte unsigned integer specifying the offset to the entry's data from the beginning of the archive
         public uint FileOffset;

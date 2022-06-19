@@ -22,6 +22,7 @@ namespace OpenTS2.Unity.Tests
     {
         public string ARCPath;
         public string TargetFolder;
+        public bool textureMode = false;
 
         private void Start()
         {
@@ -33,8 +34,15 @@ namespace OpenTS2.Unity.Tests
                     try
                     {
                         var imageFile = archive.GetEntryNoHeader(element);
-                        var texture2 = codec.Deserialize(imageFile);
-                        ContentManager.FileSystem.Write(Path.Combine(TargetFolder, element.FileName + ".png"), ((Texture2D)texture2.engineTexture).EncodeToPNG());
+                        if (textureMode)
+                        {
+                            var texture2 = codec.Deserialize(imageFile);
+                            ContentManager.FileSystem.Write(Path.Combine(TargetFolder, element.FileName + ".png"), ((Texture2D)texture2.engineTexture).EncodeToPNG());
+                        }
+                        else
+                        {
+                            ContentManager.FileSystem.Write(Path.Combine(TargetFolder, element.FileName), imageFile);
+                        }
                     }
                     catch (Exception e) { }
                 }

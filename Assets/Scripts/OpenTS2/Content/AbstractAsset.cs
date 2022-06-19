@@ -18,7 +18,7 @@ namespace OpenTS2.Content
     /// </summary>
     public abstract class AbstractAsset
     {
-        public TGI tgi = TGI.Default;
+        public ResourceKey tgi = ResourceKey.Default;
         public string sourceFile = "";
     }
 }
