@@ -17,11 +17,14 @@ namespace OpenTS2.Files.Formats.DBPF
     /// </summary>
     public static class Codecs
     {
+        public static STRCodec STR = new STRCodec();
+        public static IMGCodec IMG = new IMGCodec();
+
         static Dictionary<uint, AbstractCodec> codecsByTypeID = new Dictionary<uint, AbstractCodec>()
         {
-            { Types.STR, new STRCodec() },
-            { Types.IMG, new IMGCodec() },
-            { Types.IMG2, new IMGCodec() }
+            { Types.STR, STR },
+            { Types.IMG, IMG },
+            { Types.IMG2, IMG }
         };
 
         public static AbstractCodec GetCodecInstanceForType(uint type)
