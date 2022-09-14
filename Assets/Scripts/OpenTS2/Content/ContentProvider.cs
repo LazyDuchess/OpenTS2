@@ -110,8 +110,6 @@ namespace OpenTS2.Content
         /// <returns>Content entry for package.</returns>
         public void AddPackage(string path)
         {
-            if (Changes.IsPackageDeleted(path))
-                throw new FileNotFoundException();
             var package = new DBPFFile(path);
             AddPackage(package);
         }
@@ -123,6 +121,10 @@ namespace OpenTS2.Content
         /// <returns>Content entry for package.</returns>
         public void AddPackage(DBPFFile package)
         {
+            if (entryByPath.ContainsKey(package.FilePath))
+            {
+                RemovePackage(entryByPath[package.FilePath]);
+            }
             _contentEntries.Insert(0, package);
             entryByGroupID[package.GroupID] = package;
             entryByPath[package.FilePath] = package;

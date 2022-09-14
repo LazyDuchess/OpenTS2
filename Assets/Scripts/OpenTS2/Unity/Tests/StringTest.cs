@@ -21,6 +21,7 @@ namespace OpenTS2.Unity.Tests
         public bool seconds = true;
         public Text text;
         public bool testChanges = false;
+        public bool testDeletion = false;
         // Start is called before the first frame update
         void Start()
         {
@@ -55,6 +56,11 @@ namespace OpenTS2.Unity.Tests
                 UnityEngine.Debug.Log("Package loading took " + (double)stopWatch.ElapsedMilliseconds / 1000D + " seconds");
                 UnityEngine.Debug.Log("StringTable Asset loading took " + (double)stopWatchSTR.ElapsedMilliseconds / 1000D + " seconds");
                 UnityEngine.Debug.Log("Cached StringTable Asset loading took " + (double)stopWatchSTR2.ElapsedMilliseconds / 1000D + " seconds");
+            }
+            if (testDeletion)
+            {
+                stringTable.package.Changes.DeleteAll();
+                stringTable.package.WriteToFile();
             }
         }
 

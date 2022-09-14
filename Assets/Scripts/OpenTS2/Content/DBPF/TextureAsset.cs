@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OpenTS2.Content
+namespace OpenTS2.Content.DBPF
 {
     /// <summary>
     /// Texture DBPF Asset

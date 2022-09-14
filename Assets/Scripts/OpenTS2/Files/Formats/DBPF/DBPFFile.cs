@@ -36,6 +36,22 @@ namespace OpenTS2.Files.Formats.DBPF
                 this.owner = owner;
             }
 
+            /// <summary>
+            /// Mark all entries in this package as deleted.
+            /// </summary>
+            public void DeleteAll()
+            {
+                foreach(var element in owner.m_EntriesList)
+                {
+                    DeletedEntries[element.internalTGI] = true;
+                    RefreshCache(element.internalTGI);
+                }
+                Dirty = true;
+            }
+
+            /// <summary>
+            /// Revert all changes
+            /// </summary>
             public void Clear()
             {
                 DeletedEntries.Clear();
@@ -61,6 +77,10 @@ namespace OpenTS2.Files.Formats.DBPF
                 }
             }
 
+            /// <summary>
+            /// Mark an entry as deleted.
+            /// </summary>
+            /// <param name="entry">Entry to delete</param>
             public void Delete(DBPFEntry entry)
             {
                 DeletedEntries[entry.internalTGI] = true;
@@ -68,46 +88,87 @@ namespace OpenTS2.Files.Formats.DBPF
                 Dirty = true;
             }
 
+            /// <summary>
+            /// Unmark an entry as deleted.
+            /// </summary>
+            /// <param name="entry">Entry to undelete</param>
             public void Restore(DBPFEntry entry)
             {
-                DeletedEntries.Remove(entry.internalTGI);
-                RefreshCache(entry.internalTGI);
-                Dirty = true;
+                if (DeletedEntries.ContainsKey(entry.internalTGI))
+                {
+                    DeletedEntries.Remove(entry.internalTGI);
+                    RefreshCache(entry.internalTGI);
+                    Dirty = true;
+                }
             }
 
+            /// <summary>
+            /// Mark an entry as deleted by its TGI
+            /// </summary>
+            /// <param name="tgi">TGI of entry to delete.</param>
             public void Delete(ResourceKey tgi)
             {
                 DeletedEntries[tgi] = true;
                 RefreshCache(tgi);
                 Dirty = true;
             }
-
+            /// <summary>
+            /// Unmark an entry as deleted by its TGI
+            /// </summary>
+            /// <param name="tgi">TGI of entry to undelete.</param>
             public void Restore(ResourceKey tgi)
             {
-                DeletedEntries.Remove(tgi);
-                RefreshCache(tgi);
-                Dirty = true;
+                if (DeletedEntries.ContainsKey(tgi))
+                {
+                    DeletedEntries.Remove(tgi);
+                    RefreshCache(tgi);
+                    Dirty = true;
+                }
             }
 
+            /// <summary>
+            /// Unmark an entry as deleted without updating cache.
+            /// </summary>
+            /// <param name="tgi">TGI of entry to undelete.</param>
+            void InternalRestore(ResourceKey tgi)
+            {
+                if (DeletedEntries.ContainsKey(tgi))
+                {
+                    DeletedEntries.Remove(tgi);
+                }
+            }
+
+            /// <summary>
+            /// Save changes to an asset in memory.
+            /// </summary>
+            /// <param name="asset">Asset.</param>
             public void Set(AbstractAsset asset)
             {
                 asset.package = owner;
                 var changedAsset = new ChangedAsset(asset);
                 ChangedEntries[asset.internalTGI] = changedAsset;
+                InternalRestore(asset.internalTGI);
                 RefreshCache(asset.internalTGI);
                 Dirty = true;
             }
-
+            /// <summary>
+            /// Save changes to a resource in memory.
+            /// </summary>
+            /// <param name="bytes">Resource file bytes.</param>
+            /// <param name="tgi">Resource TGI.</param>
+            /// <param name="compressed">Compress?</param>
             public void Set(byte[] bytes, ResourceKey tgi, bool compressed)
             {
                 var changedFile = new ChangedFile(bytes, tgi, owner, Codecs.Get(tgi.TypeID));
                 changedFile.compressed = compressed;
                 ChangedEntries[tgi] = changedFile;
+                InternalRestore(tgi);
                 RefreshCache(tgi);
                 Dirty = true;
             }
         }
 
+        bool DeleteIfEmpty = true;
         private DBPFFileChanges m_changes;
         /// <summary>
         /// Holds all runtime modifications in memory.
@@ -140,11 +201,53 @@ namespace OpenTS2.Files.Formats.DBPF
         public uint GroupID;
         private IoBuffer m_Reader;
 
+        /// <summary>
+        /// Returns true if this package is empty.
+        /// </summary>
+        public bool Empty
+        {
+            get
+            {
+                return Entries.Count == 0;
+            }
+        }
+
+        /// <summary>
+        /// Get all entries in this package, plus modifications, minus deleted entries.
+        /// </summary>
+        public List<DBPFEntry> Entries
+        {
+            get
+            {
+                var basicEntries = OriginalEntries;
+                var finalEntries = new List<DBPFEntry>();
+                foreach(var element in basicEntries)
+                {
+                    if (Changes.DeletedEntries.ContainsKey(element.internalTGI))
+                        continue;
+                    if (Changes.ChangedEntries.ContainsKey(element.internalTGI))
+                        finalEntries.Add(Changes.ChangedEntries[element.internalTGI].entry);
+                }
+                return finalEntries;
+            }
+        }
+
+        /// <summary>
+        /// Get all original entries in this package.
+        /// </summary>
+        public List<DBPFEntry> OriginalEntries
+        {
+            get
+            {
+                return m_EntriesList;
+            }
+        }
         private List<DBPFEntry> m_EntriesList = new List<DBPFEntry>();
         private Dictionary<ResourceKey, DBPFEntry> m_EntryByTGI = new Dictionary<ResourceKey, DBPFEntry>();
         //private Dictionary<ResourceKey, DBPFEntry> m_EntryByInternalTGI = new Dictionary<ResourceKey, DBPFEntry>();
         private Dictionary<uint, List<DBPFEntry>> m_EntriesByType = new Dictionary<uint, List<DBPFEntry>>();
 
+        private Stream stream;
         private IoBuffer Io;
 
         public delegate void DBPFFileEvent(DBPFFile file, string oldName, uint oldGroupID);
@@ -154,12 +257,6 @@ namespace OpenTS2.Files.Formats.DBPF
         {
             var oldGroupID = GroupID;
             GroupID = FileUtils.GroupHash(Path.GetFileNameWithoutExtension(ContentManager.FileSystem.GetRealPath(m_filePath)));
-            foreach(var element in m_EntriesList)
-            {
-                m_EntryByTGI.Remove(element.tgi);
-                element.tgi = element.internalTGI.LocalGroupID(GroupID);
-                m_EntryByTGI[element.tgi] = element;
-            }
             OnRenameEvent?.Invoke(this, oldName, oldGroupID);
         }
         /// <summary>
@@ -198,6 +295,7 @@ namespace OpenTS2.Files.Formats.DBPF
             var io = IoBuffer.FromStream(stream, ByteOrder.LITTLE_ENDIAN);
             m_Reader = io;
             this.Io = io;
+            this.stream = stream;
 
             var magic = io.ReadCString(4);
             if (magic != "DBPF")
@@ -287,7 +385,14 @@ namespace OpenTS2.Files.Formats.DBPF
 
         public void WriteToFile()
         {
-
+            Dispose();
+            if (DeleteIfEmpty && Empty)
+            {
+                ContentManager.Provider.RemovePackage(this);
+                ContentManager.FileSystem.Delete(FilePath);
+                Changes.Clear();
+                return;
+            }
         }
 
         /// <summary>
@@ -398,7 +503,8 @@ namespace OpenTS2.Files.Formats.DBPF
         /// </summary>
         public void Dispose()
         {
-            Io.Dispose();
+            stream?.Dispose();
+            Io?.Dispose();
         }
 
         #endregion
