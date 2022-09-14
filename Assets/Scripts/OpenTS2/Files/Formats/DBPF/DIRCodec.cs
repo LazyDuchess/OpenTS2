@@ -17,21 +17,21 @@ namespace OpenTS2.Files.Formats.DBPF
 {
 
     /// <summary>
-    /// STR file reading codec.
+    /// DIR file reading codec.
     /// </summary>
-    public class STRCodec : AbstractCodec
+    public class DIRCodec : AbstractCodec
     {
 
         /// <summary>
-        /// Constructs a new STR instance.
+        /// Constructs a new DIR instance.
         /// </summary>
-        public STRCodec()
+        public DIRCodec()
         {
 
         }
 
         /// <summary>
-        /// Parses STR from an array of bytes.
+        /// Parses DIR from an array of bytes.
         /// </summary>
         /// <param name="bytes">Bytes to parse</param>
         public override AbstractAsset Deserialize(byte[] bytes, ResourceKey tgi, DBPFFile sourceFile)

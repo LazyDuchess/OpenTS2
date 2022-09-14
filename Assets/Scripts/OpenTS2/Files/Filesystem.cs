@@ -98,5 +98,15 @@ namespace OpenTS2.Files
                 Directory.CreateDirectory(dir);
             File.WriteAllBytes(realPath, bytes);
         }
+
+        /// <summary>
+        /// Deletes a file
+        /// </summary>
+        /// <param name="path">Path to file to delete.</param>
+        public void Delete(string path)
+        {
+            var realPath = GetRealPath(path);
+            File.Delete(path);
+        }
     }
 }

@@ -20,21 +20,29 @@ namespace OpenTS2.Unity.Tests
         public string packagePath = "%UserDataDirectory%Downloads/ld_HeightCheater.package";
         public bool seconds = true;
         public Text text;
+        public bool testChanges = false;
         // Start is called before the first frame update
         void Start()
         {
+            var contentProvider = ContentManager.Provider;
             var stopWatch = new Stopwatch();
             var stopWatchSTR = new Stopwatch();
             var stopWatchSTR2 = new Stopwatch();
             stopWatch.Start();
-            ContentManager.Provider.AddPackage(packagePath);
+            contentProvider.AddPackage(packagePath);
             stopWatch.Stop();
             stopWatchSTR.Start();
-            var stringTable = ContentManager.Provider.GetAsset<StringSetAsset>(new ResourceKey(0x0000012D, "ld_heightcheater", 0x53545223));
+            var stringTable = contentProvider.GetAsset<StringSetAsset>(new ResourceKey(0x0000012D, "ld_heightcheater", 0x53545223));
+            if (testChanges)
+            {
+                stringTable.StringData.strings[1][8] = new StringValue("Test changing stuff", " Oh hi! ");
+                stringTable.Save();
+            }
             stopWatchSTR.Stop();
             stopWatchSTR2.Start();
-            ContentManager.Provider.GetAsset<StringSetAsset>(new ResourceKey(0x0000012D, "ld_heightcheater", 0x53545223));
+            stringTable = contentProvider.GetAsset<StringSetAsset>(new ResourceKey(0x0000012D, "ld_heightcheater", 0x53545223));
             stopWatchSTR2.Stop();
+            
             text.text = stringTable.GetString(8);
             if (!seconds)
             {

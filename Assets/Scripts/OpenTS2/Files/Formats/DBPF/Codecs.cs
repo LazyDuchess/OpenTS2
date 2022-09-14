@@ -4,6 +4,7 @@
  * http://mozilla.org/MPL/2.0/. 
  */
 
+using OpenTS2.Content;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,8 +27,12 @@ namespace OpenTS2.Files.Formats.DBPF
             { Types.IMG, IMG },
             { Types.IMG2, IMG }
         };
-
-        public static AbstractCodec GetCodecInstanceForType(uint type)
+        /// <summary>
+        /// Get the codec for a filetype.
+        /// </summary>
+        /// <param name="type">The Type ID</param>
+        /// <returns>Codec for this type.</returns>
+        public static AbstractCodec Get(uint type)
         {
             return codecsByTypeID[type];
         }

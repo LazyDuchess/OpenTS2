@@ -35,7 +35,6 @@ namespace OpenTS2.Unity.Content
         {
             var dir = new DirectoryInfo(Application.dataPath).Parent.FullName;
             config = JsonUtility.FromJson<JSONConfig>(File.ReadAllText(Path.Combine(dir, "config.json")));
-            ContentManager.FileSystem = new Files.Filesystem(this);
         }
         public List<string> GetGameDataPaths()
         {

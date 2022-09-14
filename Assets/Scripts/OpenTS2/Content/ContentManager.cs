@@ -36,12 +36,20 @@ namespace OpenTS2.Content
         public static Filesystem FileSystem;
         public static ContentProvider Provider;
         public static ITextureFactory TextureFactory;
-        /*
-        public static void Initialize(ContentInitializationArgs args)
+        public static ContentCache Cache
         {
-            FileSystem = new Filesystem(args.pathProvider);
-            Provider = new ContentProvider();
-            TextureFactory = args.textureFactory;
-        }*/
+            get
+            {
+                return Provider.contentCache;
+            }
+        }
+
+        public static ContentChanges Changes
+        {
+            get
+            {
+                return Provider.Changes;
+            }
+        }
     }
 }

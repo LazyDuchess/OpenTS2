@@ -35,7 +35,7 @@ namespace OpenTS2.Files.Formats.DBPF
         /// Parses IMG from an array of bytes.
         /// </summary>
         /// <param name="bytes">Bytes to parse</param>
-        public override AbstractAsset Deserialize(byte[] bytes, ResourceKey tgi, string sourceFile)
+        public override AbstractAsset Deserialize(byte[] bytes, ResourceKey tgi, DBPFFile sourceFile)
         {
             // TODO - figure out JFIF ALFA block.
             // 0: TGA, 1: PNG, 2: JPG

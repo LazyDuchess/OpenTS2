@@ -13,6 +13,7 @@ using OpenTS2.Files.Utils;
 using OpenTS2.Common;
 using OpenTS2.Common.Utils;
 using OpenTS2.Content;
+using OpenTS2.Content.Changes;
 
 namespace OpenTS2.Files.Formats.DBPF
 {
@@ -23,6 +24,106 @@ namespace OpenTS2.Files.Formats.DBPF
     /// </summary>
     public class DBPFFile : IDisposable
     {
+        public class DBPFFileChanges
+        {
+            private DBPFFile owner;
+            public bool Dirty = false;
+            public Dictionary<ResourceKey, bool> DeletedEntries = new Dictionary<ResourceKey, bool>();
+            public Dictionary<ResourceKey, AbstractChanged> ChangedEntries = new Dictionary<ResourceKey, AbstractChanged>();
+
+            public DBPFFileChanges(DBPFFile owner)
+            {
+                this.owner = owner;
+            }
+
+            public void Clear()
+            {
+                DeletedEntries.Clear();
+                ChangedEntries.Clear();
+                Dirty = true;
+            }
+
+            void RefreshCache(ResourceKey key)
+            {
+                key = key.LocalGroupID(owner.GroupID);
+                var reference = ContentManager.Cache.GetWeakReference(key);
+                if (reference.IsAlive && reference.Target != null && reference.Target is AbstractAsset asset)
+                {
+                    if (asset.package == owner)
+                        ContentManager.Cache.Remove(key);
+                }
+            }
+
+            public void Delete(DBPFEntry entry)
+            {
+                DeletedEntries[entry.internalTGI] = true;
+                RefreshCache(entry.internalTGI);
+                Dirty = true;
+            }
+
+            public void Restore(DBPFEntry entry)
+            {
+                DeletedEntries.Remove(entry.internalTGI);
+                RefreshCache(entry.internalTGI);
+                Dirty = true;
+            }
+
+            public void Delete(ResourceKey tgi)
+            {
+                DeletedEntries[tgi] = true;
+                RefreshCache(tgi);
+                Dirty = true;
+            }
+
+            public void Restore(ResourceKey tgi)
+            {
+                DeletedEntries.Remove(tgi);
+                RefreshCache(tgi);
+                Dirty = true;
+            }
+
+            public void Set(AbstractAsset asset)
+            {
+                asset.package = owner;
+                var changedAsset = new ChangedAsset(asset);
+                ChangedEntries[asset.internalTGI] = changedAsset;
+                RefreshCache(asset.internalTGI);
+                Dirty = true;
+            }
+
+            public void Set(byte[] bytes, ResourceKey tgi, bool compressed)
+            {
+                var changedFile = new ChangedFile(bytes, tgi, owner, Codecs.Get(tgi.TypeID));
+                changedFile.compressed = compressed;
+                ChangedEntries[tgi] = changedFile;
+                RefreshCache(tgi);
+                Dirty = true;
+            }
+        }
+
+        private DBPFFileChanges m_changes;
+        /// <summary>
+        /// Holds all runtime modifications in memory.
+        /// </summary>
+        public DBPFFileChanges Changes
+        {
+            get
+            {
+                return m_changes;
+            }
+        }
+        private string m_filePath = "";
+        public string FilePath
+        {
+            get { return m_filePath; }
+            set
+            {
+                value = ContentManager.FileSystem.GetRealPath(value);
+                var oldName = m_filePath;
+                m_filePath = value;
+                UpdateFilename(oldName);
+            }
+        }
         public int DateCreated;
         public int DateModified;
 
@@ -34,26 +135,46 @@ namespace OpenTS2.Files.Formats.DBPF
 
         private List<DBPFEntry> m_EntriesList = new List<DBPFEntry>();
         private Dictionary<ResourceKey, DBPFEntry> m_EntryByTGI = new Dictionary<ResourceKey, DBPFEntry>();
+        private Dictionary<ResourceKey, DBPFEntry> m_EntryByInternalTGI = new Dictionary<ResourceKey, DBPFEntry>();
         private Dictionary<uint, List<DBPFEntry>> m_EntriesByType = new Dictionary<uint, List<DBPFEntry>>();
 
         private IoBuffer Io;
 
+        public delegate void DBPFFileEvent(DBPFFile file, string oldName, uint oldGroupID);
+        public DBPFFileEvent OnRenameEvent;
+
+        void UpdateFilename(string oldName)
+        {
+            var oldGroupID = GroupID;
+            GroupID = FileUtils.GroupHash(Path.GetFileNameWithoutExtension(ContentManager.FileSystem.GetRealPath(m_filePath)));
+            foreach(var element in m_EntriesList)
+            {
+                m_EntryByTGI.Remove(element.tgi);
+                element.tgi = element.internalTGI.LocalGroupID(GroupID);
+                m_EntryByTGI[element.tgi] = element;
+            }
+            OnRenameEvent?.Invoke(this, oldName, oldGroupID);
+        }
         /// <summary>
         /// Constructs a new DBPF instance.
         /// </summary>
         public DBPFFile()
         {
+            m_changes = new DBPFFileChanges(this);
+            m_changes.Dirty = true;
         }
 
         /// <summary>
         /// Creates a DBPF instance from a path.
         /// </summary>
         /// <param name="file">The path to an DBPF archive.</param>
-        public DBPFFile(string file)
+        public DBPFFile(string file) : this()
         {
+            m_filePath = ContentManager.FileSystem.GetRealPath(file);
             GroupID = FileUtils.GroupHash(Path.GetFileNameWithoutExtension(ContentManager.FileSystem.GetRealPath(file)));
             var stream = ContentManager.FileSystem.OpenRead(file);
             Read(stream);
+            m_changes.Dirty = false;
         }
 
         /// <summary>
@@ -64,6 +185,8 @@ namespace OpenTS2.Files.Formats.DBPF
         {
             m_EntryByTGI = new Dictionary<ResourceKey, DBPFEntry>();
             m_EntriesList = new List<DBPFEntry>();
+            m_EntriesByType = new Dictionary<uint, List<DBPFEntry>>();
+            m_EntryByInternalTGI = new Dictionary<ResourceKey, DBPFEntry>();
 
             var io = IoBuffer.FromStream(stream, ByteOrder.LITTLE_ENDIAN);
             m_Reader = io;
@@ -126,12 +249,14 @@ namespace OpenTS2.Files.Formats.DBPF
                 //entry.tgi = new TGI()
                 var TypeID = io.ReadUInt32();
                 var EntryGroupID = io.ReadUInt32();
-                if (EntryGroupID == 0xFFFFFFFF)
+                var InternalGroupID = EntryGroupID;
+                if (EntryGroupID == Groups.Local)
                     EntryGroupID = GroupID;
                 var InstanceID = io.ReadUInt32();
                 if (IndexMinorVersion >= 2)
                     instanceHigh = io.ReadUInt32();
                 entry.tgi = new ResourceKey(InstanceID, instanceHigh, EntryGroupID, TypeID);
+                entry.internalTGI = new ResourceKey(InstanceID, instanceHigh, InternalGroupID, TypeID);
                 entry.FileOffset = io.ReadUInt32();
                 entry.FileSize = io.ReadUInt32();
 
@@ -140,11 +265,19 @@ namespace OpenTS2.Files.Formats.DBPF
                 if (!m_EntryByTGI.ContainsKey(entry.tgi))
                     m_EntryByTGI.Add(entry.tgi, entry);
 
+                if (!m_EntryByInternalTGI.ContainsKey(entry.internalTGI))
+                    m_EntryByInternalTGI.Add(entry.internalTGI, entry);
+
                 if (!m_EntriesByType.ContainsKey(entry.tgi.TypeID))
                     m_EntriesByType.Add(entry.tgi.TypeID, new List<DBPFEntry>());
 
                 m_EntriesByType[entry.tgi.TypeID].Add(entry);
             }
+        }
+
+        public void WriteToFile()
+        {
+
         }
 
         /// <summary>
@@ -154,19 +287,63 @@ namespace OpenTS2.Files.Formats.DBPF
         /// <returns>Data for entry.</returns>
         public byte[] GetEntry(DBPFEntry entry)
         {
+            if (Changes.DeletedEntries.ContainsKey(entry.internalTGI))
+                return null;
+            if (Changes.ChangedEntries.ContainsKey(entry.internalTGI))
+                return Changes.ChangedEntries[entry.internalTGI].bytes;
             m_Reader.Seek(SeekOrigin.Begin, entry.FileOffset);
             return m_Reader.ReadBytes((int)entry.FileSize);
+        }
+
+        /// <summary>
+        /// Gets an item from its TGI (Type, Group, Instance IDs)
+        /// </summary>
+        /// <param name="tgi">The TGI of the entry.</param>
+        /// <returns>The entry's data.</returns>
+        public byte[] GetItemByTGI(ResourceKey tgi)
+        {
+            if (Changes.DeletedEntries.ContainsKey(tgi))
+                return null;
+            if (m_EntryByTGI.ContainsKey(tgi))
+                return GetEntry(m_EntryByTGI[tgi]);
+            else
+                return null;
+        }
+        /// <summary>
+        /// Gets an asset from its DBPF Entry
+        /// </summary>
+        /// <param name="entry">The DBPF Entry</param>
+        /// <returns></returns>
+        public AbstractAsset GetAsset(DBPFEntry entry)
+        {
+            if (Changes.ChangedEntries.ContainsKey(entry.internalTGI))
+                return Changes.ChangedEntries[entry.internalTGI].asset;
+            var item = GetEntry(entry);
+            var codec = Codecs.Get(entry.tgi.TypeID);
+            var asset = codec.Deserialize(item, entry.tgi, this);
+            asset.Compressed = false;
+            asset.tgi = entry.tgi;
+            asset.internalTGI = entry.internalTGI;
+            asset.package = this;
+            return asset;
+        }
+
+        public AbstractAsset GetAssetByTGI(ResourceKey tgi)
+        {
+            return GetAsset(GetEntryByTGI(tgi));
         }
 
         /// <summary>
         /// Gets an entry from its TGI (Type, Group, Instance IDs)
         /// </summary>
         /// <param name="tgi">The TGI of the entry.</param>
-        /// <returns>The entry's data.</returns>
-        public byte[] GetItemByTGI(ResourceKey tgi)
+        /// <returns>The entry.</returns>
+        public DBPFEntry GetEntryByTGI(ResourceKey tgi)
         {
+            if (Changes.DeletedEntries.ContainsKey(tgi))
+                return null;
             if (m_EntryByTGI.ContainsKey(tgi))
-                return GetEntry(m_EntryByTGI[tgi]);
+                return m_EntryByTGI[tgi];
             else
                 return null;
         }

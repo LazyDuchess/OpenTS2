@@ -12,10 +12,20 @@ using System.Threading.Tasks;
 
 namespace OpenTS2.Files.Formats.DBPF
 {
+    //Could be enums, but I kinda like this better.
     public static class Types
     {
         public const uint STR = 0x53545223;
         public const uint IMG = 0x856DDBAC;
         public const uint IMG2 = 0x8C3CE95A;
+        public const uint DIR = 0xE86B1EEF;
+    }
+    public static class Groups
+    {
+        /// <summary>
+        /// Local package file group - gets converted to a hash of the package filename.
+        /// </summary>
+        public const uint Local = 0xFFFFFFFF;
+        public const uint DIR = 0xE86B1EEF;
     }
 }

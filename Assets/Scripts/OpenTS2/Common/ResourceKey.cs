@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OpenTS2.Common.Utils;
+using OpenTS2.Files.Formats.DBPF;
 
 namespace OpenTS2.Common
 {
@@ -47,6 +48,21 @@ namespace OpenTS2.Common
         public uint TypeID
         {
             get { return _TypeID; }
+        }
+        /// <summary>
+        /// Returns new TGI with its Group ID replaced with localGroupID, but only if our Group ID equals Groups.Local
+        /// </summary>
+        /// <param name="localGroupID">Local Group ID</param>
+        /// <returns></returns>
+        public ResourceKey LocalGroupID(uint localGroupID)
+        {
+            if (this.GroupID == Groups.Local)
+                return WithGroupID(localGroupID);
+            return this;
+        }
+        public ResourceKey WithGroupID(uint groupID)
+        {
+            return new ResourceKey(this.InstanceID, this.InstanceHigh, groupID, this.TypeID);
         }
 
         /// <summary>
