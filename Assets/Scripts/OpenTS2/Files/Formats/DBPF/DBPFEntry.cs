@@ -62,5 +62,7 @@ namespace OpenTS2.Files.Formats.DBPF
 
         //A 4-byte unsigned integer specifying the size of the entry's data
         public uint FileSize;
+
+        public bool dynamic = false;
     }
 }

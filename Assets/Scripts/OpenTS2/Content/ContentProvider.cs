@@ -40,20 +40,48 @@ namespace OpenTS2.Content
             this.Changes = new ContentChanges(this, fileSystem);
         }
 
-        AbstractAsset InternalLoadAsset(ResourceKey tgi)
+        AbstractAsset InternalLoadAsset(CacheKey key)
         {
-            foreach (var element in _contentEntries)
+            if (key.file == null)
             {
-                var entryByTGI = element.GetEntryByTGI(tgi);
-                if (entryByTGI != null)
+                foreach (var element in _contentEntries)
                 {
-                    var finalAsset = element.GetAsset(entryByTGI);
-                    return finalAsset;
+                    var localTGI = key.tgi.GlobalGroupID(element.GroupID);
+                    var entryByTGI = element.GetEntryByTGI(localTGI);
+                    if (entryByTGI != null)
+                    {
+                        var finalAsset = element.GetAsset(entryByTGI);
+                        return finalAsset;
+                    }
                 }
+            }
+            else
+            {
+                return key.file.GetAssetByTGI(key.tgi);
             }
             return null;
         }
-        
+
+        /// <summary>
+        /// Caches an asset into the content system and returns it.
+        /// </summary>
+        /// <param name="tgi">TGI of the resource.</param>
+        /// <returns>The asset.</returns>
+        public AbstractAsset GetAsset(CacheKey key)
+        {
+            return contentCache.GetOrAdd(key, InternalLoadAsset);
+        }
+
+        /// <summary>
+        /// Caches an asset into the content system and returns it.
+        /// </summary>
+        /// <param name="tgi">TGI of the resource.</param>
+        /// <returns>The asset.</returns>
+        public AbstractAsset GetAsset(ResourceKey tgi, DBPFFile file)
+        {
+            return contentCache.GetOrAdd(tgi, file, InternalLoadAsset);
+        }
+
         /// <summary>
         /// Caches an asset into the content system and returns it.
         /// </summary>

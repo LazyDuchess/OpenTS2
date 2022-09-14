@@ -12,5 +12,6 @@ namespace OpenTS2.Content.Changes
     {
         public virtual AbstractAsset asset { get; set; }
         public virtual byte[] bytes { get; set; }
+        public DBPFEntry entry;
     }
 }

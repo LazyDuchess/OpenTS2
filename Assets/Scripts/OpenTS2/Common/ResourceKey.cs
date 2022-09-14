@@ -49,6 +49,19 @@ namespace OpenTS2.Common
         {
             get { return _TypeID; }
         }
+
+        /// <summary>
+        /// Returns new TGI with its Group ID replaced with Groups.Local, but only if our Group ID equals localGroupID
+        /// </summary>
+        /// <param name="localGroupID">Local Group ID</param>
+        /// <returns></returns>
+        public ResourceKey GlobalGroupID(uint localGroupID)
+        {
+            if (this.GroupID == localGroupID)
+                return WithGroupID(Groups.Local);
+            return this;
+        }
+
         /// <summary>
         /// Returns new TGI with its Group ID replaced with localGroupID, but only if our Group ID equals Groups.Local
         /// </summary>

@@ -43,14 +43,21 @@ namespace OpenTS2.Files.Formats.DBPF
                 Dirty = true;
             }
 
-            void RefreshCache(ResourceKey key)
+            void RefreshCache(ResourceKey tgi)
             {
-                key = key.LocalGroupID(owner.GroupID);
-                var reference = ContentManager.Cache.GetWeakReference(key);
-                if (reference.IsAlive && reference.Target != null && reference.Target is AbstractAsset asset)
+                tgi = tgi.LocalGroupID(owner.GroupID);
+
+                var reference = ContentManager.Cache.GetWeakReference(tgi);
+                if (reference != null && reference.IsAlive && reference.Target != null && reference.Target is AbstractAsset asset)
                 {
                     if (asset.package == owner)
-                        ContentManager.Cache.Remove(key);
+                        ContentManager.Cache.Remove(tgi);
+                }
+
+                reference = ContentManager.Cache.GetWeakReference(tgi, owner);
+                if (reference != null && reference.IsAlive && reference.Target != null && reference.Target is AbstractAsset asset2)
+                {
+                    ContentManager.Cache.Remove(tgi, owner);
                 }
             }
 
@@ -135,7 +142,7 @@ namespace OpenTS2.Files.Formats.DBPF
 
         private List<DBPFEntry> m_EntriesList = new List<DBPFEntry>();
         private Dictionary<ResourceKey, DBPFEntry> m_EntryByTGI = new Dictionary<ResourceKey, DBPFEntry>();
-        private Dictionary<ResourceKey, DBPFEntry> m_EntryByInternalTGI = new Dictionary<ResourceKey, DBPFEntry>();
+        //private Dictionary<ResourceKey, DBPFEntry> m_EntryByInternalTGI = new Dictionary<ResourceKey, DBPFEntry>();
         private Dictionary<uint, List<DBPFEntry>> m_EntriesByType = new Dictionary<uint, List<DBPFEntry>>();
 
         private IoBuffer Io;
@@ -186,7 +193,7 @@ namespace OpenTS2.Files.Formats.DBPF
             m_EntryByTGI = new Dictionary<ResourceKey, DBPFEntry>();
             m_EntriesList = new List<DBPFEntry>();
             m_EntriesByType = new Dictionary<uint, List<DBPFEntry>>();
-            m_EntryByInternalTGI = new Dictionary<ResourceKey, DBPFEntry>();
+            //m_EntryByInternalTGI = new Dictionary<ResourceKey, DBPFEntry>();
 
             var io = IoBuffer.FromStream(stream, ByteOrder.LITTLE_ENDIAN);
             m_Reader = io;
@@ -262,11 +269,14 @@ namespace OpenTS2.Files.Formats.DBPF
 
                 m_EntriesList.Add(entry);
                 //ulong id = (((ulong)entry.InstanceID) << 32) + (ulong)entry.TypeID;
+                /*
                 if (!m_EntryByTGI.ContainsKey(entry.tgi))
-                    m_EntryByTGI.Add(entry.tgi, entry);
-
+                    m_EntryByTGI.Add(entry.tgi, entry);*/
+                if (!m_EntryByTGI.ContainsKey(entry.internalTGI))
+                    m_EntryByTGI.Add(entry.internalTGI, entry);
+                /*
                 if (!m_EntryByInternalTGI.ContainsKey(entry.internalTGI))
-                    m_EntryByInternalTGI.Add(entry.internalTGI, entry);
+                    m_EntryByInternalTGI.Add(entry.internalTGI, entry);*/
 
                 if (!m_EntriesByType.ContainsKey(entry.tgi.TypeID))
                     m_EntriesByType.Add(entry.tgi.TypeID, new List<DBPFEntry>());
@@ -285,10 +295,13 @@ namespace OpenTS2.Files.Formats.DBPF
         /// </summary>
         /// <param name="entry">Entry to retrieve data for.</param>
         /// <returns>Data for entry.</returns>
-        public byte[] GetEntry(DBPFEntry entry)
+        public byte[] GetEntry(DBPFEntry entry, bool ignoreDeleted = true)
         {
-            if (Changes.DeletedEntries.ContainsKey(entry.internalTGI))
-                return null;
+            if (ignoreDeleted)
+            {
+                if (Changes.DeletedEntries.ContainsKey(entry.internalTGI))
+                    return null;
+            }
             if (Changes.ChangedEntries.ContainsKey(entry.internalTGI))
                 return Changes.ChangedEntries[entry.internalTGI].bytes;
             m_Reader.Seek(SeekOrigin.Begin, entry.FileOffset);
@@ -300,10 +313,15 @@ namespace OpenTS2.Files.Formats.DBPF
         /// </summary>
         /// <param name="tgi">The TGI of the entry.</param>
         /// <returns>The entry's data.</returns>
-        public byte[] GetItemByTGI(ResourceKey tgi)
+        public byte[] GetItemByTGI(ResourceKey tgi, bool ignoreDeleted = true)
         {
-            if (Changes.DeletedEntries.ContainsKey(tgi))
-                return null;
+            if (ignoreDeleted)
+            {
+                if (Changes.DeletedEntries.ContainsKey(tgi))
+                    return null;
+            }
+            if (Changes.ChangedEntries.ContainsKey(tgi))
+                return Changes.ChangedEntries[tgi].bytes;
             if (m_EntryByTGI.ContainsKey(tgi))
                 return GetEntry(m_EntryByTGI[tgi]);
             else
@@ -314,11 +332,11 @@ namespace OpenTS2.Files.Formats.DBPF
         /// </summary>
         /// <param name="entry">The DBPF Entry</param>
         /// <returns></returns>
-        public AbstractAsset GetAsset(DBPFEntry entry)
+        public AbstractAsset GetAsset(DBPFEntry entry, bool ignoreDeleted = true)
         {
             if (Changes.ChangedEntries.ContainsKey(entry.internalTGI))
                 return Changes.ChangedEntries[entry.internalTGI].asset;
-            var item = GetEntry(entry);
+            var item = GetEntry(entry, ignoreDeleted);
             var codec = Codecs.Get(entry.tgi.TypeID);
             var asset = codec.Deserialize(item, entry.tgi, this);
             asset.Compressed = false;
@@ -328,9 +346,9 @@ namespace OpenTS2.Files.Formats.DBPF
             return asset;
         }
 
-        public AbstractAsset GetAssetByTGI(ResourceKey tgi)
+        public AbstractAsset GetAssetByTGI(ResourceKey tgi, bool ignoreDeleted = true)
         {
-            return GetAsset(GetEntryByTGI(tgi));
+            return GetAsset(GetEntryByTGI(tgi), ignoreDeleted);
         }
 
         /// <summary>
@@ -338,10 +356,15 @@ namespace OpenTS2.Files.Formats.DBPF
         /// </summary>
         /// <param name="tgi">The TGI of the entry.</param>
         /// <returns>The entry.</returns>
-        public DBPFEntry GetEntryByTGI(ResourceKey tgi)
+        public DBPFEntry GetEntryByTGI(ResourceKey tgi , bool ignoreDeleted = true)
         {
-            if (Changes.DeletedEntries.ContainsKey(tgi))
-                return null;
+            if (ignoreDeleted)
+            {
+                if (Changes.DeletedEntries.ContainsKey(tgi))
+                    return null;
+            }
+            if (Changes.ChangedEntries.ContainsKey(tgi))
+                return Changes.ChangedEntries[tgi].entry;
             if (m_EntryByTGI.ContainsKey(tgi))
                 return m_EntryByTGI[tgi];
             else
@@ -353,7 +376,7 @@ namespace OpenTS2.Files.Formats.DBPF
         /// </summary>
         /// <param name="Type">The Type of the entry.</param>
         /// <returns>The entry data, paired with its TGI.</returns>
-        public List<KeyValuePair<ResourceKey, byte[]>> GetItemsByType(uint Type)
+        public List<KeyValuePair<ResourceKey, byte[]>> GetItemsByType(uint Type, bool ignoreDeleted = true)
         {
 
             var result = new List<KeyValuePair<ResourceKey, byte[]>>();
@@ -361,6 +384,8 @@ namespace OpenTS2.Files.Formats.DBPF
             var entries = m_EntriesByType[Type];
             for (int i = 0; i < entries.Count; i++)
             {
+                if (ignoreDeleted && Changes.DeletedEntries.ContainsKey(entries[i].internalTGI))
+                    continue;
                 result.Add(new KeyValuePair<ResourceKey, byte[]>(entries[i].tgi, GetEntry(entries[i])));
             }
             return result;

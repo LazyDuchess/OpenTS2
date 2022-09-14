@@ -19,6 +19,12 @@ namespace OpenTS2.Content.Changes
             {
                 this.asset = codec.Deserialize(fileData, tgi, package);
             }
+            this.entry = new DBPFEntry()
+            {
+                tgi = this.asset.tgi.LocalGroupID(package.GroupID),
+                internalTGI = this.asset.tgi,
+                dynamic = true
+            };
         }
         public ChangedFile(AbstractAsset asset, byte[] fileData) : this(fileData, asset.internalTGI, asset.package)
         {
