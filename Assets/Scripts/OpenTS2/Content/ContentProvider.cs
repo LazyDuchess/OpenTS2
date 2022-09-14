@@ -4,15 +4,11 @@
  * http://mozilla.org/MPL/2.0/. 
  */
 
+using OpenTS2.Common;
+using OpenTS2.Common.Utils;
+using OpenTS2.Files.Formats.DBPF;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using OpenTS2.Files.Formats.DBPF;
-using OpenTS2.Common.Utils;
-using OpenTS2.Common;
-using System.IO;
 
 namespace OpenTS2.Content
 {
@@ -30,7 +26,7 @@ namespace OpenTS2.Content
         private Dictionary<uint, DBPFFile> entryByGroupID = new Dictionary<uint, DBPFFile>();
         private Dictionary<string, DBPFFile> entryByPath = new Dictionary<string, DBPFFile>();
         private Dictionary<DBPFFile, DBPFFile> entryByFile = new Dictionary<DBPFFile, DBPFFile>();
-        public ContentCache contentCache = new ContentCache();
+        public ContentCache Cache = new ContentCache();
         public ContentChanges Changes;
         private Files.Filesystem fileSystem;
 
@@ -69,7 +65,7 @@ namespace OpenTS2.Content
         /// <returns>The asset.</returns>
         public AbstractAsset GetAsset(CacheKey key)
         {
-            return contentCache.GetOrAdd(key, InternalLoadAsset);
+            return Cache.GetOrAdd(key, InternalLoadAsset);
         }
 
         /// <summary>
@@ -79,7 +75,7 @@ namespace OpenTS2.Content
         /// <returns>The asset.</returns>
         public AbstractAsset GetAsset(ResourceKey tgi, DBPFFile file)
         {
-            return contentCache.GetOrAdd(tgi, file, InternalLoadAsset);
+            return Cache.GetOrAdd(tgi, file, InternalLoadAsset);
         }
 
         /// <summary>
@@ -89,7 +85,7 @@ namespace OpenTS2.Content
         /// <returns>The asset.</returns>
         public AbstractAsset GetAsset(ResourceKey tgi)
         {
-            return contentCache.GetOrAdd(tgi, InternalLoadAsset);
+            return Cache.GetOrAdd(tgi, InternalLoadAsset);
         }
 
         /// <summary>
@@ -104,18 +100,22 @@ namespace OpenTS2.Content
         }
 
         /// <summary>
-        /// Adds a DBPF Package to the filesystem.
+        /// Adds a DBPF Package to the filesystem, or returns existing package if already loaded.
         /// </summary>
         /// <param name="path">Path to the package.</param>
         /// <returns>Content entry for package.</returns>
-        public void AddPackage(string path)
+        public DBPFFile AddPackage(string path)
         {
+            var realPath = fileSystem.GetRealPath(path);
+            if (entryByPath.ContainsKey(realPath))
+                return entryByPath[realPath];
             var package = new DBPFFile(path);
             AddPackage(package);
+            return package;
         }
 
         /// <summary>
-        /// Adds a DBPF Package to the filesystem.
+        /// Adds a DBPF Package to the filesystem. Removes any packages with the same path.
         /// </summary>
         /// <param name="package">DBPFFile to add.</param>
         /// <returns>Content entry for package.</returns>
@@ -134,6 +134,7 @@ namespace OpenTS2.Content
 
         void PackageOnRename(DBPFFile package, string oldName, uint oldGroupID)
         {
+            Cache.RemoveAllForPackage(package);
             var entry = entryByFile[package];
             entryByPath.Remove(oldName);
             entryByGroupID.Remove(oldGroupID);
@@ -148,6 +149,7 @@ namespace OpenTS2.Content
         public void RemovePackage(DBPFFile package)
         {
             //package.Dispose();
+            Cache.RemoveAllForPackage(package);
             _contentEntries.Remove(package);
             entryByGroupID.Remove(package.GroupID);
             entryByPath.Remove(package.FilePath);

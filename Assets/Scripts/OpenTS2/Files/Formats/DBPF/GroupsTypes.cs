@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 namespace OpenTS2.Files.Formats.DBPF
 {
     //Could be enums, but I kinda like this better.
-    public static class Types
+    public static class ResTypes
     {
         public const uint STR = 0x53545223;
         public const uint IMG = 0x856DDBAC;

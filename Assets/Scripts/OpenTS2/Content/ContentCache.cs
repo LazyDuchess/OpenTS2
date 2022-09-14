@@ -10,6 +10,7 @@ using OpenTS2.Files.Formats.DBPF;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace OpenTS2.Content
 {
@@ -158,6 +159,11 @@ namespace OpenTS2.Content
             if (_cache.ContainsKey(key))
                 return _cache[key];
             return null;
+        }
+
+        public void RemoveAllForPackage(DBPFFile package)
+        {
+            _cache = _cache.Where(cache => cache.Key.file != package).ToDictionary(x => x.Key, x => x.Value);
         }
     }
 }

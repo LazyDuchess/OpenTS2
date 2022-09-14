@@ -44,8 +44,8 @@ namespace OpenTS2.Files.Formats.DBPF
                 foreach(var element in owner.m_EntriesList)
                 {
                     DeletedEntries[element.internalTGI] = true;
-                    RefreshCache(element.internalTGI);
                 }
+                ContentManager.Cache.RemoveAllForPackage(owner);
                 Dirty = true;
             }
 
@@ -54,20 +54,24 @@ namespace OpenTS2.Files.Formats.DBPF
             /// </summary>
             public void Clear()
             {
+                foreach(var element in DeletedEntries)
+                {
+                    RefreshCache(element.Key);
+                }
                 DeletedEntries.Clear();
                 ChangedEntries.Clear();
-                Dirty = true;
+                Dirty = false;
             }
 
             void RefreshCache(ResourceKey tgi)
             {
-                tgi = tgi.LocalGroupID(owner.GroupID);
+                var globaltgi = tgi.LocalGroupID(owner.GroupID);
 
-                var reference = ContentManager.Cache.GetWeakReference(tgi);
+                var reference = ContentManager.Cache.GetWeakReference(globaltgi);
                 if (reference != null && reference.IsAlive && reference.Target != null && reference.Target is AbstractAsset asset)
                 {
                     if (asset.package == owner)
-                        ContentManager.Cache.Remove(tgi);
+                        ContentManager.Cache.Remove(globaltgi);
                 }
 
                 reference = ContentManager.Cache.GetWeakReference(tgi, owner);
@@ -168,7 +172,7 @@ namespace OpenTS2.Files.Formats.DBPF
             }
         }
 
-        bool DeleteIfEmpty = true;
+        public bool DeleteIfEmpty = true;
         private DBPFFileChanges m_changes;
         /// <summary>
         /// Holds all runtime modifications in memory.
@@ -382,17 +386,23 @@ namespace OpenTS2.Files.Formats.DBPF
                 m_EntriesByType[entry.tgi.TypeID].Add(entry);
             }
         }
-
+        /// <summary>
+        /// Write and clear all changes to FilePath.
+        /// </summary>
         public void WriteToFile()
         {
-            Dispose();
             if (DeleteIfEmpty && Empty)
             {
+                Dispose();
                 ContentManager.Provider.RemovePackage(this);
                 ContentManager.FileSystem.Delete(FilePath);
                 Changes.Clear();
                 return;
             }
+            var stream = ContentManager.FileSystem.OpenRead(FilePath);
+            Read(stream);
+            Changes.Clear();
+            return;
         }
 
         /// <summary>

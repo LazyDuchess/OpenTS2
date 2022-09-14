@@ -74,6 +74,15 @@ namespace OpenTS2.Files
             path = FileUtils.CleanPath(path);
             return path;
         }
+        /// <summary>
+        /// Opens a file for writing.
+        /// </summary>
+        /// <param name="path">Unparsed path</param>
+        /// <returns>A FileStream</returns>
+        public FileStream OpenWrite(string path)
+        {
+            return File.OpenWrite(GetRealPath(path));
+        }
 
         /// <summary>
         /// Opens a file for reading.

@@ -12,6 +12,7 @@ using OpenTS2.Content;
 using OpenTS2.Common;
 using System.Diagnostics;
 using OpenTS2.Content.DBPF;
+using OpenTS2.Files.Formats.DBPF;
 
 namespace OpenTS2.Unity.Tests
 {
@@ -22,6 +23,7 @@ namespace OpenTS2.Unity.Tests
         public Text text;
         public bool testChanges = false;
         public bool testDeletion = false;
+        public bool testSaving = false;
         // Start is called before the first frame update
         void Start()
         {
@@ -33,7 +35,7 @@ namespace OpenTS2.Unity.Tests
             contentProvider.AddPackage(packagePath);
             stopWatch.Stop();
             stopWatchSTR.Start();
-            var stringTable = contentProvider.GetAsset<StringSetAsset>(new ResourceKey(0x0000012D, "ld_heightcheater", 0x53545223));
+            var stringTable = contentProvider.GetAsset<StringSetAsset>(new ResourceKey(0x0000012D, "ld_heightcheater", ResTypes.STR));
             if (testChanges)
             {
                 stringTable.StringData.strings[1][8] = new StringValue("Test changing stuff", " Oh hi! ");
@@ -41,7 +43,7 @@ namespace OpenTS2.Unity.Tests
             }
             stopWatchSTR.Stop();
             stopWatchSTR2.Start();
-            stringTable = contentProvider.GetAsset<StringSetAsset>(new ResourceKey(0x0000012D, "ld_heightcheater", 0x53545223));
+            stringTable = contentProvider.GetAsset<StringSetAsset>(new ResourceKey(0x0000012D, "ld_heightcheater", ResTypes.STR));
             stopWatchSTR2.Stop();
             
             text.text = stringTable.GetString(8);
@@ -57,11 +59,12 @@ namespace OpenTS2.Unity.Tests
                 UnityEngine.Debug.Log("StringTable Asset loading took " + (double)stopWatchSTR.ElapsedMilliseconds / 1000D + " seconds");
                 UnityEngine.Debug.Log("Cached StringTable Asset loading took " + (double)stopWatchSTR2.ElapsedMilliseconds / 1000D + " seconds");
             }
+
             if (testDeletion)
-            {
                 stringTable.package.Changes.DeleteAll();
+
+            if (testSaving)
                 stringTable.package.WriteToFile();
-            }
         }
 
         // Update is called once per frame

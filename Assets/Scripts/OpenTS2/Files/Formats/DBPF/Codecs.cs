@@ -23,9 +23,9 @@ namespace OpenTS2.Files.Formats.DBPF
 
         static Dictionary<uint, AbstractCodec> codecsByTypeID = new Dictionary<uint, AbstractCodec>()
         {
-            { Types.STR, STR },
-            { Types.IMG, IMG },
-            { Types.IMG2, IMG }
+            { ResTypes.STR, STR },
+            { ResTypes.IMG, IMG },
+            { ResTypes.IMG2, IMG }
         };
         /// <summary>
         /// Get the codec for a filetype.

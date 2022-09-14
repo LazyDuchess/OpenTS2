@@ -40,7 +40,7 @@ namespace OpenTS2.Content
         {
             get
             {
-                return Provider.contentCache;
+                return Provider.Cache;
             }
         }
 
