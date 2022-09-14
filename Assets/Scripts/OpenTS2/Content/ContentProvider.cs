@@ -149,12 +149,15 @@ namespace OpenTS2.Content
         public void RemovePackage(DBPFFile package)
         {
             //package.Dispose();
-            Cache.RemoveAllForPackage(package);
-            _contentEntries.Remove(package);
-            entryByGroupID.Remove(package.GroupID);
-            entryByPath.Remove(package.FilePath);
-            entryByFile.Remove(package);
-            package.OnRenameEvent -= PackageOnRename;
+            if (entryByFile.ContainsKey(package))
+            {
+                Cache.RemoveAllForPackage(package);
+                _contentEntries.Remove(package);
+                entryByGroupID.Remove(package.GroupID);
+                entryByPath.Remove(package.FilePath);
+                entryByFile.Remove(package);
+                package.OnRenameEvent -= PackageOnRename;
+            }
         }
 
         /// <summary>

@@ -26,11 +26,12 @@ namespace OpenTS2.Content.Changes
         {
             this.asset = asset;
             this.codec = codec;
-            this.entry = new DBPFEntry()
+            this.entry = new DynamicDBPFEntry()
             {
                 tgi = this.asset.tgi,
                 internalTGI = this.asset.internalTGI,
-                dynamic = true
+                dynamic = true,
+                change = this
             };
         }
         public ChangedAsset(AbstractAsset asset) : this(asset, Codecs.Get(asset.TGI.TypeID))

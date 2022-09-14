@@ -171,7 +171,14 @@ namespace OpenTS2.Files.Formats.DBPF
                 Dirty = true;
             }
         }
-
+        public bool Deleted
+        {
+            get
+            {
+                return _deleted;
+            }
+        }
+        bool _deleted = false;
         public bool DeleteIfEmpty = true;
         private DBPFFileChanges m_changes;
         /// <summary>
@@ -231,6 +238,8 @@ namespace OpenTS2.Files.Formats.DBPF
                         continue;
                     if (Changes.ChangedEntries.ContainsKey(element.internalTGI))
                         finalEntries.Add(Changes.ChangedEntries[element.internalTGI].entry);
+                    else
+                        finalEntries.Add(element);
                 }
                 return finalEntries;
             }
@@ -397,12 +406,102 @@ namespace OpenTS2.Files.Formats.DBPF
                 ContentManager.Provider.RemovePackage(this);
                 ContentManager.FileSystem.Delete(FilePath);
                 Changes.Clear();
+                _deleted = true;
                 return;
             }
+            var memStream = new MemoryStream();
+            var size = Write(memStream);
+            var finalData = memStream.GetBuffer();
+            memStream.Dispose();
+            Dispose();
+            ContentManager.FileSystem.Write(FilePath, finalData, size);
             var stream = ContentManager.FileSystem.OpenRead(FilePath);
             Read(stream);
             Changes.Clear();
             return;
+        }
+
+        public int Write(Stream wStream)
+        {
+            var entries = Entries;
+            var writer = new BinaryWriter(wStream);
+            //HeeeADER
+            writer.Write(new char[] { 'D', 'B', 'P', 'F' });
+            //major version
+            writer.Write((int)1);
+            //minor version
+            writer.Write((int)2);
+
+            //unknown
+            writer.Write(new byte[12]);
+
+            //Date stuff
+            writer.Write((int)0);
+            writer.Write((int)0);
+
+            //Index major
+            writer.Write((int)7);
+
+            //Num entries
+            writer.Write((int)entries.Count);
+
+            //Index offset
+            var indexOff = wStream.Position;
+            //Placeholder
+            writer.Write((int)0);
+
+            //Index size
+            var indexSize = wStream.Position;
+            //Placeholder
+            writer.Write((int)0);
+
+            //Trash Entry Stuff
+            writer.Write((int)0);
+            writer.Write((int)0);
+            writer.Write((int)0);
+
+            //Index Minor Ver
+            writer.Write((int)2);
+            //Padding
+            writer.Write(new byte[32]);
+
+            //Go back and write index offset
+            var lastPos = wStream.Position;
+            wStream.Position = indexOff;
+            writer.Write((int)lastPos);
+            wStream.Position = lastPos;
+
+            var entryOffset = new List<long>();
+
+            for(var i=0;i<entries.Count;i++)
+            {
+                var element = entries[i];
+                writer.Write(element.internalTGI.TypeID);
+                writer.Write(element.internalTGI.GroupID);
+                writer.Write(element.internalTGI.InstanceID);
+                writer.Write(element.internalTGI.InstanceHigh);
+                entryOffset.Add(wStream.Position);
+                writer.Write(0);
+                //File Size
+                writer.Write(element.FileSize);
+            }
+
+            //Write files
+            for (var i = 0; i < entries.Count; i++)
+            {
+                var filePosition = wStream.Position;
+                wStream.Position = entryOffset[i];
+                writer.Write((int)filePosition);
+                wStream.Position = filePosition;
+                var entry = GetEntry(entries[i]);
+                writer.Write(entry, 0, (int)entries[i].FileSize);
+            }
+            lastPos = wStream.Position;
+            var siz = lastPos - indexOff;
+            wStream.Position = indexSize;
+            writer.Write((int)siz);
+            writer.Dispose();
+            return (int)lastPos;
         }
 
         /// <summary>

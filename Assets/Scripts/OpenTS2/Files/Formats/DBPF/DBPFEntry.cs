@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using OpenTS2.Common;
+using OpenTS2.Content.Changes;
+
 namespace OpenTS2.Files.Formats.DBPF
 {
     /// <summary>
@@ -61,8 +63,19 @@ namespace OpenTS2.Files.Formats.DBPF
         public uint FileOffset;
 
         //A 4-byte unsigned integer specifying the size of the entry's data
-        public uint FileSize;
+        public virtual uint FileSize { get; set; }
 
         public bool dynamic = false;
+    }
+
+    public class DynamicDBPFEntry : DBPFEntry
+    {
+        public ChangedAsset change;
+        public override uint FileSize { 
+            get
+            {
+                return (uint)change.bytes.Length;
+            }
+        }
     }
 }

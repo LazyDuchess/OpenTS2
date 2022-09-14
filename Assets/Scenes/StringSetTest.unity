@@ -178,6 +178,7 @@ MonoBehaviour:
   text: {fileID: 93897976}
   testChanges: 1
   testDeletion: 0
+  testSaving: 1
 --- !u!114 &93897976
 MonoBehaviour:
   m_ObjectHideFlags: 0

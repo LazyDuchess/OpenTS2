@@ -12,6 +12,7 @@ using OpenTS2.Files.Utils;
 using OpenTS2.Content;
 using OpenTS2.Common;
 using OpenTS2.Content.DBPF;
+using System.Text;
 
 namespace OpenTS2.Files.Formats.DBPF
 {
@@ -55,6 +56,49 @@ namespace OpenTS2.Files.Formats.DBPF
             reader.Dispose();
             var ast = new StringSetAsset(stringTableData);
             return ast; 
+        }
+
+        public class StringForSerialization
+        {
+            public byte languageCode;
+            public string value;
+            public string description;
+        }
+        public override byte[] Serialize(AbstractAsset asset)
+        {
+            var stringAsset = asset as StringSetAsset;
+            var stream = new MemoryStream();
+            var writer = new BinaryWriter(stream);
+            writer.Write(new byte[64]);
+            writer.Seek(0, SeekOrigin.Begin);
+            var ascii = Encoding.UTF8.GetBytes(stringAsset.StringData.fileName + char.MinValue);
+            writer.Write(ascii);
+            writer.Seek(64, SeekOrigin.Begin);
+            writer.Write(new byte[2] { 253, 255 });
+            var stringList = new List<StringForSerialization>();
+            foreach(var element in stringAsset.StringData.strings)
+            {
+                foreach(var listElement in element.Value)
+                {
+                    var item = new StringForSerialization();
+                    item.languageCode = element.Key;
+                    item.value = listElement.value;
+                    item.description = listElement.description;
+                    stringList.Add(item);
+                }
+            }
+            writer.Write((short)stringList.Count);
+            foreach(var element in stringList)
+            {
+                writer.Write(element.languageCode);
+                ascii = Encoding.UTF8.GetBytes(element.value + char.MinValue);
+                writer.Write(ascii);
+                ascii = Encoding.UTF8.GetBytes(element.description + char.MinValue);
+                writer.Write(ascii);
+            }
+            writer.Dispose();
+            stream.Close();
+            return stream.GetBuffer();
         }
     }
 }

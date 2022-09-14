@@ -45,7 +45,18 @@ namespace OpenTS2.Files
             _UserDirectory = FileUtils.CleanPath(pathProvider.GetUserPath()) + "/";
             _BinDirectory = FileUtils.CleanPath(pathProvider.GetGameRootPath()) + "/TSBin/";
         }
-
+        /// <summary>
+        /// Checks if two paths, unparsed or parsed, are equal.
+        /// </summary>
+        /// <param name="path1">Path to check</param>
+        /// <param name="path2">Path to check against</param>
+        /// <returns>True if equal, false if not.</returns>
+        public bool PathsEqual(string path1, string path2)
+        {
+            path1 = GetRealPath(path1).ToLowerInvariant();
+            path2 = GetRealPath(path2).ToLowerInvariant();
+            return (path1 == path2);
+        }
         /// <summary>
         /// Returns short relative path. (Eg. Replaces the game's directory with the %DataDirectory% shorthand)
         /// </summary>
@@ -101,11 +112,24 @@ namespace OpenTS2.Files
         /// <param name="bytes">Byte array to write.</param>
         public void Write(string path, byte[] bytes)
         {
+            Write(path, bytes, bytes.Length);
+        }
+
+        /// <summary>
+        /// Writes a byte array into a file.
+        /// </summary>
+        /// <param name="path">Path to output file.</param>
+        /// <param name="bytes">Byte array to write.</param>
+        public void Write(string path, byte[] bytes, int size)
+        {
             var realPath = GetRealPath(path);
             var dir = Path.GetDirectoryName(realPath);
             if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
-            File.WriteAllBytes(realPath, bytes);
+            var fStream = new FileStream(realPath, FileMode.Create, FileAccess.Write);
+            fStream.Write(bytes, 0, size);
+            fStream.Dispose();
+            //File.WriteAllBytes(realPath, bytes);
         }
 
         /// <summary>
