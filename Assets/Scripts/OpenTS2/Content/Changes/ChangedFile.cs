@@ -10,7 +10,6 @@ namespace OpenTS2.Content.Changes
 {
     public class ChangedFile : AbstractChanged
     {
-        public bool compressed = false;
         protected byte[] fileData;
         public ChangedFile(byte[] fileData, ResourceKey tgi, DBPFFile package, AbstractCodec codec = null)
         {

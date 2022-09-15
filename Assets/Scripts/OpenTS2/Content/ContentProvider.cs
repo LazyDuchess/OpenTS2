@@ -110,8 +110,17 @@ namespace OpenTS2.Content
             if (entryByPath.ContainsKey(realPath))
                 return entryByPath[realPath];
             var package = new DBPFFile(path);
-            AddPackage(package);
+            InternalAddPackage(package);
             return package;
+        }
+
+        void InternalAddPackage(DBPFFile package)
+        {
+            _contentEntries.Insert(0, package);
+            entryByGroupID[package.GroupID] = package;
+            entryByPath[package.FilePath] = package;
+            entryByFile[package] = package;
+            package.OnRenameEvent += PackageOnRename;
         }
 
         /// <summary>
@@ -125,11 +134,7 @@ namespace OpenTS2.Content
             {
                 RemovePackage(entryByPath[package.FilePath]);
             }
-            _contentEntries.Insert(0, package);
-            entryByGroupID[package.GroupID] = package;
-            entryByPath[package.FilePath] = package;
-            entryByFile[package] = package;
-            package.OnRenameEvent += PackageOnRename;
+            InternalAddPackage(package);
         }
 
         void PackageOnRename(DBPFFile package, string oldName, uint oldGroupID)

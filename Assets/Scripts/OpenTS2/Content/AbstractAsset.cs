@@ -19,7 +19,7 @@ namespace OpenTS2.Content
     /// <summary>
     /// Represents a saveable DBPF asset.
     /// </summary>
-    public abstract class AbstractAsset
+    public abstract class AbstractAsset : ICloneable
     {
         /// <summary>
         /// Save changes to this asset in memory.
@@ -42,6 +42,19 @@ namespace OpenTS2.Content
         {
             package.Changes.Restore(this.internalTGI);
         }
+
+        public object Clone()
+        {
+            var codec = Codecs.Get(TGI.TypeID);
+            var serialized = codec.Serialize(this);
+            var clone = codec.Deserialize(serialized, this.tgi, package);
+            clone.tgi = tgi;
+            clone.internalTGI = internalTGI;
+            clone.package = package;
+            clone.Compressed = Compressed;
+            return clone;
+        }
+
         public ResourceKey TGI
         {
             get

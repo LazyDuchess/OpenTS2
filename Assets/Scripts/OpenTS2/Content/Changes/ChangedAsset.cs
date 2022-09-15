@@ -10,6 +10,13 @@ namespace OpenTS2.Content.Changes
 {
     public class ChangedAsset : AbstractChanged
     {
+        public override bool Compressed
+        {
+            get
+            {
+                return asset.Compressed;
+            }
+        }
         public AbstractCodec codec;
         public override byte[] bytes
         {

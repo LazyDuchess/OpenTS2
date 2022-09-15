@@ -12,6 +12,7 @@ using OpenTS2.Files.Utils;
 using OpenTS2.Content;
 using OpenTS2.Common;
 using OpenTS2.Content.DBPF;
+using OpenTS2.Common.Utils;
 
 namespace OpenTS2.Files.Formats.DBPF
 {
@@ -30,31 +31,47 @@ namespace OpenTS2.Files.Formats.DBPF
 
         }
 
+        public override byte[] Serialize(AbstractAsset asset)
+        {
+            var dirAsset = asset as DIRAsset;
+            var stream = new MemoryStream(0);
+            var writer = new BinaryWriter(stream);
+            foreach(var element in dirAsset.m_SizeByInternalTGI)
+            {
+                writer.Write(element.Key.TypeID);
+                writer.Write(element.Key.GroupID);
+                writer.Write(element.Key.InstanceID);
+                writer.Write(element.Key.InstanceHigh);
+                writer.Write(element.Value);
+            }
+            var buffer = StreamUtils.GetBuffer(stream);
+            writer.Dispose();
+            stream.Dispose();
+            return buffer;
+        }
+
         /// <summary>
         /// Parses DIR from an array of bytes.
         /// </summary>
         /// <param name="bytes">Bytes to parse</param>
         public override AbstractAsset Deserialize(byte[] bytes, ResourceKey tgi, DBPFFile sourceFile)
         {
-            var stringTableData = new StringSetData();
+            var dirAsset = new DIRAsset();
             var stream = new MemoryStream(bytes);
             var reader = IoBuffer.FromStream(stream, ByteOrder.LITTLE_ENDIAN);
-            stringTableData.fileName = reader.ReadNullTerminatedUTF8();
-            reader.Seek(SeekOrigin.Begin, 66);
-            var stringSets = reader.ReadUInt16();
-            for (var i = 0; i < stringSets; i++)
+            while (stream.Position < bytes.Length)
             {
-                var languageCode = reader.ReadByte();
-                var value = reader.ReadNullTerminatedUTF8();
-                var desc = reader.ReadNullTerminatedUTF8();
-                if (!stringTableData.strings.ContainsKey(languageCode))
-                    stringTableData.strings[languageCode] = new List<StringValue>();
-                stringTableData.strings[languageCode].Add(new StringValue(value, desc));
+                var TypeID = reader.ReadUInt32();
+                var GroupID = reader.ReadUInt32();
+                var InstanceID = reader.ReadUInt32();
+                uint InstanceID2 = 0x0;
+                if (sourceFile.IndexMinorVersion >= 2)
+                    InstanceID2 = reader.ReadUInt32();
+                dirAsset.m_SizeByInternalTGI[new ResourceKey(InstanceID, InstanceID2, GroupID, TypeID)] = reader.ReadUInt32();
             }
-            stream.Dispose();
             reader.Dispose();
-            var ast = new StringSetAsset(stringTableData);
-            return ast; 
+            stream.Dispose();
+            return dirAsset;
         }
     }
 }

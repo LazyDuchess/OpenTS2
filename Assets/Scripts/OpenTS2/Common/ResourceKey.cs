@@ -23,7 +23,12 @@ namespace OpenTS2.Common
         {
             get { return _Default; }
         }
+        public static ResourceKey DIR
+        {
+            get { return _DIR; }
+        }
         static ResourceKey _Default = new ResourceKey(0, 0, 0);
+        static ResourceKey _DIR = new ResourceKey(0x286B1F03, 0xE86B1EEF, 0xE86B1EEF);
 
         private uint _InstanceID;
         private uint _InstanceHigh;
@@ -58,7 +63,7 @@ namespace OpenTS2.Common
         public ResourceKey GlobalGroupID(uint localGroupID)
         {
             if (this.GroupID == localGroupID)
-                return WithGroupID(Groups.Local);
+                return WithGroupID(GroupIDs.Local);
             return this;
         }
 
@@ -69,7 +74,7 @@ namespace OpenTS2.Common
         /// <returns></returns>
         public ResourceKey LocalGroupID(uint localGroupID)
         {
-            if (this.GroupID == Groups.Local)
+            if (this.GroupID == GroupIDs.Local)
                 return WithGroupID(localGroupID);
             return this;
         }

@@ -24,6 +24,7 @@ namespace OpenTS2.Unity.Tests
         public bool testChanges = false;
         public bool testDeletion = false;
         public bool testSaving = false;
+
         // Start is called before the first frame update
         void Start()
         {
@@ -35,15 +36,16 @@ namespace OpenTS2.Unity.Tests
             contentProvider.AddPackage(packagePath);
             stopWatch.Stop();
             stopWatchSTR.Start();
-            var stringTable = contentProvider.GetAsset<StringSetAsset>(new ResourceKey(0x0000012D, "ld_heightcheater", ResTypes.STR));
+            var stringTable = contentProvider.GetAsset<StringSetAsset>(new ResourceKey(0x0000012D, "ld_heightcheater", TypeIDs.STR));
+            stopWatchSTR.Stop();
             if (testChanges)
             {
                 stringTable.StringData.strings[1][8] = new StringValue("Test changing stuff", " Oh hi! ");
+                stringTable.Compressed = false;
                 stringTable.Save();
             }
-            stopWatchSTR.Stop();
             stopWatchSTR2.Start();
-            stringTable = contentProvider.GetAsset<StringSetAsset>(new ResourceKey(0x0000012D, "ld_heightcheater", ResTypes.STR));
+            stringTable = contentProvider.GetAsset<StringSetAsset>(new ResourceKey(0x0000012D, "ld_heightcheater", TypeIDs.STR));
             stopWatchSTR2.Stop();
             
             text.text = stringTable.GetString(8);

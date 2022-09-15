@@ -13,6 +13,7 @@ using OpenTS2.Content;
 using OpenTS2.Common;
 using OpenTS2.Content.DBPF;
 using System.Text;
+using OpenTS2.Common.Utils;
 
 namespace OpenTS2.Files.Formats.DBPF
 {
@@ -67,7 +68,7 @@ namespace OpenTS2.Files.Formats.DBPF
         public override byte[] Serialize(AbstractAsset asset)
         {
             var stringAsset = asset as StringSetAsset;
-            var stream = new MemoryStream();
+            var stream = new MemoryStream(0);
             var writer = new BinaryWriter(stream);
             writer.Write(new byte[64]);
             writer.Seek(0, SeekOrigin.Begin);
@@ -96,9 +97,10 @@ namespace OpenTS2.Files.Formats.DBPF
                 ascii = Encoding.UTF8.GetBytes(element.description + char.MinValue);
                 writer.Write(ascii);
             }
+            var buffer = StreamUtils.GetBuffer(stream);
             writer.Dispose();
-            stream.Close();
-            return stream.GetBuffer();
+            stream.Dispose();
+            return buffer;
         }
     }
 }
