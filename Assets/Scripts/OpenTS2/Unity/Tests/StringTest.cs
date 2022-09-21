@@ -53,6 +53,9 @@ namespace OpenTS2.Unity.Tests
             if (testRevert)
                 stringTable.package.Changes.Clear();
 
+            if (testSaving)
+                stringTable.package.WriteToFile();
+
             stopWatchSTR2.Start();
             stringTable = contentProvider.GetAsset<StringSetAsset>(new ResourceKey(0x0000012D, "ld_heightcheater", TypeIDs.STR));
             stopWatchSTR2.Stop();
@@ -73,8 +76,7 @@ namespace OpenTS2.Unity.Tests
 
             
 
-            if (testSaving)
-                stringTable.package.WriteToFile();
+            
         }
 
         // Update is called once per frame

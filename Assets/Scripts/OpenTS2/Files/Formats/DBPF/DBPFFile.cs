@@ -73,14 +73,15 @@ namespace OpenTS2.Files.Formats.DBPF
             public void Clear()
             {
                 provider?.RemoveFromResourceMap(owner);
-                foreach(var element in DeletedEntries)
+                provider?.Cache.RemoveAllForPackage(owner);
+                foreach (var element in DeletedEntries)
                 {
                     RefreshCache(element.Key);
                 }
                 DeletedEntries.Clear();
                 ChangedEntries.Clear();
                 Dirty = false;
-                provider?.AddToResourceMap(owner);
+                provider?.UpdateOrAddToResourceMap(owner);
             }
 
             void RefreshCache(ResourceKey tgi)

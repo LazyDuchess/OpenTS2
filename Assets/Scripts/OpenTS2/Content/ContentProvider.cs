@@ -9,6 +9,7 @@ using OpenTS2.Common.Utils;
 using OpenTS2.Files.Formats.DBPF;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace OpenTS2.Content
 {
@@ -44,7 +45,7 @@ namespace OpenTS2.Content
                 DBPFEntry output;
                 if (_resourceMap.TryGetValue(key.tgi, out output))
                 {
-                    return output.package.GetAsset(output);
+                    return output.GetAsset();
                 }
                 return null;
                 /*
@@ -156,6 +157,16 @@ namespace OpenTS2.Content
         }
 
         /// <summary>
+        /// Gets all entries of a specific type.
+        /// </summary>
+        /// <param name="typeID">Type</param>
+        /// <returns>List of DBPFEntries of specified type.</returns>
+        public List<DBPFEntry> GetEntriesOfType(uint typeID)
+        {
+            return _resourceMap.Where(map => map.Value.tgi.TypeID == typeID).ToDictionary(x => x.Key, x => x.Value).Values.ToList();
+        }
+
+        /// <summary>
         /// Caches an asset into the content system and returns it.
         /// </summary>
         /// <param name="key">Key of the resource.</param>
@@ -215,25 +226,51 @@ namespace OpenTS2.Content
         {
             package.Provider = this;
             _contentEntries.Insert(0, package);
-            AddToResourceMap(package);
+            AddToTopOfResourceMap(package);
             entryByGroupID[package.GroupID] = package;
             entryByPath[package.FilePath] = package;
             entryByFile[package] = package;
         }
 
-        public void AddToResourceMap(DBPFFile package)
+        /// <summary>
+        /// Adds all entries from a package into the resource map, at the top of the stack.
+        /// </summary>
+        /// <param name="package">Package to add entries from.</param>
+        public void AddToTopOfResourceMap(DBPFFile package)
         {
             var entries = package.Entries;
             foreach (var element in entries)
             {
-                _resourceMap[element.tgi] = element;
+                AddToTopOfResourceMap(element);
             }
         }
-        public void AddToResourceMap(DBPFEntry entry)
+
+        /// <summary>
+        /// Adds an entry to the resource map, at the top of the stack.
+        /// </summary>
+        /// <param name="entry">Entry to add</param>
+        public void AddToTopOfResourceMap(DBPFEntry entry)
         {
             _resourceMap[entry.tgi] = entry;
         }
 
+        /// <summary>
+        /// Attempts to add all entries from a package into the resource map. Will not work if there are resources with the same TGIs higher up in the stack.
+        /// </summary>
+        /// <param name="package">Package to add entries from</param>
+        public void UpdateOrAddToResourceMap(DBPFFile package)
+        {
+            var entries = package.Entries;
+            foreach (var element in entries)
+            {
+                UpdateOrAddToResourceMap(element);
+            }
+        }
+
+        /// <summary>
+        /// Attempts to add an entry to the resource map. Will not work if there are resources with the same TGI higher up in the stack.
+        /// </summary>
+        /// <param name="entry">Entry to add to resource map</param>
         public void UpdateOrAddToResourceMap(DBPFEntry entry)
         {
             DBPFEntry output;
@@ -243,11 +280,19 @@ namespace OpenTS2.Content
                 {
                     _resourceMap[entry.tgi] = entry;
                 }
+                else
+                {
+                    FindEntryForMap(entry.tgi);
+                }
             }
             else
-                AddToResourceMap(entry);
+                AddToTopOfResourceMap(entry);
         }
 
+        /// <summary>
+        /// Remove all entries from a package from the resource map. Requires all entries to be synchronized.
+        /// </summary>
+        /// <param name="package">Package to remove from map.</param>
         public void RemoveFromResourceMap(DBPFFile package)
         {
             var entries = package.Entries;
@@ -256,12 +301,20 @@ namespace OpenTS2.Content
                 RemoveFromResourceMap(element);
             }
         }
-
+        /// <summary>
+        /// Remove a resource from the resourcemap, by its entry, then update with the next entry.
+        /// </summary>
+        /// <param name="entry">Entry for resource</param>
         public void RemoveFromResourceMap(DBPFEntry entry)
         {
             RemoveFromResourceMap(entry.tgi, entry.package);
         }
 
+        /// <summary>
+        /// Remove a resource from the resourcemap, by its global TGI and package file, then update with the next entry.
+        /// </summary>
+        /// <param name="tgi">TGI</param>
+        /// <param name="package">Package</param>
         public void RemoveFromResourceMap(ResourceKey tgi, DBPFFile package)
         {
             DBPFEntry output;
@@ -275,6 +328,10 @@ namespace OpenTS2.Content
             }
         }
 
+        /// <summary>
+        /// Find topmost resource for this TGI to add to resource map.
+        /// </summary>
+        /// <param name="tgi">TGI</param>
         void FindEntryForMap(ResourceKey tgi)
         {
             foreach (var element in _contentEntries)
@@ -284,6 +341,7 @@ namespace OpenTS2.Content
                 if (entryByTGI != null)
                 {
                     _resourceMap[tgi] = entryByTGI;
+                    return;
                 }
             }
         }

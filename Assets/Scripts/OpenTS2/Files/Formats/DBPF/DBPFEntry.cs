@@ -76,7 +76,12 @@ namespace OpenTS2.Files.Formats.DBPF
 
         public T GetAsset<T>() where T : AbstractAsset
         {
-            return package.GetAsset(this) as T;
+            return GetAsset() as T;
+        }
+
+        public AbstractAsset GetAsset()
+        {
+            return package.GetAsset(this);
         }
     }
 
