@@ -18,16 +18,23 @@ namespace OpenTS2.Content
     {
         public DBPFFile file = null;
         public ResourceKey tgi = ResourceKey.Default;
+        private ContentProvider contentProvider;
 
-        public CacheKey(ResourceKey tgi)
-        {
-            this.tgi = tgi;
-        }
-
-        public CacheKey(ResourceKey tgi, DBPFFile package)
+        public CacheKey(ResourceKey tgi, DBPFFile package = null, ContentProvider provider = null)
         {
             this.tgi = tgi;
             this.file = package;
+            if (provider == null)
+                provider = ContentManager.Get?.Provider;
+            this.contentProvider = provider;
+            if (package == null && this.contentProvider != null)
+            {
+                this.file = this.contentProvider.GetFromResourceMap(this.tgi)?.package;
+            }
+            if (this.file != null)
+            {
+                this.tgi = this.tgi.GlobalGroupID(this.file.GroupID);
+            }
         }
 
         public override int GetHashCode()
@@ -62,9 +69,11 @@ namespace OpenTS2.Content
     {
         // Dictionary to contain the temporary cache.
         Dictionary<CacheKey, WeakReference> _cache;
+        public ContentProvider Provider;
 
-        public ContentCache()
+        public ContentCache(ContentProvider provider)
         {
+            Provider = provider;
             _cache = new Dictionary<CacheKey, WeakReference>();
         }
 
@@ -75,17 +84,18 @@ namespace OpenTS2.Content
 
         public void Remove(ResourceKey key, DBPFFile package)
         {
-            Remove(new CacheKey(key, package));
+            Remove(new CacheKey(key, package, Provider));
         }
 
         public void Remove(ResourceKey key)
         {
-            Remove(new CacheKey(key));
+            Remove(new CacheKey(key, null, Provider));
         }
 
         public void Remove(CacheKey key)
         {
-            _cache.Remove(key);
+            if (_cache.ContainsKey(key))
+                _cache.Remove(key);
         }
 
         WeakReference GetOrAddInternal(CacheKey key, Func<CacheKey, AbstractAsset> objectFactory)
@@ -121,7 +131,7 @@ namespace OpenTS2.Content
         /// <returns>A strong reference to the cached object.</returns>
         public AbstractAsset GetOrAdd(ResourceKey key, DBPFFile package, Func<CacheKey, AbstractAsset> objectFactory)
         {
-            return GetOrAdd(new CacheKey(key, package), objectFactory);
+            return GetOrAdd(new CacheKey(key, package, Provider), objectFactory);
         }
 
         /// <summary>
@@ -132,7 +142,7 @@ namespace OpenTS2.Content
         /// <returns>A strong reference to the cached object.</returns>
         public AbstractAsset GetOrAdd(ResourceKey key, Func<CacheKey, AbstractAsset> objectFactory)
         {
-            return GetOrAdd(new CacheKey(key), objectFactory);
+            return GetOrAdd(new CacheKey(key, null, Provider), objectFactory);
         }
 
         /// <summary>
@@ -148,12 +158,12 @@ namespace OpenTS2.Content
 
         public WeakReference GetWeakReference(ResourceKey key, DBPFFile package)
         {
-            return GetWeakReference(new CacheKey(key, package));
+            return GetWeakReference(new CacheKey(key, package, Provider));
         }
 
         public WeakReference GetWeakReference(ResourceKey key)
         {
-            return GetWeakReference(new CacheKey(key));
+            return GetWeakReference(new CacheKey(key, null, Provider));
         }
 
         public WeakReference GetWeakReference(CacheKey key)

@@ -28,7 +28,7 @@ namespace OpenTS2.Content
         private Dictionary<uint, DBPFFile> entryByGroupID = new Dictionary<uint, DBPFFile>();
         private Dictionary<string, DBPFFile> entryByPath = new Dictionary<string, DBPFFile>();
         private Dictionary<DBPFFile, DBPFFile> entryByFile = new Dictionary<DBPFFile, DBPFFile>();
-        public ContentCache Cache = new ContentCache();
+        public ContentCache Cache;
         public ContentChanges Changes;
         private Files.Filesystem fileSystem;
 
@@ -36,124 +36,12 @@ namespace OpenTS2.Content
         {
             this.fileSystem = fileSystem;
             this.Changes = new ContentChanges(this, fileSystem);
+            this.Cache = new ContentCache(this);
         }
 
         AbstractAsset InternalLoadAsset(CacheKey key)
         {
-            if (key.file == null)
-            {
-                DBPFEntry output;
-                if (_resourceMap.TryGetValue(key.tgi, out output))
-                {
-                    return output.GetAsset();
-                }
-                return null;
-                /*
-                foreach (var element in _contentEntries)
-                {
-                    var localTGI = key.tgi.GlobalGroupID(element.GroupID);
-                    var entryByTGI = element.GetEntryByTGI(localTGI);
-                    if (entryByTGI != null)
-                    {
-                        var finalAsset = element.GetAsset(entryByTGI);
-                        return finalAsset;
-                    }
-                }*/
-            }
-            else
-            {
-                return key.file.GetAssetByTGI(key.tgi);
-            }
-        }
-
-        /// <summary>
-        /// Returns DBPFEntry for TGI resource.
-        /// </summary>
-        /// <param name="tgi">TGI for the resource.</param>
-        /// <param name="package">Package to check for resource.</param>
-        /// <returns>A DBPFEntry</returns>
-        public DBPFEntry GetEntry(ResourceKey tgi, DBPFFile package)
-        {
-            var key = new CacheKey(tgi, package);
-            if (key.file == null)
-            {
-                DBPFEntry output;
-                if (_resourceMap.TryGetValue(key.tgi, out output))
-                    return output;
-                return null;
-                /*
-                foreach (var element in _contentEntries)
-                {
-                    var localTGI = key.tgi.GlobalGroupID(element.GroupID);
-                    var entryByTGI = element.GetEntryByTGI(localTGI);
-                    if (entryByTGI != null)
-                        return entryByTGI;
-                }*/
-            }
-            else
-            {
-                return key.file.GetEntryByTGI(key.tgi);
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// Returns DBPFEntry for TGI resource.
-        /// </summary>
-        /// <param name="tgi">TGI for the resource.</param>
-        /// <returns>A DBPFEntry</returns>
-        public DBPFEntry GetEntry(ResourceKey tgi)
-        {
-            var key = new CacheKey(tgi);
-            if (key.file == null)
-            {
-                DBPFEntry output;
-                if (_resourceMap.TryGetValue(tgi, out output))
-                    return output;
-                return null;
-                /*
-                foreach (var element in _contentEntries)
-                {
-                    var localTGI = key.tgi.GlobalGroupID(element.GroupID);
-                    var entryByTGI = element.GetEntryByTGI(localTGI);
-                    if (entryByTGI != null)
-                        return entryByTGI;
-                }*/
-            }
-            else
-            {
-                return key.file.GetEntryByTGI(key.tgi);
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// Returns DBPFEntry for TGI resource.
-        /// </summary>
-        /// <param name="key">Key</param>
-        /// <returns>A DBPFEntry</returns>
-        public DBPFEntry GetEntry(CacheKey key)
-        {
-            if (key.file == null)
-            {
-                DBPFEntry output;
-                if (_resourceMap.TryGetValue(key.tgi, out output))
-                    return output;
-                return null;
-                /*
-                foreach (var element in _contentEntries)
-                {
-                    var localTGI = key.tgi.GlobalGroupID(element.GroupID);
-                    var entryByTGI = element.GetEntryByTGI(localTGI);
-                    if (entryByTGI != null)
-                        return entryByTGI;
-                }*/
-            }
-            else
-            {
-                return key.file.GetEntryByTGI(key.tgi);
-            }
-            return null;
+            return key.file.GetAssetByTGI(key.tgi);
         }
 
         /// <summary>
@@ -230,6 +118,14 @@ namespace OpenTS2.Content
             entryByGroupID[package.GroupID] = package;
             entryByPath[package.FilePath] = package;
             entryByFile[package] = package;
+        }
+
+        public DBPFEntry GetFromResourceMap(ResourceKey key)
+        {
+            DBPFEntry output = null;
+            if (_resourceMap.TryGetValue(key, out output))
+                return output;
+            return null;
         }
 
         /// <summary>

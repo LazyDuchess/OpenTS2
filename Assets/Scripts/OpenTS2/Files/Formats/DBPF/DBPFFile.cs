@@ -86,20 +86,7 @@ namespace OpenTS2.Files.Formats.DBPF
 
             void RefreshCache(ResourceKey tgi)
             {
-                var globaltgi = tgi.LocalGroupID(owner.GroupID);
-
-                var reference = provider?.Cache.GetWeakReference(globaltgi);
-                if (reference != null && reference.IsAlive && reference.Target != null && reference.Target is AbstractAsset asset)
-                {
-                    if (asset.package == owner)
-                        provider?.Cache.Remove(globaltgi);
-                }
-
-                reference = provider?.Cache.GetWeakReference(tgi, owner);
-                if (reference != null && reference.IsAlive && reference.Target != null && reference.Target is AbstractAsset asset2)
-                {
-                    provider?.Cache.Remove(tgi, owner);
-                }
+                provider?.Cache.Remove(tgi, owner);
             }
 
             /// <summary>
@@ -240,6 +227,18 @@ namespace OpenTS2.Files.Formats.DBPF
         public string FilePath
         {
             get { return m_filePath; }
+            set
+            {
+                var oldProvider = Provider;
+                oldProvider?.RemovePackage(this);
+                m_filePath = content.FileSystem.GetRealPath(value);
+                GroupID = FileUtils.GroupHash(Path.GetFileNameWithoutExtension(m_filePath));
+                foreach(var element in Entries)
+                {
+                    element.tgi = element.internalTGI.LocalGroupID(GroupID);
+                }
+                oldProvider?.AddPackage(this);
+            }
         }
         public int DateCreated;
         public int DateModified;
