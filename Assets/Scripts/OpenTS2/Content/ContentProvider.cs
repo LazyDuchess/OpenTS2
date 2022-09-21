@@ -213,6 +213,7 @@ namespace OpenTS2.Content
 
         void InternalAddPackage(DBPFFile package)
         {
+            package.Provider = this;
             _contentEntries.Insert(0, package);
             AddToResourceMap(package);
             entryByGroupID[package.GroupID] = package;
@@ -310,6 +311,7 @@ namespace OpenTS2.Content
             //package.Dispose();
             if (entryByFile.ContainsKey(package))
             {
+                package.Provider = null;
                 RemoveFromResourceMap(package);
                 Cache.RemoveAllForPackage(package);
                 _contentEntries.Remove(package);

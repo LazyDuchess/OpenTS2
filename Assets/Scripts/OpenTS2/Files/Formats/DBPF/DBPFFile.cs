@@ -28,6 +28,13 @@ namespace OpenTS2.Files.Formats.DBPF
         public class DBPFFileChanges
         {
             private DBPFFile owner;
+            private ContentProvider provider
+            {
+                get
+                {
+                    return owner.Provider;
+                }
+            }
             private ContentManager content
             {
                 get
@@ -50,8 +57,8 @@ namespace OpenTS2.Files.Formats.DBPF
             /// </summary>
             public void Delete()
             {
-                content.Provider.RemoveFromResourceMap(owner);
-                content.Cache.RemoveAllForPackage(owner);
+                provider?.RemoveFromResourceMap(owner);
+                provider?.Cache.RemoveAllForPackage(owner);
                 var entries = owner.Entries;
                 foreach(var element in entries)
                 {
@@ -65,7 +72,7 @@ namespace OpenTS2.Files.Formats.DBPF
             /// </summary>
             public void Clear()
             {
-                content.Provider.RemoveFromResourceMap(owner);
+                provider?.RemoveFromResourceMap(owner);
                 foreach(var element in DeletedEntries)
                 {
                     RefreshCache(element.Key);
@@ -73,24 +80,24 @@ namespace OpenTS2.Files.Formats.DBPF
                 DeletedEntries.Clear();
                 ChangedEntries.Clear();
                 Dirty = false;
-                content.Provider.AddToResourceMap(owner);
+                provider?.AddToResourceMap(owner);
             }
 
             void RefreshCache(ResourceKey tgi)
             {
                 var globaltgi = tgi.LocalGroupID(owner.GroupID);
 
-                var reference = content.Cache.GetWeakReference(globaltgi);
+                var reference = provider?.Cache.GetWeakReference(globaltgi);
                 if (reference != null && reference.IsAlive && reference.Target != null && reference.Target is AbstractAsset asset)
                 {
                     if (asset.package == owner)
-                        content.Cache.Remove(globaltgi);
+                        provider?.Cache.Remove(globaltgi);
                 }
 
-                reference = content.Cache.GetWeakReference(tgi, owner);
+                reference = provider?.Cache.GetWeakReference(tgi, owner);
                 if (reference != null && reference.IsAlive && reference.Target != null && reference.Target is AbstractAsset asset2)
                 {
-                    content.Cache.Remove(tgi, owner);
+                    provider?.Cache.Remove(tgi, owner);
                 }
             }
 
@@ -103,7 +110,7 @@ namespace OpenTS2.Files.Formats.DBPF
                 DeletedEntries[entry.internalTGI] = true;
                 RefreshCache(entry.internalTGI);
                 Dirty = true;
-                content.Provider.RemoveFromResourceMap(entry);
+                provider?.RemoveFromResourceMap(entry);
             }
 
             /// <summary>
@@ -117,7 +124,7 @@ namespace OpenTS2.Files.Formats.DBPF
                     DeletedEntries.Remove(entry.internalTGI);
                     RefreshCache(entry.internalTGI);
                     Dirty = true;
-                    content.Provider.UpdateOrAddToResourceMap(entry);
+                    provider?.UpdateOrAddToResourceMap(entry);
                 }
             }
 
@@ -130,7 +137,7 @@ namespace OpenTS2.Files.Formats.DBPF
                 DeletedEntries[tgi] = true;
                 RefreshCache(tgi);
                 Dirty = true;
-                content.Provider.RemoveFromResourceMap(tgi.LocalGroupID(owner.GroupID), owner);
+                provider?.RemoveFromResourceMap(tgi.LocalGroupID(owner.GroupID), owner);
             }
             /// <summary>
             /// Unmark an entry as deleted by its TGI
@@ -143,7 +150,7 @@ namespace OpenTS2.Files.Formats.DBPF
                     DeletedEntries.Remove(tgi);
                     RefreshCache(tgi);
                     Dirty = true;
-                    content.Provider.UpdateOrAddToResourceMap(owner.GetEntryByTGI(tgi));
+                    provider?.UpdateOrAddToResourceMap(owner.GetEntryByTGI(tgi));
                 }
             }
 
@@ -172,7 +179,7 @@ namespace OpenTS2.Files.Formats.DBPF
                 InternalRestore(asset.internalTGI);
                 RefreshCache(asset.internalTGI);
                 Dirty = true;
-                content.Provider.UpdateOrAddToResourceMap(changedAsset.entry);
+                provider?.UpdateOrAddToResourceMap(changedAsset.entry);
             }
             /// <summary>
             /// Save changes to a resource in memory.
@@ -188,7 +195,7 @@ namespace OpenTS2.Files.Formats.DBPF
                 InternalRestore(tgi);
                 RefreshCache(tgi);
                 Dirty = true;
-                content.Provider.UpdateOrAddToResourceMap(changedFile.entry);
+                provider?.UpdateOrAddToResourceMap(changedFile.entry);
             }
         }
 
@@ -216,6 +223,7 @@ namespace OpenTS2.Files.Formats.DBPF
             }
         }
         private ContentManager _Content = null;
+        public ContentProvider Provider = null;
         
         /// <summary>
         /// Holds all runtime modifications in memory.
@@ -419,7 +427,7 @@ namespace OpenTS2.Files.Formats.DBPF
             if (DeleteIfEmpty && Empty)
             {
                 Dispose();
-                content.Provider.RemovePackage(this);
+                Provider?.RemovePackage(this);
                 content.FileSystem.Delete(FilePath);
                 Changes.Clear();
                 _deleted = true;
