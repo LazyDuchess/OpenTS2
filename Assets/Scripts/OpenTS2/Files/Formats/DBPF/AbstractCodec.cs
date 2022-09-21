@@ -16,6 +16,7 @@ namespace OpenTS2.Files.Formats.DBPF
 {
     public abstract class AbstractCodec
     {
+        public ContentManager content = ContentManager.Get;
         public virtual AbstractAsset Deserialize(byte[] bytes, ResourceKey tgi, DBPFFile sourceFile)
         {
             throw new NotSupportedException();

@@ -22,6 +22,7 @@ namespace OpenTS2.Content
             get { return _contentEntries; }
         }
 
+        private Dictionary<ResourceKey, DBPFEntry> _resourceMap = new Dictionary<ResourceKey, DBPFEntry>();
         private List<DBPFFile> _contentEntries = new List<DBPFFile>();
         private Dictionary<uint, DBPFFile> entryByGroupID = new Dictionary<uint, DBPFFile>();
         private Dictionary<string, DBPFFile> entryByPath = new Dictionary<string, DBPFFile>();
@@ -40,6 +41,13 @@ namespace OpenTS2.Content
         {
             if (key.file == null)
             {
+                DBPFEntry output;
+                if (_resourceMap.TryGetValue(key.tgi, out output))
+                {
+                    return output.package.GetAsset(output);
+                }
+                return null;
+                /*
                 foreach (var element in _contentEntries)
                 {
                     var localTGI = key.tgi.GlobalGroupID(element.GroupID);
@@ -49,11 +57,100 @@ namespace OpenTS2.Content
                         var finalAsset = element.GetAsset(entryByTGI);
                         return finalAsset;
                     }
-                }
+                }*/
             }
             else
             {
                 return key.file.GetAssetByTGI(key.tgi);
+            }
+        }
+
+        /// <summary>
+        /// Returns DBPFEntry for TGI resource.
+        /// </summary>
+        /// <param name="tgi">TGI for the resource.</param>
+        /// <param name="package">Package to check for resource.</param>
+        /// <returns>A DBPFEntry</returns>
+        public DBPFEntry GetEntry(ResourceKey tgi, DBPFFile package)
+        {
+            var key = new CacheKey(tgi, package);
+            if (key.file == null)
+            {
+                DBPFEntry output;
+                if (_resourceMap.TryGetValue(key.tgi, out output))
+                    return output;
+                return null;
+                /*
+                foreach (var element in _contentEntries)
+                {
+                    var localTGI = key.tgi.GlobalGroupID(element.GroupID);
+                    var entryByTGI = element.GetEntryByTGI(localTGI);
+                    if (entryByTGI != null)
+                        return entryByTGI;
+                }*/
+            }
+            else
+            {
+                return key.file.GetEntryByTGI(key.tgi);
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Returns DBPFEntry for TGI resource.
+        /// </summary>
+        /// <param name="tgi">TGI for the resource.</param>
+        /// <returns>A DBPFEntry</returns>
+        public DBPFEntry GetEntry(ResourceKey tgi)
+        {
+            var key = new CacheKey(tgi);
+            if (key.file == null)
+            {
+                DBPFEntry output;
+                if (_resourceMap.TryGetValue(tgi, out output))
+                    return output;
+                return null;
+                /*
+                foreach (var element in _contentEntries)
+                {
+                    var localTGI = key.tgi.GlobalGroupID(element.GroupID);
+                    var entryByTGI = element.GetEntryByTGI(localTGI);
+                    if (entryByTGI != null)
+                        return entryByTGI;
+                }*/
+            }
+            else
+            {
+                return key.file.GetEntryByTGI(key.tgi);
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Returns DBPFEntry for TGI resource.
+        /// </summary>
+        /// <param name="key">Key</param>
+        /// <returns>A DBPFEntry</returns>
+        public DBPFEntry GetEntry(CacheKey key)
+        {
+            if (key.file == null)
+            {
+                DBPFEntry output;
+                if (_resourceMap.TryGetValue(key.tgi, out output))
+                    return output;
+                return null;
+                /*
+                foreach (var element in _contentEntries)
+                {
+                    var localTGI = key.tgi.GlobalGroupID(element.GroupID);
+                    var entryByTGI = element.GetEntryByTGI(localTGI);
+                    if (entryByTGI != null)
+                        return entryByTGI;
+                }*/
+            }
+            else
+            {
+                return key.file.GetEntryByTGI(key.tgi);
             }
             return null;
         }
@@ -61,7 +158,7 @@ namespace OpenTS2.Content
         /// <summary>
         /// Caches an asset into the content system and returns it.
         /// </summary>
-        /// <param name="tgi">TGI of the resource.</param>
+        /// <param name="key">Key of the resource.</param>
         /// <returns>The asset.</returns>
         public AbstractAsset GetAsset(CacheKey key)
         {
@@ -117,10 +214,77 @@ namespace OpenTS2.Content
         void InternalAddPackage(DBPFFile package)
         {
             _contentEntries.Insert(0, package);
+            AddToResourceMap(package);
             entryByGroupID[package.GroupID] = package;
             entryByPath[package.FilePath] = package;
             entryByFile[package] = package;
-            package.OnRenameEvent += PackageOnRename;
+        }
+
+        public void AddToResourceMap(DBPFFile package)
+        {
+            var entries = package.Entries;
+            foreach (var element in entries)
+            {
+                _resourceMap[element.tgi] = element;
+            }
+        }
+        public void AddToResourceMap(DBPFEntry entry)
+        {
+            _resourceMap[entry.tgi] = entry;
+        }
+
+        public void UpdateOrAddToResourceMap(DBPFEntry entry)
+        {
+            DBPFEntry output;
+            if (_resourceMap.TryGetValue(entry.tgi, out output))
+            {
+                if (entry.package == output.package)
+                {
+                    _resourceMap[entry.tgi] = entry;
+                }
+            }
+            else
+                AddToResourceMap(entry);
+        }
+
+        public void RemoveFromResourceMap(DBPFFile package)
+        {
+            var entries = package.Entries;
+            foreach (var element in entries)
+            {
+                RemoveFromResourceMap(element);
+            }
+        }
+
+        public void RemoveFromResourceMap(DBPFEntry entry)
+        {
+            RemoveFromResourceMap(entry.tgi, entry.package);
+        }
+
+        public void RemoveFromResourceMap(ResourceKey tgi, DBPFFile package)
+        {
+            DBPFEntry output;
+            if (_resourceMap.TryGetValue(tgi, out output))
+            {
+                if (package == output.package)
+                {
+                    _resourceMap.Remove(tgi);
+                    FindEntryForMap(tgi);
+                }
+            }
+        }
+
+        void FindEntryForMap(ResourceKey tgi)
+        {
+            foreach (var element in _contentEntries)
+            {
+                var localTGI = tgi.GlobalGroupID(element.GroupID);
+                var entryByTGI = element.GetEntryByTGI(localTGI);
+                if (entryByTGI != null)
+                {
+                    _resourceMap[tgi] = entryByTGI;
+                }
+            }
         }
 
         /// <summary>
@@ -137,16 +301,6 @@ namespace OpenTS2.Content
             InternalAddPackage(package);
         }
 
-        void PackageOnRename(DBPFFile package, string oldName, uint oldGroupID)
-        {
-            Cache.RemoveAllForPackage(package);
-            var entry = entryByFile[package];
-            entryByPath.Remove(oldName);
-            entryByGroupID.Remove(oldGroupID);
-            entryByPath[package.FilePath] = entry;
-            entryByGroupID[package.GroupID] = entry;
-        }
-
         /// <summary>
         /// Removes a DBPF Package from the filesystem.
         /// </summary>
@@ -156,12 +310,12 @@ namespace OpenTS2.Content
             //package.Dispose();
             if (entryByFile.ContainsKey(package))
             {
+                RemoveFromResourceMap(package);
                 Cache.RemoveAllForPackage(package);
                 _contentEntries.Remove(package);
                 entryByGroupID.Remove(package.GroupID);
                 entryByPath.Remove(package.FilePath);
                 entryByFile.Remove(package);
-                package.OnRenameEvent -= PackageOnRename;
             }
         }
 

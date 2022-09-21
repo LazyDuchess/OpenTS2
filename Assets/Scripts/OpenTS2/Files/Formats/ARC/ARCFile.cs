@@ -41,7 +41,7 @@ namespace OpenTS2.Files.Formats.ARC
         /// <param name="file">The path to an ARC archive.</param>
         public ARCFile(string file)
         {
-            var stream = ContentManager.FileSystem.OpenRead(file);
+            var stream = ContentManager.Get.FileSystem.OpenRead(file);
             Read(stream);
         }
 

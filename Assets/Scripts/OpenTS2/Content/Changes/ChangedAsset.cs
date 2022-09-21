@@ -38,7 +38,8 @@ namespace OpenTS2.Content.Changes
                 tgi = this.asset.tgi,
                 internalTGI = this.asset.internalTGI,
                 dynamic = true,
-                change = this
+                change = this,
+                package = asset.package
             };
         }
         public ChangedAsset(AbstractAsset asset) : this(asset, Codecs.Get(asset.TGI.TypeID))

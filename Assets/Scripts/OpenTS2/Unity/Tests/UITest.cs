@@ -13,7 +13,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using OpenTS2.Content;
 using OpenTS2.Common;
-using OpenTS2.Unity.Content;
+using OpenTS2.Unity.Core;
 using OpenTS2.Content.DBPF;
 
 namespace OpenTS2.Unity.Tests
@@ -25,8 +25,8 @@ namespace OpenTS2.Unity.Tests
 
         void Start()
         {
-            ContentManager.Provider.AddPackage(packageToLoad);
-            var texture = ContentManager.Provider.GetAsset<TextureAsset>(new ResourceKey(0x00000001, "N002_FamilyThumbnails", 0x8C3CE95A));
+            ContentManager.Get.Provider.AddPackage(packageToLoad);
+            var texture = ContentManager.Get.Provider.GetAsset<TextureAsset>(new ResourceKey(0x00000001, "N002_FamilyThumbnails", 0x8C3CE95A));
             image.texture = texture.engineTexture as Texture2D;
         }
     }

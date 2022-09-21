@@ -1,4 +1,4 @@
-﻿using OpenTS2.Unity.Content;
+﻿using OpenTS2.Unity.Core;
 using OpenTS2.Content;
 using System;
 using System.Collections.Generic;
@@ -12,9 +12,7 @@ namespace OpenTS2.Unity.Core
     {
         public static void Initialize()
         {
-            ContentManager.TextureFactory = new TextureFactory();
-            ContentManager.FileSystem = new Files.Filesystem(new JSONPathProvider());
-            ContentManager.Provider = new ContentProvider(ContentManager.FileSystem);
+            new UnityContentManager();
         }
     }
 }

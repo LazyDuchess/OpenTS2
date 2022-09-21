@@ -28,7 +28,7 @@ namespace OpenTS2.Unity.Tests
         // Start is called before the first frame update
         void Start()
         {
-            var contentProvider = ContentManager.Provider;
+            var contentProvider = ContentManager.Get.Provider;
             var stopWatch = new Stopwatch();
             var stopWatchSTR = new Stopwatch();
             var stopWatchSTR2 = new Stopwatch();
@@ -40,10 +40,15 @@ namespace OpenTS2.Unity.Tests
             stopWatchSTR.Stop();
             if (testChanges)
             {
-                stringTable.StringData.strings[1][8] = new StringValue("Test changing stuff", " Oh hi! ");
+                stringTable = (StringSetAsset)stringTable.Clone();
+                stringTable.StringData.strings[1][8] = new StringValue("Test SEX stuff", " Oh hi! ");
                 stringTable.Compressed = false;
                 stringTable.Save();
             }
+
+            if (testDeletion)
+                stringTable.package.Changes.Delete();
+
             stopWatchSTR2.Start();
             stringTable = contentProvider.GetAsset<StringSetAsset>(new ResourceKey(0x0000012D, "ld_heightcheater", TypeIDs.STR));
             stopWatchSTR2.Stop();
@@ -62,8 +67,7 @@ namespace OpenTS2.Unity.Tests
                 UnityEngine.Debug.Log("Cached StringTable Asset loading took " + (double)stopWatchSTR2.ElapsedMilliseconds / 1000D + " seconds");
             }
 
-            if (testDeletion)
-                stringTable.package.Changes.DeleteAll();
+            
 
             if (testSaving)
                 stringTable.package.WriteToFile();

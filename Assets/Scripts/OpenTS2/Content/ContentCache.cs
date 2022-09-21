@@ -94,7 +94,9 @@ namespace OpenTS2.Content
             if (_cache.TryGetValue(key, out result))
             {
                 if (result.Target != null && result.IsAlive)
+                {
                     return result;
+                }
                 else
                 {
                     result = new WeakReference(objectFactory(key));

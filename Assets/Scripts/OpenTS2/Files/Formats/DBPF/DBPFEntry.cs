@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using OpenTS2.Common;
+using OpenTS2.Content;
 using OpenTS2.Content.Changes;
 
 namespace OpenTS2.Files.Formats.DBPF
@@ -66,6 +67,17 @@ namespace OpenTS2.Files.Formats.DBPF
         public virtual uint FileSize { get; set; }
 
         public bool dynamic = false;
+        public DBPFFile package;
+
+        public byte[] GetBytes()
+        {
+            return package.GetEntry(this);
+        }
+
+        public T GetAsset<T>() where T : AbstractAsset
+        {
+            return package.GetAsset(this) as T;
+        }
     }
 
     public class DynamicDBPFEntry : DBPFEntry

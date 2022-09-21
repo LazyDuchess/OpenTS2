@@ -51,17 +51,17 @@ namespace OpenTS2.Files.Formats.DBPF
             switch (fileType)
             {
                 case 0:
-                texture = ContentManager.TextureFactory.CreateTGATexture(bytes);
+                texture = content.TextureFactory.CreateTGATexture(bytes);
                 textureAsset.engineTexture = texture;
                 return textureAsset;
 
                 case 1:
-                texture = ContentManager.TextureFactory.CreatePNGTexture(bytes);
+                texture = content.TextureFactory.CreatePNGTexture(bytes);
                 textureAsset.engineTexture = texture;
                 return textureAsset;
 
                 case 2:
-                texture = ContentManager.TextureFactory.CreateJPGTexture(bytes);
+                texture = content.TextureFactory.CreateJPGTexture(bytes);
                 textureAsset.engineTexture = texture;
                 return textureAsset;
             }

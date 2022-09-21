@@ -13,7 +13,7 @@ using UnityEngine;
 using OpenTS2.Files.Formats.ARC;
 using OpenTS2.Content;
 using System.IO;
-using OpenTS2.Unity.Content;
+using OpenTS2.Unity.Core;
 
 namespace OpenTS2.Unity.Tests
 {
@@ -37,11 +37,11 @@ namespace OpenTS2.Unity.Tests
                         if (textureMode)
                         {
                             var texture2 = codec.Deserialize(imageFile);
-                            ContentManager.FileSystem.Write(Path.Combine(TargetFolder, element.FileName + ".png"), ((Texture2D)texture2.engineTexture).EncodeToPNG());
+                            ContentManager.Get.FileSystem.Write(Path.Combine(TargetFolder, element.FileName + ".png"), ((Texture2D)texture2.engineTexture).EncodeToPNG());
                         }
                         else
                         {
-                            ContentManager.FileSystem.Write(Path.Combine(TargetFolder, element.FileName), imageFile);
+                            ContentManager.Get.FileSystem.Write(Path.Combine(TargetFolder, element.FileName), imageFile);
                         }
                     }
                     catch (Exception e) { }

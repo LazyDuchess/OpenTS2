@@ -16,7 +16,7 @@ using OpenTS2.Files.Formats.ARC;
 using OpenTS2.Files.Utils;
 using UnityEngine;
 
-namespace OpenTS2.Unity.Content
+namespace OpenTS2.Unity.Core
 {
     /// <summary>
     /// Constructs Unity Texture2D resources.

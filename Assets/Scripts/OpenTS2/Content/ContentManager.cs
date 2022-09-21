@@ -14,41 +14,59 @@ using OpenTS2.Files;
 
 namespace OpenTS2.Content
 {
-    public class ContentInitializationArgs
-    {
-        public IPathProvider pathProvider;
-        public ITextureFactory textureFactory;
-
-        public static ContentInitializationArgs Default
-        {
-            get
-            {
-                var ini = new ContentInitializationArgs();
-                return ini;
-            }
-        }
-    }
     /// <summary>
     /// Manages the game's asset saving/loading/caching and its filesystem.
     /// </summary>
-    public static class ContentManager
+    public class ContentManager
     {
-        public static Filesystem FileSystem;
-        public static ContentProvider Provider;
-        public static ITextureFactory TextureFactory;
-        public static ContentCache Cache
+        protected static ContentManager _singleton;
+        protected Filesystem _fileSystem;
+        protected ContentProvider _provider;
+        protected ITextureFactory _textureFactory;
+        public static ContentManager Get
+        { get
+            {
+                return _singleton;
+            } 
+        }
+        public Filesystem FileSystem
         {
             get
             {
-                return Provider.Cache;
+                return _fileSystem;
+            }
+        }
+        public ContentProvider Provider
+        {
+            get
+            {
+                return _provider;
+            }
+        }
+        public ITextureFactory TextureFactory
+        {
+            get
+            {
+                return _textureFactory;
+            }
+        }
+        public ContentManager()
+        {
+            _singleton = this;
+        }
+        public ContentCache Cache
+        {
+            get
+            {
+                return _provider.Cache;
             }
         }
 
-        public static ContentChanges Changes
+        public ContentChanges Changes
         {
             get
             {
-                return Provider.Changes;
+                return _provider.Changes;
             }
         }
     }
