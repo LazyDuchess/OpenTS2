@@ -179,6 +179,7 @@ MonoBehaviour:
   testChanges: 0
   testDeletion: 0
   testSaving: 0
+  testRevert: 0
 --- !u!114 &93897976
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -409,8 +409,12 @@ namespace OpenTS2.Files.Formats.DBPF
                 entry.FileSize = io.ReadUInt32();
                 entry.package = this;
 
+                var mappedTGI = entry.internalTGI;
+                if (InternalGroupID == GroupID)
+                    mappedTGI = entry.internalTGI.GlobalGroupID(GroupID);
+
                 m_EntriesList.Add(entry);
-                m_EntryByTGI[entry.internalTGI] = entry;
+                m_EntryByTGI[mappedTGI] = entry;
 
                 if (!m_EntriesByType.ContainsKey(entry.tgi.TypeID))
                     m_EntriesByType.Add(entry.tgi.TypeID, new List<DBPFEntry>());
