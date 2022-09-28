@@ -407,10 +407,8 @@ namespace OpenTS2.Files.Formats.DBPF
                 entry.FileSize = io.ReadUInt32();
                 entry.package = this;
 
-                var mappedTGI = entry.internalTGI.GlobalGroupID(GroupID);
-
                 m_EntriesList.Add(entry);
-                m_EntryByTGI[mappedTGI] = entry;
+                m_EntryByTGI[entry.internalTGI] = entry;
             }
             _compressionDIR = (DIRAsset)GetAssetByTGI(ResourceKey.DIR);
         }
@@ -598,7 +596,6 @@ namespace OpenTS2.Files.Formats.DBPF
         /// <returns>The entry's data.</returns>
         public byte[] GetItemByTGI(ResourceKey tgi, bool ignoreDeleted = true)
         {
-            tgi = tgi.GlobalGroupID(GroupID);
             if (ignoreDeleted)
             {
                 if (Changes.DeletedEntries.ContainsKey(tgi))
@@ -675,7 +672,6 @@ namespace OpenTS2.Files.Formats.DBPF
         /// <returns>The entry.</returns>
         public DBPFEntry GetEntryByTGI(ResourceKey tgi , bool ignoreDeleted = true)
         {
-            tgi = tgi.GlobalGroupID(GroupID);
             if (Changes.DeletedEntries.ContainsKey(tgi) && ignoreDeleted)
                 return null;
             if (Changes.ChangedEntries.ContainsKey(tgi))

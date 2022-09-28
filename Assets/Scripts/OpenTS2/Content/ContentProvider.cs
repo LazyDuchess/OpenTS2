@@ -239,6 +239,12 @@ namespace OpenTS2.Content
                     _resourceMap[tgi] = entryByTGI;
                     return;
                 }
+                entryByTGI = element.GetEntryByTGI(tgi);
+                if (entryByTGI != null)
+                {
+                    _resourceMap[tgi] = entryByTGI;
+                    return;
+                }
             }
         }
 
