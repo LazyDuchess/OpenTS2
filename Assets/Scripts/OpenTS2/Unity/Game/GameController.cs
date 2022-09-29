@@ -5,9 +5,9 @@
  */
 
 using UnityEngine;
-using OpenTS2.Unity.Core;
+using OpenTS2.Gameface.Core;
 
-namespace OpenTS2.Unity.Game
+namespace OpenTS2.Gameface.Game
 {
     class GameController : MonoBehaviour
     {

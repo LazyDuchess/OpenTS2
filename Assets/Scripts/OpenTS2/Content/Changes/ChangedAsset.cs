@@ -35,8 +35,6 @@ namespace OpenTS2.Content.Changes
             this.codec = codec;
             this.entry = new DynamicDBPFEntry()
             {
-                tgi = this.asset.tgi,
-                internalTGI = this.asset.internalTGI,
                 dynamic = true,
                 change = this,
                 package = asset.package

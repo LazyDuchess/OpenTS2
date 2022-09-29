@@ -51,7 +51,7 @@ namespace OpenTS2.Content
         /// <returns>List of DBPFEntries of specified type.</returns>
         public List<DBPFEntry> GetEntriesOfType(uint typeID)
         {
-            return _resourceMap.Where(map => map.Value.tgi.TypeID == typeID).ToDictionary(x => x.Key, x => x.Value).Values.ToList();
+            return _resourceMap.Where(map => map.Value.globalTGI.TypeID == typeID).ToDictionary(x => x.Key, x => x.Value).Values.ToList();
         }
 
         /// <summary>
@@ -147,7 +147,7 @@ namespace OpenTS2.Content
         /// <param name="entry">Entry to add</param>
         public void AddToTopOfResourceMap(DBPFEntry entry)
         {
-            _resourceMap[entry.tgi] = entry;
+            _resourceMap[entry.globalTGI] = entry;
         }
 
         /// <summary>
@@ -170,15 +170,15 @@ namespace OpenTS2.Content
         public void UpdateOrAddToResourceMap(DBPFEntry entry)
         {
             DBPFEntry output;
-            if (_resourceMap.TryGetValue(entry.tgi, out output))
+            if (_resourceMap.TryGetValue(entry.globalTGI, out output))
             {
                 if (entry.package == output.package)
                 {
-                    _resourceMap[entry.tgi] = entry;
+                    _resourceMap[entry.globalTGI] = entry;
                 }
                 else
                 {
-                    FindEntryForMap(entry.tgi);
+                    FindEntryForMap(entry.globalTGI);
                 }
             }
             else
@@ -203,7 +203,7 @@ namespace OpenTS2.Content
         /// <param name="entry">Entry for resource</param>
         public void RemoveFromResourceMap(DBPFEntry entry)
         {
-            RemoveFromResourceMap(entry.tgi, entry.package);
+            RemoveFromResourceMap(entry.globalTGI, entry.package);
         }
 
         /// <summary>

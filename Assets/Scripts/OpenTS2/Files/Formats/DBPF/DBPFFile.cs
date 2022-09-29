@@ -161,7 +161,7 @@ namespace OpenTS2.Files.Formats.DBPF
             public void Set(AbstractAsset asset)
             {
                 asset.package = owner;
-                asset.tgi = asset.internalTGI.LocalGroupID(owner.GroupID);
+                asset.globalTGI = asset.internalTGI.LocalGroupID(owner.GroupID);
                 var changedAsset = new ChangedAsset(asset);
                 ChangedEntries[asset.internalTGI] = changedAsset;
                 InternalRestore(asset.internalTGI);
@@ -233,9 +233,13 @@ namespace OpenTS2.Files.Formats.DBPF
                 oldProvider?.RemovePackage(this);
                 m_filePath = content.FileSystem.GetRealPath(value);
                 GroupID = FileUtils.GroupHash(Path.GetFileNameWithoutExtension(m_filePath));
-                foreach(var element in Entries)
+                foreach(var element in m_EntriesList)
                 {
-                    element.tgi = element.internalTGI.LocalGroupID(GroupID);
+                    element.globalTGI = element.internalTGI.LocalGroupID(GroupID);
+                }
+                foreach(var element in Changes.ChangedEntries)
+                {
+                    element.Value.entry.globalTGI = element.Value.entry.internalTGI.LocalGroupID(GroupID);
                 }
                 oldProvider?.AddPackage(this);
             }
@@ -401,7 +405,7 @@ namespace OpenTS2.Files.Formats.DBPF
                 var InstanceID = io.ReadUInt32();
                 if (IndexMinorVersion >= 2)
                     instanceHigh = io.ReadUInt32();
-                entry.tgi = new ResourceKey(InstanceID, instanceHigh, EntryGroupID, TypeID);
+                entry.globalTGI = new ResourceKey(InstanceID, instanceHigh, EntryGroupID, TypeID);
                 entry.internalTGI = new ResourceKey(InstanceID, instanceHigh, InternalGroupID, TypeID);
                 entry.FileOffset = io.ReadUInt32();
                 entry.FileSize = io.ReadUInt32();
@@ -643,10 +647,10 @@ namespace OpenTS2.Files.Formats.DBPF
             if (Changes.ChangedEntries.ContainsKey(entry.internalTGI))
                 return Changes.ChangedEntries[entry.internalTGI].asset;
             var item = GetEntry(entry, ignoreDeleted);
-            var codec = Codecs.Get(entry.tgi.TypeID);
-            var asset = codec.Deserialize(item, entry.tgi, this);
+            var codec = Codecs.Get(entry.globalTGI.TypeID);
+            var asset = codec.Deserialize(item, entry.globalTGI, this);
             asset.Compressed = InternalUncompressedSize(entry) > 0;
-            asset.tgi = entry.tgi;
+            asset.globalTGI = entry.globalTGI;
             asset.internalTGI = entry.internalTGI;
             asset.package = this;
             return asset;

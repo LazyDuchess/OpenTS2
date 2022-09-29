@@ -14,7 +14,7 @@ using System.Diagnostics;
 using OpenTS2.Content.DBPF;
 using OpenTS2.Files.Formats.DBPF;
 
-namespace OpenTS2.Unity.Tests
+namespace OpenTS2.Gameface.Tests
 {
     public class StringTest : MonoBehaviour
     {
@@ -25,6 +25,24 @@ namespace OpenTS2.Unity.Tests
         public bool testDeletion = false;
         public bool testSaving = false;
         public bool testRevert = false;
+
+        void editAsset()
+        {
+            //Add a package to the content provider
+            var contentProvider = ContentManager.Get.Provider;
+            contentProvider.AddPackage("%UserDataDirectory%Downloads/ld_HeightCheater.package");
+
+            //Load STR asset
+            var stringTable = contentProvider.GetAsset<StringSetAsset>(new ResourceKey(0x0000012D, "ld_heightcheater", TypeIDs.STR));
+
+            //Modify STR asset, make it uncompressed and save it
+            stringTable.StringData.strings[1][8] = new StringValue("Test editing.", " Oh hi! ");
+            stringTable.Compressed = false;
+            stringTable.Save();
+
+            //Save package to disk
+            stringTable.package.WriteToFile();
+        }
 
         // Start is called before the first frame update
         void Start()

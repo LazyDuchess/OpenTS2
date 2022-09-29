@@ -14,7 +14,7 @@ using UnityEngine;
 using System.IO;
 using OpenTS2.Content;
 
-namespace OpenTS2.Unity.Core
+namespace OpenTS2.Gameface.Core
 {
     [System.Serializable]
     public class JSONConfig

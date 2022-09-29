@@ -47,8 +47,8 @@ namespace OpenTS2.Content
         {
             var codec = Codecs.Get(TGI.TypeID);
             var serialized = codec.Serialize(this);
-            var clone = codec.Deserialize(serialized, this.tgi, package);
-            clone.tgi = tgi;
+            var clone = codec.Deserialize(serialized, this.globalTGI, package);
+            clone.globalTGI = globalTGI;
             clone.internalTGI = internalTGI;
             clone.package = package;
             clone.Compressed = Compressed;
@@ -59,15 +59,15 @@ namespace OpenTS2.Content
         {
             get
             {
-                return tgi;
+                return globalTGI;
             }
             set
             {
                 internalTGI = value;
-                tgi = value.LocalGroupID(package.GroupID);
+                globalTGI = value.LocalGroupID(package.GroupID);
             }
         }
-        public ResourceKey tgi = ResourceKey.Default;
+        public ResourceKey globalTGI = ResourceKey.Default;
         /// <summary>
         /// Original TGI, as written to file.
         /// </summary>

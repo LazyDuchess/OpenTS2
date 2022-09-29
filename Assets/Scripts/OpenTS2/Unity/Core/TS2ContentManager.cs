@@ -5,12 +5,21 @@ using System.Text;
 using System.Threading.Tasks;
 using OpenTS2.Content;
 
-namespace OpenTS2.Unity.Core
+namespace OpenTS2.Gameface.Core
 {
-    public class UnityContentManager : ContentManager
+    public class TS2ContentManager : ContentManager
     {
-        public UnityContentManager() : base()
+        public static new TS2ContentManager Get
         {
+            get
+            {
+                return _singleton;
+            }
+        }
+        static new TS2ContentManager _singleton;
+        public TS2ContentManager() : base()
+        {
+            _singleton = this;
             _textureFactory = new TextureFactory();
             _fileSystem = new Files.Filesystem(new JSONPathProvider());
             _provider = new ContentProvider(_fileSystem);
