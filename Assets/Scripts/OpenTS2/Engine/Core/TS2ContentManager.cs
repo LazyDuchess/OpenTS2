@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using OpenTS2.Content;
 
-namespace OpenTS2.Gameface.Core
+namespace OpenTS2.Engine.Core
 {
     public class TS2ContentManager : ContentManager
     {

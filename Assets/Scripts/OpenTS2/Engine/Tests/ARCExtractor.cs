@@ -13,9 +13,9 @@ using UnityEngine;
 using OpenTS2.Files.Formats.ARC;
 using OpenTS2.Content;
 using System.IO;
-using OpenTS2.Gameface.Core;
+using OpenTS2.Engine.Core;
 
-namespace OpenTS2.Gameface.Tests
+namespace OpenTS2.Engine.Tests
 {
     
     public class ARCExtractor : MonoBehaviour

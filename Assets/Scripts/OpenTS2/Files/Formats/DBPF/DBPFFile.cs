@@ -231,7 +231,7 @@ namespace OpenTS2.Files.Formats.DBPF
             {
                 var oldProvider = Provider;
                 oldProvider?.RemovePackage(this);
-                m_filePath = content.FileSystem.GetRealPath(value);
+                m_filePath = value;
                 GroupID = FileUtils.GroupHash(Path.GetFileNameWithoutExtension(m_filePath));
                 foreach(var element in m_EntriesList)
                 {
@@ -321,8 +321,8 @@ namespace OpenTS2.Files.Formats.DBPF
         /// <param name="file">The path to an DBPF archive.</param>
         public DBPFFile(string file, ContentManager contentManager = null) : this()
         {
-            m_filePath = content.FileSystem.GetRealPath(file);
-            GroupID = FileUtils.GroupHash(Path.GetFileNameWithoutExtension(content.FileSystem.GetRealPath(file)));
+            m_filePath = file;
+            GroupID = FileUtils.GroupHash(Path.GetFileNameWithoutExtension(file));
             var stream = content.FileSystem.OpenRead(file);
             Read(stream);
             m_changes.Dirty = false;

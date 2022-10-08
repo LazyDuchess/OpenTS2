@@ -11,7 +11,7 @@ using OpenTS2.Common;
 using OpenTS2.Files.Formats.DBPF;
 using System.IO;
 
-namespace OpenTS2.Gameface.Tests
+namespace OpenTS2.Engine.Tests
 {
     public class HashTestComponent : MonoBehaviour
     {
