@@ -41,7 +41,6 @@ namespace OpenTS2.Files.Formats.ARC
         /// <returns>A Texture asset.</returns>
         public TextureAsset Deserialize(byte[] bytes)
         {
-            var textureAsset = new TextureAsset();
             var texture = new PalettizedARCTexture();
             var io = IoBuffer.FromBytes(bytes, ByteOrder.LITTLE_ENDIAN);
             //pad
@@ -78,8 +77,7 @@ namespace OpenTS2.Files.Formats.ARC
                     texture.pixels.Add((int)io.ReadByte());
                 }
             }
-            textureAsset.engineTexture = Factories.Get.TextureFactory.CreateTexture(texture);
-            return textureAsset;
+            return new TextureAsset(Factories.Get.TextureFactory.CreateTexture(texture));
         }
     }
 }

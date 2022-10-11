@@ -17,6 +17,10 @@ namespace OpenTS2.Content.DBPF
     /// </summary>
     public partial class TextureAsset : AbstractAsset
     {
-        public object engineTexture;
+        public TextureAsset(object engineTexture)
+        {
+            this.engineTexture = engineTexture;
+        }
+        object engineTexture;
     }
 }

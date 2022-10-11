@@ -37,7 +37,7 @@ namespace OpenTS2.Engine.Tests
                         if (textureMode)
                         {
                             var texture2 = codec.Deserialize(imageFile);
-                            ContentManager.Get.FileSystem.Write(Path.Combine(TargetFolder, element.FileName + ".png"), ((Texture2D)texture2.engineTexture).EncodeToPNG());
+                            ContentManager.Get.FileSystem.Write(Path.Combine(TargetFolder, element.FileName + ".png"), texture2.Texture.EncodeToPNG());
                         }
                         else
                         {

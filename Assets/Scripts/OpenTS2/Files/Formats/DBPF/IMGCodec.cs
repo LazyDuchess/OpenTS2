@@ -46,27 +46,19 @@ namespace OpenTS2.Files.Formats.DBPF
                 fileType = 1;
             else if (jpgCheck == "JFIF")
                 fileType = 2;
-            var textureAsset = new TextureAsset();
-            object texture;
             var textureFactory = Factories.Get.TextureFactory;
             switch (fileType)
             {
                 case 0:
-                texture = textureFactory.CreateTGATexture(bytes);
-                textureAsset.engineTexture = texture;
-                return textureAsset;
+                    return new TextureAsset(textureFactory.CreateTGATexture(bytes));
 
                 case 1:
-                texture = textureFactory.CreatePNGTexture(bytes);
-                textureAsset.engineTexture = texture;
-                return textureAsset;
+                    return new TextureAsset(textureFactory.CreatePNGTexture(bytes));
 
                 case 2:
-                texture = textureFactory.CreateJPGTexture(bytes);
-                textureAsset.engineTexture = texture;
-                return textureAsset;
+                    return new TextureAsset(textureFactory.CreateJPGTexture(bytes));
             }
-            return textureAsset;
+            return null;
         }
     }
 }
