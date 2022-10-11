@@ -27,7 +27,7 @@ namespace OpenTS2.Engine.Tests
         {
             ContentManager.Get.Provider.AddPackage(packageToLoad);
             var texture = ContentManager.Get.Provider.GetAsset<TextureAsset>(new ResourceKey(0x00000001, "N002_FamilyThumbnails", 0x8C3CE95A));
-            image.texture = texture.engineTexture as Texture2D;
+            image.texture = texture.Texture;
         }
     }
 }

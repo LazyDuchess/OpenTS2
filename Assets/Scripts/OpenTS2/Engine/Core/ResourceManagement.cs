@@ -12,7 +12,8 @@ namespace OpenTS2.Engine.Core
     {
         public static void Initialize()
         {
-            new TS2ContentManager();
+            new UnityContentManager();
+            new UnityFactories();
         }
     }
 }

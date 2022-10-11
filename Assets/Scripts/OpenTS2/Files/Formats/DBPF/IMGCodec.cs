@@ -48,20 +48,21 @@ namespace OpenTS2.Files.Formats.DBPF
                 fileType = 2;
             var textureAsset = new TextureAsset();
             object texture;
+            var textureFactory = Factories.Get.TextureFactory;
             switch (fileType)
             {
                 case 0:
-                texture = content.TextureFactory.CreateTGATexture(bytes);
+                texture = textureFactory.CreateTGATexture(bytes);
                 textureAsset.engineTexture = texture;
                 return textureAsset;
 
                 case 1:
-                texture = content.TextureFactory.CreatePNGTexture(bytes);
+                texture = textureFactory.CreatePNGTexture(bytes);
                 textureAsset.engineTexture = texture;
                 return textureAsset;
 
                 case 2:
-                texture = content.TextureFactory.CreateJPGTexture(bytes);
+                texture = textureFactory.CreateJPGTexture(bytes);
                 textureAsset.engineTexture = texture;
                 return textureAsset;
             }

@@ -78,7 +78,7 @@ namespace OpenTS2.Files.Formats.ARC
                     texture.pixels.Add((int)io.ReadByte());
                 }
             }
-            textureAsset.engineTexture = ContentManager.Get.TextureFactory.CreateTexture(texture);
+            textureAsset.engineTexture = Factories.Get.TextureFactory.CreateTexture(texture);
             return textureAsset;
         }
     }

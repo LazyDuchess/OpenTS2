@@ -19,10 +19,10 @@ namespace OpenTS2.Content
     /// </summary>
     public class ContentManager
     {
-        protected static ContentManager _singleton;
+        private static ContentManager _singleton;
         protected Filesystem _fileSystem;
         protected ContentProvider _provider;
-        protected ITextureFactory _textureFactory;
+        
         public static ContentManager Get
         { get
             {
@@ -43,13 +43,7 @@ namespace OpenTS2.Content
                 return _provider;
             }
         }
-        public ITextureFactory TextureFactory
-        {
-            get
-            {
-                return _textureFactory;
-            }
-        }
+        
         public ContentManager()
         {
             _singleton = this;
