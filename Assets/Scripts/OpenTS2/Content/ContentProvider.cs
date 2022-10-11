@@ -10,6 +10,7 @@ using OpenTS2.Files.Formats.DBPF;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace OpenTS2.Content
 {
@@ -93,6 +94,45 @@ namespace OpenTS2.Content
         public T GetAsset<T>(ResourceKey tgi) where T : AbstractAsset
         {
             return GetAsset(tgi) as T;
+        }
+
+        class AsyncDBPFFile
+        {
+            public DBPFFile file;
+            public string path;
+        }
+
+        /// <summary>
+        /// Loads a list of packages in parallel.
+        /// </summary>
+        /// <param name="paths">List of package paths.</param>
+        /// <returns></returns>
+        public async Task AddPackagesAsync(List<string> paths)
+        {
+            await AddPackagesAsync(paths.ToArray());
+        }
+
+        /// <summary>
+        /// Loads an array of packages in parallel.
+        /// </summary>
+        /// <param name="paths">Array of package paths.</param>
+        /// <returns></returns>
+        public async Task AddPackagesAsync(string[] paths)
+        {
+            var tasks = new List<Task>();
+            var packages = new List<AsyncDBPFFile>();
+            for(var i=0;i<paths.Length;i++)
+            {
+                var async = new AsyncDBPFFile();
+                async.path = paths[i];
+                packages.Add(async);
+                tasks.Add(Task.Run(() => { async.file = new DBPFFile(async.path); }));
+            }
+            await Task.WhenAll(tasks);
+            foreach(var element in packages)
+            {
+                AddPackage(element.file);
+            }
         }
 
         /// <summary>
