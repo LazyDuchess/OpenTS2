@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace OpenTS2.Content.Listeners
 {
+    /// <summary>
+    /// Listens for changes to resources in contentproviders.
+    /// </summary>
     public abstract class ContentListener
     {
         public virtual void DeAttach(ContentProvider provider)

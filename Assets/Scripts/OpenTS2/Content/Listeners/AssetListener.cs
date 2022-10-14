@@ -8,6 +8,10 @@ using System.Threading.Tasks;
 
 namespace OpenTS2.Content.Listeners
 {
+    /// <summary>
+    /// Listens for asset changes of a specific type.
+    /// </summary>
+    /// <typeparam name="T">Asset type.</typeparam>
     public abstract class AssetListener<T> : ContentListener where T : AbstractAsset
     {
         public abstract uint[] Types { get; }
@@ -21,6 +25,10 @@ namespace OpenTS2.Content.Listeners
             else
                 AssetUpdated(contentAsset);
         }
+        /// <summary>
+        /// Start tracking changes from a contentprovider.
+        /// </summary>
+        /// <param name="provider">ContentProvider to track changes from.</param>
         public override void Attach(ContentProvider provider)
         {
             base.Attach(provider);
@@ -36,10 +44,19 @@ namespace OpenTS2.Content.Listeners
         }
         void Initialize(List<T> entries)
         {
+            //Load all entries
             foreach (var element in entries)
                 AssetUpdated(element);
         }
+        /// <summary>
+        /// Called when an asset gets updated.
+        /// </summary>
+        /// <param name="asset">Updated asset.</param>
         public abstract void AssetUpdated(T asset);
+        /// <summary>
+        /// Called when an asset gets deleted.
+        /// </summary>
+        /// <param name="globalTGI">TGI of deleted asset.</param>
         public abstract void AssetDeleted(ResourceKey globalTGI);
     }
 }
