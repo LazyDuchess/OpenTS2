@@ -58,13 +58,13 @@ namespace OpenTS2.Files.Formats.DBPF
             public void Delete()
             {
                 provider?.RemoveFromResourceMap(owner);
-                provider?.Cache.RemoveAllForPackage(owner);
                 var entries = owner.Entries;
                 foreach(var element in entries)
                 {
                     DeletedEntries[element.internalTGI] = true;
                 }
                 Dirty = true;
+                RefreshCache();
             }
 
             /// <summary>
@@ -73,15 +73,16 @@ namespace OpenTS2.Files.Formats.DBPF
             public void Clear()
             {
                 provider?.RemoveFromResourceMap(owner);
-                provider?.Cache.RemoveAllForPackage(owner);
-                foreach (var element in DeletedEntries)
-                {
-                    RefreshCache(element.Key);
-                }
                 DeletedEntries.Clear();
                 ChangedEntries.Clear();
                 Dirty = false;
                 provider?.UpdateOrAddToResourceMap(owner);
+                RefreshCache();
+            }
+
+            void RefreshCache()
+            {
+                provider?.Cache.RemoveAllForPackage(owner);
             }
 
             void RefreshCache(ResourceKey tgi)
@@ -96,9 +97,9 @@ namespace OpenTS2.Files.Formats.DBPF
             public void Delete(DBPFEntry entry)
             {
                 DeletedEntries[entry.internalTGI] = true;
-                RefreshCache(entry.internalTGI);
                 Dirty = true;
                 provider?.RemoveFromResourceMap(entry);
+                RefreshCache(entry.internalTGI);
             }
 
             /// <summary>
@@ -110,9 +111,9 @@ namespace OpenTS2.Files.Formats.DBPF
                 if (DeletedEntries.ContainsKey(entry.internalTGI))
                 {
                     DeletedEntries.Remove(entry.internalTGI);
-                    RefreshCache(entry.internalTGI);
                     Dirty = true;
                     provider?.UpdateOrAddToResourceMap(entry);
+                    RefreshCache(entry.internalTGI);
                 }
             }
 
@@ -123,9 +124,9 @@ namespace OpenTS2.Files.Formats.DBPF
             public void Delete(ResourceKey tgi)
             {
                 DeletedEntries[tgi] = true;
-                RefreshCache(tgi);
                 Dirty = true;
                 provider?.RemoveFromResourceMap(tgi.LocalGroupID(owner.GroupID), owner);
+                RefreshCache(tgi);
             }
             /// <summary>
             /// Unmark an entry as deleted by its TGI
@@ -136,9 +137,9 @@ namespace OpenTS2.Files.Formats.DBPF
                 if (DeletedEntries.ContainsKey(tgi))
                 {
                     DeletedEntries.Remove(tgi);
-                    RefreshCache(tgi);
                     Dirty = true;
                     provider?.UpdateOrAddToResourceMap(owner.GetEntryByTGI(tgi));
+                    RefreshCache(tgi);
                 }
             }
 
@@ -165,9 +166,9 @@ namespace OpenTS2.Files.Formats.DBPF
                 var changedAsset = new ChangedAsset(asset);
                 ChangedEntries[asset.internalTGI] = changedAsset;
                 InternalRestore(asset.internalTGI);
-                RefreshCache(asset.internalTGI);
                 Dirty = true;
                 provider?.UpdateOrAddToResourceMap(changedAsset.entry);
+                RefreshCache(asset.internalTGI);
             }
             /// <summary>
             /// Save changes to a resource in memory.
@@ -181,9 +182,9 @@ namespace OpenTS2.Files.Formats.DBPF
                 changedFile.Compressed = compressed;
                 ChangedEntries[tgi] = changedFile;
                 InternalRestore(tgi);
-                RefreshCache(tgi);
                 Dirty = true;
                 provider?.UpdateOrAddToResourceMap(changedFile.entry);
+                RefreshCache(tgi);
             }
         }
 

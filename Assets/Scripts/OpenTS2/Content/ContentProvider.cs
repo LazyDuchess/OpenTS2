@@ -19,6 +19,10 @@ namespace OpenTS2.Content
     /// </summary>
     public class ContentProvider : IDisposable
     {
+        public Dictionary<ResourceKey, DBPFEntry> ResourceMap
+        {
+            get { return _resourceMap; }
+        }
         public List<DBPFFile> ContentEntries
         {
             get { return _contentEntries; }
@@ -32,6 +36,8 @@ namespace OpenTS2.Content
         public ContentCache Cache;
         public ContentChanges Changes;
         private Files.Filesystem fileSystem;
+        public delegate void ResourceChangedDelegate(ResourceKey key);
+        public ResourceChangedDelegate OnContentChangedEventHandler;
 
         public ContentProvider(Files.Filesystem fileSystem)
         {
@@ -188,6 +194,7 @@ namespace OpenTS2.Content
         public void AddToTopOfResourceMap(DBPFEntry entry)
         {
             _resourceMap[entry.globalTGI] = entry;
+            OnContentChangedEventHandler?.Invoke(entry.globalTGI);
         }
 
         /// <summary>
@@ -223,6 +230,7 @@ namespace OpenTS2.Content
             }
             else
                 AddToTopOfResourceMap(entry);
+            OnContentChangedEventHandler?.Invoke(entry.globalTGI);
         }
 
         /// <summary>
@@ -260,6 +268,7 @@ namespace OpenTS2.Content
                 {
                     _resourceMap.Remove(tgi);
                     FindEntryForMap(tgi);
+                    OnContentChangedEventHandler?.Invoke(tgi);
                 }
             }
         }

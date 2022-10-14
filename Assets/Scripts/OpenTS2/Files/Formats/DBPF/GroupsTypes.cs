@@ -19,6 +19,7 @@ namespace OpenTS2.Files.Formats.DBPF
         public const uint IMG = 0x856DDBAC;
         public const uint IMG2 = 0x8C3CE95A;
         public const uint DIR = 0xE86B1EEF;
+        public const uint MP3 = 0x2026960B;
     }
     public static class GroupIDs
     {
@@ -27,5 +28,7 @@ namespace OpenTS2.Files.Formats.DBPF
         /// </summary>
         public const uint Local = 0xFFFFFFFF;
         public const uint DIR = 0xE86B1EEF;
+        public const uint Scenegraph = 0x1C050000;
+        public const uint Pop = 0xFF23C3BF;
     }
 }
