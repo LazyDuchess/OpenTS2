@@ -20,7 +20,6 @@ namespace OpenTS2.Content
     public class ContentManager
     {
         private static ContentManager _singleton;
-        protected Filesystem _fileSystem;
         protected ContentProvider _provider;
         
         public static ContentManager Get
@@ -28,13 +27,6 @@ namespace OpenTS2.Content
             {
                 return _singleton;
             } 
-        }
-        public Filesystem FileSystem
-        {
-            get
-            {
-                return _fileSystem;
-            }
         }
         public ContentProvider Provider
         {

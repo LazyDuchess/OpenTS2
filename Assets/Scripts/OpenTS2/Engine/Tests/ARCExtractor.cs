@@ -14,6 +14,7 @@ using OpenTS2.Files.Formats.ARC;
 using OpenTS2.Content;
 using System.IO;
 using OpenTS2.Engine.Core;
+using OpenTS2.Files;
 
 namespace OpenTS2.Engine.Tests
 {
@@ -37,11 +38,11 @@ namespace OpenTS2.Engine.Tests
                         if (textureMode)
                         {
                             var texture2 = codec.Deserialize(imageFile);
-                            ContentManager.Get.FileSystem.Write(Path.Combine(TargetFolder, element.FileName + ".png"), texture2.Texture.EncodeToPNG());
+                            Filesystem.Write(Path.Combine(TargetFolder, element.FileName + ".png"), texture2.Texture.EncodeToPNG());
                         }
                         else
                         {
-                            ContentManager.Get.FileSystem.Write(Path.Combine(TargetFolder, element.FileName), imageFile);
+                            Filesystem.Write(Path.Combine(TargetFolder, element.FileName), imageFile);
                         }
                     }
                     catch (Exception e) { }

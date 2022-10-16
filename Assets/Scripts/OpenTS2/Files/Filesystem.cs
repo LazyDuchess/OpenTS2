@@ -18,28 +18,28 @@ namespace OpenTS2.Files
     /// <summary>
     /// Handles device filesystem interfacing and path parsing
     /// </summary>
-    public class Filesystem
+    public static class Filesystem
     {
-        string _DataDirectory;
-        string _UserDirectory;
-        string _BinDirectory;
+        static string _DataDirectory;
+        static string _UserDirectory;
+        static string _BinDirectory;
 
-        public string UserDataDirectory
+        public static string UserDataDirectory
         {
             get { return "%UserDataDir%"; }
         }
 
-        public string DataDirectory
+        public static string DataDirectory
         {
             get { return "%DataDirectory%"; }
         }
 
-        public string BinDirectory
+        public static string BinDirectory
         {
             get { return "%BinDirectory%"; }
         }
 
-        public Filesystem(IPathProvider pathProvider)
+        public static void SetPathProvider(IPathProvider pathProvider)
         {
             _DataDirectory = FileUtils.CleanPath(pathProvider.GetGameRootPath()) + "/TSData/";
             _UserDirectory = FileUtils.CleanPath(pathProvider.GetUserPath()) + "/";
@@ -51,7 +51,7 @@ namespace OpenTS2.Files
         /// <param name="path1">Path to check</param>
         /// <param name="path2">Path to check against</param>
         /// <returns>True if equal, false if not.</returns>
-        public bool PathsEqual(string path1, string path2)
+        public static bool PathsEqual(string path1, string path2)
         {
             path1 = GetRealPath(path1).ToLowerInvariant();
             path2 = GetRealPath(path2).ToLowerInvariant();
@@ -62,7 +62,7 @@ namespace OpenTS2.Files
         /// </summary>
         /// <param name="path">Path to shorten</param>
         /// <returns>Fake short path</returns>
-        public string GetShortPath(string path)
+        public static string GetShortPath(string path)
         {
             path = FileUtils.CleanPath(path) + "/";
             path = path.Replace(_DataDirectory, DataDirectory);
@@ -77,7 +77,7 @@ namespace OpenTS2.Files
         /// </summary>
         /// <param name="path">Path to parse</param>
         /// <returns>Real path</returns>
-        public string GetRealPath(string path)
+        public static string GetRealPath(string path)
         {
             path = path.Replace(DataDirectory, _DataDirectory);
             path = path.Replace(UserDataDirectory, _UserDirectory);
@@ -90,7 +90,7 @@ namespace OpenTS2.Files
         /// </summary>
         /// <param name="path">Unparsed path</param>
         /// <returns>A FileStream</returns>
-        public FileStream OpenWrite(string path)
+        public static FileStream OpenWrite(string path)
         {
             return File.OpenWrite(GetRealPath(path));
         }
@@ -100,7 +100,7 @@ namespace OpenTS2.Files
         /// </summary>
         /// <param name="path">Unparsed path</param>
         /// <returns>A FileStream</returns>
-        public FileStream OpenRead(string path)
+        public static FileStream OpenRead(string path)
         {
             return File.OpenRead(GetRealPath(path));
         }
@@ -110,7 +110,7 @@ namespace OpenTS2.Files
         /// </summary>
         /// <param name="path">Path to output file.</param>
         /// <param name="bytes">Byte array to write.</param>
-        public void Write(string path, byte[] bytes)
+        public static void Write(string path, byte[] bytes)
         {
             Write(path, bytes, bytes.Length);
         }
@@ -120,7 +120,7 @@ namespace OpenTS2.Files
         /// </summary>
         /// <param name="path">Path to output file.</param>
         /// <param name="bytes">Byte array to write.</param>
-        public void Write(string path, byte[] bytes, int size)
+        public static void Write(string path, byte[] bytes, int size)
         {
             var realPath = GetRealPath(path);
             var dir = Path.GetDirectoryName(realPath);
@@ -136,7 +136,7 @@ namespace OpenTS2.Files
         /// Deletes a file
         /// </summary>
         /// <param name="path">Path to file to delete.</param>
-        public void Delete(string path)
+        public static void Delete(string path)
         {
             var realPath = GetRealPath(path);
             File.Delete(path);

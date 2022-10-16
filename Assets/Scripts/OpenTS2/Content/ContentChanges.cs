@@ -10,14 +10,12 @@ namespace OpenTS2.Content
     public class ContentChanges
     {
         private ContentProvider contentProvider;
-        private Files.Filesystem fileSystem;
         //private Dictionary<string, bool> m_DeletedPackagesByName = new Dictionary<string, bool>();
         //private List<string> m_DeletedPackages = new List<string>();
 
-        public ContentChanges(ContentProvider contentProvider, Files.Filesystem fileSystem)
+        public ContentChanges(ContentProvider contentProvider)
         {
             this.contentProvider = contentProvider;
-            this.fileSystem = fileSystem;
         }
         /// <summary>
         /// Clear all runtime changes made to packages.

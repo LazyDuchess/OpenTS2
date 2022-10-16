@@ -324,7 +324,7 @@ namespace OpenTS2.Files.Formats.DBPF
         {
             m_filePath = file;
             GroupID = FileUtils.GroupHash(Path.GetFileNameWithoutExtension(file));
-            var stream = content.FileSystem.OpenRead(file);
+            var stream = Filesystem.OpenRead(file);
             Read(stream);
             m_changes.Dirty = false;
             _Content = contentManager;
@@ -426,15 +426,15 @@ namespace OpenTS2.Files.Formats.DBPF
             {
                 Dispose();
                 Provider?.RemovePackage(this);
-                content.FileSystem.Delete(FilePath);
+                Filesystem.Delete(FilePath);
                 Changes.Clear();
                 _deleted = true;
                 return;
             }
             var data = Serialize();
             Dispose();
-            content.FileSystem.Write(FilePath, data);
-            var stream = content.FileSystem.OpenRead(FilePath);
+            Filesystem.Write(FilePath, data);
+            var stream = Filesystem.OpenRead(FilePath);
             Read(stream);
             Changes.Clear();
             return;

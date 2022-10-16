@@ -6,6 +6,7 @@
 
 using OpenTS2.Common;
 using OpenTS2.Common.Utils;
+using OpenTS2.Files;
 using OpenTS2.Files.Formats.DBPF;
 using System;
 using System.Collections.Generic;
@@ -35,14 +36,12 @@ namespace OpenTS2.Content
         private Dictionary<DBPFFile, DBPFFile> entryByFile = new Dictionary<DBPFFile, DBPFFile>();
         public ContentCache Cache;
         public ContentChanges Changes;
-        private Files.Filesystem fileSystem;
         public delegate void ResourceChangedDelegate(ResourceKey key);
         public ResourceChangedDelegate OnContentChangedEventHandler;
 
-        public ContentProvider(Files.Filesystem fileSystem)
+        public ContentProvider()
         {
-            this.fileSystem = fileSystem;
-            this.Changes = new ContentChanges(this, fileSystem);
+            this.Changes = new ContentChanges(this);
             this.Cache = new ContentCache(this);
         }
 
@@ -148,7 +147,7 @@ namespace OpenTS2.Content
         /// <returns>Content entry for package.</returns>
         public DBPFFile AddPackage(string path)
         {
-            var realPath = fileSystem.GetRealPath(path);
+            var realPath = Filesystem.GetRealPath(path);
             if (entryByPath.ContainsKey(realPath))
                 return entryByPath[realPath];
             var package = new DBPFFile(path);
@@ -364,7 +363,7 @@ namespace OpenTS2.Content
         /// <returns>Content entry for package.</returns>
         public DBPFFile GetPackageByPath(string path)
         {
-            path = fileSystem.GetRealPath(path);
+            path = Filesystem.GetRealPath(path);
             if (entryByPath.ContainsKey(path))
                 return entryByPath[path];
             else
