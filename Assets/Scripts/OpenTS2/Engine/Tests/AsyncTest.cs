@@ -19,12 +19,12 @@ namespace OpenTS2.Engine.Tests
             stopW = new Stopwatch();
             stopW.Start();
             if (async)
-                asyncTask = ContentManager.Get.Provider.AddPackagesAsync(packageList);
+                asyncTask = ContentManager.Provider.AddPackagesAsync(packageList);
             else
             {
                 foreach(var element in packageList)
                 {
-                    ContentManager.Get.Provider.AddPackage(element);
+                    ContentManager.Provider.AddPackage(element);
                 }
                 stopW.Stop();
                 UnityEngine.Debug.Log("Done loading packages!");

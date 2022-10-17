@@ -17,42 +17,23 @@ namespace OpenTS2.Content
     /// <summary>
     /// Manages the game's asset saving/loading/caching and its filesystem.
     /// </summary>
-    public class ContentManager
+    public static class ContentManager
     {
-        private static ContentManager _singleton;
-        protected ContentProvider _provider;
-        
-        public static ContentManager Get
-        { get
-            {
-                return _singleton;
-            } 
-        }
-        public ContentProvider Provider
+        public static ContentProvider Provider;
+
+        public static ContentCache Cache
         {
             get
             {
-                return _provider;
-            }
-        }
-        
-        public ContentManager()
-        {
-            _singleton = this;
-        }
-        public ContentCache Cache
-        {
-            get
-            {
-                return _provider.Cache;
+                return Provider.Cache;
             }
         }
 
-        public ContentChanges Changes
+        public static ContentChanges Changes
         {
             get
             {
-                return _provider.Changes;
+                return Provider.Changes;
             }
         }
     }

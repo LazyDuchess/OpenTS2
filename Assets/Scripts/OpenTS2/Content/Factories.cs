@@ -7,27 +7,8 @@ using System.Threading.Tasks;
 
 namespace OpenTS2.Content
 {
-    public class Factories
+    public static class Factories
     {
-        public static Factories Get
-        {
-            get
-            {
-                return _singleton;
-            }
-        }
-        private static Factories _singleton;
-        protected ITextureFactory _textureFactory;
-        public ITextureFactory TextureFactory
-        {
-            get
-            {
-                return _textureFactory;
-            }
-        }
-        public Factories()
-        {
-            _singleton = this;
-        }
+        public static ITextureFactory TextureFactory;
     }
 }

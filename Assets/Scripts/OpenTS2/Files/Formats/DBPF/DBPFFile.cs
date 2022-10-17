@@ -35,13 +35,7 @@ namespace OpenTS2.Files.Formats.DBPF
                     return owner.Provider;
                 }
             }
-            private ContentManager content
-            {
-                get
-                {
-                    return owner.content;
-                }
-            }
+
             public bool Dirty = false;
             public Dictionary<ResourceKey, bool> DeletedEntries = new Dictionary<ResourceKey, bool>();
             public Dictionary<ResourceKey, AbstractChanged> ChangedEntries = new Dictionary<ResourceKey, AbstractChanged>();
@@ -202,16 +196,6 @@ namespace OpenTS2.Files.Formats.DBPF
         bool _deleted = false;
         public bool DeleteIfEmpty = true;
         private DBPFFileChanges m_changes;
-        public ContentManager content
-        {
-            get
-            {
-                if (_Content == null)
-                    return ContentManager.Get;
-                return _Content;
-            }
-        }
-        private ContentManager _Content = null;
         public ContentProvider Provider = null;
         
         /// <summary>
@@ -309,25 +293,23 @@ namespace OpenTS2.Files.Formats.DBPF
         /// <summary>
         /// Constructs a new DBPF instance.
         /// </summary>
-        public DBPFFile(ContentManager contentManager = null)
+        public DBPFFile()
         {
             m_changes = new DBPFFileChanges(this);
             m_changes.Dirty = true;
-            _Content = contentManager;
         }
 
         /// <summary>
         /// Creates a DBPF instance from a path.
         /// </summary>
         /// <param name="file">The path to an DBPF archive.</param>
-        public DBPFFile(string file, ContentManager contentManager = null) : this()
+        public DBPFFile(string file) : this()
         {
             m_filePath = file;
             GroupID = FileUtils.GroupHash(Path.GetFileNameWithoutExtension(file));
             var stream = Filesystem.OpenRead(file);
             Read(stream);
             m_changes.Dirty = false;
-            _Content = contentManager;
         }
 
         /// <summary>

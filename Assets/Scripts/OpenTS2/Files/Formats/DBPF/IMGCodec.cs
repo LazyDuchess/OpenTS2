@@ -46,7 +46,7 @@ namespace OpenTS2.Files.Formats.DBPF
                 fileType = 1;
             else if (jpgCheck == "JFIF")
                 fileType = 2;
-            var textureFactory = Factories.Get.TextureFactory;
+            var textureFactory = Factories.TextureFactory;
             switch (fileType)
             {
                 case 0:

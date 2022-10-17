@@ -19,7 +19,7 @@ namespace OpenTS2.Content.Listeners
         {
             if (!Types.Contains(key.TypeID))
                 return;
-            var contentAsset = ContentManager.Get.Provider.GetAsset<T>(key);
+            var contentAsset = ContentManager.Provider.GetAsset<T>(key);
             if (contentAsset == null)
                 AssetDeleted(key);
             else
