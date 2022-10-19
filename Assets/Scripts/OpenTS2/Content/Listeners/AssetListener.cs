@@ -12,9 +12,32 @@ namespace OpenTS2.Content.Listeners
     /// Listens for asset changes of a specific type.
     /// </summary>
     /// <typeparam name="T">Asset type.</typeparam>
-    public abstract class AssetListener<T> : ContentListener where T : AbstractAsset
+    public class AssetListener<T> : ContentListener where T : AbstractAsset
     {
-        public abstract uint[] Types { get; }
+        readonly uint[] Types;
+        public delegate void OnUpdateDelegate(T asset);
+        public delegate void OnRemoveDelegate(ResourceKey globalTGI);
+        public OnUpdateDelegate OnUpdateEventHandler;
+        public OnRemoveDelegate OnRemoveEventHandler;
+
+        /// <summary>
+        /// Creates a new AssetListener.
+        /// </summary>
+        /// <param name="Types">Type ID to listen to.</param>
+        public AssetListener(uint Type)
+        {
+            this.Types = new uint[] { Type };
+        }
+
+        /// <summary>
+        /// Creates a new AssetListener.
+        /// </summary>
+        /// <param name="Types">Array of Type IDs to listen to.</param>
+        public AssetListener(uint[] Types)
+        {
+            this.Types = Types;
+        }
+
         public override sealed void OnUpdate(ResourceKey key)
         {
             if (!Types.Contains(key.TypeID))
@@ -52,11 +75,17 @@ namespace OpenTS2.Content.Listeners
         /// Called when an asset gets updated.
         /// </summary>
         /// <param name="asset">Updated asset.</param>
-        public abstract void AssetUpdated(T asset);
+        public virtual void AssetUpdated(T asset)
+        {
+            OnUpdateEventHandler?.Invoke(asset);
+        }
         /// <summary>
         /// Called when an asset gets deleted.
         /// </summary>
         /// <param name="globalTGI">TGI of deleted asset.</param>
-        public abstract void AssetDeleted(ResourceKey globalTGI);
+        public virtual void AssetDeleted(ResourceKey globalTGI)
+        {
+            OnRemoveEventHandler?.Invoke(globalTGI);
+        }
     }
 }

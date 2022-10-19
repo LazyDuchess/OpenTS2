@@ -61,6 +61,35 @@ namespace OpenTS2.Content
         }
 
         /// <summary>
+        /// Gets all Assets of a specific Type ID in the Resource Map.
+        /// </summary>
+        /// <param name="TypeID">Type ID</param>
+        /// <returns>List of assets.</returns>
+        public List<AbstractAsset> GetAssetsOfType(uint TypeID)
+        {
+            return GetAssetsOfType<AbstractAsset>(TypeID);
+        }
+
+        /// <summary>
+        /// Gets all Assets of a specific Type ID in the Resource Map.
+        /// </summary>
+        /// <param name="TypeID">Type</param>
+        /// <typeparam name="T">Type of Asset</typeparam>
+        /// <returns>List of assets.</returns>
+        public List<T> GetAssetsOfType<T>(uint TypeID) where T : AbstractAsset
+        {
+            var entryList = GetEntriesOfType(TypeID);
+            var assetList = new List<T>();
+            foreach(var element in entryList)
+            {
+                var outputAsset = element.GetAsset<T>();
+                if (outputAsset != null)
+                    assetList.Add(outputAsset);
+            }
+            return assetList;
+        }
+
+        /// <summary>
         /// Caches an asset into the content system and returns it.
         /// </summary>
         /// <param name="key">Key of the resource.</param>
@@ -112,9 +141,9 @@ namespace OpenTS2.Content
         /// </summary>
         /// <param name="paths">List of package paths.</param>
         /// <returns></returns>
-        public async Task AddPackagesAsync(List<string> paths)
+        public async Task AddPackagesAsync(List<string> paths, LoadProgress loadProgress = null)
         {
-            await AddPackagesAsync(paths.ToArray());
+            await AddPackagesAsync(paths.ToArray(), loadProgress);
         }
 
         /// <summary>
@@ -122,7 +151,7 @@ namespace OpenTS2.Content
         /// </summary>
         /// <param name="paths">Array of package paths.</param>
         /// <returns></returns>
-        public async Task AddPackagesAsync(string[] paths)
+        async Task AddPackagesAsync(string[] paths, LoadProgress loadProgress = null)
         {
             var tasks = new List<Task>();
             var packages = new List<AsyncDBPFFile>();
@@ -131,13 +160,26 @@ namespace OpenTS2.Content
                 var async = new AsyncDBPFFile();
                 async.path = paths[i];
                 packages.Add(async);
-                tasks.Add(Task.Run(() => { async.file = new DBPFFile(async.path); }));
+                var capturedI = i;
+                var fileCount = paths.Length;
+                tasks.Add(Task.Run(() => { 
+                    async.file = new DBPFFile(async.path);
+                    if (loadProgress != null)
+                    {
+                        var progress = (float)capturedI / fileCount;
+                        if (loadProgress.percentage < progress)
+                            loadProgress.percentage = (float)capturedI / fileCount;
+                    }
+                }));
             }
-            await Task.WhenAll(tasks);
-            foreach(var element in packages)
+            await Task.WhenAll(tasks).ContinueWith((task) =>
             {
-                AddPackage(element.file);
-            }
+                foreach (var element in packages)
+                {
+                    AddPackage(element.file);
+                }
+                loadProgress.percentage = 1f;
+            }, TaskScheduler.FromCurrentSynchronizationContext());
         }
 
         /// <summary>

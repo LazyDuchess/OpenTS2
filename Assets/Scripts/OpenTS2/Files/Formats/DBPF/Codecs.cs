@@ -21,13 +21,15 @@ namespace OpenTS2.Files.Formats.DBPF
         public static STRCodec STR = new STRCodec();
         public static IMGCodec IMG = new IMGCodec();
         public static DIRCodec DIR = new DIRCodec();
+        public static OBJDCodec OBJD = new OBJDCodec();
 
         static Dictionary<uint, AbstractCodec> codecsByTypeID = new Dictionary<uint, AbstractCodec>()
         {
             { TypeIDs.STR, STR },
             { TypeIDs.IMG, IMG },
             { TypeIDs.IMG2, IMG },
-            { TypeIDs.DIR, DIR }
+            { TypeIDs.DIR, DIR },
+            { TypeIDs.OBJD, OBJD }
         };
         /// <summary>
         /// Get the codec for a filetype.

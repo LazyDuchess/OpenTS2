@@ -16,6 +16,8 @@ namespace OpenTS2.Engine.Core
             Filesystem.SetPathProvider(new JSONPathProvider());
             ContentManager.Provider = new ContentProvider();
             Factories.TextureFactory = new TextureFactory();
+
+            new ObjectManager(ContentManager.Provider);
         }
     }
 }
