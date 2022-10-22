@@ -21,7 +21,6 @@ namespace OpenTS2.Engine.Core
     {
         public string game_dir;
         public string user_dir;
-        public string lang;
         public List<string> dlc;
     }
 
