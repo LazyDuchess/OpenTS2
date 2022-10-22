@@ -46,6 +46,7 @@ namespace OpenTS2.Common.Utils
             //Remove slash if there is a redundant one at the end
             if (path[path.Length - 1] == '/')
                 path = path.Substring(0, path.Length - 1);
+            path = path.Replace("\\", "/");
             return path;
         }
         /// <summary>

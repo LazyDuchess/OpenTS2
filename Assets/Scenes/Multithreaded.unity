@@ -303,12 +303,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   progressText: {fileID: 1906276133}
   objectsText: {fileID: 391159555}
-  packageList:
-  - E:\Origin\The Sims 2 Ultimate Collection\Fun with Pets\SP9\TSData\Res\Objects\objects.package
-  - E:\Origin\The Sims 2 Ultimate Collection\Double Deluxe\Base\TSData\Res\Sound\Voice1.package
-  - E:\Origin\The Sims 2 Ultimate Collection\Double Deluxe\Base\TSData\Res\Sound\Sfx1.package
-  - E:\Origin\The Sims 2 Ultimate Collection\Double Deluxe\Base\TSData\Res\Sound\Voice5.package
-  - E:\Origin\The Sims 2 Ultimate Collection\Double Deluxe\Base\TSData\Res\Sound\Sfx2.package
   async: 1
 --- !u!4 &353010659
 Transform:

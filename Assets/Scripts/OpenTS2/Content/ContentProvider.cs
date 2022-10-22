@@ -136,6 +136,14 @@ namespace OpenTS2.Content
             public string path;
         }
 
+        public void AddPackages(List<string> paths)
+        {
+            foreach(var element in paths)
+            {
+                AddPackage(element);
+            }
+        }
+
         /// <summary>
         /// Loads a list of packages in parallel.
         /// </summary>

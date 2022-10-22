@@ -36,14 +36,20 @@ namespace OpenTS2.Engine.Core
             var dir = new DirectoryInfo(Application.dataPath).Parent.FullName;
             config = JsonUtility.FromJson<JSONConfig>(File.ReadAllText(Path.Combine(dir, "config.json")));
         }
-        public List<string> GetGameDataPaths()
+        public string GetPathForProduct(ProductFlags productFlag)
         {
-            return config.dlc;
+            var index = Array.IndexOf(Enum.GetValues(productFlag.GetType()), productFlag);
+            return Path.Combine(config.game_dir,config.dlc[index]);
         }
 
-        public string GetGameRootPath()
+        public string GetDataPathForProduct(ProductFlags productFlag)
         {
-            return config.game_dir;
+            return GetPathForProduct(productFlag) + "/TSData";
+        }
+
+        public string GetBinPathForProduct(ProductFlags productFlag)
+        {
+            return GetPathForProduct(productFlag) + "/TSBin";
         }
 
         public string GetUserPath()

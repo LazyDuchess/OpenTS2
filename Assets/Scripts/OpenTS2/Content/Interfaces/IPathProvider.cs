@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using OpenTS2.Content;
 
 namespace OpenTS2.Content.Interfaces
 {
@@ -17,8 +18,9 @@ namespace OpenTS2.Content.Interfaces
     /// </summary>
     public interface IPathProvider
     {
-        public string GetGameRootPath();
-        public List<string> GetGameDataPaths();
+        public string GetPathForProduct(ProductFlags productFlag);
+        public string GetDataPathForProduct(ProductFlags productFlag);
+        public string GetBinPathForProduct(ProductFlags productFlag);
         public string GetUserPath();
     }
 }

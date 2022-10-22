@@ -15,8 +15,19 @@ namespace OpenTS2.Client
     /// <summary>
     /// Stores global user specific settings such as language.
     /// </summary>
-    public static class GlobalSettings
+    public class Settings
     {
-        public static byte language = 1;
+        static Settings INSTANCE;
+        public byte language = 1;
+        public bool customContentEnabled = true;
+
+        public static Settings Get()
+        {
+            return INSTANCE;
+        }
+        public Settings()
+        {
+            INSTANCE = this;
+        }
     }
 }

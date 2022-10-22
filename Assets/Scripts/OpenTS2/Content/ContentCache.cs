@@ -25,7 +25,10 @@ namespace OpenTS2.Content
             this.tgi = tgi;
             this.file = package;
             if (provider == null)
-                provider = ContentManager.Provider;
+            {
+                var contentManager = ContentManager.Get();
+                provider = contentManager.Provider;
+            }
             this.contentProvider = provider;
             if (package == null && this.contentProvider != null)
             {

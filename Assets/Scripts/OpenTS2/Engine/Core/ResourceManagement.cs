@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OpenTS2.Files;
+using OpenTS2.Client;
 
 namespace OpenTS2.Engine.Core
 {
@@ -13,11 +14,12 @@ namespace OpenTS2.Engine.Core
     {
         public static void Initialize()
         {
-            Filesystem.SetPathProvider(new JSONPathProvider());
-            ContentManager.Provider = new ContentProvider();
+            var settings = new Settings();
+            var epManager = new EPManager();
+            var contentManager = new ContentManager();
+            var objectManager = new ObjectManager(contentManager.Provider);
+            Filesystem.Initialize(new JSONPathProvider(), epManager);
             Factories.TextureFactory = new TextureFactory();
-
-            new ObjectManager(ContentManager.Provider);
         }
     }
 }

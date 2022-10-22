@@ -71,7 +71,7 @@ namespace OpenTS2.Content.DBPF
         /// <returns>Localized string</returns>
         public string GetString(int id)
         {
-            return _StringData.GetString(id, GlobalSettings.language);
+            return _StringData.GetString(id, Settings.Get().language);
         }
     }
 }

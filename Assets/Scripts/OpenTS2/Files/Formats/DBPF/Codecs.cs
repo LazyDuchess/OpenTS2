@@ -22,6 +22,7 @@ namespace OpenTS2.Files.Formats.DBPF
         public static IMGCodec IMG = new IMGCodec();
         public static DIRCodec DIR = new DIRCodec();
         public static OBJDCodec OBJD = new OBJDCodec();
+        public static MP3Codec MP3 = new MP3Codec();
 
         static Dictionary<uint, AbstractCodec> codecsByTypeID = new Dictionary<uint, AbstractCodec>()
         {
@@ -29,7 +30,8 @@ namespace OpenTS2.Files.Formats.DBPF
             { TypeIDs.IMG, IMG },
             { TypeIDs.IMG2, IMG },
             { TypeIDs.DIR, DIR },
-            { TypeIDs.OBJD, OBJD }
+            { TypeIDs.OBJD, OBJD },
+            { TypeIDs.MP3, MP3 }
         };
         /// <summary>
         /// Get the codec for a filetype.
