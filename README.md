@@ -10,7 +10,7 @@ Currently resource management, asset loading and saving and other engine code is
 * A copy of The Sims 2 Ultimate Collection
 
 ## Setup
-You need to have a "config.json" file in the root folder that provides paths to your Sims 2 UC installation and user directories. Copy the "config.example.json" file and rename it to "config.json" to start off.
+You need to have a "config.json" file in the root folder that provides paths to your Sims 2 UC installation and user directories. Copy the "config.example.json" file and rename it to "config.json" to start off, and type in your own paths.
 
 ## Acknowledgements
 * [InvertedTomato.CRC](https://github.com/invertedtomato/crc)
