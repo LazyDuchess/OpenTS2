@@ -14,6 +14,7 @@ using OpenTS2.Common;
 using OpenTS2.Content.DBPF;
 using System.Text;
 using OpenTS2.Common.Utils;
+using OpenTS2.Client;
 
 namespace OpenTS2.Files.Formats.DBPF
 {
@@ -46,7 +47,7 @@ namespace OpenTS2.Files.Formats.DBPF
             var stringSets = reader.ReadUInt16();
             for (var i = 0; i < stringSets; i++)
             {
-                var languageCode = reader.ReadByte();
+                var languageCode = (Languages)reader.ReadByte();
                 var value = reader.ReadNullTerminatedUTF8();
                 var desc = reader.ReadNullTerminatedUTF8();
                 if (!stringTableData.strings.ContainsKey(languageCode))
@@ -61,7 +62,7 @@ namespace OpenTS2.Files.Formats.DBPF
 
         public class StringForSerialization
         {
-            public byte languageCode;
+            public Languages languageCode;
             public string value;
             public string description;
         }
@@ -91,7 +92,7 @@ namespace OpenTS2.Files.Formats.DBPF
             writer.Write((short)stringList.Count);
             foreach(var element in stringList)
             {
-                writer.Write(element.languageCode);
+                writer.Write((byte)element.languageCode);
                 ascii = Encoding.UTF8.GetBytes(element.value + char.MinValue);
                 writer.Write(ascii);
                 ascii = Encoding.UTF8.GetBytes(element.description + char.MinValue);

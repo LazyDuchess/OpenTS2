@@ -13,6 +13,7 @@ using OpenTS2.Common;
 using System.Diagnostics;
 using OpenTS2.Content.DBPF;
 using OpenTS2.Files.Formats.DBPF;
+using OpenTS2.Client;
 
 namespace OpenTS2.Engine.Tests
 {
@@ -43,7 +44,7 @@ namespace OpenTS2.Engine.Tests
             if (testChanges)
             {
                 stringTable = (StringSetAsset)stringTable.Clone();
-                stringTable.StringData.strings[1][8] = new StringValue("Test changing this crap.", " Oh hi! ");
+                stringTable.StringData.strings[Languages.USEnglish][8] = new StringValue("Test changing this crap.", " Oh hi! ");
                 stringTable.Compressed = false;
                 stringTable.Save();
             }

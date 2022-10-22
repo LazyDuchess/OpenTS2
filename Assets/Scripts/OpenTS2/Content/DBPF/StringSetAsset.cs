@@ -31,7 +31,7 @@ namespace OpenTS2.Content.DBPF
     public class StringSetData
     {
         public string fileName;
-        public Dictionary<byte, List<StringValue>> strings = new Dictionary<byte, List<StringValue>>();
+        public Dictionary<Languages, List<StringValue>> strings = new Dictionary<Languages, List<StringValue>>();
 
         /// <summary>
         /// Gets a string by its ID and in the specified language.
@@ -39,7 +39,7 @@ namespace OpenTS2.Content.DBPF
         /// <param name="id">ID of the string to retrieve.</param>
         /// <param name="language">Language bytecode.</param>
         /// <returns>Localized string.</returns>
-        public string GetString(int id, byte language)
+        public string GetString(int id, Languages language)
         {
             return strings[language][id].value;
         }

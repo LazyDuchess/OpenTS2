@@ -18,7 +18,7 @@ namespace OpenTS2.Client
     public class Settings
     {
         static Settings INSTANCE;
-        public byte language = 1;
+        public Languages language = Languages.USEnglish;
         public bool customContentEnabled = true;
 
         public static Settings Get()
