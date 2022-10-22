@@ -55,7 +55,7 @@ namespace OpenTS2.Files
         public static List<string> GetUserPackages()
         {
             var userPath = _PathProvider.GetUserPath();
-            var packageList = RemoveNeighborhoodPackagesFromList(GetPackagesInDirectory(userPath));
+            var packageList = RemoveNeighborhoodAndCCPackagesFromList(GetPackagesInDirectory(userPath));
             /*
             var collectionsPath = Path.Combine(userPath, "Collections");
             var lockedBinsPath = Path.Combine(userPath, "LockedBins");
@@ -75,9 +75,17 @@ namespace OpenTS2.Files
             return packageList;
         }
 
-        static List<string> RemoveNeighborhoodPackagesFromList(List<string> packages)
+        static List<string> RemoveNeighborhoodAndCCPackagesFromList(List<string> packages)
         {
-            return packages.Where(x => !IsNeighborhoodPackage(x)).ToList();
+            return packages.Where(x => !IsNeighborhoodPackage(x) && !IsDownloadPackage(x)).ToList();
+        }
+
+        static bool IsDownloadPackage(string filename)
+        {
+            var clean = FileUtils.CleanPath(filename).ToLowerInvariant();
+            if (clean.Contains("/downloads/"))
+                return true;
+            return false;
         }
 
         static bool IsNeighborhoodPackage(string filename)
