@@ -10,6 +10,8 @@ namespace OpenTS2.Assemblies
 {
     public static class AssemblyHelper
     {
+        public delegate void AssemblyProcessType(Type type, Assembly assembly);
+        public static AssemblyProcessType AssemblyProcesses;
         /// <summary>
         /// Initializes an assembly, does Reflection tasks like parsing attributes.
         /// </summary>
@@ -18,15 +20,7 @@ namespace OpenTS2.Assemblies
         {
             foreach (Type type in assembly.GetTypes())
             {
-                var attr = type.GetCustomAttribute<CodecAttribute>();
-                if (attr != null)
-                {
-                    var instance = Activator.CreateInstance(type) as AbstractCodec;
-                    foreach (var element in attr.TypeIDs)
-                    {
-                        Codecs.Register(element, instance);
-                    }
-                }
+                AssemblyProcesses?.Invoke(type, assembly);
             }
         }
     }

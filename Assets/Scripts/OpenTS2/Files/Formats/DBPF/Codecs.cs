@@ -18,6 +18,7 @@ namespace OpenTS2.Files.Formats.DBPF
     /// </summary>
     public static class Codecs
     {
+        //AbstractCodec classes with CodecAttributes should be automatically added here.
         static Dictionary<uint, AbstractCodec> codecsByTypeID = new Dictionary<uint, AbstractCodec>();
 
         /// <summary>
