@@ -18,21 +18,18 @@ namespace OpenTS2.Files.Formats.DBPF
     /// </summary>
     public static class Codecs
     {
-        public static STRCodec STR = new STRCodec();
-        public static IMGCodec IMG = new IMGCodec();
-        public static DIRCodec DIR = new DIRCodec();
-        public static OBJDCodec OBJD = new OBJDCodec();
-        public static MP3Codec MP3 = new MP3Codec();
+        static Dictionary<uint, AbstractCodec> codecsByTypeID = new Dictionary<uint, AbstractCodec>();
 
-        static Dictionary<uint, AbstractCodec> codecsByTypeID = new Dictionary<uint, AbstractCodec>()
+        /// <summary>
+        /// Register a codec.
+        /// </summary>
+        /// <param name="type">Type ID.</param>
+        /// <param name="codec">Codec instance.</param>
+        public static void Register(uint type, AbstractCodec codec)
         {
-            { TypeIDs.STR, STR },
-            { TypeIDs.IMG, IMG },
-            { TypeIDs.IMG2, IMG },
-            { TypeIDs.DIR, DIR },
-            { TypeIDs.OBJD, OBJD },
-            { TypeIDs.MP3, MP3 }
-        };
+            codecsByTypeID[type] = codec;
+        }
+
         /// <summary>
         /// Get the codec for a filetype.
         /// </summary>

@@ -22,6 +22,7 @@ namespace OpenTS2.Files.Formats.DBPF
     /// <summary>
     /// MP3 or XA audio reading code.
     /// </summary>
+    [Codec(TypeIDs.MP3)]
     public class MP3Codec : AbstractCodec
     {
 

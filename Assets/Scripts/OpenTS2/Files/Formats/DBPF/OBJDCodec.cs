@@ -11,6 +11,10 @@ using System.Threading.Tasks;
 
 namespace OpenTS2.Files.Formats.DBPF
 {
+    /// <summary>
+    /// Codec for Object Definitions.
+    /// </summary>
+    [Codec(TypeIDs.OBJD)]
     public class OBJDCodec : AbstractCodec
     {
         //File Spec: https://modthesims.info/wiki.php?title=4F424A44

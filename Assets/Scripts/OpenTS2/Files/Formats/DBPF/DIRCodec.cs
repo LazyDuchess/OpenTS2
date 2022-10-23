@@ -20,6 +20,7 @@ namespace OpenTS2.Files.Formats.DBPF
     /// <summary>
     /// DIR file reading codec.
     /// </summary>
+    [Codec(TypeIDs.DIR)]
     public class DIRCodec : AbstractCodec
     {
 

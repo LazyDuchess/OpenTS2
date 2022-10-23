@@ -20,6 +20,7 @@ namespace OpenTS2.Files.Formats.DBPF
     /// <summary>
     /// IMG file reading codec.
     /// </summary>
+    [Codec(TypeIDs.IMG, TypeIDs.IMG2)]
     public class IMGCodec : AbstractCodec
     {
 

@@ -28,6 +28,7 @@ namespace OpenTS2.Files.Formats.DBPF
         /// <summary>
         /// Constructs a new STR instance.
         /// </summary>
+        [Codec(TypeIDs.STR)]
         public STRCodec()
         {
 
