@@ -22,13 +22,13 @@ namespace OpenTS2.Files.Formats.DBPF
     /// <summary>
     /// STR file reading codec.
     /// </summary>
+    [Codec(TypeIDs.STR)]
     public class STRCodec : AbstractCodec
     {
 
         /// <summary>
         /// Constructs a new STR instance.
         /// </summary>
-        [Codec(TypeIDs.STR)]
         public STRCodec()
         {
 
