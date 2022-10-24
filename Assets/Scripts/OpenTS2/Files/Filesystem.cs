@@ -45,11 +45,22 @@ namespace OpenTS2.Files
             _EPManager = EPManager;
         }
 
-        public static List<string> GetDownloadPackages()
+        public static List<string> GetStartupDownloadPackages()
         {
             var userPath = _PathProvider.GetUserPath();
             var downloadsPath = Path.Combine(userPath, "Downloads");
-            return GetPackagesInDirectory(downloadsPath);
+            var packages = GetPackagesInDirectory(downloadsPath);
+            packages = packages.Where(x => FileUtils.CleanPath(x).ToLowerInvariant().Contains("/startup/")).ToList();
+            return packages;
+        }
+
+        public static List<string> GetStreamedDownloadPackages()
+        {
+            var userPath = _PathProvider.GetUserPath();
+            var downloadsPath = Path.Combine(userPath, "Downloads");
+            var packages = GetPackagesInDirectory(downloadsPath);
+            packages = packages.Where(x => !FileUtils.CleanPath(x).ToLowerInvariant().Contains("/startup/")).ToList();
+            return packages;
         }
 
         public static List<string> GetUserPackages()

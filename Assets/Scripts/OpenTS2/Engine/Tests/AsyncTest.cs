@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using UnityEngine;
+using OpenTS2.Game;
 using UnityEngine.UI;
 
 namespace OpenTS2.Engine.Tests
@@ -28,6 +29,7 @@ namespace OpenTS2.Engine.Tests
         {
             var contentManager = ContentManager.Get();
             contentManager.LoadContentStartup();
+            PluginSupport.Initialize();
             musicSource.clip = AudioManager.SplashAudio.Clip;
             musicSource.Play();
             stopW = new Stopwatch();

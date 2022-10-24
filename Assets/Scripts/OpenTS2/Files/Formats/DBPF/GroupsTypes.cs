@@ -24,6 +24,8 @@ namespace OpenTS2.Files.Formats.DBPF
         /// </summary>
         public const uint MP3 = 0x2026960B;
         public const uint OBJD = 0x4F424A44;
+        /// dynamiclinklibrary CRC32 hash
+        public const uint DLL = 0x7582DEC6;
     }
     public static class GroupIDs
     {
