@@ -13,6 +13,7 @@ namespace OpenTS2.Game
 {
     public static class PluginSupport
     {
+        public static List<AbstractPlugin> loadedPlugins = new List<AbstractPlugin>();
         /// <summary>
         /// Initializes all plugin assemblies it can find in loaded packages.
         /// </summary>
@@ -30,6 +31,8 @@ namespace OpenTS2.Game
                     if (typeof(AbstractPlugin).IsAssignableFrom(type))
                     {
                         var pluginInstance = Activator.CreateInstance(type) as AbstractPlugin;
+                        pluginInstance.assembly = modAssembly;
+                        loadedPlugins.Add(pluginInstance);
                         break;
                     }
                 }
