@@ -12,8 +12,14 @@ using OpenTS2.Files.Formats.DBPF;
 
 namespace OpenTS2.Engine.Core
 {
-    public static class ResourceManagement
+    /// <summary>
+    /// Global class for Unity implementation of OpenTS2.
+    /// </summary>
+    public static class GameEngine
     {
+        /// <summary>
+        /// Initializes all globals, managers and the game assembly.
+        /// </summary>
         public static void Initialize()
         {
             var settings = new Settings();

@@ -24,6 +24,15 @@ namespace OpenTS2.Game
             {
                 var modAssembly = Assembly.Load(element.data);
                 AssemblyHelper.InitializeAssembly(modAssembly);
+                var types = modAssembly.GetTypes();
+                foreach(var type in types)
+                {
+                    if (typeof(AbstractPlugin).IsAssignableFrom(type))
+                    {
+                        var pluginInstance = Activator.CreateInstance(type) as AbstractPlugin;
+                        break;
+                    }
+                }
             }
         }
     }

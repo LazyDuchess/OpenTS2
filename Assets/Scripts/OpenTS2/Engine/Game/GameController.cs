@@ -13,7 +13,7 @@ namespace OpenTS2.Engine.Game
     {
         private void Awake()
         {
-            ResourceManagement.Initialize();
+            GameEngine.Initialize();
         }
     }
 }
