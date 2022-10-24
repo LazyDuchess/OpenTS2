@@ -21,17 +21,22 @@ namespace OpenTS2.Game
         {
             var contentManager = ContentManager.Get();
             var assemblyAssets = contentManager.Provider.GetAssetsOfType<AssemblyAsset>(TypeIDs.DLL);
+            var loadedAssemblies = new List<Assembly>();
             foreach(var element in assemblyAssets)
             {
                 var modAssembly = Assembly.Load(element.data);
-                AssemblyHelper.InitializeAssembly(modAssembly);
-                var types = modAssembly.GetTypes();
-                foreach(var type in types)
+                loadedAssemblies.Add(modAssembly);
+            }
+            foreach(var element in loadedAssemblies)
+            {
+                AssemblyHelper.InitializeAssembly(element);
+                var types = element.GetTypes();
+                foreach (var type in types)
                 {
                     if (typeof(AbstractPlugin).IsAssignableFrom(type))
                     {
                         var pluginInstance = Activator.CreateInstance(type) as AbstractPlugin;
-                        pluginInstance.assembly = modAssembly;
+                        pluginInstance.assembly = element;
                         loadedPlugins.Add(pluginInstance);
                         break;
                     }

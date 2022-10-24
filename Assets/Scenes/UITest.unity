@@ -611,7 +611,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   image: {fileID: 683157549}
   packageToLoad: "C:\\Users\\Duchess\\Documents\\EA Games\\The Sims\u2122 2 Ultimate
-    Collection\\Neighborhoods\\N002\\Thumbnails/N002_FamilyThumbnails.package"
+    Collection\\Neighborhoods\\N007\\Thumbnails/N007_FamilyThumbnails.package"
 --- !u!4 &1947281170
 Transform:
   m_ObjectHideFlags: 0
