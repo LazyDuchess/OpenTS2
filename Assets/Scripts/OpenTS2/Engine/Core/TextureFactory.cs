@@ -4,6 +4,8 @@
  * http://mozilla.org/MPL/2.0/. 
  */
 
+#define REMOVE_STRAY_PIXELS
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -27,6 +29,31 @@ namespace OpenTS2.Engine.Core
         {
             Texture2D fTex = new Texture2D(1, 1);
             fTex.LoadImage(source);
+            var alphaCheck = Encoding.UTF8.GetString(source, 24, 4);
+            
+            //HORRIBLE Temp hack.
+            var hasAlpha = alphaCheck == "ALFA";
+            if (hasAlpha)
+            {
+                var pixels = fTex.GetPixels();
+                for(var i=0;i<pixels.Length;i++)
+                {
+                    var pixel = pixels[i];
+                    var thresh = 0.075f;
+                    if (pixel.r <= thresh && pixel.g <= thresh && pixel.b <= thresh)
+                    {
+                        pixels[i] = Color.clear;
+                    }
+                }
+                var alphaTex = new Texture2D(fTex.width, fTex.height, TextureFormat.RGBA32, true);
+                alphaTex.SetPixels(pixels);
+                alphaTex.Apply();
+                //this sucks a lot
+                #if REMOVE_STRAY_PIXELS
+                    RemoveStrayPixels(ref alphaTex);
+                #endif
+                return alphaTex;
+            }
             // TODO - Figure out how the fuck jpg alpha works. Preferably on the IMG codec, not here.
             /*
             var alphaCheck = Encoding.UTF8.GetString(source, 24, 4);
@@ -64,6 +91,63 @@ namespace OpenTS2.Engine.Core
             }*/
             return fTex;
         }
+        #if REMOVE_STRAY_PIXELS
+        void RemoveStrayPixels(ref Texture2D texture)
+        {
+            var minNeighbors = 7;
+            for(var i=0;i<texture.width;i++)
+            {
+                for(var n=0;n<texture.height;n++)
+                {
+                    var neighs = GetNeighbors(texture, i, n, 0, 1);
+                    if (neighs < minNeighbors)
+                    {
+                        texture.SetPixel(i, n, Color.clear);
+                    }
+                }
+            }
+            texture.Apply();
+        }
+
+
+        int GetNeighbors(Texture2D texture, int x, int y, int currentLevel = 0, int maxLevels = 3)
+        {
+            var avoid = new List<Tuple<int, int>>();
+            return GetNeighbors(texture, x, y, ref avoid, currentLevel, maxLevels);
+        }
+
+        int GetNeighbors(Texture2D texture, int x, int y, ref List<Tuple<int, int>> avoid, int currentLevel = 0, int maxLevels = 3)
+        {
+            var neighbors = 0;
+            var thresh = 0.01f;
+            avoid.Add(new Tuple<int, int>(x, y));
+            for(var i=-1;i<=1;i++)
+            {
+                for(var n=-1;n<=1;n++)
+                {
+                    var curX = x + i;
+                    var curY = y + n;
+                    var tuple = new Tuple<int, int>(curX, curY);
+                    if (avoid.IndexOf(tuple) < 0 && curX >= 0 && curX < texture.width && curY >= 0 && curY < texture.height)
+                    {
+                        var color = texture.GetPixel(curX, curY);
+                        if (color.r > thresh && color.g > thresh && color.b > thresh)
+                        {
+                            neighbors += 1;
+                            //avoid.Add(new Tuple<int, int>(curX, curY));
+                            var nextLevel = currentLevel + 1;
+                            if (nextLevel <= maxLevels)
+                            {
+                                neighbors += GetNeighbors(texture, curX, curY, ref avoid, nextLevel, maxLevels);
+                            }
+                        }
+                    }
+                }
+            }
+            return neighbors;
+        }
+
+        #endif
 
         public override object CreatePNGTexture(byte[] source)
         {
