@@ -18,15 +18,20 @@ namespace OpenTS2.Engine.Tests
         public int resolution = 8;
         public float round = 0.14f;
 
+        public bool followMouse = true;
+        public Vector3 movePos = Vector3.zero;
+
         void Update()
         {
-            Vector3 movePos;
-            RectTransformUtility.ScreenPointToWorldPointInRectangle(
-                canvas.transform as RectTransform,
-                Input.mousePosition, canvas.worldCamera,
-                out movePos);
-
-            MakeMeshNew(this.transform.InverseTransformPoint(movePos));
+            if (followMouse)
+            {
+                RectTransformUtility.ScreenPointToWorldPointInRectangle(
+                    canvas.transform as RectTransform,
+                    Input.mousePosition, canvas.worldCamera,
+                    out movePos);
+                movePos = this.transform.InverseTransformPoint(movePos);
+            }
+            MakeMeshNew(movePos);
         }
 
         public void MakeRoundedRectangle(int vertexCount, float edgeRound, Vector3 origin, Vector3 boxSize, ref List<Vector3> verts, ref List<int> indices, ref List<Color> colors)
@@ -218,7 +223,7 @@ namespace OpenTS2.Engine.Tests
                 return false;
             }
         }
-
+        /*
         private Segment FindNeighbor(Segment segment, List<Segment> segments, int index)
         {
             var newSegments = segments.ToList();
@@ -236,7 +241,7 @@ namespace OpenTS2.Engine.Tests
             }
             return null;
         }
-        /*
+        
         private Vector3 GetProportionPoint(Vector3 point, double segment,
                                   double length, double dx, double dy)
         {
@@ -371,7 +376,7 @@ namespace OpenTS2.Engine.Tests
 
                 //Debug.DrawLine(ogVertex, exVertex, Color.yellow, 0.1f);
             }
-            foreach(var segment in finalSegments)
+            foreach (var segment in finalSegments)
             {
                 var startIndex = segment.startIndex;
                 var endIndex = segment.endIndex;
@@ -379,13 +384,35 @@ namespace OpenTS2.Engine.Tests
                 var exStartIndex = extrudedVertices[startIndex];
                 var exEndIndex = extrudedVertices[endIndex];
 
-                indices.Add(startIndex);
-                indices.Add(exStartIndex);
-                indices.Add(endIndex);
+                var startVertex = verts[startIndex];
+                var endVertex = verts[endIndex];
 
-                indices.Add(exStartIndex);
-                indices.Add(exEndIndex);
-                indices.Add(endIndex);
+                var exStartVertex = verts[exStartIndex];
+                var exEndVertex = verts[exEndIndex];
+
+                var orderDistance = Vector3.Distance(exStartVertex, endVertex);
+                var order2Distance = Vector3.Distance(exEndVertex, startVertex);
+
+                if (orderDistance < order2Distance)
+                {
+                    indices.Add(startIndex);
+                    indices.Add(exStartIndex);
+                    indices.Add(endIndex);
+
+                    indices.Add(exStartIndex);
+                    indices.Add(exEndIndex);
+                    indices.Add(endIndex);
+                }
+                else
+                {
+                    indices.Add(startIndex);
+                    indices.Add(exEndIndex);
+                    indices.Add(endIndex);
+
+                    indices.Add(exStartIndex);
+                    indices.Add(exEndIndex);
+                    indices.Add(startIndex);
+                }
             }
         }
 
