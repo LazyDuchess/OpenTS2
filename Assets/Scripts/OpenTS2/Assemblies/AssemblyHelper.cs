@@ -10,8 +10,7 @@ namespace OpenTS2.Assemblies
 {
     public static class AssemblyHelper
     {
-        public delegate void AssemblyProcessType(Type type, Assembly assembly);
-        public static AssemblyProcessType AssemblyProcesses;
+        public static Action<Type, Assembly> AssemblyProcesses;
         /// <summary>
         /// Initializes an assembly, does Reflection tasks like parsing attributes.
         /// </summary>

@@ -36,8 +36,7 @@ namespace OpenTS2.Content
         private readonly Dictionary<DBPFFile, DBPFFile> _entryByFile = new Dictionary<DBPFFile, DBPFFile>();
         public ContentCache Cache;
         public ContentChanges Changes;
-        public delegate void ResourceChangedDelegate(ResourceKey key);
-        public ResourceChangedDelegate OnContentChangedEventHandler;
+        public Action<ResourceKey> OnContentChangedEventHandler;
 
         public ContentProvider()
         {

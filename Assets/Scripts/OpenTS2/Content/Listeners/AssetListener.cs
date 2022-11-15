@@ -15,10 +15,8 @@ namespace OpenTS2.Content.Listeners
     public class AssetListener<T> : ContentListener where T : AbstractAsset
     {
         readonly uint[] _types;
-        public delegate void OnUpdateDelegate(T asset);
-        public delegate void OnRemoveDelegate(ResourceKey globalTGI);
-        public OnUpdateDelegate OnUpdateEventHandler;
-        public OnRemoveDelegate OnRemoveEventHandler;
+        public Action<T> OnUpdateEventHandler;
+        public Action<ResourceKey> OnRemoveEventHandler;
 
         /// <summary>
         /// Creates a new AssetListener.
