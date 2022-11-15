@@ -44,7 +44,7 @@ namespace OpenTS2.Engine.Tests
                         Filesystem.Write(Path.Combine(TargetFolder, element.FileName), imageFile);
                     }
                 }
-                catch (Exception e) { }
+                catch (Exception) { }
             }
         }
     }

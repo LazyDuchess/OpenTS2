@@ -64,7 +64,7 @@ namespace OpenTS2.Files.Formats.DBPF
                 {
                     array[destPos + i] = array[srcPos + i];
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     //Fail silently :(
                 }

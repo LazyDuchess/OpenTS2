@@ -319,7 +319,6 @@ namespace OpenTS2.Files
         /// <param name="path">Path to file to delete.</param>
         public static void Delete(string path)
         {
-            var realPath = GetRealPath(path);
             File.Delete(path);
         }
     }
