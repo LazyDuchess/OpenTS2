@@ -19,8 +19,8 @@ namespace OpenTS2.Content.DBPF
     {
         public TextureAsset(object engineTexture)
         {
-            this.engineTexture = engineTexture;
+            this._engineTexture = engineTexture;
         }
-        object engineTexture;
+        object _engineTexture;
     }
 }

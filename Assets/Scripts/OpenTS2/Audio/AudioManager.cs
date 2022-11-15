@@ -11,13 +11,13 @@ namespace OpenTS2.Audio
 {
     public static class AudioManager
     {
-        readonly static ResourceKey splashKey = new ResourceKey(0xFF8DFFC2, 0xE4085DD2, 0xFF8DFFC2, 0x2026960B);
+        readonly static ResourceKey s_splashKey = new ResourceKey(0xFF8DFFC2, 0xE4085DD2, 0xFF8DFFC2, 0x2026960B);
         public static AudioAsset SplashAudio
         {
             get
             {
                 var content = ContentManager.Get();
-                return content.Provider.GetAsset<AudioAsset>(splashKey);
+                return content.Provider.GetAsset<AudioAsset>(s_splashKey);
             }
         }
     }

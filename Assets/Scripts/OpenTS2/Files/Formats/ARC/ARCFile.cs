@@ -4,14 +4,10 @@
  * http://mozilla.org/MPL/2.0/. 
  */
 
+using OpenTS2.Files.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using OpenTS2.Content;
-using OpenTS2.Files.Utils;
 
 namespace OpenTS2.Files.Formats.ARC
 {
@@ -22,11 +18,11 @@ namespace OpenTS2.Files.Formats.ARC
     {
         public List<ARCEntry> Entries
         {
-            get { return _Entries; }
+            get { return _entries; }
         }
-        private List<ARCEntry> _Entries = new List<ARCEntry>();
-        private Dictionary<string, ARCEntry> EntryByName = new Dictionary<string, ARCEntry>();
-        private IoBuffer Io;
+        private readonly List<ARCEntry> _entries = new List<ARCEntry>();
+        private readonly Dictionary<string, ARCEntry> _entryByName = new Dictionary<string, ARCEntry>();
+        private IoBuffer _io;
 
         /// <summary>
         /// Constructs a new ARC instance.
@@ -52,7 +48,7 @@ namespace OpenTS2.Files.Formats.ARC
         public void Read(Stream stream)
         {
             var io = IoBuffer.FromStream(stream, ByteOrder.LITTLE_ENDIAN);
-            Io = io;
+            _io = io;
             var fileOffset = io.ReadUInt32();
             io.Seek(SeekOrigin.Begin, fileOffset);
             var fileAmount = io.ReadUInt32();
@@ -67,40 +63,40 @@ namespace OpenTS2.Files.Formats.ARC
                 entry.FileName = filename;
                 entry.FileOffset = offset;
                 entry.FileSize = size;
-                _Entries.Add(entry);
-                EntryByName[entry.FileName] = entry;
+                _entries.Add(entry);
+                _entryByName[entry.FileName] = entry;
             }
         }
 
         public byte[] GetEntryNoHeader(ARCEntry entry)
         {
-            Io.Seek(SeekOrigin.Begin, entry.FileOffset);
-            var oldPosition = (int)Io.Position;
-            Io.Skip(16);
-            Io.ReadNullTerminatedString();
-            Io.Skip(4);
-            var offset = (int)Io.Position - oldPosition;
-            return Io.ReadBytes((int)entry.FileSize - offset);
+            _io.Seek(SeekOrigin.Begin, entry.FileOffset);
+            var oldPosition = (int)_io.Position;
+            _io.Skip(16);
+            _io.ReadNullTerminatedString();
+            _io.Skip(4);
+            var offset = (int)_io.Position - oldPosition;
+            return _io.ReadBytes((int)entry.FileSize - offset);
         }
 
         public byte[] GetEntry(ARCEntry entry)
         {
-            Io.Seek(SeekOrigin.Begin, entry.FileOffset);
+            _io.Seek(SeekOrigin.Begin, entry.FileOffset);
 
-            return Io.ReadBytes((int)entry.FileSize);
+            return _io.ReadBytes((int)entry.FileSize);
         }
 
         public byte[] GetItemByName(string filename)
         {
-            if (EntryByName.ContainsKey(filename))
-                return GetEntryNoHeader(EntryByName[filename]);
+            if (_entryByName.ContainsKey(filename))
+                return GetEntryNoHeader(_entryByName[filename]);
             else
                 return null;
         }
 
         public void Dispose()
         {
-            Io.Dispose();
+            _io.Dispose();
         }
     }
 }

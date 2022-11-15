@@ -14,31 +14,31 @@ namespace OpenTS2.Content
     {
         public static ObjectManager Get()
         {
-            return INSTANCE;
+            return s_instance;
         }
         
-        static ObjectManager INSTANCE;
+        static ObjectManager s_instance;
         public List<TSObject> Objects
         {
             get
             {
-                return objectByGUID.Values.ToList();
+                return _objectByGUID.Values.ToList();
             }
         }
 
-        Dictionary<uint, TSObject> objectByGUID = new Dictionary<uint, TSObject>();
-        ContentProvider Provider;
+        Dictionary<uint, TSObject> _objectByGUID = new Dictionary<uint, TSObject>();
+        readonly ContentProvider _provider;
 
         public ObjectManager(ContentProvider provider)
         {
-            INSTANCE = this;
-            Provider = provider;
+            s_instance = this;
+            _provider = provider;
         }
 
         public void Initialize()
         {
-            objectByGUID = new Dictionary<uint, TSObject>();
-            var objectList = Provider.GetAssetsOfType<ObjectDefinitionAsset>(TypeIDs.OBJD); 
+            _objectByGUID = new Dictionary<uint, TSObject>();
+            var objectList = _provider.GetAssetsOfType<ObjectDefinitionAsset>(TypeIDs.OBJD); 
             foreach(ObjectDefinitionAsset element in objectList)
             {
                 RegisterObject(element);
@@ -54,7 +54,7 @@ namespace OpenTS2.Content
         TSObject RegisterObject(ObjectDefinitionAsset objd)
         {
             var tsObject = new TSObject(objd);
-            objectByGUID[objd.guid] = tsObject;
+            _objectByGUID[objd.GUID] = tsObject;
             return tsObject;
         }
     }

@@ -10,35 +10,35 @@ namespace OpenTS2.Content.Changes
 {
     public class ChangedFile : AbstractChanged
     {
-        protected byte[] fileData;
+        protected byte[] FileData;
         public ChangedFile(byte[] fileData, ResourceKey tgi, DBPFFile package, AbstractCodec codec = null)
         {
-            this.fileData = fileData;
+            this.FileData = fileData;
             if (codec != null)
             {
-                this.asset = codec.Deserialize(fileData, tgi, package);
+                this.Asset = codec.Deserialize(fileData, tgi, package);
             }
-            this.entry = new DBPFEntry()
+            this.Entry = new DBPFEntry()
             {
-                globalTGI = this.asset.globalTGI.LocalGroupID(package.GroupID),
-                internalTGI = this.asset.globalTGI,
-                dynamic = true,
-                package = package
+                GlobalTGI = this.Asset.GlobalTGI.LocalGroupID(package.GroupID),
+                InternalTGI = this.Asset.GlobalTGI,
+                Dynamic = true,
+                Package = package
             };
         }
-        public ChangedFile(AbstractAsset asset, byte[] fileData) : this(fileData, asset.internalTGI, asset.package)
+        public ChangedFile(AbstractAsset asset, byte[] fileData) : this(fileData, asset.InternalTGI, asset.Package)
         {
 
         }
-        public override byte[] bytes
+        public override byte[] Bytes
         {
             get
             {
-                return fileData;
+                return FileData;
             }
             set
             {
-                fileData = value;
+                FileData = value;
             }
         }
     }

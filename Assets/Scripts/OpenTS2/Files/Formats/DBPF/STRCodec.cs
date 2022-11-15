@@ -43,7 +43,7 @@ namespace OpenTS2.Files.Formats.DBPF
             var stringTableData = new StringSetData();
             var stream = new MemoryStream(bytes);
             var reader = IoBuffer.FromStream(stream, ByteOrder.LITTLE_ENDIAN);
-            stringTableData.fileName = reader.ReadNullTerminatedUTF8();
+            stringTableData.FileName = reader.ReadNullTerminatedUTF8();
             reader.Seek(SeekOrigin.Begin, 66);
             var stringSets = reader.ReadUInt16();
             for (var i = 0; i < stringSets; i++)
@@ -74,7 +74,7 @@ namespace OpenTS2.Files.Formats.DBPF
             var writer = new BinaryWriter(stream);
             writer.Write(new byte[64]);
             writer.Seek(0, SeekOrigin.Begin);
-            var ascii = Encoding.UTF8.GetBytes(stringAsset.StringData.fileName + char.MinValue);
+            var ascii = Encoding.UTF8.GetBytes(stringAsset.StringData.FileName + char.MinValue);
             writer.Write(ascii);
             writer.Seek(64, SeekOrigin.Begin);
             writer.Write(new byte[2] { 253, 255 });
@@ -83,10 +83,12 @@ namespace OpenTS2.Files.Formats.DBPF
             {
                 foreach(var listElement in element.Value)
                 {
-                    var item = new StringForSerialization();
-                    item.languageCode = element.Key;
-                    item.value = listElement.value;
-                    item.description = listElement.description;
+                    var item = new StringForSerialization
+                    {
+                        languageCode = element.Key,
+                        value = listElement.Value,
+                        description = listElement.Description
+                    };
                     stringList.Add(item);
                 }
             }

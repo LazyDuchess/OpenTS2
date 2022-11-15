@@ -24,7 +24,7 @@ namespace OpenTS2.Game
             var loadedAssemblies = new List<Assembly>();
             foreach(var element in assemblyAssets)
             {
-                var modAssembly = Assembly.Load(element.data);
+                var modAssembly = Assembly.Load(element.Data);
                 loadedAssemblies.Add(modAssembly);
             }
             foreach(var element in loadedAssemblies)

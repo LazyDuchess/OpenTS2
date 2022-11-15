@@ -8,11 +8,11 @@ namespace OpenTS2.Content.DBPF
         {
             get
             {
-                return engineTexture as Texture2D;
+                return _engineTexture as Texture2D;
             }
             set
             {
-                engineTexture = value;
+                _engineTexture = value;
             }
         }
     }

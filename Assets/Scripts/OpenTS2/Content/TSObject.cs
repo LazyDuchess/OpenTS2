@@ -4,12 +4,13 @@ namespace OpenTS2.Content
 {
     public class TSObject
     {
-        public uint GUID => Definition.guid;
-        public ObjectDefinitionAsset Definition => _Definition;
-        ObjectDefinitionAsset _Definition;
+        public uint GUID => Definition.GUID;
+        public ObjectDefinitionAsset Definition => _definition;
+
+        readonly ObjectDefinitionAsset _definition;
         public TSObject(ObjectDefinitionAsset ObjectDefinition)
         {
-            _Definition = ObjectDefinition;
+            _definition = ObjectDefinition;
         }
     }
 }

@@ -12,18 +12,19 @@ namespace OpenTS2.Content
     {
         public static EPManager Get()
         {
-            return INSTANCE;
+            return s_instance;
         }
-        static EPManager INSTANCE;
+        static EPManager s_instance;
+
         //mask of all products, minus store.
-        int InstalledProducts = 0x3EFFF;
+        readonly int _installedProducts = 0x3EFFF;
         public EPManager()
         {
-            INSTANCE = this;
+            s_instance = this;
         }
         public bool IsEPInstalled(ProductFlags product)
         {
-            if (BitUtils.AllBitsSet(InstalledProducts, (int)product))
+            if (BitUtils.AllBitsSet(_installedProducts, (int)product))
                 return true;
             return false;
         }

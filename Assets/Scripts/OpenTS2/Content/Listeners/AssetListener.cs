@@ -14,7 +14,7 @@ namespace OpenTS2.Content.Listeners
     /// <typeparam name="T">Asset type.</typeparam>
     public class AssetListener<T> : ContentListener where T : AbstractAsset
     {
-        readonly uint[] Types;
+        readonly uint[] _types;
         public delegate void OnUpdateDelegate(T asset);
         public delegate void OnRemoveDelegate(ResourceKey globalTGI);
         public OnUpdateDelegate OnUpdateEventHandler;
@@ -26,7 +26,7 @@ namespace OpenTS2.Content.Listeners
         /// <param name="Types">Type ID to listen to.</param>
         public AssetListener(uint Type)
         {
-            this.Types = new uint[] { Type };
+            this._types = new uint[] { Type };
         }
 
         /// <summary>
@@ -35,12 +35,12 @@ namespace OpenTS2.Content.Listeners
         /// <param name="Types">Array of Type IDs to listen to.</param>
         public AssetListener(uint[] Types)
         {
-            this.Types = Types;
+            this._types = Types;
         }
 
         public override sealed void OnUpdate(ResourceKey key)
         {
-            if (!Types.Contains(key.TypeID))
+            if (!_types.Contains(key.TypeID))
                 return;
             var contentManager = ContentManager.Get();
             var contentAsset = contentManager.Provider.GetAsset<T>(key);
@@ -56,7 +56,7 @@ namespace OpenTS2.Content.Listeners
         public override void Attach(ContentProvider provider)
         {
             base.Attach(provider);
-            var allEntries = provider.ResourceMap.Where(x => Types.Contains(x.Key.TypeID)).ToDictionary(x => x.Key, x => x.Value).Values.ToList();
+            var allEntries = provider.ResourceMap.Where(x => _types.Contains(x.Key.TypeID)).ToDictionary(x => x.Key, x => x.Value).Values.ToList();
             var allAssets = new List<T>();
             foreach(var element in allEntries)
             {

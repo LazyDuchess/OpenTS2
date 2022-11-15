@@ -16,13 +16,14 @@ namespace OpenTS2.Engine.Tests
 {
     public class AsyncTest : MonoBehaviour
     {
-        public AudioSource musicSource;
-        public Text progressText;
-        public Text objectsText;
+        public AudioSource MusicSource;
+        public Text ProgressText;
+        public Text ObjectsText;
+        public RawImage PopupBackgroundImage;
+        public RawImage BackgroundImage;
 
         //public List<string> packageList;
         public bool async = true;
-        Task asyncTask;
         Stopwatch stopW;
         // Start is called before the first frame update
         void Start()
@@ -30,12 +31,12 @@ namespace OpenTS2.Engine.Tests
             var contentManager = ContentManager.Get();
             contentManager.LoadContentStartup();
             PluginSupport.Initialize();
-            musicSource.clip = AudioManager.SplashAudio.Clip;
-            musicSource.Play();
+            MusicSource.clip = AudioManager.SplashAudio.Clip;
+            MusicSource.Play();
             stopW = new Stopwatch();
             stopW.Start();
             if (async)
-                asyncTask = contentManager.LoadGameContentAsync().ContinueWith((task) => { OnFinishLoading(); }, TaskScheduler.FromCurrentSynchronizationContext());
+                contentManager.LoadGameContentAsync().ContinueWith((task) => { OnFinishLoading(); }, TaskScheduler.FromCurrentSynchronizationContext());
             else
             {
                 contentManager.LoadGameContentSync();
@@ -46,7 +47,7 @@ namespace OpenTS2.Engine.Tests
         void Update()
         {
             var contentManager = ContentManager.Get();
-            progressText.text = Mathf.Round(contentManager.ContentLoadProgress.percentage * 100f).ToString() + "%";
+            ProgressText.text = Mathf.Round(contentManager.ContentLoadProgress.Percentage * 100f).ToString() + "%";
         }
 
         void OnFinishLoading()
@@ -64,9 +65,11 @@ namespace OpenTS2.Engine.Tests
                 if (i >= oMgr.Objects.Count)
                     break;
                 var element = oMgr.Objects[(oMgr.Objects.Count-1)-i];
-                objectStr += element.Definition.filename + " (" + "0x"+element.GUID.ToString("X8") + ")" + System.Environment.NewLine;
+                objectStr += element.Definition.FileName + " (" + "0x"+element.GUID.ToString("X8") + ")" + System.Environment.NewLine;
             }
-            objectsText.text = objectStr;
+            ObjectsText.text = objectStr;
+            PopupBackgroundImage.texture = contentManager.Provider.GetAsset<TextureAsset>(new ResourceKey(0xA9600400, 0x499DB772, 0x856DDBAC)).Texture;
+            BackgroundImage.texture = contentManager.Provider.GetAsset<TextureAsset>(new ResourceKey(0xCCC9AF70, 0x499DB772, 0x856DDBAC)).Texture;
         }
     }
 }

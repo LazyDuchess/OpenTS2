@@ -21,70 +21,36 @@ namespace OpenTS2.Content
     /// </summary>
     public abstract class AbstractAsset : ICloneable
     {
-        /// <summary>
-        /// Save changes to this asset in memory.
-        /// </summary>
-        public void Save()
-        {
-            package.Changes.Set(this);
-        }
-        /// <summary>
-        /// Mark this asset as deleted in memory.
-        /// </summary>
-        public void Delete()
-        {
-            package.Changes.Delete(this.internalTGI);
-        }
-        /// <summary>
-        /// Unmark this asset as deleted in memory.
-        /// </summary>
-        public void Restore()
-        {
-            package.Changes.Restore(this.internalTGI);
-        }
-
-        public object Clone()
-        {
-            var codec = Codecs.Get(TGI.TypeID);
-            var serialized = codec.Serialize(this);
-            var clone = codec.Deserialize(serialized, this.globalTGI, package);
-            clone.globalTGI = globalTGI;
-            clone.internalTGI = internalTGI;
-            clone.package = package;
-            clone.Compressed = Compressed;
-            return clone;
-        }
-
         public ResourceKey TGI
         {
             get
             {
-                return globalTGI;
+                return GlobalTGI;
             }
             set
             {
-                internalTGI = value;
-                globalTGI = value.LocalGroupID(package.GroupID);
+                InternalTGI = value;
+                GlobalTGI = value.LocalGroupID(Package.GroupID);
             }
         }
-        public ResourceKey globalTGI = ResourceKey.Default;
+        public ResourceKey GlobalTGI = ResourceKey.Default;
         /// <summary>
         /// Original TGI, as written to file.
         /// </summary>
-        public ResourceKey internalTGI = ResourceKey.Default;
-        public DBPFFile package;
+        public ResourceKey InternalTGI = ResourceKey.Default;
+        public DBPFFile Package;
         public bool Compressed
         {
             get
             {
                 if (!CanBeCompressed)
                     return false;
-                return compressed;
+                return _compressed;
             }
             set
             {
                 if (CanBeCompressed)
-                    compressed = value;
+                    _compressed = value;
             }
         }
         public virtual bool CanBeCompressed
@@ -94,6 +60,40 @@ namespace OpenTS2.Content
                 return true;
             }
         }
-        bool compressed = false;
+        bool _compressed = false;
+
+        /// <summary>
+        /// Save changes to this asset in memory.
+        /// </summary>
+        public void Save()
+        {
+            Package.Changes.Set(this);
+        }
+        /// <summary>
+        /// Mark this asset as deleted in memory.
+        /// </summary>
+        public void Delete()
+        {
+            Package.Changes.Delete(this.InternalTGI);
+        }
+        /// <summary>
+        /// Unmark this asset as deleted in memory.
+        /// </summary>
+        public void Restore()
+        {
+            Package.Changes.Restore(this.InternalTGI);
+        }
+
+        public object Clone()
+        {
+            var codec = Codecs.Get(TGI.TypeID);
+            var serialized = codec.Serialize(this);
+            var clone = codec.Deserialize(serialized, this.GlobalTGI, Package);
+            clone.GlobalTGI = GlobalTGI;
+            clone.InternalTGI = InternalTGI;
+            clone.Package = Package;
+            clone.Compressed = Compressed;
+            return clone;
+        }
     }
 }

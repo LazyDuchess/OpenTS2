@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace OpenTS2.Files.Utils
 {
-    public interface BCFReadProxy : IDisposable
+    public interface IBCFReadProxy : IDisposable
     {
         byte ReadByte();
         ushort ReadUInt16();
@@ -25,7 +25,7 @@ namespace OpenTS2.Files.Utils
         string ReadLongPascalString();
     }
 
-    public class BCFReadString : BCFReadProxy
+    public class BCFReadString : IBCFReadProxy
     {
         private StreamReader Reader;
         public int Version;

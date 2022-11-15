@@ -4,28 +4,26 @@
  * http://mozilla.org/MPL/2.0/. 
  */
 
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
-using OpenTS2.Content;
+using OpenTS2.Client;
 using OpenTS2.Common;
-using System.Diagnostics;
+using OpenTS2.Content;
 using OpenTS2.Content.DBPF;
 using OpenTS2.Files.Formats.DBPF;
-using OpenTS2.Client;
+using System.Diagnostics;
+using UnityEngine;
+using UnityEngine.UI;
 
 namespace OpenTS2.Engine.Tests
 {
     public class StringTest : MonoBehaviour
     {
-        public string packagePath = "%UserDataDirectory%Downloads/ld_HeightCheater.package";
-        public bool seconds = true;
-        public Text text;
-        public bool testChanges = false;
-        public bool testDeletion = false;
-        public bool testSaving = false;
-        public bool testRevert = false;
+        public string PackagePath = "%UserDataDirectory%Downloads/ld_HeightCheater.package";
+        public bool Seconds = true;
+        public Text Text;
+        public bool TestChanges = false;
+        public bool TestDeletion = false;
+        public bool TestSaving = false;
+        public bool TestRevert = false;
 
         // Start is called before the first frame update
         void Start()
@@ -36,12 +34,12 @@ namespace OpenTS2.Engine.Tests
             var stopWatchSTR = new Stopwatch();
             var stopWatchSTR2 = new Stopwatch();
             stopWatch.Start();
-            contentProvider.AddPackage(packagePath);
+            contentProvider.AddPackage(PackagePath);
             stopWatch.Stop();
             stopWatchSTR.Start();
             var stringTable = contentProvider.GetAsset<StringSetAsset>(new ResourceKey(0x0000012D, "ld_heightcheater", TypeIDs.STR));
             stopWatchSTR.Stop();
-            if (testChanges)
+            if (TestChanges)
             {
                 stringTable = (StringSetAsset)stringTable.Clone();
                 stringTable.StringData.strings[Languages.USEnglish][8] = new StringValue("Test changing this crap.", " Oh hi! ");
@@ -49,21 +47,21 @@ namespace OpenTS2.Engine.Tests
                 stringTable.Save();
             }
 
-            if (testDeletion)
-                stringTable.package.Changes.Delete();
+            if (TestDeletion)
+                stringTable.Package.Changes.Delete();
 
-            if (testRevert)
-                stringTable.package.Changes.Clear();
+            if (TestRevert)
+                stringTable.Package.Changes.Clear();
 
-            if (testSaving)
-                stringTable.package.WriteToFile();
+            if (TestSaving)
+                stringTable.Package.WriteToFile();
 
             stopWatchSTR2.Start();
             stringTable = contentProvider.GetAsset<StringSetAsset>(new ResourceKey(0x0000012D, "ld_heightcheater", TypeIDs.STR));
             stopWatchSTR2.Stop();
             
-            text.text = stringTable.GetString(8);
-            if (!seconds)
+            Text.text = stringTable.GetString(8);
+            if (!Seconds)
             {
                 UnityEngine.Debug.Log("Package loading took " + (stopWatch.ElapsedTicks * 1000000 / Stopwatch.Frequency) + " microseconds");
                 UnityEngine.Debug.Log("StringTable Asset loading took " + (stopWatchSTR.ElapsedTicks * 1000000 / Stopwatch.Frequency) + " microseconds");
@@ -79,12 +77,6 @@ namespace OpenTS2.Engine.Tests
             
 
             
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-
         }
     }
 }

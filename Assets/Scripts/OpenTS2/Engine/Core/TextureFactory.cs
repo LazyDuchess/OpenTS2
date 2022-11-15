@@ -27,15 +27,15 @@ namespace OpenTS2.Engine.Core
     {
         public override object CreateJPGTexture(byte[] source)
         {
-            Texture2D fTex = new Texture2D(1, 1);
-            fTex.LoadImage(source);
+            Texture2D tex2D = new Texture2D(1, 1);
+            tex2D.LoadImage(source);
             var alphaCheck = Encoding.UTF8.GetString(source, 24, 4);
             
             //HORRIBLE Temp hack.
             var hasAlpha = alphaCheck == "ALFA";
             if (hasAlpha)
             {
-                var pixels = fTex.GetPixels();
+                var pixels = tex2D.GetPixels();
                 for(var i=0;i<pixels.Length;i++)
                 {
                     var pixel = pixels[i];
@@ -45,7 +45,7 @@ namespace OpenTS2.Engine.Core
                         pixels[i] = Color.clear;
                     }
                 }
-                var alphaTex = new Texture2D(fTex.width, fTex.height, TextureFormat.RGBA32, true);
+                var alphaTex = new Texture2D(tex2D.width, tex2D.height, TextureFormat.RGBA32, true);
                 alphaTex.SetPixels(pixels);
                 alphaTex.Apply();
                 //this sucks a lot
@@ -89,7 +89,7 @@ namespace OpenTS2.Engine.Core
                 alphaTex.Apply();
                 return alphaTex;
             }*/
-            return fTex;
+            return tex2D;
         }
         #if REMOVE_STRAY_PIXELS
         void RemoveStrayPixels(ref Texture2D texture)
@@ -158,12 +158,12 @@ namespace OpenTS2.Engine.Core
 
         public override object CreateTexture(PalettizedARCTexture source)
         {
-            var texture = new Texture2D(source.width, source.height);
-            for (var i = 0; i < source.width; i++)
+            var texture = new Texture2D(source.Width, source.Height);
+            for (var i = 0; i < source.Width; i++)
             {
-                for (var n = 0; n < source.height; n++)
+                for (var n = 0; n < source.Height; n++)
                 {
-                    var col = source.palette[source.pixels[n + i * source.width]];
+                    var col = source.Palette[source.Pixels[n + i * source.Width]];
                     texture.SetPixel(n, i, col.UnityColor);
                 }
             }

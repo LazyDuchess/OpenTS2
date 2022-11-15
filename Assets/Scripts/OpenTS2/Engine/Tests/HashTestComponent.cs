@@ -23,7 +23,7 @@ namespace OpenTS2.Engine.Tests
             ulong ret = 0;
             foreach (byte b in input)
             {
-                ret = ret << 8;
+                ret <<= 8;
                 ret += b;
             }
 

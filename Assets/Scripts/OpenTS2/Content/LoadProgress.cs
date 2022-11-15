@@ -8,6 +8,6 @@ namespace OpenTS2.Content
 {
     public class LoadProgress
     {
-        public float percentage = 0f;
+        public float Percentage = 0f;
     }
 }

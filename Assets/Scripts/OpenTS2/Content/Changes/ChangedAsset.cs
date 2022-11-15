@@ -14,15 +14,15 @@ namespace OpenTS2.Content.Changes
         {
             get
             {
-                return asset.Compressed;
+                return Asset.Compressed;
             }
         }
-        public AbstractCodec codec;
-        public override byte[] bytes
+        public AbstractCodec Codec;
+        public override byte[] Bytes
         {
             get
             {
-                return codec.Serialize(asset);
+                return Codec.Serialize(Asset);
             }
             set
             {
@@ -31,13 +31,13 @@ namespace OpenTS2.Content.Changes
         }
         public ChangedAsset(AbstractAsset asset, AbstractCodec codec)
         {
-            this.asset = asset;
-            this.codec = codec;
-            this.entry = new DynamicDBPFEntry()
+            this.Asset = asset;
+            this.Codec = codec;
+            this.Entry = new DynamicDBPFEntry()
             {
-                dynamic = true,
-                change = this,
-                package = asset.package
+                Dynamic = true,
+                Change = this,
+                Package = asset.Package
             };
         }
         public ChangedAsset(AbstractAsset asset) : this(asset, Codecs.Get(asset.TGI.TypeID))

@@ -17,17 +17,17 @@ namespace OpenTS2.Client
     /// </summary>
     public class Settings
     {
-        static Settings INSTANCE;
-        public Languages language = Languages.USEnglish;
-        public bool customContentEnabled = true;
+        static Settings s_instance;
+        public Languages Language = Languages.USEnglish;
+        public bool CustomContentEnabled = true;
 
         public static Settings Get()
         {
-            return INSTANCE;
+            return s_instance;
         }
         public Settings()
         {
-            INSTANCE = this;
+            s_instance = this;
         }
     }
 }

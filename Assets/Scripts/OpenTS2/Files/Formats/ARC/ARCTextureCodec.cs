@@ -22,10 +22,10 @@ namespace OpenTS2.Files.Formats.ARC
     /// </summary>
     public class PalettizedARCTexture
     {
-        public int width = 0;
-        public int height = 0;
-        public List<Color> palette = new List<Color>();
-        public List<int> pixels = new List<int>();
+        public int Width = 0;
+        public int Height = 0;
+        public List<Color> Palette = new List<Color>();
+        public List<int> Pixels = new List<int>();
     }
 
     /// <summary>
@@ -50,8 +50,8 @@ namespace OpenTS2.Files.Formats.ARC
             //pad
             io.Skip(4);
             //sizes
-            texture.width = io.ReadUInt16();
-            texture.height = io.ReadUInt16();
+            texture.Width = io.ReadUInt16();
+            texture.Height = io.ReadUInt16();
             //dunno
             io.Skip(4);
             //bit flags?
@@ -59,7 +59,7 @@ namespace OpenTS2.Files.Formats.ARC
             //pad
             io.Skip(4);
             var colorPos = io.Position;
-            io.Skip(texture.width * texture.height);
+            io.Skip(texture.Width * texture.Height);
             for (var i = 0; i < 256; i++)
             {
                 var R = (float)io.ReadByte() / (float)byte.MaxValue;
@@ -67,14 +67,14 @@ namespace OpenTS2.Files.Formats.ARC
                 var B = (float)io.ReadByte() / (float)byte.MaxValue;
                 var A = (float)io.ReadByte() / 128f;
                 var col = new Color(R, G, B, A);
-                texture.palette.Add(col);
+                texture.Palette.Add(col);
             }
             io.Seek(SeekOrigin.Begin, colorPos);
-            for (var i = 0; i < texture.width; i++)
+            for (var i = 0; i < texture.Width; i++)
             {
-                for (var n = 0; n < texture.height; n++)
+                for (var n = 0; n < texture.Height; n++)
                 {
-                    texture.pixels.Add((int)io.ReadByte());
+                    texture.Pixels.Add((int)io.ReadByte());
                 }
             }
             return new TextureAsset(Factories.TextureFactory.CreateTexture(texture));

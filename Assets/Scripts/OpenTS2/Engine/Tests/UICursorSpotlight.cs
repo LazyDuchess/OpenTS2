@@ -9,29 +9,29 @@ namespace OpenTS2.Engine.Tests
 {
     public class UICursorSpotlight : MonoBehaviour
     {
-        private Mesh mesh = null;
-        public MeshFilter meshFilter;
-        public Canvas canvas;
-        public Vector3 origin;
-        public Vector3 boxSize;
+        private Mesh _mesh = null;
+        public MeshFilter MeshFilter;
+        public Canvas Canvas;
+        public Vector3 Origin;
+        public Vector3 BoxSize;
         public float Thickness = 1f;
-        public int resolution = 8;
-        public float round = 0.14f;
+        public int Resolution = 8;
+        public float Roundness = 0.14f;
 
-        public bool followMouse = true;
-        public Vector3 movePos = Vector3.zero;
+        public bool FollowMouse = true;
+        public Vector3 MovePosition = Vector3.zero;
 
         void Update()
         {
-            if (followMouse)
+            if (FollowMouse)
             {
                 RectTransformUtility.ScreenPointToWorldPointInRectangle(
-                    canvas.transform as RectTransform,
-                    Input.mousePosition, canvas.worldCamera,
-                    out movePos);
-                movePos = this.transform.InverseTransformPoint(movePos);
+                    Canvas.transform as RectTransform,
+                    Input.mousePosition, Canvas.worldCamera,
+                    out MovePosition);
+                MovePosition = this.transform.InverseTransformPoint(MovePosition);
             }
-            MakeMeshNew(movePos);
+            MakeMeshNew(MovePosition);
         }
 
         public void MakeRoundedRectangle(int vertexCount, float edgeRound, Vector3 origin, Vector3 boxSize, ref List<Vector3> verts, ref List<int> indices, ref List<Color> colors)
@@ -79,7 +79,7 @@ namespace OpenTS2.Engine.Tests
             m_Triangles[count * 3 - 1] = 1 + verts.Count;
 
             verts.AddRange(m_Vertices);
-            foreach (var element in m_Vertices)
+            for(var i=0;i<m_Vertices.Length;i++)
             {
                 colors.Add(Color.white);
             }
@@ -88,26 +88,26 @@ namespace OpenTS2.Engine.Tests
 
         void MakeMeshNew(Vector3 position)
         {
-            position.z = origin.z;
+            position.z = Origin.z;
 
-            if (mesh == null)
+            if (_mesh == null)
             {
-                mesh = new Mesh();
-                mesh.MarkDynamic();
+                _mesh = new Mesh();
+                _mesh.MarkDynamic();
             }
             var verts = new List<Vector3>();
             var indices = new List<int>();
             var colors = new List<Color>();
 
-            MakeRoundedRectangle(resolution, round, origin, boxSize, ref verts, ref indices, ref colors);
+            MakeRoundedRectangle(Resolution, Roundness, Origin, BoxSize, ref verts, ref indices, ref colors);
             ExtrudeIntoPos(ref verts, ref colors, ref indices, position);
             ExtrudeOutwards(ref indices, ref verts, ref colors, Thickness);
             
-            mesh.Clear();
-            mesh.vertices = verts.ToArray();
-            mesh.colors = colors.ToArray();
-            mesh.triangles = indices.ToArray();
-            meshFilter.sharedMesh = mesh;
+            _mesh.Clear();
+            _mesh.vertices = verts.ToArray();
+            _mesh.colors = colors.ToArray();
+            _mesh.triangles = indices.ToArray();
+            MeshFilter.sharedMesh = _mesh;
         }
 
         void ExtrudeIntoPos(ref List<Vector3> verts, ref List<Color> colors, ref List<int> indices, Vector3 position)
@@ -365,16 +365,6 @@ namespace OpenTS2.Engine.Tests
                 {
                     verts[extrudedVertices[endIndex]] = endVertex;
                 }
-            }
-            foreach (var element in extrudedVertices)
-            {
-                var ogIndex = element.Key;
-                var exIndex = element.Value;
-
-                var ogVertex = verts[ogIndex];
-                var exVertex = verts[exIndex];
-
-                //Debug.DrawLine(ogVertex, exVertex, Color.yellow, 0.1f);
             }
             foreach (var segment in finalSegments)
             {

@@ -10,13 +10,13 @@ namespace OpenTS2.Engine.Tests
 {
     public class ALFATest : MonoBehaviour
     {
-        public string sourceFile = "E:/TransparencyTest.png";
-        public string outputFile = "E:/TransparencyOut.alfa";
+        public string SourceFile = "E:/TransparencyTest.png";
+        public string OutputFile = "E:/TransparencyOut.alfa";
         private void Start()
         {
             var tex = new Texture2D(1, 1);
-            tex.LoadImage(File.ReadAllBytes(sourceFile));
-            var outStream = new FileStream(outputFile, FileMode.Create);
+            tex.LoadImage(File.ReadAllBytes(SourceFile));
+            var outStream = new FileStream(OutputFile, FileMode.Create);
             var outWriter = new BinaryWriter(outStream);
             outWriter.Write((ushort)0);
             outWriter.Write('A');

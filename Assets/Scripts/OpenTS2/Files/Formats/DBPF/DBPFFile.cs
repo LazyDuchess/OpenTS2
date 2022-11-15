@@ -27,12 +27,12 @@ namespace OpenTS2.Files.Formats.DBPF
     {
         public class DBPFFileChanges
         {
-            private DBPFFile owner;
-            private ContentProvider provider
+            private readonly DBPFFile _owner;
+            private ContentProvider Provider
             {
                 get
                 {
-                    return owner.Provider;
+                    return _owner.Provider;
                 }
             }
 
@@ -42,7 +42,7 @@ namespace OpenTS2.Files.Formats.DBPF
 
             public DBPFFileChanges(DBPFFile owner)
             {
-                this.owner = owner;
+                this._owner = owner;
             }
 
             /// <summary>
@@ -51,11 +51,11 @@ namespace OpenTS2.Files.Formats.DBPF
             /// </summary>
             public void Delete()
             {
-                provider?.RemoveFromResourceMap(owner);
-                var entries = owner.Entries;
+                Provider?.RemoveFromResourceMap(_owner);
+                var entries = _owner.Entries;
                 foreach(var element in entries)
                 {
-                    DeletedEntries[element.internalTGI] = true;
+                    DeletedEntries[element.InternalTGI] = true;
                 }
                 Dirty = true;
                 RefreshCache();
@@ -66,22 +66,22 @@ namespace OpenTS2.Files.Formats.DBPF
             /// </summary>
             public void Clear()
             {
-                provider?.RemoveFromResourceMap(owner);
+                Provider?.RemoveFromResourceMap(_owner);
                 DeletedEntries.Clear();
                 ChangedEntries.Clear();
                 Dirty = false;
-                provider?.UpdateOrAddToResourceMap(owner);
+                Provider?.UpdateOrAddToResourceMap(_owner);
                 RefreshCache();
             }
 
             void RefreshCache()
             {
-                provider?.Cache.RemoveAllForPackage(owner);
+                Provider?.Cache.RemoveAllForPackage(_owner);
             }
 
             void RefreshCache(ResourceKey tgi)
             {
-                provider?.Cache.Remove(tgi, owner);
+                Provider?.Cache.Remove(tgi, _owner);
             }
 
             /// <summary>
@@ -90,10 +90,10 @@ namespace OpenTS2.Files.Formats.DBPF
             /// <param name="entry">Entry to delete</param>
             public void Delete(DBPFEntry entry)
             {
-                DeletedEntries[entry.internalTGI] = true;
+                DeletedEntries[entry.InternalTGI] = true;
                 Dirty = true;
-                provider?.RemoveFromResourceMap(entry);
-                RefreshCache(entry.internalTGI);
+                Provider?.RemoveFromResourceMap(entry);
+                RefreshCache(entry.InternalTGI);
             }
 
             /// <summary>
@@ -102,12 +102,12 @@ namespace OpenTS2.Files.Formats.DBPF
             /// <param name="entry">Entry to undelete</param>
             public void Restore(DBPFEntry entry)
             {
-                if (DeletedEntries.ContainsKey(entry.internalTGI))
+                if (DeletedEntries.ContainsKey(entry.InternalTGI))
                 {
-                    DeletedEntries.Remove(entry.internalTGI);
+                    DeletedEntries.Remove(entry.InternalTGI);
                     Dirty = true;
-                    provider?.UpdateOrAddToResourceMap(entry);
-                    RefreshCache(entry.internalTGI);
+                    Provider?.UpdateOrAddToResourceMap(entry);
+                    RefreshCache(entry.InternalTGI);
                 }
             }
 
@@ -119,7 +119,7 @@ namespace OpenTS2.Files.Formats.DBPF
             {
                 DeletedEntries[tgi] = true;
                 Dirty = true;
-                provider?.RemoveFromResourceMap(tgi.LocalGroupID(owner.GroupID), owner);
+                Provider?.RemoveFromResourceMap(tgi.LocalGroupID(_owner.GroupID), _owner);
                 RefreshCache(tgi);
             }
             /// <summary>
@@ -132,7 +132,7 @@ namespace OpenTS2.Files.Formats.DBPF
                 {
                     DeletedEntries.Remove(tgi);
                     Dirty = true;
-                    provider?.UpdateOrAddToResourceMap(owner.GetEntryByTGI(tgi));
+                    Provider?.UpdateOrAddToResourceMap(_owner.GetEntryByTGI(tgi));
                     RefreshCache(tgi);
                 }
             }
@@ -155,14 +155,14 @@ namespace OpenTS2.Files.Formats.DBPF
             /// <param name="asset">Asset.</param>
             public void Set(AbstractAsset asset)
             {
-                asset.package = owner;
-                asset.globalTGI = asset.internalTGI.LocalGroupID(owner.GroupID);
+                asset.Package = _owner;
+                asset.GlobalTGI = asset.InternalTGI.LocalGroupID(_owner.GroupID);
                 var changedAsset = new ChangedAsset(asset);
-                ChangedEntries[asset.internalTGI] = changedAsset;
-                InternalRestore(asset.internalTGI);
+                ChangedEntries[asset.InternalTGI] = changedAsset;
+                InternalRestore(asset.InternalTGI);
                 Dirty = true;
-                provider?.UpdateOrAddToResourceMap(changedAsset.entry);
-                RefreshCache(asset.internalTGI);
+                Provider?.UpdateOrAddToResourceMap(changedAsset.Entry);
+                RefreshCache(asset.InternalTGI);
             }
             /// <summary>
             /// Save changes to a resource in memory.
@@ -172,12 +172,14 @@ namespace OpenTS2.Files.Formats.DBPF
             /// <param name="compressed">Compress?</param>
             public void Set(byte[] bytes, ResourceKey tgi, bool compressed)
             {
-                var changedFile = new ChangedFile(bytes, tgi, owner, Codecs.Get(tgi.TypeID));
-                changedFile.Compressed = compressed;
+                var changedFile = new ChangedFile(bytes, tgi, _owner, Codecs.Get(tgi.TypeID))
+                {
+                    Compressed = compressed
+                };
                 ChangedEntries[tgi] = changedFile;
                 InternalRestore(tgi);
                 Dirty = true;
-                provider?.UpdateOrAddToResourceMap(changedFile.entry);
+                Provider?.UpdateOrAddToResourceMap(changedFile.Entry);
                 RefreshCache(tgi);
             }
         }
@@ -195,7 +197,7 @@ namespace OpenTS2.Files.Formats.DBPF
         }
         bool _deleted = false;
         public bool DeleteIfEmpty = true;
-        private DBPFFileChanges m_changes;
+        private readonly DBPFFileChanges _changes;
         public ContentProvider Provider = null;
         
         /// <summary>
@@ -205,26 +207,26 @@ namespace OpenTS2.Files.Formats.DBPF
         {
             get
             {
-                return m_changes;
+                return _changes;
             }
         }
-        private string m_filePath = "";
+        private string _filePath = "";
         public string FilePath
         {
-            get { return m_filePath; }
+            get { return _filePath; }
             set
             {
                 var oldProvider = Provider;
                 oldProvider?.RemovePackage(this);
-                m_filePath = value;
-                GroupID = FileUtils.GroupHash(Path.GetFileNameWithoutExtension(m_filePath));
-                foreach(var element in m_EntriesList)
+                _filePath = value;
+                GroupID = FileUtils.GroupHash(Path.GetFileNameWithoutExtension(_filePath));
+                foreach(var element in _entriesList)
                 {
-                    element.globalTGI = element.internalTGI.LocalGroupID(GroupID);
+                    element.GlobalTGI = element.InternalTGI.LocalGroupID(GroupID);
                 }
                 foreach(var element in Changes.ChangedEntries)
                 {
-                    element.Value.entry.globalTGI = element.Value.entry.internalTGI.LocalGroupID(GroupID);
+                    element.Value.Entry.GlobalTGI = element.Value.Entry.InternalTGI.LocalGroupID(GroupID);
                 }
                 oldProvider?.AddPackage(this);
             }
@@ -234,9 +236,9 @@ namespace OpenTS2.Files.Formats.DBPF
 
         public uint IndexMajorVersion;
         public uint IndexMinorVersion;
-        private uint NumEntries;
+        private uint _numEntries;
         public uint GroupID;
-        private IoBuffer m_Reader;
+        private IoBuffer _reader;
 
         /// <summary>
         /// Returns true if this package is empty.
@@ -260,14 +262,14 @@ namespace OpenTS2.Files.Formats.DBPF
                 var finalEntries = new List<DBPFEntry>();
                 foreach(var element in basicEntries)
                 {
-                    if (Changes.DeletedEntries.ContainsKey(element.internalTGI))
+                    if (Changes.DeletedEntries.ContainsKey(element.InternalTGI))
                         continue;
-                    if (!Changes.ChangedEntries.ContainsKey(element.internalTGI))
+                    if (!Changes.ChangedEntries.ContainsKey(element.InternalTGI))
                         finalEntries.Add(element);
                 }
                 foreach(var element in Changes.ChangedEntries)
                 {
-                    finalEntries.Add(element.Value.entry);
+                    finalEntries.Add(element.Value.Entry);
                 }
                 return finalEntries;
             }
@@ -280,23 +282,25 @@ namespace OpenTS2.Files.Formats.DBPF
         {
             get
             {
-                return m_EntriesList;
+                return _entriesList;
             }
         }
-        private List<DBPFEntry> m_EntriesList = new List<DBPFEntry>();
-        private Dictionary<ResourceKey, DBPFEntry> m_EntryByTGI = new Dictionary<ResourceKey, DBPFEntry>();
+        private List<DBPFEntry> _entriesList = new List<DBPFEntry>();
+        private Dictionary<ResourceKey, DBPFEntry> _entryByTGI = new Dictionary<ResourceKey, DBPFEntry>();
         //private Dictionary<ResourceKey, DBPFEntry> m_EntryByInternalTGI = new Dictionary<ResourceKey, DBPFEntry>();
 
-        private Stream stream;
-        private IoBuffer Io;
+        private Stream _stream;
+        private IoBuffer _io;
 
         /// <summary>
         /// Constructs a new DBPF instance.
         /// </summary>
         public DBPFFile()
         {
-            m_changes = new DBPFFileChanges(this);
-            m_changes.Dirty = true;
+            _changes = new DBPFFileChanges(this)
+            {
+                Dirty = true
+            };
         }
 
         /// <summary>
@@ -305,11 +309,11 @@ namespace OpenTS2.Files.Formats.DBPF
         /// <param name="file">The path to an DBPF archive.</param>
         public DBPFFile(string file) : this()
         {
-            m_filePath = file;
+            _filePath = file;
             GroupID = FileUtils.GroupHash(Path.GetFileNameWithoutExtension(file));
             var stream = Filesystem.OpenRead(file);
             Read(stream);
-            m_changes.Dirty = false;
+            _changes.Dirty = false;
         }
 
         /// <summary>
@@ -318,13 +322,13 @@ namespace OpenTS2.Files.Formats.DBPF
         /// <param name="stream">The stream to read from.</param>
         public void Read(Stream stream)
         {
-            m_EntryByTGI = new Dictionary<ResourceKey, DBPFEntry>();
-            m_EntriesList = new List<DBPFEntry>();
+            _entryByTGI = new Dictionary<ResourceKey, DBPFEntry>();
+            _entriesList = new List<DBPFEntry>();
 
             var io = IoBuffer.FromStream(stream, ByteOrder.LITTLE_ENDIAN);
-            m_Reader = io;
-            this.Io = io;
-            this.stream = stream;
+            _reader = io;
+            this._io = io;
+            this._stream = stream;
 
             var magic = io.ReadCString(4);
             if (magic != "DBPF")
@@ -351,7 +355,7 @@ namespace OpenTS2.Files.Formats.DBPF
                 IndexMajorVersion = io.ReadUInt32();
             }
 
-            NumEntries = io.ReadUInt32();
+            _numEntries = io.ReadUInt32();
             uint indexOffset = 0;
             if (version < 2.0)
             {
@@ -376,7 +380,7 @@ namespace OpenTS2.Files.Formats.DBPF
             io.Skip(32);
 
             io.Seek(SeekOrigin.Begin, indexOffset);
-            for (int i = 0; i < NumEntries; i++)
+            for (int i = 0; i < _numEntries; i++)
             {
                 var entry = new DBPFEntry();
                 uint instanceHigh = 0x00000000;
@@ -388,14 +392,14 @@ namespace OpenTS2.Files.Formats.DBPF
                 var InstanceID = io.ReadUInt32();
                 if (IndexMinorVersion >= 2)
                     instanceHigh = io.ReadUInt32();
-                entry.globalTGI = new ResourceKey(InstanceID, instanceHigh, EntryGroupID, TypeID);
-                entry.internalTGI = new ResourceKey(InstanceID, instanceHigh, InternalGroupID, TypeID);
+                entry.GlobalTGI = new ResourceKey(InstanceID, instanceHigh, EntryGroupID, TypeID);
+                entry.InternalTGI = new ResourceKey(InstanceID, instanceHigh, InternalGroupID, TypeID);
                 entry.FileOffset = io.ReadUInt32();
                 entry.FileSize = io.ReadUInt32();
-                entry.package = this;
+                entry.Package = this;
 
-                m_EntriesList.Add(entry);
-                m_EntryByTGI[entry.internalTGI] = entry;
+                _entriesList.Add(entry);
+                _entryByTGI[entry.InternalTGI] = entry;
             }
             _compressionDIR = (DIRAsset)GetAssetByTGI(ResourceKey.DIR);
         }
@@ -483,10 +487,10 @@ namespace OpenTS2.Files.Formats.DBPF
             for(var i=0;i<entries.Count;i++)
             {
                 var element = entries[i];
-                writer.Write(element.internalTGI.TypeID);
-                writer.Write(element.internalTGI.GroupID);
-                writer.Write(element.internalTGI.InstanceID);
-                writer.Write(element.internalTGI.InstanceHigh);
+                writer.Write(element.InternalTGI.TypeID);
+                writer.Write(element.InternalTGI.GroupID);
+                writer.Write(element.InternalTGI.InstanceID);
+                writer.Write(element.InternalTGI.InstanceHigh);
                 entryOffset.Add(wStream.Position);
                 writer.Write(0);
                 //File Size
@@ -502,7 +506,7 @@ namespace OpenTS2.Files.Formats.DBPF
                 wStream.Position = filePosition;
                 var entry = entries[i];
                 var entryData = GetEntry(entry);
-                if (dirAsset != null && dirAsset.GetUncompressedSize(entry.internalTGI) != 0)
+                if (dirAsset != null && dirAsset.GetUncompressedSize(entry.InternalTGI) != 0)
                 {
                     entryData = DBPFCompression.Compress(entryData);
                     var lastPosition = wStream.Position;
@@ -531,22 +535,22 @@ namespace OpenTS2.Files.Formats.DBPF
             {
                 if (element is DynamicDBPFEntry dynamicEntry)
                 {
-                    if (dynamicEntry.change.Compressed)
-                        dirAsset.m_SizeByInternalTGI[element.internalTGI] = (uint)dynamicEntry.change.bytes.Length;
+                    if (dynamicEntry.Change.Compressed)
+                        dirAsset.SizeByInternalTGI[element.InternalTGI] = (uint)dynamicEntry.Change.Bytes.Length;
                 }
                 else
                 {
                     var uncompressedSize = InternalUncompressedSize(element);
                     if (uncompressedSize > 0)
-                        dirAsset.m_SizeByInternalTGI[element.internalTGI] = uncompressedSize;
+                        dirAsset.SizeByInternalTGI[element.InternalTGI] = uncompressedSize;
                 }
             }
-            if (dirAsset.m_SizeByInternalTGI.Count == 0)
+            if (dirAsset.SizeByInternalTGI.Count == 0)
             {
                 Changes.Delete(ResourceKey.DIR);
                 return;
             }
-            dirAsset.package = this;
+            dirAsset.Package = this;
             dirAsset.TGI = ResourceKey.DIR;
             dirAsset.Compressed = false;
             dirAsset.Save();
@@ -561,13 +565,13 @@ namespace OpenTS2.Files.Formats.DBPF
         {
             if (ignoreDeleted)
             {
-                if (Changes.DeletedEntries.ContainsKey(entry.internalTGI))
+                if (Changes.DeletedEntries.ContainsKey(entry.InternalTGI))
                     return null;
             }
-            if (Changes.ChangedEntries.ContainsKey(entry.internalTGI))
-                return Changes.ChangedEntries[entry.internalTGI].bytes;
-            m_Reader.Seek(SeekOrigin.Begin, entry.FileOffset);
-            var fileBytes = m_Reader.ReadBytes((int)entry.FileSize);
+            if (Changes.ChangedEntries.ContainsKey(entry.InternalTGI))
+                return Changes.ChangedEntries[entry.InternalTGI].Bytes;
+            _reader.Seek(SeekOrigin.Begin, entry.FileOffset);
+            var fileBytes = _reader.ReadBytes((int)entry.FileSize);
             var uncompressedSize = InternalUncompressedSize(entry);
             if (uncompressedSize > 0)
             {
@@ -589,22 +593,22 @@ namespace OpenTS2.Files.Formats.DBPF
                     return null;
             }
             if (Changes.ChangedEntries.ContainsKey(tgi))
-                return Changes.ChangedEntries[tgi].bytes;
-            if (m_EntryByTGI.ContainsKey(tgi))
-                return GetEntry(m_EntryByTGI[tgi]);
+                return Changes.ChangedEntries[tgi].Bytes;
+            if (_entryByTGI.ContainsKey(tgi))
+                return GetEntry(_entryByTGI[tgi]);
             else
                 return null;
         }
 
         uint InternalUncompressedSize(DBPFEntry entry)
         {
-            if (entry.internalTGI.TypeID == TypeIDs.DIR)
+            if (entry.InternalTGI.TypeID == TypeIDs.DIR)
                 return 0;
             var dirAsset = _compressionDIR;
             if (dirAsset == null)
                 return 0;
-            if (dirAsset.m_SizeByInternalTGI.ContainsKey(entry.internalTGI))
-                return dirAsset.m_SizeByInternalTGI[entry.internalTGI];
+            if (dirAsset.SizeByInternalTGI.ContainsKey(entry.InternalTGI))
+                return dirAsset.SizeByInternalTGI[entry.InternalTGI];
             return 0;
         }
 
@@ -625,17 +629,17 @@ namespace OpenTS2.Files.Formats.DBPF
         /// <returns></returns>
         public AbstractAsset GetAsset(DBPFEntry entry, bool ignoreDeleted = true)
         {
-            if (Changes.DeletedEntries.ContainsKey(entry.internalTGI) && ignoreDeleted)
+            if (Changes.DeletedEntries.ContainsKey(entry.InternalTGI) && ignoreDeleted)
                 return null;
-            if (Changes.ChangedEntries.ContainsKey(entry.internalTGI))
-                return Changes.ChangedEntries[entry.internalTGI].asset;
+            if (Changes.ChangedEntries.ContainsKey(entry.InternalTGI))
+                return Changes.ChangedEntries[entry.InternalTGI].Asset;
             var item = GetEntry(entry, ignoreDeleted);
-            var codec = Codecs.Get(entry.globalTGI.TypeID);
-            var asset = codec.Deserialize(item, entry.globalTGI, this);
+            var codec = Codecs.Get(entry.GlobalTGI.TypeID);
+            var asset = codec.Deserialize(item, entry.GlobalTGI, this);
             asset.Compressed = InternalUncompressedSize(entry) > 0;
-            asset.globalTGI = entry.globalTGI;
-            asset.internalTGI = entry.internalTGI;
-            asset.package = this;
+            asset.GlobalTGI = entry.GlobalTGI;
+            asset.InternalTGI = entry.InternalTGI;
+            asset.Package = this;
             return asset;
         }
 
@@ -662,9 +666,9 @@ namespace OpenTS2.Files.Formats.DBPF
             if (Changes.DeletedEntries.ContainsKey(tgi) && ignoreDeleted)
                 return null;
             if (Changes.ChangedEntries.ContainsKey(tgi))
-                return Changes.ChangedEntries[tgi].entry;
-            if (m_EntryByTGI.ContainsKey(tgi))
-                return m_EntryByTGI[tgi];
+                return Changes.ChangedEntries[tgi].Entry;
+            if (_entryByTGI.ContainsKey(tgi))
+                return _entryByTGI[tgi];
             else
                 return null;
         }
@@ -676,8 +680,8 @@ namespace OpenTS2.Files.Formats.DBPF
         /// </summary>
         public void Dispose()
         {
-            stream?.Dispose();
-            Io?.Dispose();
+            _stream?.Dispose();
+            _io?.Dispose();
         }
 
         #endregion

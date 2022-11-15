@@ -8,6 +8,6 @@ namespace OpenTS2.Content.DBPF
 {
     public partial class AudioAsset : AbstractAsset
     {
-        public byte[] audioData;
+        public byte[] AudioData;
     }
 }

@@ -46,12 +46,12 @@ namespace OpenTS2.Files.Formats.DBPF
             {
                 case "XA":
                     var xa = new XAFile(bytes);
-                    asset.audioData = xa.DecompressedData;
+                    asset.AudioData = xa.DecompressedData;
                     return asset;
                 case "UT":
                     var utk = new UTKFile(bytes);
                     utk.UTKDecode();
-                    asset.audioData = utk.DecompressedWav;
+                    asset.AudioData = utk.DecompressedWav;
                     return asset;
             }
             return asset;

@@ -8,7 +8,7 @@ namespace OpenTS2.Content.DBPF
 {
     public class ObjectDefinitionAsset : AbstractAsset
     {
-        public string filename;
-        public uint guid;
+        public string FileName;
+        public uint GUID;
     }
 }

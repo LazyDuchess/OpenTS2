@@ -21,39 +21,40 @@ namespace OpenTS2.Common
     {
         public static ResourceKey Default
         {
-            get { return _Default; }
+            get { return s_default; }
         }
         public static ResourceKey DIR
         {
-            get { return _DIR; }
+            get { return s_dir; }
         }
-        static ResourceKey _Default = new ResourceKey(0, 0, 0);
-        static ResourceKey _DIR = new ResourceKey(0x286B1F03, 0xE86B1EEF, 0xE86B1EEF);
-
-        private uint _InstanceID;
-        private uint _InstanceHigh;
-        private uint _GroupID;
-        private uint _TypeID;
 
         public uint InstanceID
         {
-            get { return _InstanceID; }
+            get { return _instanceID; }
         }
 
         public uint InstanceHigh
         {
-            get { return _InstanceHigh; }
+            get { return _instanceHigh; }
         }
 
         public uint GroupID
         {
-            get { return _GroupID; }
+            get { return _groupID; }
         }
 
         public uint TypeID
         {
-            get { return _TypeID; }
+            get { return _typeID; }
         }
+
+        static readonly ResourceKey s_default = new ResourceKey(0, 0, 0);
+        static readonly ResourceKey s_dir = new ResourceKey(0x286B1F03, 0xE86B1EEF, 0xE86B1EEF);
+
+        private readonly uint _instanceID;
+        private readonly uint _instanceHigh;
+        private readonly uint _groupID;
+        private readonly uint _typeID;
 
         /// <summary>
         /// Returns new TGI with its Group ID replaced with Groups.Local, but only if our Group ID equals localGroupID
@@ -91,10 +92,10 @@ namespace OpenTS2.Common
         /// <param name="typeID">Type ID</param>
         public ResourceKey(uint instanceID, uint groupID, uint typeID)
         {
-            this._InstanceID = instanceID;
-            this._InstanceHigh = 0x00000000;
-            this._GroupID = groupID;
-            this._TypeID = typeID;
+            this._instanceID = instanceID;
+            this._instanceHigh = 0x00000000;
+            this._groupID = groupID;
+            this._typeID = typeID;
         }
 
         /// <summary>
@@ -106,10 +107,10 @@ namespace OpenTS2.Common
         /// <param name="typeID">Type ID</param>
         public ResourceKey(uint instanceID, uint instanceHigh, uint groupID, uint typeID)
         {
-            this._InstanceID = instanceID;
-            this._InstanceHigh = instanceHigh;
-            this._GroupID = groupID;
-            this._TypeID = typeID;
+            this._instanceID = instanceID;
+            this._instanceHigh = instanceHigh;
+            this._groupID = groupID;
+            this._typeID = typeID;
         }
 
         /// <summary>
@@ -121,10 +122,10 @@ namespace OpenTS2.Common
         /// <param name="typeID">Type ID</param>
         public ResourceKey(string filename, uint groupID, uint typeID)
         {
-            this._InstanceID = FileUtils.LowHash(filename);
-            this._InstanceHigh = FileUtils.HighHash(filename);
-            this._GroupID = groupID;
-            this._TypeID = typeID;
+            this._instanceID = FileUtils.LowHash(filename);
+            this._instanceHigh = FileUtils.HighHash(filename);
+            this._groupID = groupID;
+            this._typeID = typeID;
         }
         /// <summary>
         /// Creates a Instance ID, Instance (High), Group ID and Type ID reference.
@@ -135,10 +136,10 @@ namespace OpenTS2.Common
         /// <param name="typeID">Type ID</param>
         public ResourceKey(string filename, string groupName, uint typeID)
         {
-            this._InstanceID = FileUtils.LowHash(filename);
-            this._InstanceHigh = FileUtils.HighHash(filename);
-            this._GroupID = FileUtils.GroupHash(groupName);
-            this._TypeID = typeID;
+            this._instanceID = FileUtils.LowHash(filename);
+            this._instanceHigh = FileUtils.HighHash(filename);
+            this._groupID = FileUtils.GroupHash(groupName);
+            this._typeID = typeID;
         }
         /// <summary>
         /// Creates a Instance ID, Instance (High), Group ID and Type ID reference.
@@ -150,10 +151,10 @@ namespace OpenTS2.Common
         /// <param name="typeID">Type ID</param>
         public ResourceKey(uint instanceID, uint instanceHigh, string groupName, uint typeID)
         {
-            this._InstanceID = instanceID;
-            this._InstanceHigh = instanceHigh;
-            this._GroupID = FileUtils.GroupHash(groupName);
-            this._TypeID = typeID;
+            this._instanceID = instanceID;
+            this._instanceHigh = instanceHigh;
+            this._groupID = FileUtils.GroupHash(groupName);
+            this._typeID = typeID;
         }
         /// <summary>
         /// Creates a Instance ID, Group ID and Type ID reference.
@@ -164,10 +165,10 @@ namespace OpenTS2.Common
         /// <param name="typeID">Type ID</param>
         public ResourceKey(uint instanceID, string groupName, uint typeID)
         {
-            this._InstanceID = instanceID;
-            this._InstanceHigh = 0x00000000;
-            this._GroupID = FileUtils.GroupHash(groupName);
-            this._TypeID = typeID;
+            this._instanceID = instanceID;
+            this._instanceHigh = 0x00000000;
+            this._groupID = FileUtils.GroupHash(groupName);
+            this._typeID = typeID;
         }
 
         public override int GetHashCode()
@@ -175,10 +176,10 @@ namespace OpenTS2.Common
             unchecked // Overflow is fine, just wrap
             {
                 int hash = 17;
-                hash = hash * 23 + _InstanceID.GetHashCode();
-                hash = hash * 23 + _InstanceHigh.GetHashCode();
-                hash = hash * 23 + _TypeID.GetHashCode();
-                hash = hash * 23 + _GroupID.GetHashCode();
+                hash = hash * 23 + _instanceID.GetHashCode();
+                hash = hash * 23 + _instanceHigh.GetHashCode();
+                hash = hash * 23 + _typeID.GetHashCode();
+                hash = hash * 23 + _groupID.GetHashCode();
                 return hash;
             }
         }

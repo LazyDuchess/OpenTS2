@@ -8,10 +8,10 @@ namespace OpenTS2.Content.DBPF
 {
     public class AssemblyAsset : AbstractAsset
     {
-        public readonly byte[] data;
+        public readonly byte[] Data;
         public AssemblyAsset(byte[] data)
         {
-            this.data = data;
+            this.Data = data;
         }
     }
 }

@@ -9,11 +9,11 @@ namespace OpenTS2.Content.DBPF
         {
             get
             {
-                if (_Clip == null)
-                    _Clip = WavUtility.ToAudioClip(audioData, 0, TGI.ToString());
-                return _Clip;
+                if (_clip == null)
+                    _clip = WavUtility.ToAudioClip(AudioData, 0, TGI.ToString());
+                return _clip;
             }
         }
-        AudioClip _Clip;
+        AudioClip _clip;
     }
 }

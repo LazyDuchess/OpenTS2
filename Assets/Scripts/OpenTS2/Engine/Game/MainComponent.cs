@@ -9,11 +9,11 @@ using OpenTS2.Engine.Core;
 
 namespace OpenTS2.Engine.Game
 {
-    class GameController : MonoBehaviour
+    class MainComponent : MonoBehaviour
     {
         private void Awake()
         {
-            GameEngine.Initialize();
+            Main.Initialize();
         }
     }
 }

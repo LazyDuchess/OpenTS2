@@ -11,8 +11,8 @@ namespace OpenTS2.Content.Changes
     public abstract class AbstractChanged
     {
         public virtual bool Compressed { get; set; } = false;
-        public virtual AbstractAsset asset { get; set; }
-        public virtual byte[] bytes { get; set; }
-        public DBPFEntry entry;
+        public virtual AbstractAsset Asset { get; set; }
+        public virtual byte[] Bytes { get; set; }
+        public DBPFEntry Entry;
     }
 }

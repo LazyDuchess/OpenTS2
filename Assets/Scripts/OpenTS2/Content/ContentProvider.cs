@@ -29,11 +29,11 @@ namespace OpenTS2.Content
             get { return _contentEntries; }
         }
 
-        private Dictionary<ResourceKey, DBPFEntry> _resourceMap = new Dictionary<ResourceKey, DBPFEntry>();
-        private List<DBPFFile> _contentEntries = new List<DBPFFile>();
-        private Dictionary<uint, DBPFFile> entryByGroupID = new Dictionary<uint, DBPFFile>();
-        private Dictionary<string, DBPFFile> entryByPath = new Dictionary<string, DBPFFile>();
-        private Dictionary<DBPFFile, DBPFFile> entryByFile = new Dictionary<DBPFFile, DBPFFile>();
+        private readonly Dictionary<ResourceKey, DBPFEntry> _resourceMap = new Dictionary<ResourceKey, DBPFEntry>();
+        private readonly List<DBPFFile> _contentEntries = new List<DBPFFile>();
+        private readonly Dictionary<uint, DBPFFile> _entryByGroupID = new Dictionary<uint, DBPFFile>();
+        private readonly Dictionary<string, DBPFFile> _entryByPath = new Dictionary<string, DBPFFile>();
+        private readonly Dictionary<DBPFFile, DBPFFile> _entryByFile = new Dictionary<DBPFFile, DBPFFile>();
         public ContentCache Cache;
         public ContentChanges Changes;
         public delegate void ResourceChangedDelegate(ResourceKey key);
@@ -47,7 +47,7 @@ namespace OpenTS2.Content
 
         AbstractAsset InternalLoadAsset(CacheKey key)
         {
-            return key.file.GetAssetByTGI(key.tgi);
+            return key.File.GetAssetByTGI(key.TGI);
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace OpenTS2.Content
         /// <returns>List of DBPFEntries of specified type.</returns>
         public List<DBPFEntry> GetEntriesOfType(uint typeID)
         {
-            return _resourceMap.Where(map => map.Value.globalTGI.TypeID == typeID).ToDictionary(x => x.Key, x => x.Value).Values.ToList();
+            return _resourceMap.Where(map => map.Value.GlobalTGI.TypeID == typeID).ToDictionary(x => x.Key, x => x.Value).Values.ToList();
         }
 
         /// <summary>
@@ -165,8 +165,10 @@ namespace OpenTS2.Content
             var packages = new List<AsyncDBPFFile>();
             for(var i=0;i<paths.Length;i++)
             {
-                var async = new AsyncDBPFFile();
-                async.path = paths[i];
+                var async = new AsyncDBPFFile
+                {
+                    path = paths[i]
+                };
                 packages.Add(async);
                 var capturedI = i;
                 var fileCount = paths.Length;
@@ -175,8 +177,8 @@ namespace OpenTS2.Content
                     if (loadProgress != null)
                     {
                         var progress = (float)capturedI / fileCount;
-                        if (loadProgress.percentage < progress)
-                            loadProgress.percentage = (float)capturedI / fileCount;
+                        if (loadProgress.Percentage < progress)
+                            loadProgress.Percentage = (float)capturedI / fileCount;
                     }
                 }));
             }
@@ -186,7 +188,7 @@ namespace OpenTS2.Content
                 {
                     AddPackage(element.file);
                 }
-                loadProgress.percentage = 1f;
+                loadProgress.Percentage = 1f;
             }, TaskScheduler.FromCurrentSynchronizationContext());
         }
 
@@ -198,8 +200,8 @@ namespace OpenTS2.Content
         public DBPFFile AddPackage(string path)
         {
             var realPath = Filesystem.GetRealPath(path);
-            if (entryByPath.ContainsKey(realPath))
-                return entryByPath[realPath];
+            if (_entryByPath.ContainsKey(realPath))
+                return _entryByPath[realPath];
             var package = new DBPFFile(path);
             InternalAddPackage(package);
             return package;
@@ -208,17 +210,17 @@ namespace OpenTS2.Content
         void InternalAddPackage(DBPFFile package)
         {
             package.Provider = this;
+            //Resource map goes from first to last, keeps the first resource it finds with the requested TGI.
             _contentEntries.Insert(0, package);
             AddToTopOfResourceMap(package);
-            entryByGroupID[package.GroupID] = package;
-            entryByPath[package.FilePath] = package;
-            entryByFile[package] = package;
+            _entryByGroupID[package.GroupID] = package;
+            _entryByPath[package.FilePath] = package;
+            _entryByFile[package] = package;
         }
 
         public DBPFEntry GetFromResourceMap(ResourceKey key)
         {
-            DBPFEntry output = null;
-            if (_resourceMap.TryGetValue(key, out output))
+            if (_resourceMap.TryGetValue(key, out DBPFEntry output))
                 return output;
             return null;
         }
@@ -242,8 +244,8 @@ namespace OpenTS2.Content
         /// <param name="entry">Entry to add</param>
         public void AddToTopOfResourceMap(DBPFEntry entry)
         {
-            _resourceMap[entry.globalTGI] = entry;
-            OnContentChangedEventHandler?.Invoke(entry.globalTGI);
+            _resourceMap[entry.GlobalTGI] = entry;
+            OnContentChangedEventHandler?.Invoke(entry.GlobalTGI);
         }
 
         /// <summary>
@@ -265,21 +267,20 @@ namespace OpenTS2.Content
         /// <param name="entry">Entry to add to resource map</param>
         public void UpdateOrAddToResourceMap(DBPFEntry entry)
         {
-            DBPFEntry output;
-            if (_resourceMap.TryGetValue(entry.globalTGI, out output))
+            if (_resourceMap.TryGetValue(entry.GlobalTGI, out DBPFEntry output))
             {
-                if (entry.package == output.package)
+                if (entry.Package == output.Package)
                 {
-                    _resourceMap[entry.globalTGI] = entry;
+                    _resourceMap[entry.GlobalTGI] = entry;
                 }
                 else
                 {
-                    FindEntryForMap(entry.globalTGI);
+                    FindEntryForMap(entry.GlobalTGI);
                 }
             }
             else
                 AddToTopOfResourceMap(entry);
-            OnContentChangedEventHandler?.Invoke(entry.globalTGI);
+            OnContentChangedEventHandler?.Invoke(entry.GlobalTGI);
         }
 
         /// <summary>
@@ -300,7 +301,7 @@ namespace OpenTS2.Content
         /// <param name="entry">Entry for resource</param>
         public void RemoveFromResourceMap(DBPFEntry entry)
         {
-            RemoveFromResourceMap(entry.globalTGI, entry.package);
+            RemoveFromResourceMap(entry.GlobalTGI, entry.Package);
         }
 
         /// <summary>
@@ -310,10 +311,9 @@ namespace OpenTS2.Content
         /// <param name="package">Package</param>
         public void RemoveFromResourceMap(ResourceKey tgi, DBPFFile package)
         {
-            DBPFEntry output;
-            if (_resourceMap.TryGetValue(tgi, out output))
+            if (_resourceMap.TryGetValue(tgi, out DBPFEntry output))
             {
-                if (package == output.package)
+                if (package == output.Package)
                 {
                     _resourceMap.Remove(tgi);
                     FindEntryForMap(tgi);
@@ -353,9 +353,9 @@ namespace OpenTS2.Content
         /// <returns>Content entry for package.</returns>
         public void AddPackage(DBPFFile package)
         {
-            if (entryByPath.ContainsKey(package.FilePath))
+            if (_entryByPath.ContainsKey(package.FilePath))
             {
-                RemovePackage(entryByPath[package.FilePath]);
+                RemovePackage(_entryByPath[package.FilePath]);
             }
             InternalAddPackage(package);
         }
@@ -367,15 +367,15 @@ namespace OpenTS2.Content
         public void RemovePackage(DBPFFile package)
         {
             //package.Dispose();
-            if (entryByFile.ContainsKey(package))
+            if (_entryByFile.ContainsKey(package))
             {
                 package.Provider = null;
                 RemoveFromResourceMap(package);
                 Cache.RemoveAllForPackage(package);
                 _contentEntries.Remove(package);
-                entryByGroupID.Remove(package.GroupID);
-                entryByPath.Remove(package.FilePath);
-                entryByFile.Remove(package);
+                _entryByGroupID.Remove(package.GroupID);
+                _entryByPath.Remove(package.FilePath);
+                _entryByFile.Remove(package);
             }
         }
 
@@ -386,8 +386,8 @@ namespace OpenTS2.Content
         /// <returns>Content entry for package.</returns>
         public DBPFFile GetPackageByGroup(uint groupID)
         {
-            if (entryByGroupID.ContainsKey(groupID))
-                return entryByGroupID[groupID];
+            if (_entryByGroupID.ContainsKey(groupID))
+                return _entryByGroupID[groupID];
             else
                 return null;
         }
@@ -400,8 +400,8 @@ namespace OpenTS2.Content
         public DBPFFile GetPackageByGroup(string groupName)
         {
             var groupID = FileUtils.GroupHash(groupName);
-            if (entryByGroupID.ContainsKey(groupID))
-                return entryByGroupID[groupID];
+            if (_entryByGroupID.ContainsKey(groupID))
+                return _entryByGroupID[groupID];
             else
                 return null;
         }
@@ -414,8 +414,8 @@ namespace OpenTS2.Content
         public DBPFFile GetPackageByPath(string path)
         {
             path = Filesystem.GetRealPath(path);
-            if (entryByPath.ContainsKey(path))
-                return entryByPath[path];
+            if (_entryByPath.ContainsKey(path))
+                return _entryByPath[path];
             else
                 return null;
         }

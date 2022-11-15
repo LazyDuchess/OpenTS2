@@ -29,16 +29,16 @@ namespace OpenTS2.Engine.Core
     /// </summary>
     public class JSONPathProvider : IPathProvider
     {
-        JSONConfig config;
+        readonly JSONConfig _config;
         public JSONPathProvider()
         {
             var dir = new DirectoryInfo(Application.dataPath).Parent.FullName;
-            config = JsonUtility.FromJson<JSONConfig>(File.ReadAllText(Path.Combine(dir, "config.json")));
+            _config = JsonUtility.FromJson<JSONConfig>(File.ReadAllText(Path.Combine(dir, "config.json")));
         }
         public string GetPathForProduct(ProductFlags productFlag)
         {
             var index = Array.IndexOf(Enum.GetValues(productFlag.GetType()), productFlag);
-            return Path.Combine(config.game_dir,config.dlc[index]);
+            return Path.Combine(_config.game_dir,_config.dlc[index]);
         }
 
         public string GetDataPathForProduct(ProductFlags productFlag)
@@ -53,7 +53,7 @@ namespace OpenTS2.Engine.Core
 
         public string GetUserPath()
         {
-            return config.user_dir;
+            return _config.user_dir;
         }
     }
 }

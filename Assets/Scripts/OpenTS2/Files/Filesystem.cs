@@ -21,8 +21,8 @@ namespace OpenTS2.Files
     /// </summary>
     public static class Filesystem
     {
-        static IPathProvider _PathProvider;
-        static EPManager _EPManager;
+        static IPathProvider s_pathProvider;
+        static EPManager s_epManager;
 
         static string UserDataDirectory
         {
@@ -41,13 +41,13 @@ namespace OpenTS2.Files
 
         public static void Initialize(IPathProvider pathProvider, EPManager EPManager)
         {
-            _PathProvider = pathProvider;
-            _EPManager = EPManager;
+            s_pathProvider = pathProvider;
+            s_epManager = EPManager;
         }
 
         public static List<string> GetStartupDownloadPackages()
         {
-            var userPath = _PathProvider.GetUserPath();
+            var userPath = s_pathProvider.GetUserPath();
             var downloadsPath = Path.Combine(userPath, "Downloads");
             var packages = GetPackagesInDirectory(downloadsPath);
             packages = packages.Where(x => FileUtils.CleanPath(x).ToLowerInvariant().Contains("/startup/")).ToList();
@@ -56,7 +56,7 @@ namespace OpenTS2.Files
 
         public static List<string> GetStreamedDownloadPackages()
         {
-            var userPath = _PathProvider.GetUserPath();
+            var userPath = s_pathProvider.GetUserPath();
             var downloadsPath = Path.Combine(userPath, "Downloads");
             var packages = GetPackagesInDirectory(downloadsPath);
             packages = packages.Where(x => !FileUtils.CleanPath(x).ToLowerInvariant().Contains("/startup/")).ToList();
@@ -65,7 +65,7 @@ namespace OpenTS2.Files
 
         public static List<string> GetUserPackages()
         {
-            var userPath = _PathProvider.GetUserPath();
+            var userPath = s_pathProvider.GetUserPath();
             var packageList = RemoveNeighborhoodAndCCPackagesFromList(GetPackagesInDirectory(userPath));
             /*
             var collectionsPath = Path.Combine(userPath, "Collections");
@@ -119,10 +119,10 @@ namespace OpenTS2.Files
         public static List<string> GetStartupPackages()
         {
             var startupList = new List<string>();
-            var productList = _EPManager.GetInstalledProducts();
+            var productList = s_epManager.GetInstalledProducts();
             foreach(var product in productList)
             {
-                var dataPath = _PathProvider.GetDataPathForProduct(product);
+                var dataPath = s_pathProvider.GetDataPathForProduct(product);
                 var uiPath = Path.Combine(dataPath, "Res/UI");
                 var textPath = Path.Combine(dataPath, "Res/Text");
                 var soundPath = Path.Combine(dataPath, "Res/Sound");
@@ -136,11 +136,11 @@ namespace OpenTS2.Files
         public static List<string> GetMainPackages()
         {
             var mainList = new List<string>();
-            var productList = _EPManager.GetInstalledProducts();
+            var productList = s_epManager.GetInstalledProducts();
             foreach (var product in productList)
             {
                 
-                var dataPath = _PathProvider.GetDataPathForProduct(product);
+                var dataPath = s_pathProvider.GetDataPathForProduct(product);
                 var catalogPath = Path.Combine(dataPath, "Res/Catalog");
                 var effectsPath = Path.Combine(dataPath, "Res/Effects");
                 
@@ -163,7 +163,7 @@ namespace OpenTS2.Files
 
                 mainList.AddRange(GetPackagesInDirectory(lightingPath));
 
-                if (_EPManager.GetLatestProduct() == product)
+                if (s_epManager.GetLatestProduct() == product)
                 {
                     var globalLotsPath = Path.Combine(dataPath, "Res/GlobalLots");
                     mainList.AddRange(GetPackagesInDirectory(globalLotsPath));
@@ -187,8 +187,10 @@ namespace OpenTS2.Files
             format = format.ToLowerInvariant();
             if (path.ToLowerInvariant().EndsWith(format) && File.Exists(path))
             {
-                var lst = new List<string>();
-                lst.Add(path);
+                var lst = new List<string>
+                {
+                    path
+                };
                 return lst;
             }
             if (!Directory.Exists(path))
@@ -206,22 +208,22 @@ namespace OpenTS2.Files
 
         public static string GetPathForProduct(ProductFlags product)
         {
-            return _PathProvider.GetPathForProduct(product);
+            return s_pathProvider.GetPathForProduct(product);
         }
 
         public static string GetDataPathForProduct(ProductFlags product)
         {
-            return _PathProvider.GetDataPathForProduct(product);
+            return s_pathProvider.GetDataPathForProduct(product);
         }
 
         public static string GetBinPathForProduct(ProductFlags product)
         {
-            return _PathProvider.GetBinPathForProduct(product);
+            return s_pathProvider.GetBinPathForProduct(product);
         }
 
         public static string GetUserPath()
         {
-            return _PathProvider.GetUserPath();
+            return s_pathProvider.GetUserPath();
         }
 
         /// <summary>
@@ -244,9 +246,9 @@ namespace OpenTS2.Files
         public static string GetShortPath(string path)
         {
             path = FileUtils.CleanPath(path) + "/";
-            path = path.Replace(_PathProvider.GetDataPathForProduct(_EPManager.GetLatestProduct()), DataDirectory);
-            path = path.Replace(_PathProvider.GetUserPath(), UserDataDirectory);
-            path = path.Replace(_PathProvider.GetBinPathForProduct(_EPManager.GetLatestProduct()), BinDirectory);
+            path = path.Replace(s_pathProvider.GetDataPathForProduct(s_epManager.GetLatestProduct()), DataDirectory);
+            path = path.Replace(s_pathProvider.GetUserPath(), UserDataDirectory);
+            path = path.Replace(s_pathProvider.GetBinPathForProduct(s_epManager.GetLatestProduct()), BinDirectory);
             path = FileUtils.CleanPath(path);
             return path;
         }
@@ -258,9 +260,9 @@ namespace OpenTS2.Files
         /// <returns>Real path</returns>
         public static string GetRealPath(string path)
         {
-            path = path.Replace(DataDirectory, _PathProvider.GetDataPathForProduct(_EPManager.GetLatestProduct()));
-            path = path.Replace(UserDataDirectory, _PathProvider.GetUserPath());
-            path = path.Replace(BinDirectory, _PathProvider.GetBinPathForProduct(_EPManager.GetLatestProduct()));
+            path = path.Replace(DataDirectory, s_pathProvider.GetDataPathForProduct(s_epManager.GetLatestProduct()));
+            path = path.Replace(UserDataDirectory, s_pathProvider.GetUserPath());
+            path = path.Replace(BinDirectory, s_pathProvider.GetBinPathForProduct(s_epManager.GetLatestProduct()));
             path = FileUtils.CleanPath(path);
             return path;
         }

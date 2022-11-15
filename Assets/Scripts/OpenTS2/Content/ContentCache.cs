@@ -16,27 +16,27 @@ namespace OpenTS2.Content
 {
     public class CacheKey
     {
-        public DBPFFile file = null;
-        public ResourceKey tgi = ResourceKey.Default;
-        private ContentProvider contentProvider;
+        public DBPFFile File = null;
+        public ResourceKey TGI = ResourceKey.Default;
+        private readonly ContentProvider _contentProvider;
 
         public CacheKey(ResourceKey tgi, DBPFFile package = null, ContentProvider provider = null)
         {
-            this.tgi = tgi;
-            this.file = package;
+            this.TGI = tgi;
+            this.File = package;
             if (provider == null)
             {
                 var contentManager = ContentManager.Get();
                 provider = contentManager.Provider;
             }
-            this.contentProvider = provider;
-            if (package == null && this.contentProvider != null)
+            this._contentProvider = provider;
+            if (package == null && this._contentProvider != null)
             {
-                this.file = this.contentProvider.GetFromResourceMap(this.tgi)?.package;
+                this.File = this._contentProvider.GetFromResourceMap(this.TGI)?.Package;
             }
-            if (this.file != null)
+            if (this.File != null)
             {
-                this.tgi = this.tgi.GlobalGroupID(this.file.GroupID);
+                this.TGI = this.TGI.GlobalGroupID(this.File.GroupID);
             }
         }
 
@@ -45,12 +45,12 @@ namespace OpenTS2.Content
             unchecked // Overflow is fine, just wrap
             {
                 int hash = 17;
-                hash = hash * 23 + tgi.InstanceID.GetHashCode();
-                hash = hash * 23 + tgi.InstanceHigh.GetHashCode();
-                hash = hash * 23 + tgi.TypeID.GetHashCode();
-                hash = hash * 23 + tgi.GroupID.GetHashCode();
-                if (file != null)
-                    hash = hash * 23 + (int)FileUtils.GroupHash(file.FilePath);
+                hash = hash * 23 + TGI.InstanceID.GetHashCode();
+                hash = hash * 23 + TGI.InstanceHigh.GetHashCode();
+                hash = hash * 23 + TGI.TypeID.GetHashCode();
+                hash = hash * 23 + TGI.GroupID.GetHashCode();
+                if (File != null)
+                    hash = hash * 23 + (int)FileUtils.GroupHash(File.FilePath);
                 return hash;
             }
         }
@@ -62,7 +62,7 @@ namespace OpenTS2.Content
 
         public bool Equals(CacheKey obj)
         {
-            return (tgi.InstanceHigh == obj.tgi.InstanceHigh && tgi.InstanceID == obj.tgi.InstanceID && tgi.GroupID == obj.tgi.GroupID && tgi.TypeID == obj.tgi.TypeID && obj.file == file);
+            return (TGI.InstanceHigh == obj.TGI.InstanceHigh && TGI.InstanceID == obj.TGI.InstanceID && TGI.GroupID == obj.TGI.GroupID && TGI.TypeID == obj.TGI.TypeID && obj.File == File);
         }
     }
     /// <summary>
@@ -103,8 +103,7 @@ namespace OpenTS2.Content
 
         WeakReference GetOrAddInternal(CacheKey key, Func<CacheKey, AbstractAsset> objectFactory)
         {
-            WeakReference result;
-            if (_cache.TryGetValue(key, out result))
+            if (_cache.TryGetValue(key, out WeakReference result))
             {
                 if (result.Target != null && result.IsAlive)
                 {
@@ -178,7 +177,7 @@ namespace OpenTS2.Content
 
         public void RemoveAllForPackage(DBPFFile package)
         {
-            _cache = _cache.Where(cache => cache.Key.file != package).ToDictionary(x => x.Key, x => x.Value);
+            _cache = _cache.Where(cache => cache.Key.File != package).ToDictionary(x => x.Key, x => x.Value);
         }
     }
 }

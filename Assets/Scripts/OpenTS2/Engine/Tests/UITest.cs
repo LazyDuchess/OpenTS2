@@ -20,15 +20,15 @@ namespace OpenTS2.Engine.Tests
 {
     public class UITest : MonoBehaviour
     {
-        public RawImage image;
-        public string packageToLoad = "E:/EA Games/bb/Downloads/Mods/zld_Nannies/ld_nanny_phone.package";
+        public RawImage Image;
+        public string PackageToLoad = "%UserDataDirectory%/Neighborhoods/N007/Thumbnails/N007_FamilyThumbnails.package";
 
         void Start()
         {
             var contentManager = ContentManager.Get();
-            contentManager.Provider.AddPackage(packageToLoad);
+            contentManager.Provider.AddPackage(PackageToLoad);
             var texture = contentManager.Provider.GetAsset<TextureAsset>(new ResourceKey(0x00000001, "N007_FamilyThumbnails", 0x8C3CE95A));
-            image.texture = texture.Texture;
+            Image.texture = texture.Texture;
         }
     }
 }

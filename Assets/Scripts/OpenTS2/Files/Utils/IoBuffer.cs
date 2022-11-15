@@ -25,7 +25,7 @@ namespace OpenTS2.Files.Utils
     /// <summary>
     /// IOBuffer is a very basic wrapper over System.BinaryReader that inherits from IDisposable.
     /// </summary>
-    public class IoBuffer : IDisposable, BCFReadProxy
+    public class IoBuffer : IDisposable, IBCFReadProxy
     {
         public long Position
         {

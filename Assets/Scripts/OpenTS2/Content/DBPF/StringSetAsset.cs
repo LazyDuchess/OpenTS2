@@ -19,18 +19,18 @@ namespace OpenTS2.Content.DBPF
     /// </summary>
     public class StringValue
     {
-        public string value;
-        public string description;
+        public string Value;
+        public string Description;
 
         public StringValue(string value, string description)
         {
-            this.value = value;
-            this.description = description;
+            this.Value = value;
+            this.Description = description;
         }
     }
     public class StringSetData
     {
-        public string fileName;
+        public string FileName;
         public Dictionary<Languages, List<StringValue>> strings = new Dictionary<Languages, List<StringValue>>();
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace OpenTS2.Content.DBPF
         /// <returns>Localized string.</returns>
         public string GetString(int id, Languages language)
         {
-            return strings[language][id].value;
+            return strings[language][id].Value;
         }
     }
     /// <summary>
@@ -51,9 +51,10 @@ namespace OpenTS2.Content.DBPF
     {
         public StringSetData StringData
         {
-            get { return _StringData; }
+            get { return _stringData; }
         }
-        StringSetData _StringData;
+
+        readonly StringSetData _stringData;
 
         /// <summary>
         /// Constructs a StringTable from StringTableData.
@@ -61,7 +62,7 @@ namespace OpenTS2.Content.DBPF
         /// <param name="str">STR to use</param>
         public StringSetAsset(StringSetData stringData)
         {
-            _StringData = stringData;
+            _stringData = stringData;
         }
 
         /// <summary>
@@ -71,7 +72,7 @@ namespace OpenTS2.Content.DBPF
         /// <returns>Localized string</returns>
         public string GetString(int id)
         {
-            return _StringData.GetString(id, Settings.Get().language);
+            return _stringData.GetString(id, Settings.Get().Language);
         }
     }
 }

@@ -19,7 +19,7 @@ namespace OpenTS2.Files.Formats.DBPF
     public static class Codecs
     {
         //AbstractCodec classes with CodecAttributes should be automatically added here.
-        static Dictionary<uint, AbstractCodec> codecsByTypeID = new Dictionary<uint, AbstractCodec>();
+        static Dictionary<uint, AbstractCodec> s_codecsByTypeID = new Dictionary<uint, AbstractCodec>();
 
         /// <summary>
         /// Register a codec.
@@ -28,7 +28,7 @@ namespace OpenTS2.Files.Formats.DBPF
         /// <param name="codec">Codec instance.</param>
         public static void Register(uint type, AbstractCodec codec)
         {
-            codecsByTypeID[type] = codec;
+            s_codecsByTypeID[type] = codec;
         }
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace OpenTS2.Files.Formats.DBPF
         /// <returns>Codec for this type.</returns>
         public static AbstractCodec Get(uint type)
         {
-            return codecsByTypeID[type];
+            return s_codecsByTypeID[type];
         }
     }
 }

@@ -37,7 +37,7 @@ namespace OpenTS2.Files.Formats.DBPF
             var dirAsset = asset as DIRAsset;
             var stream = new MemoryStream(0);
             var writer = new BinaryWriter(stream);
-            foreach(var element in dirAsset.m_SizeByInternalTGI)
+            foreach(var element in dirAsset.SizeByInternalTGI)
             {
                 writer.Write(element.Key.TypeID);
                 writer.Write(element.Key.GroupID);
@@ -68,7 +68,7 @@ namespace OpenTS2.Files.Formats.DBPF
                 uint InstanceID2 = 0x0;
                 if (sourceFile.IndexMinorVersion >= 2)
                     InstanceID2 = reader.ReadUInt32();
-                dirAsset.m_SizeByInternalTGI[new ResourceKey(InstanceID, InstanceID2, GroupID, TypeID)] = reader.ReadUInt32();
+                dirAsset.SizeByInternalTGI[new ResourceKey(InstanceID, InstanceID2, GroupID, TypeID)] = reader.ReadUInt32();
             }
             reader.Dispose();
             stream.Dispose();

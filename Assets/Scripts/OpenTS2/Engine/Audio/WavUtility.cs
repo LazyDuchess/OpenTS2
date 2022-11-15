@@ -195,8 +195,7 @@ namespace OpenTS2.Engine.Audio
 
 		public static byte[] FromAudioClip(AudioClip audioClip)
 		{
-			string file;
-			return FromAudioClip(audioClip, out file, false);
+			return FromAudioClip(audioClip, out _, false);
 		}
 
 		public static byte[] FromAudioClip(AudioClip audioClip, out string filepath, bool saveAsFile = true, string dirname = "recordings")

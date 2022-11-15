@@ -23,30 +23,28 @@ namespace OpenTS2.Engine.Tests
     {
         public string ARCPath;
         public string TargetFolder;
-        public bool textureMode = false;
+        public bool TextureMode = false;
 
         private void Start()
         {
             var codec = new ARCTextureCodec();
-            using (var archive = new ARCFile(ARCPath))
+            using var archive = new ARCFile(ARCPath);
+            foreach (var element in archive.Entries)
             {
-                foreach (var element in archive.Entries)
+                try
                 {
-                    try
+                    var imageFile = archive.GetEntryNoHeader(element);
+                    if (TextureMode)
                     {
-                        var imageFile = archive.GetEntryNoHeader(element);
-                        if (textureMode)
-                        {
-                            var texture2 = codec.Deserialize(imageFile);
-                            Filesystem.Write(Path.Combine(TargetFolder, element.FileName + ".png"), texture2.Texture.EncodeToPNG());
-                        }
-                        else
-                        {
-                            Filesystem.Write(Path.Combine(TargetFolder, element.FileName), imageFile);
-                        }
+                        var texture2 = codec.Deserialize(imageFile);
+                        Filesystem.Write(Path.Combine(TargetFolder, element.FileName + ".png"), texture2.Texture.EncodeToPNG());
                     }
-                    catch (Exception e) { }
+                    else
+                    {
+                        Filesystem.Write(Path.Combine(TargetFolder, element.FileName), imageFile);
+                    }
                 }
+                catch (Exception e) { }
             }
         }
     }

@@ -56,9 +56,9 @@ namespace OpenTS2.Files.Formats.DBPF
     public class DBPFEntry
     {
         //ID of file, type and group
-        public virtual ResourceKey globalTGI { get; set; } = ResourceKey.Default;
+        public virtual ResourceKey GlobalTGI { get; set; } = ResourceKey.Default;
 
-        public virtual ResourceKey internalTGI { get; set; } = ResourceKey.Default;
+        public virtual ResourceKey InternalTGI { get; set; } = ResourceKey.Default;
 
         //A 4-byte unsigned integer specifying the offset to the entry's data from the beginning of the archive
         public uint FileOffset;
@@ -66,12 +66,12 @@ namespace OpenTS2.Files.Formats.DBPF
         //A 4-byte unsigned integer specifying the size of the entry's data
         public virtual uint FileSize { get; set; }
 
-        public bool dynamic = false;
-        public DBPFFile package;
+        public bool Dynamic = false;
+        public DBPFFile Package;
 
         public byte[] GetBytes()
         {
-            return package.GetEntry(this);
+            return Package.GetEntry(this);
         }
 
         public T GetAsset<T>() where T : AbstractAsset
@@ -81,39 +81,39 @@ namespace OpenTS2.Files.Formats.DBPF
 
         public AbstractAsset GetAsset()
         {
-            return package.GetAsset(this);
+            return Package.GetAsset(this);
         }
     }
 
     public class DynamicDBPFEntry : DBPFEntry
     {
-        public override ResourceKey globalTGI
+        public override ResourceKey GlobalTGI
         {
             get
             {
-                return change.asset.globalTGI;
+                return Change.Asset.GlobalTGI;
             }
             set
             {
-                change.asset.globalTGI = value;
+                Change.Asset.GlobalTGI = value;
             }
         }
-        public override ResourceKey internalTGI
+        public override ResourceKey InternalTGI
         {
             get
             {
-                return change.asset.internalTGI;
+                return Change.Asset.InternalTGI;
             }
             set
             {
-                change.asset.internalTGI = value;
+                Change.Asset.InternalTGI = value;
             }
         }
-        public ChangedAsset change;
+        public ChangedAsset Change;
         public override uint FileSize { 
             get
             {
-                return (uint)change.bytes.Length;
+                return (uint)Change.Bytes.Length;
             }
         }
     }
