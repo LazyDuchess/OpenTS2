@@ -11,6 +11,16 @@ namespace OpenTS2.Assemblies
     public static class AssemblyHelper
     {
         public static Action<Type, Assembly> AssemblyProcesses;
+
+        public static void InitializeLoadedAssemblies()
+        {
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            foreach(var element in assemblies)
+            {
+                InitializeAssembly(element);
+            }
+        }
+
         /// <summary>
         /// Initializes an assembly, does Reflection tasks like parsing attributes.
         /// </summary>

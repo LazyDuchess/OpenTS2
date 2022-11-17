@@ -30,7 +30,7 @@ namespace OpenTS2.Engine.Core
             Factories.TextureFactory = new TextureFactory();
             CodecAttribute.Initialize();
             //Initialize the game assembly, do all reflection things.
-            AssemblyHelper.InitializeAssembly(Assembly.GetExecutingAssembly());
+            AssemblyHelper.InitializeLoadedAssemblies();
             s_initialized = true;
         }
     }
