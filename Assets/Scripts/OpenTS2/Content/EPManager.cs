@@ -22,6 +22,17 @@ namespace OpenTS2.Content
         {
             s_instance = this;
         }
+        public static List<ProductFlags> GetProductsInMask(int productMask)
+        {
+            var finalList = new List<ProductFlags>();
+            var valueList = Enum.GetValues(typeof(ProductFlags)).Cast<ProductFlags>().ToList();
+            foreach (var element in valueList)
+            {
+                if (BitUtils.AllBitsSet(productMask, (int)element))
+                    finalList.Add(element);
+            }
+            return finalList;
+        }
         public bool IsEPInstalled(ProductFlags product)
         {
             if (BitUtils.AllBitsSet(_installedProducts, (int)product))

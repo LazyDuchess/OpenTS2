@@ -31,7 +31,7 @@ namespace OpenTS2.Content.DBPF
     public class StringSetData
     {
         public string FileName;
-        public Dictionary<Languages, List<StringValue>> strings = new Dictionary<Languages, List<StringValue>>();
+        public Dictionary<Languages, List<StringValue>> Strings = new Dictionary<Languages, List<StringValue>>();
 
         /// <summary>
         /// Gets a string by its ID and in the specified language.
@@ -41,7 +41,14 @@ namespace OpenTS2.Content.DBPF
         /// <returns>Localized string.</returns>
         public string GetString(int id, Languages language)
         {
-            return strings[language][id].Value;
+            if (!Strings.ContainsKey(language))
+                language = Languages.USEnglish;
+            if (!Strings.ContainsKey(language))
+                return "";
+            var languageStr = Strings[language];
+            if (id >= languageStr.Count)
+                return "";
+            return languageStr[id].Value;
         }
     }
     /// <summary>

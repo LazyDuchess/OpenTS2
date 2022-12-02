@@ -42,7 +42,7 @@ namespace OpenTS2.Engine.Tests
             if (TestChanges)
             {
                 stringTable = (StringSetAsset)stringTable.Clone();
-                stringTable.StringData.strings[Languages.USEnglish][8] = new StringValue("Test changing this crap.", " Oh hi! ");
+                stringTable.StringData.Strings[Languages.USEnglish][8] = new StringValue("Test changing this crap.", " Oh hi! ");
                 stringTable.Compressed = false;
                 stringTable.Save();
             }

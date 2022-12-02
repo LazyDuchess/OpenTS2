@@ -46,6 +46,8 @@ namespace OpenTS2.Content
 
         AbstractAsset InternalLoadAsset(CacheKey key)
         {
+            if (key.File == null)
+                return null;
             return key.File.GetAssetByTGI(key.TGI);
         }
 

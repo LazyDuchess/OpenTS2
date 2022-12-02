@@ -22,7 +22,7 @@ namespace OpenTS2.Files.Formats.DBPF
     /// <summary>
     /// STR file reading codec.
     /// </summary>
-    [Codec(TypeIDs.STR)]
+    [Codec(TypeIDs.STR, TypeIDs.CTSS)]
     public class STRCodec : AbstractCodec
     {
 
@@ -51,9 +51,9 @@ namespace OpenTS2.Files.Formats.DBPF
                 var languageCode = (Languages)reader.ReadByte();
                 var value = reader.ReadNullTerminatedUTF8();
                 var desc = reader.ReadNullTerminatedUTF8();
-                if (!stringTableData.strings.ContainsKey(languageCode))
-                    stringTableData.strings[languageCode] = new List<StringValue>();
-                stringTableData.strings[languageCode].Add(new StringValue(value, desc));
+                if (!stringTableData.Strings.ContainsKey(languageCode))
+                    stringTableData.Strings[languageCode] = new List<StringValue>();
+                stringTableData.Strings[languageCode].Add(new StringValue(value, desc));
             }
             stream.Dispose();
             reader.Dispose();
@@ -79,7 +79,7 @@ namespace OpenTS2.Files.Formats.DBPF
             writer.Seek(64, SeekOrigin.Begin);
             writer.Write(new byte[2] { 253, 255 });
             var stringList = new List<StringForSerialization>();
-            foreach(var element in stringAsset.StringData.strings)
+            foreach(var element in stringAsset.StringData.Strings)
             {
                 foreach(var listElement in element.Value)
                 {
