@@ -30,5 +30,13 @@ namespace OpenTS2.Content.Interfaces
         public abstract object CreatePNGTexture(byte[] source);
 
         public abstract object CreateJPGTexture(byte[] source);
+
+        /// <summary>
+        /// Constructs a JPG with a provided alpha channel.
+        /// </summary>
+        /// <param name="source">The bytes of the jpg file.</param>
+        /// <param name="alphaChannel">The transparency channel (one byte per pixel).</param>
+        /// <returns></returns>
+        public abstract object CreateJPGTextureWithAlphaChannel(byte[] source, byte[] alphaChannel);
     }
 }

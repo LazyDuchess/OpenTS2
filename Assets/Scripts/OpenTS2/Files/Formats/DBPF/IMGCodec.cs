@@ -13,6 +13,7 @@ using OpenTS2.Content;
 using OpenTS2.Common;
 using OpenTS2.Content.DBPF;
 using System.Text;
+using OpenTS2.Files.Formats.JPEGWithAlfaSegment;
 
 namespace OpenTS2.Files.Formats.DBPF
 {
@@ -57,7 +58,16 @@ namespace OpenTS2.Files.Formats.DBPF
                     return new TextureAsset(textureFactory.CreatePNGTexture(bytes));
 
                 case 2:
-                    return new TextureAsset(textureFactory.CreateJPGTexture(bytes));
+                    {
+                        byte[] alphaChannel = JpegFileWithAlfaSegment.GetTransparencyFromAlfaSegment(bytes);
+                        if (alphaChannel != null)
+                        {
+                            return new TextureAsset(
+                                textureFactory.CreateJPGTextureWithAlphaChannel(bytes, alphaChannel));
+                        }
+
+                        return new TextureAsset(textureFactory.CreateJPGTexture(bytes));
+                    }
             }
             return null;
         }
