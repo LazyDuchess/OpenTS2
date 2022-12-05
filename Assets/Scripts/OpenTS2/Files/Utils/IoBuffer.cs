@@ -208,6 +208,15 @@ namespace OpenTS2.Files.Utils
         }
 
         /// <summary>
+        /// Reads a signed byte from the current stream.
+        /// </summary>
+        /// <returns>A signed byte.</returns>
+        public sbyte ReadSByte()
+        {
+            return Reader.ReadSByte();
+        }
+
+        /// <summary>
         /// Reads a number of bytes from the current stream.
         /// </summary>
         /// <param name="num">Number of bytes to read.</param>
