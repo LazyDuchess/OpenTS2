@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using OpenTS2.Files;
 using OpenTS2.Files.Formats.Reia;
+using System.Diagnostics;
 
 namespace OpenTS2.Engine.Tests
 {
@@ -16,30 +17,23 @@ namespace OpenTS2.Engine.Tests
         public RawImage image;
 
         ReiaFile reia = null;
-        float frameCounter = 0f;
-        int currentFrame = 0;
+        Stopwatch frameCounter;
+
         private void Start()
         {
             var stream = Filesystem.OpenRead(reiaPath);
             reia = ReiaFile.Read(stream);
-            //image.texture = reia.Frames[0].Image;
+            frameCounter = new Stopwatch();
+            frameCounter.Start();
         }
 
         private void Update()
         {
             if (reia == null)
                 return;
-            var frameDelta = 1f / reia.FramesPerSecond;
-            if (frameCounter > frameDelta)
-            {
-                frameCounter = 0f;
-                currentFrame++;
-                if (currentFrame >= reia.Frames.Count)
-                    currentFrame = 0;
-            }
-            else
-                frameCounter += Time.deltaTime;
-            image.texture = reia.Frames[currentFrame].Image;
+            var frame = (int)Mathf.Floor((float)frameCounter.Elapsed.TotalSeconds * reia.FramesPerSecond);
+            frame -= (int)(Mathf.Floor((float)frame / reia.Frames.Count) * reia.Frames.Count);
+            image.texture = reia.Frames[frame].Image;
         }
     }
 }

@@ -111,6 +111,7 @@ namespace OpenTS2.Files.Formats.Reia
         static ReiaFrame ReadSingleFrame(IoBuffer io, int width, int height, Texture2D previousFrame)
         {
             var image = new Texture2D(width, height);
+            image.wrapMode = TextureWrapMode.Clamp;
             var maxI = (int)Mathf.Floor(width / 32);
             var maxJ = (int)Mathf.Floor(height / 32);
             for (var i = 0; i < maxI; i++)
