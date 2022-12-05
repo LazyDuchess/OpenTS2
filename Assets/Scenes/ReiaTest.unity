@@ -568,6 +568,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   reiaPath: '%UserDataDir%/Neighborhoods/E001/E001_Neighborhood.reia'
   image: {fileID: 683157549}
+  speedMultiplier: 1
 --- !u!4 &1947281170
 Transform:
   m_ObjectHideFlags: 0

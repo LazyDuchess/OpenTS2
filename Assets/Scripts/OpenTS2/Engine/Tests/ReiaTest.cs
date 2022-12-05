@@ -17,23 +17,28 @@ namespace OpenTS2.Engine.Tests
         public RawImage image;
 
         ReiaFile reia = null;
-        Stopwatch frameCounter;
+        float frameCounter = 0f;
+
+        public float speedMultiplier = 1f;
 
         private void Start()
         {
             var stream = Filesystem.OpenRead(reiaPath);
             reia = ReiaFile.Read(stream);
-            frameCounter = new Stopwatch();
-            frameCounter.Start();
         }
 
         private void Update()
         {
             if (reia == null)
                 return;
-            var frame = (int)Mathf.Floor((float)frameCounter.Elapsed.TotalSeconds * reia.FramesPerSecond);
-            frame -= (int)(Mathf.Floor((float)frame / reia.Frames.Count) * reia.Frames.Count);
-            image.texture = reia.Frames[frame].Image;
+            frameCounter += Time.deltaTime * speedMultiplier;
+            var framesPast = Mathf.Floor(frameCounter * reia.FramesPerSecond);
+            for(var i=0;i<framesPast;i++)
+            {
+                reia.MoveNextFrame();
+            }
+            frameCounter -= framesPast / reia.FramesPerSecond;
+            image.texture = reia.GetCurrentFrame().Image;
         }
     }
 }

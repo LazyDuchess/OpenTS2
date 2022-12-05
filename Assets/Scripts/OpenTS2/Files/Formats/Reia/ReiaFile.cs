@@ -6,27 +6,41 @@ using System.Collections.Generic;
 
 namespace OpenTS2.Files.Formats.Reia
 {
-    public class ReiaFile
+    public class ReiaFile : IDisposable
     {
         public int Width => _width;
         public int Height => _height;
         public int FramesPerSecond => _fps;
         public int NumberOfFrames => _numFrames;
-        public List<ReiaFrame> Frames => _frames;
 
         private readonly int _width;
         private readonly int _height;
         private readonly int _fps;
         private readonly int _numFrames;
-        private readonly List<ReiaFrame> _frames;
+        private readonly ReiaFrameStream _frameStream;
 
-        public ReiaFile(int width, int height, int fps, int numFrames, List<ReiaFrame> frames)
+        public ReiaFile(int width, int height, int fps, int numFrames, ReiaFrameStream frameStream)
         {
             _width = width;
             _height = height;
             _fps = fps;
             _numFrames = numFrames;
-            _frames = frames;
+            _frameStream = frameStream;
+            MoveNextFrame();
+        }
+
+        public void MoveNextFrame()
+        {
+            if (!_frameStream.MoveNext())
+            {
+                _frameStream.Reset();
+                _frameStream.MoveNext();
+            }
+        }
+
+        public ReiaFrame GetCurrentFrame()
+        {
+            return _frameStream.Current;
         }
 
         public static ReiaFile Read(Stream stream)
@@ -62,10 +76,16 @@ namespace OpenTS2.Files.Formats.Reia
             var fpsNumerator = io.ReadUInt32();
             var fpsDenominator = io.ReadUInt32();
             var fps = (float)fpsNumerator / fpsDenominator;
-
             var numFrames = io.ReadUInt32();
-            var frames = ReiaFrame.ReadFrames(io, (int)width, (int)height);
-            return new ReiaFile((int)width, (int)height, (int)fps, (int)numFrames, frames);
+            var ioFrameStreamPosition = io.Position;
+            var frameEnumerable = ReiaFrame.ReadFrameEnumerable(io, (int)width, (int)height);
+            var frameStream = new ReiaFrameStream(frameEnumerable.GetEnumerator(), io, (int)ioFrameStreamPosition, (int)width, (int)height, stream);
+            return new ReiaFile((int)width, (int)height, (int)fps, (int)numFrames, frameStream);
+        }
+
+        public void Dispose()
+        {
+            _frameStream.Dispose();
         }
     }
 }

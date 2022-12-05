@@ -1,11 +1,12 @@
-﻿using OpenTS2.Files.Utils;
+﻿using OpenTS2.Engine;
+using OpenTS2.Files.Utils;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace OpenTS2.Files.Formats.Reia
 {
-    public class ReiaFrame
+    public class ReiaFrame : IDisposable
     {
         public Texture2D Image => _image;
         private readonly Texture2D _image;
@@ -14,9 +15,9 @@ namespace OpenTS2.Files.Formats.Reia
         {
             _image = Image;
         }
-        public static List<ReiaFrame> ReadFrames(IoBuffer io, int width, int height)
+
+        static IEnumerable<ReiaFrame> ReadFrameEnumerableInternal(IoBuffer io, int width, int height, bool disposePreviousFrames)
         {
-            var frameList = new List<ReiaFrame>();
             ReiaFrame previousFrame = null;
 
             var frameMagic = io.ReadCString(4);
@@ -31,14 +32,28 @@ namespace OpenTS2.Files.Formats.Reia
 
                 var frame = ReadSingleFrame(io, width, height, previousFrame?.Image);
 
+                if (disposePreviousFrames)
+                    previousFrame?.Dispose();
+
                 previousFrame = frame;
 
-                frameList.Add(frame);
+                yield return frame;
 
                 var padding = frameSize % 2;
                 io.Skip(padding);
                 frameMagic = io.ReadCString(4);
             }
+        }
+
+        public static IEnumerable<ReiaFrame> ReadFrameEnumerable(IoBuffer io, int width, int height)
+        {
+            return ReadFrameEnumerableInternal(io, width, height, true);
+        }
+
+        public static List<ReiaFrame> ReadFrames(IoBuffer io, int width, int height)
+        {
+            var frameStream = ReadFrameEnumerableInternal(io, width, height, false);
+            var frameList = new List<ReiaFrame>(frameStream);
             return frameList;
         }
 
@@ -110,6 +125,7 @@ namespace OpenTS2.Files.Formats.Reia
 
         static ReiaFrame ReadSingleFrame(IoBuffer io, int width, int height, Texture2D previousFrame)
         {
+            var smallBlock = new Texture2D(32, 32);
             var image = new Texture2D(width, height);
             image.wrapMode = TextureWrapMode.Clamp;
             var maxI = (int)Mathf.Floor(width / 32);
@@ -132,12 +148,12 @@ namespace OpenTS2.Files.Formats.Reia
                         if (previousFrame != null)
                         {
                             var previousPixels = previousFrame.GetPixels(x, y, 32, 32);
-                            var previousBlock = new Texture2D(32, 32);
-                            previousBlock.SetPixels(previousPixels);
-                            previousBlock.Apply();
-                            AddTextures(previousBlock, block);
+                            smallBlock.SetPixels(previousPixels);
+                            smallBlock.Apply();
+                            AddTextures(smallBlock, block);
                         }
                         image.SetPixels(x, y, 32, 32, block.GetPixels());
+                        block.Free();
                     }
                     else
                     {
@@ -146,15 +162,24 @@ namespace OpenTS2.Files.Formats.Reia
                             throw new Exception("Tried to re-use previous 32x32 block but it's null");
                         }
                         var previousPixels = previousFrame.GetPixels(x, y, 32, 32);
-                        var previousBlock = new Texture2D(32, 32);
-                        previousBlock.SetPixels(previousPixels);
-                        previousBlock.Apply();
-                        image.SetPixels(x, y, 32, 32, previousBlock.GetPixels());
+                        smallBlock.SetPixels(previousPixels);
+                        smallBlock.Apply();
+                        image.SetPixels(x, y, 32, 32, smallBlock.GetPixels());
                     }
                 }
             }
+            if (smallBlock != null)
+                smallBlock.Free();
             image.Apply();
             return new ReiaFrame(image);
+        }
+
+        public void Dispose()
+        {
+            if (_image != null)
+            {
+                _image.Free();
+            }
         }
     }
 }
