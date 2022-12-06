@@ -38,7 +38,9 @@ namespace OpenTS2.Files.Formats.DBPF
         /// <returns>Codec for this type.</returns>
         public static AbstractCodec Get(uint type)
         {
-            return s_codecsByTypeID[type];
+            if (s_codecsByTypeID.TryGetValue(type, out AbstractCodec codecOut))
+                return codecOut;
+            return null;
         }
     }
 }

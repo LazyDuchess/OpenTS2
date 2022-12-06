@@ -9,10 +9,10 @@ using System.Threading.Tasks;
 
 namespace OpenTS2.Files.Formats.Reia
 {
-    public class ReiaFrameStream : IDisposable
+    public class ReiaFrameStream
     {
         public ReiaFrame Current => _enumerator.Current;
-        private IEnumerator<ReiaFrame> _enumerator;
+        protected IEnumerator<ReiaFrame> _enumerator;
         private readonly IoBuffer _io;
         private readonly int _frameStartPosition;
         private readonly int _width;
@@ -39,7 +39,7 @@ namespace OpenTS2.Files.Formats.Reia
             _enumerator.Current?.Dispose();
         }
 
-        public void Reset()
+        public virtual void Reset()
         {
             FreeCurrentFrame();
             _enumerator?.Current?.Dispose();
@@ -48,7 +48,7 @@ namespace OpenTS2.Files.Formats.Reia
             _enumerator = ReiaFrame.ReadFrameEnumerable(_io, _width, _height).GetEnumerator();
         }
 
-        public void Dispose()
+        public virtual void Dispose()
         {
             FreeCurrentFrame();
             _enumerator?.Current?.Dispose();

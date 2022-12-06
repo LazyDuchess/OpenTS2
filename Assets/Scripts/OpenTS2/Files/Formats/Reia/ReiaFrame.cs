@@ -65,7 +65,7 @@ namespace OpenTS2.Files.Formats.Reia
             return new Color32(r, g, b, byte.MaxValue);
         }
 
-        static Texture2D Read32By32Block(IoBuffer io)
+        static Texture2D ReadBlock(IoBuffer io, int blockWidth, int blockHeight)
         {
             var numPixels = 32 * 32;
 
@@ -101,10 +101,25 @@ namespace OpenTS2.Files.Formats.Reia
                     }
                 }
             }
-            var tex = new Texture2D(32, 32);
-            tex.SetPixels32(imgData);
-            tex.Apply();
-            return tex;
+            if (blockWidth != 32 || blockHeight != 32)
+            {
+                var texTemp = new Texture2D(32, 32);
+                texTemp.SetPixels32(imgData);
+                texTemp.Apply();
+                var trimmedImgData = texTemp.GetPixels(0, 0, blockWidth, blockHeight);
+                texTemp.Free();
+                var tex = new Texture2D(blockWidth, blockHeight);
+                tex.SetPixels(trimmedImgData);
+                tex.Apply();
+                return tex;
+            }
+            else
+            {
+                var tex = new Texture2D(blockWidth, blockHeight);
+                tex.SetPixels32(0, 0, blockWidth, blockHeight, imgData);
+                tex.Apply();
+                return tex;
+            }
         }
 
         static void AddTextures(Texture2D source, Texture2D destination)
@@ -125,11 +140,14 @@ namespace OpenTS2.Files.Formats.Reia
 
         static ReiaFrame ReadSingleFrame(IoBuffer io, int width, int height, Texture2D previousFrame)
         {
-            var smallBlock = new Texture2D(32, 32);
+            var maxJ = (int)Mathf.Ceil((float)width / 32);
+            var maxI = (int)Mathf.Ceil((float)height / 32);
+
+            Texture2D smallBlock = null;
             var image = new Texture2D(width, height);
             image.wrapMode = TextureWrapMode.Clamp;
-            var maxI = (int)Mathf.Floor(width / 32);
-            var maxJ = (int)Mathf.Floor(height / 32);
+            
+
             for (var i = 0; i < maxI; i++)
             {
                 for (var j = 0; j < maxJ; j++)
@@ -137,22 +155,35 @@ namespace OpenTS2.Files.Formats.Reia
                     var x = (j * 32);
                     var y = (i * 32);
 
+                    var xBound = x + 32;
+                    var yBound = y + 32;
+
+                    var blockWidth = 32;
+                    var blockHeight = 32;
+
+                    if (xBound > image.width)
+                        blockWidth -= xBound - image.width;
+                    if (yBound > image.height)
+                        blockHeight -= yBound - image.height;
+
+                    smallBlock = new Texture2D(blockWidth, blockHeight);
+
                     // First byte tells us if we should expect a new 32x32 pixel block or re-use
                     // the one from the previous frame.
                     var newFrame = io.ReadByte() != 0;
-
+                    
                     if (newFrame)
                     {
-                        var block = Read32By32Block(io);
+                        var block = ReadBlock(io, blockWidth, blockHeight);
 
                         if (previousFrame != null)
                         {
-                            var previousPixels = previousFrame.GetPixels(x, y, 32, 32);
+                            var previousPixels = previousFrame.GetPixels(x, y, blockWidth, blockHeight);
                             smallBlock.SetPixels(previousPixels);
                             smallBlock.Apply();
                             AddTextures(smallBlock, block);
                         }
-                        image.SetPixels(x, y, 32, 32, block.GetPixels());
+                        image.SetPixels32(x, y, blockWidth, blockHeight, block.GetPixels32());
                         block.Free();
                     }
                     else
@@ -161,15 +192,16 @@ namespace OpenTS2.Files.Formats.Reia
                         {
                             throw new Exception("Tried to re-use previous 32x32 block but it's null");
                         }
-                        var previousPixels = previousFrame.GetPixels(x, y, 32, 32);
+                        var previousPixels = previousFrame.GetPixels(x, y, blockWidth, blockHeight);
                         smallBlock.SetPixels(previousPixels);
                         smallBlock.Apply();
-                        image.SetPixels(x, y, 32, 32, smallBlock.GetPixels());
+                        image.SetPixels32(x, y, blockWidth, blockHeight, smallBlock.GetPixels32());
                     }
+                    if (smallBlock != null)
+                        smallBlock.Free();
                 }
             }
-            if (smallBlock != null)
-                smallBlock.Free();
+            
             image.Apply();
             return new ReiaFrame(image);
         }

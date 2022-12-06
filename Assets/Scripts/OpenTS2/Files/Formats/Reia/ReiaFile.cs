@@ -43,7 +43,7 @@ namespace OpenTS2.Files.Formats.Reia
             return _frameStream.Current;
         }
 
-        public static ReiaFile Read(Stream stream)
+        public static ReiaFile Read(Stream stream, bool streamed = true)
         {
             var io = IoBuffer.FromStream(stream, ByteOrder.LITTLE_ENDIAN);
 
@@ -78,8 +78,17 @@ namespace OpenTS2.Files.Formats.Reia
             var fps = (float)fpsNumerator / fpsDenominator;
             var numFrames = io.ReadUInt32();
             var ioFrameStreamPosition = io.Position;
-            var frameEnumerable = ReiaFrame.ReadFrameEnumerable(io, (int)width, (int)height);
-            var frameStream = new ReiaFrameStream(frameEnumerable.GetEnumerator(), io, (int)ioFrameStreamPosition, (int)width, (int)height, stream);
+            ReiaFrameStream frameStream;
+            if (streamed)
+            {
+                var frameEnumerable = ReiaFrame.ReadFrameEnumerable(io, (int)width, (int)height);
+                frameStream = new ReiaFrameStream(frameEnumerable.GetEnumerator(), io, (int)ioFrameStreamPosition, (int)width, (int)height, stream);
+            }
+            else
+            {
+                var frameEnumerable = ReiaFrame.ReadFrames(io, (int)width, (int)height);
+                frameStream = new ReiaFrameMemoryStream(frameEnumerable.GetEnumerator(), io, (int)ioFrameStreamPosition, (int)width, (int)height, stream);
+            }
             return new ReiaFile((int)width, (int)height, (int)fps, (int)numFrames, frameStream);
         }
 

@@ -16,6 +16,9 @@ namespace OpenTS2.Engine.Tests
         public string reiaPath;
         public RawImage image;
 
+        public bool reload = false;
+        public bool stream = true;
+
         ReiaFile reia = null;
         float frameCounter = 0f;
 
@@ -23,14 +26,28 @@ namespace OpenTS2.Engine.Tests
 
         private void Start()
         {
-            var stream = Filesystem.OpenRead(reiaPath);
-            reia = ReiaFile.Read(stream);
+            var streamFs = Filesystem.OpenRead(reiaPath);
+            reia = ReiaFile.Read(streamFs, stream);
+        }
+
+        void Reload()
+        {
+            reia.Dispose();
+            var streamFs = Filesystem.OpenRead(reiaPath);
+            reia = ReiaFile.Read(streamFs, stream);
+            reload = false;
+            frameCounter = 0f;
         }
 
         private void Update()
         {
             if (reia == null)
                 return;
+            if (reload)
+            {
+                Reload();
+                return;
+            }
             frameCounter += Time.deltaTime * speedMultiplier;
             var framesPast = Mathf.Floor(frameCounter * reia.FramesPerSecond);
             for(var i=0;i<framesPast;i++)

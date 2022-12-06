@@ -20,8 +20,8 @@ namespace OpenTS2.Content.Changes
             }
             this.Entry = new DBPFEntry()
             {
-                GlobalTGI = this.Asset.GlobalTGI.LocalGroupID(package.GroupID),
-                InternalTGI = this.Asset.GlobalTGI,
+                GlobalTGI = tgi.LocalGroupID(package.GroupID),
+                InternalTGI = tgi,
                 Dynamic = true,
                 Package = package
             };
