@@ -30,10 +30,16 @@ namespace OpenTS2.Files.Formats.Reia
 
                 var frameSize = io.ReadUInt32();
 
-                var frame = ReadSingleFrame(io, width, height, previousFrame?.Image);
+                var currentFrame = previousFrame?.Image;
 
+                if (!disposePreviousFrames || currentFrame == null)
+                    currentFrame = new Texture2D(width, height);
+                
+
+                var frame = ReadSingleFrame(io, width, height, previousFrame?.Image, currentFrame);
+                /*
                 if (disposePreviousFrames)
-                    previousFrame?.Dispose();
+                    previousFrame?.Dispose();*/
 
                 previousFrame = frame;
 
@@ -59,10 +65,8 @@ namespace OpenTS2.Files.Formats.Reia
 
         static Color32 ReadSinglePixel(IoBuffer io)
         {
-            var b = io.ReadByte();
-            var g = io.ReadByte();
-            var r = io.ReadByte();
-            return new Color32(r, g, b, byte.MaxValue);
+            var bytes = io.ReadBytes(3);
+            return new Color32(bytes[2], bytes[1], bytes[0], 255);
         }
 
         static Texture2D ReadBlock(IoBuffer io, int blockWidth, int blockHeight)
@@ -138,13 +142,12 @@ namespace OpenTS2.Files.Formats.Reia
             destination.Apply();
         }
 
-        static ReiaFrame ReadSingleFrame(IoBuffer io, int width, int height, Texture2D previousFrame)
+        static ReiaFrame ReadSingleFrame(IoBuffer io, int width, int height, Texture2D previousFrame, Texture2D image)
         {
             var maxJ = (int)Mathf.Ceil((float)width / 32);
             var maxI = (int)Mathf.Ceil((float)height / 32);
 
             Texture2D smallBlock = null;
-            var image = new Texture2D(width, height);
             image.wrapMode = TextureWrapMode.Clamp;
             
 

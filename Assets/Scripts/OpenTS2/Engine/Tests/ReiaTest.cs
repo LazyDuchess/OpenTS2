@@ -19,6 +19,8 @@ namespace OpenTS2.Engine.Tests
         public bool reload = false;
         public bool stream = true;
 
+        public bool oneAtATime = true;
+
         ReiaFile reia = null;
         float frameCounter = 0f;
 
@@ -50,11 +52,15 @@ namespace OpenTS2.Engine.Tests
             }
             frameCounter += Time.deltaTime * speedMultiplier;
             var framesPast = Mathf.Floor(frameCounter * reia.FramesPerSecond);
+            frameCounter -= framesPast / reia.FramesPerSecond;
+            if (oneAtATime && framesPast > 1f)
+            {
+                framesPast = 1f;
+            }
             for(var i=0;i<framesPast;i++)
             {
                 reia.MoveNextFrame();
             }
-            frameCounter -= framesPast / reia.FramesPerSecond;
             image.texture = reia.GetCurrentFrame().Image;
         }
     }

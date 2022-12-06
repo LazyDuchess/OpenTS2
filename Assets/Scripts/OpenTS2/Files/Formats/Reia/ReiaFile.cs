@@ -68,7 +68,9 @@ namespace OpenTS2.Files.Formats.Reia
                 throw new Exception("Reiahead metadata size doesn't equal 24");
             }
 
-            Debug.Assert(io.ReadUInt32() == 1);
+            var unknown1 = io.ReadUInt32();
+
+            Debug.Assert(unknown1 == 1);
 
             var width = io.ReadUInt32();
             var height = io.ReadUInt32();
