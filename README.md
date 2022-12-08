@@ -4,14 +4,6 @@ OpenTS2 is an Open-Source Reimplementation of The Sims 2, using the Unity game e
 ## Progress
 Currently resource management, asset loading and saving and other engine code is being worked on. There is no playable build yet.
 
-## Prerequisites
-* [Unity 2020.3.32f1](https://unity3d.com/get-unity/download/archive) - Can be found under "Unity 2020.x", you could also download the Unity Hub and install from there. Unity version is subject to change, please keep an eye on this!
-* [Visual Studio 2019](https://visualstudio.microsoft.com/vs/)
-* A copy of The Sims 2 Ultimate Collection
-
-## Setup
-You need to have a "config.json" file in the root folder that provides paths to your Sims 2 UC installation and user directories. Copy the "config.example.json" file and rename it to "config.json" to start off, and type in your own paths.
-
 ## Acknowledgements
 * [InvertedTomato.CRC](https://github.com/invertedtomato/crc)
 * [TGA Image Reader](https://www.codeproject.com/Articles/31702/NET-Targa-Image-Reader)
@@ -25,3 +17,28 @@ You need to have a "config.json" file in the root folder that provides paths to 
 
 ## License
 This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+# Development
+
+## Prerequisites
+* [Unity 2020.3.32f1](https://unity3d.com/get-unity/download/archive) - Can be found under "Unity 2020.x", you could also download the Unity Hub and install from there. Unity version is subject to change, please keep an eye on this!
+* [Visual Studio 2019](https://visualstudio.microsoft.com/vs/)
+* A copy of The Sims 2 Ultimate Collection
+
+## Setup
+You need to have a "config.json" file in the root folder that provides paths to your Sims 2 UC installation and user directories. Copy the "config.example.json" file and rename it to "config.json" to start off, and type in your own paths.
+
+## Project Structure
+
+We follow the layout of a normal Unity project except:
+
+* `Assets/Scripts/OpenTS2` - Contains the bulk of the C# code that deals with TS2 formats and files.
+* `Assets/Scripts/OpenTS2/Engine` - Unity *specific* code tends to live in here to keep it
+  separate from the language-independent code in the directory.
+* `Assets/Tests/OpenTS2/` - Unit tests following the same directory structure as the `Scripts` folder.
+
+## Testing
+
+We currently use the [Unity Test Runner](https://docs.unity3d.com/2017.4/Documentation/Manual/testing-editortestsrunner.html)
+for unit testing code. These tests can be run inside of unity through the test runner tab or if you use Rider as your C#
+editor, inside of it.
