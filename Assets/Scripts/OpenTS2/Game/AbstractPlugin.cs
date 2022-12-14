@@ -12,6 +12,6 @@ namespace OpenTS2.Game
     /// </summary>
     public abstract class AbstractPlugin
     {
-        public Assembly assembly;
+        public Assembly Assembly;
     }
 }

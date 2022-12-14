@@ -14,9 +14,9 @@ using UnityEngine;
 using System.IO;
 using OpenTS2.Content;
 
-namespace OpenTS2.Engine.Core
+namespace OpenTS2.Engine
 {
-    [System.Serializable]
+    [Serializable]
     public class JSONConfig
     {
         public string game_dir;
@@ -38,7 +38,7 @@ namespace OpenTS2.Engine.Core
         public string GetPathForProduct(ProductFlags productFlag)
         {
             var index = Array.IndexOf(Enum.GetValues(productFlag.GetType()), productFlag);
-            return Path.Combine(_config.game_dir,_config.dlc[index]);
+            return Path.Combine(_config.game_dir, _config.dlc[index]);
         }
 
         public string GetDataPathForProduct(ProductFlags productFlag)

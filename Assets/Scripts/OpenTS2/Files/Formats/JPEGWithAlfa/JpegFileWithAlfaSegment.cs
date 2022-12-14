@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using UnityEngine;
 
 namespace OpenTS2.Files.Formats.JPEGWithAlfaSegment
 {
@@ -21,8 +20,9 @@ namespace OpenTS2.Files.Formats.JPEGWithAlfaSegment
             {
                 // Consume the two magic Start-of-Image bytes
                 byte[] startOfImageMagic = binReader.ReadBytes(2);
-                Debug.Assert(startOfImageMagic[0] == 0xff);
-                Debug.Assert(startOfImageMagic[1] == 0xd8);
+                var logger = Logger.Get();
+                logger.Assert(startOfImageMagic[0] == 0xff);
+                logger.Assert(startOfImageMagic[1] == 0xd8);
 
                 // Based off http://fileformats.archiveteam.org/wiki/JPEG#Format
                 // and https://en.wikipedia.org/wiki/JPEG_File_Interchange_Format#File_format_structure
@@ -30,7 +30,7 @@ namespace OpenTS2.Files.Formats.JPEGWithAlfaSegment
                 {
                     // Read the segment marker.
                     byte sectionMarker1 = binReader.ReadByte();
-                    Debug.Assert(sectionMarker1 == 0xff);
+                    logger.Assert(sectionMarker1 == 0xff);
                     byte sectionMarker2 = binReader.ReadByte();
                     // ALFA segments are encoded as part of JFIF APP0 markers and they need to
                     // be at the start of the file, so once we get past APP0 segments just break

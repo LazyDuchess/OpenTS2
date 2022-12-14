@@ -13,7 +13,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using OpenTS2.Content;
 using OpenTS2.Common;
-using OpenTS2.Engine.Core;
 using OpenTS2.Content.DBPF;
 
 namespace OpenTS2.Engine.Tests

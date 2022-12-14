@@ -18,7 +18,7 @@ using OpenTS2.Files.Formats.ARC;
 using OpenTS2.Files.Utils;
 using UnityEngine;
 
-namespace OpenTS2.Engine.Core
+namespace OpenTS2.Engine
 {
     /// <summary>
     /// Constructs Unity Texture2D resources.
@@ -54,7 +54,7 @@ namespace OpenTS2.Engine.Core
 
                     // Unity Color uses floats from 0 to 1, the alpha
                     // channel is bytes from 0 to 0xff.
-                    pixels[(i * tex2D.height) + j].a = ((float) transparency) / 0xff;
+                    pixels[i * tex2D.height + j].a = (float)transparency / 0xff;
                 }
             }
 

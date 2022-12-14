@@ -6,7 +6,7 @@ using OpenTS2.Files.Formats.DBPF;
 using System.Reflection;
 using UnityEngine;
 
-namespace OpenTS2.Engine.Core
+namespace OpenTS2.Engine
 {
     /// <summary>
     /// Main initialization class for Unity Engine implementation of OpenTS2.
@@ -26,6 +26,7 @@ namespace OpenTS2.Engine.Core
             var epManager = new EPManager();
             var contentManager = new ContentManager();
             var objectManager = new ObjectManager(contentManager.Provider);
+            var logger = new UnityLogger();
             Filesystem.Initialize(new JSONPathProvider(), epManager);
             Factories.TextureFactory = new TextureFactory();
             CodecAttribute.Initialize();
