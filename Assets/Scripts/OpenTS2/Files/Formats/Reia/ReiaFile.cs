@@ -44,7 +44,6 @@ namespace OpenTS2.Files.Formats.Reia
 
         public static ReiaFile Read(Stream stream, bool streamed = true)
         {
-            var logger = Logger.Get();
             var io = IoBuffer.FromStream(stream, ByteOrder.LITTLE_ENDIAN);
 
             var riffMagic = io.ReadCString(4);
@@ -70,7 +69,7 @@ namespace OpenTS2.Files.Formats.Reia
 
             var unknown1 = io.ReadUInt32();
 
-            logger.Assert(unknown1 == 1);
+            Logger.Assert(unknown1 == 1);
 
             var width = io.ReadUInt32();
             var height = io.ReadUInt32();

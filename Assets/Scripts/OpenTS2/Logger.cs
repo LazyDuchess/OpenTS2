@@ -38,6 +38,16 @@ namespace OpenTS2
         /// Assert a condition.
         /// </summary>
         /// <param name="condition">Condition to assert.</param>
-        public abstract void Assert(bool condition);
+        protected abstract void Assert_Impl(bool condition);
+
+        /// <summary>
+        /// Assert a condition.
+        /// </summary>
+        /// <param name="condition">Condition to assert.</param>
+        [Conditional("DEBUG")] 
+        public static void Assert(bool condition)
+        {
+            Get().Assert_Impl(condition);
+        }
     }
 }

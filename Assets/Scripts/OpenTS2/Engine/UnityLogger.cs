@@ -12,7 +12,7 @@ namespace OpenTS2.Engine
     /// </summary>
     public class UnityLogger : Logger
     {
-        public override void Assert(bool condition)
+        protected override void Assert_Impl(bool condition)
         {
             Debug.Assert(condition);
         }

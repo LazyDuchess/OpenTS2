@@ -3,7 +3,6 @@ using OpenTS2.Client;
 using OpenTS2.Content;
 using OpenTS2.Files;
 using OpenTS2.Files.Formats.DBPF;
-using System.Reflection;
 using UnityEngine;
 
 namespace OpenTS2.Engine
