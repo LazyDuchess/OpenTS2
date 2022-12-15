@@ -219,6 +219,11 @@ namespace OpenTS2.Content
             _entryByFile[package] = package;
         }
 
+        /// <summary>
+        /// Gets an entry from the resource map.
+        /// </summary>
+        /// <param name="key">TGI of the resource.</param>
+        /// <returns></returns>
         public DBPFEntry GetEntry(ResourceKey key)
         {
             if (_resourceMap.TryGetValue(key, out DBPFEntry output))
