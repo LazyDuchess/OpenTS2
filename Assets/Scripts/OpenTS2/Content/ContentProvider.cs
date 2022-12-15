@@ -219,7 +219,7 @@ namespace OpenTS2.Content
             _entryByFile[package] = package;
         }
 
-        public DBPFEntry GetFromResourceMap(ResourceKey key)
+        public DBPFEntry GetEntry(ResourceKey key)
         {
             if (_resourceMap.TryGetValue(key, out DBPFEntry output))
                 return output;

@@ -32,7 +32,7 @@ namespace OpenTS2.Content
             this._contentProvider = provider;
             if (package == null && this._contentProvider != null)
             {
-                this.File = this._contentProvider.GetFromResourceMap(this.TGI)?.Package;
+                this.File = this._contentProvider.GetEntry(this.TGI)?.Package;
             }
             if (this.File != null)
             {
