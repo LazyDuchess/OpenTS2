@@ -8,6 +8,7 @@ using UnityEngine.UI;
 using OpenTS2.Files;
 using OpenTS2.Files.Formats.Reia;
 using System.Diagnostics;
+using OpenTS2.Engine.Files.Formats.Reia;
 
 namespace OpenTS2.Engine.Tests
 {
@@ -61,7 +62,7 @@ namespace OpenTS2.Engine.Tests
             {
                 reia.MoveNextFrame();
             }
-            image.texture = reia.GetCurrentFrame().Image;
+            image.texture = (reia.GetCurrentFrame() as UnityReiaFrame).Image;
         }
     }
 }
