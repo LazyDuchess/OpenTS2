@@ -19,13 +19,18 @@ namespace OpenTS2.Content.DBPF
     /// </summary>
     public class StringValue
     {
-        public string Value;
-        public string Description;
+        public string Value = "";
+        public string Description = "";
 
         public StringValue(string value, string description)
         {
             this.Value = value;
             this.Description = description;
+        }
+
+        public StringValue(string value)
+        {
+            Value = value;
         }
     }
     public class StringSetData

@@ -150,8 +150,6 @@ namespace OpenTS2.Engine.Files.Formats.Reia
         {
             var maxJ = (int)Mathf.Ceil((float)width / 32);
             var maxI = (int)Mathf.Ceil((float)height / 32);
-
-            Texture2D smallBlock = null;
             image.wrapMode = TextureWrapMode.Clamp;
 
 
@@ -173,7 +171,7 @@ namespace OpenTS2.Engine.Files.Formats.Reia
                     if (yBound > image.height)
                         blockHeight -= yBound - image.height;
 
-                    smallBlock = new Texture2D(blockWidth, blockHeight);
+                    Texture2D smallBlock = new Texture2D(blockWidth, blockHeight);
 
                     // First byte tells us if we should expect a new 32x32 pixel block or re-use
                     // the one from the previous frame.
