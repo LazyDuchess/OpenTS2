@@ -2,7 +2,6 @@
 using OpenTS2.Files.Utils;
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace OpenTS2.Files.Formats.Reia
 {
