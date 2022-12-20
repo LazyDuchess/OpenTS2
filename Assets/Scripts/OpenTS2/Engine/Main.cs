@@ -26,7 +26,6 @@ namespace OpenTS2.Engine
             var epManager = new EPManager();
             var contentManager = new ContentManager();
             var objectManager = new ObjectManager(contentManager.Provider);
-            var logger = new UnityLogger();
             var reiaImplementation = new UnityReiaImplementation();
             Filesystem.Initialize(new JSONPathProvider(), epManager);
             Factories.TextureFactory = new TextureFactory();

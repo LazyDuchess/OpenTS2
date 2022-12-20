@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace OpenTS2.Files.Formats.Reia
 {
@@ -69,7 +70,7 @@ namespace OpenTS2.Files.Formats.Reia
 
             var unknown1 = io.ReadUInt32();
 
-            Logger.Assert(unknown1 == 1);
+            Debug.Assert(unknown1 == 1);
 
             var width = io.ReadUInt32();
             var height = io.ReadUInt32();
