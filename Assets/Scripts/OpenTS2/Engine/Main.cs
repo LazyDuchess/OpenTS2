@@ -1,7 +1,6 @@
 ﻿using OpenTS2.Assemblies;
 using OpenTS2.Client;
 using OpenTS2.Content;
-using OpenTS2.Engine.Files.Formats.Reia;
 using OpenTS2.Files;
 using OpenTS2.Files.Formats.DBPF;
 using UnityEngine;
@@ -26,7 +25,6 @@ namespace OpenTS2.Engine
             var epManager = new EPManager();
             var contentManager = new ContentManager();
             var objectManager = new ObjectManager(contentManager.Provider);
-            var reiaImplementation = new UnityReiaImplementation();
             Filesystem.Initialize(new JSONPathProvider(), epManager);
             Factories.TextureFactory = new TextureFactory();
             CodecAttribute.Initialize();
