@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using OpenTS2.Files.Formats.ARC;
 
 namespace OpenTS2.Content.Interfaces
 {
@@ -18,12 +17,6 @@ namespace OpenTS2.Content.Interfaces
     /// </summary>
     public abstract class ITextureFactory
     {
-        /// <summary>
-        /// Creates an engine texture out of a palettized ARC Texture.
-        /// </summary>
-        /// <param name="source">ARC Texture source.</param>
-        /// <returns></returns>
-        public abstract object CreateTexture(PalettizedARCTexture source);
 
         public abstract object CreateTGATexture(byte[] source);
 

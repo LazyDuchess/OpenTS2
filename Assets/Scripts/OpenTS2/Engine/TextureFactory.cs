@@ -14,7 +14,6 @@ using System.Text;
 using System.Threading.Tasks;
 using OpenTS2.Content;
 using OpenTS2.Content.Interfaces;
-using OpenTS2.Files.Formats.ARC;
 using OpenTS2.Files.Utils;
 using UnityEngine;
 
@@ -70,20 +69,6 @@ namespace OpenTS2.Engine
             Texture2D fTex = new Texture2D(1, 1);
             fTex.LoadImage(source);
             return fTex;
-        }
-
-        public override object CreateTexture(PalettizedARCTexture source)
-        {
-            var texture = new Texture2D(source.Width, source.Height);
-            for (var i = 0; i < source.Width; i++)
-            {
-                for (var n = 0; n < source.Height; n++)
-                {
-                    var col = source.Palette[source.Pixels[n + i * source.Width]];
-                    texture.SetPixel(n, i, col.UnityColor);
-                }
-            }
-            return texture;
         }
 
         public override object CreateTGATexture(byte[] source)
