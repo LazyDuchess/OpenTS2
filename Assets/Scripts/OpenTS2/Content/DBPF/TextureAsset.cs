@@ -9,18 +9,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace OpenTS2.Content.DBPF
 {
     /// <summary>
     /// Texture DBPF Asset
     /// </summary>
-    public partial class TextureAsset : AbstractAsset
+    public class TextureAsset : AbstractAsset
     {
-        public TextureAsset(object engineTexture)
+        public TextureAsset(Texture2D texture2D)
         {
-            this._engineTexture = engineTexture;
+            _texture2D = texture2D;
         }
-        object _engineTexture;
+        Texture2D _texture2D;
+        public Texture2D Texture => _texture2D;
     }
 }

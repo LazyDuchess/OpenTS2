@@ -26,7 +26,6 @@ namespace OpenTS2.Engine
             var contentManager = new ContentManager();
             var objectManager = new ObjectManager(contentManager.Provider);
             Filesystem.Initialize(new JSONPathProvider(), epManager);
-            Factories.TextureFactory = new TextureFactory();
             CodecAttribute.Initialize();
             //Initialize the game assembly, do all reflection things.
             AssemblyHelper.InitializeLoadedAssemblies();

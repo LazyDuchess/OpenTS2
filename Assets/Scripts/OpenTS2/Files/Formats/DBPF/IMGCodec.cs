@@ -14,6 +14,7 @@ using OpenTS2.Common;
 using OpenTS2.Content.DBPF;
 using System.Text;
 using OpenTS2.Files.Formats.JPEGWithAlfaSegment;
+using UnityEngine;
 
 namespace OpenTS2.Files.Formats.DBPF
 {
@@ -33,6 +34,57 @@ namespace OpenTS2.Files.Formats.DBPF
 
         }
 
+        Texture2D CreateJPGTexture(byte[] source)
+        {
+            Texture2D tex2D = new Texture2D(1, 1);
+            tex2D.LoadImage(source);
+            return tex2D;
+        }
+
+        Texture2D CreateJPGTextureWithAlphaChannel(
+            byte[] source, byte[] alphaChannel)
+        {
+            Texture2D tex2D = new Texture2D(1, 1);
+            tex2D.LoadImage(source);
+            Debug.Assert(tex2D.width * tex2D.height == alphaChannel.Length);
+
+            var pixels = tex2D.GetPixels();
+
+            // Unity flattens the pixels left-to-right bottom-to-top but the alpha channel
+            // is top-to-bottom left-to-right.
+            var alphaCounter = 0;
+            for (var i = tex2D.height - 1; i >= 0; i--)
+            {
+                for (var j = 0; j < tex2D.width; j++)
+                {
+                    byte transparency = alphaChannel[alphaCounter];
+                    alphaCounter++;
+
+                    // Unity Color uses floats from 0 to 1, the alpha
+                    // channel is bytes from 0 to 0xff.
+                    pixels[i * tex2D.height + j].a = (float)transparency / 0xff;
+                }
+            }
+
+            var alphaTex = new Texture2D(tex2D.width, tex2D.height, TextureFormat.RGBA32, true);
+            alphaTex.SetPixels(pixels);
+            alphaTex.Apply();
+
+            return alphaTex;
+        }
+
+        Texture2D CreatePNGTexture(byte[] source)
+        {
+            Texture2D fTex = new Texture2D(1, 1);
+            fTex.LoadImage(source);
+            return fTex;
+        }
+
+        Texture2D CreateTGATexture(byte[] source)
+        {
+            return new Paloma.TargaImage(source).bmpTargaImage;
+        }
+
         /// <summary>
         /// Parses IMG from an array of bytes.
         /// </summary>
@@ -48,14 +100,13 @@ namespace OpenTS2.Files.Formats.DBPF
                 fileType = 1;
             else if (jpgCheck == "JFIF")
                 fileType = 2;
-            var textureFactory = Factories.TextureFactory;
             switch (fileType)
             {
                 case 0:
-                    return new TextureAsset(textureFactory.CreateTGATexture(bytes));
+                    return new TextureAsset(CreateTGATexture(bytes));
 
                 case 1:
-                    return new TextureAsset(textureFactory.CreatePNGTexture(bytes));
+                    return new TextureAsset(CreatePNGTexture(bytes));
 
                 case 2:
                     {
@@ -63,10 +114,10 @@ namespace OpenTS2.Files.Formats.DBPF
                         if (alphaChannel != null)
                         {
                             return new TextureAsset(
-                                textureFactory.CreateJPGTextureWithAlphaChannel(bytes, alphaChannel));
+                                CreateJPGTextureWithAlphaChannel(bytes, alphaChannel));
                         }
 
-                        return new TextureAsset(textureFactory.CreateJPGTexture(bytes));
+                        return new TextureAsset(CreateJPGTexture(bytes));
                     }
             }
             return null;
