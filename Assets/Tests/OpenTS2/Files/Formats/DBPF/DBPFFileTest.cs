@@ -2,7 +2,6 @@
 using OpenTS2.Files.Formats.DBPF;
 using OpenTS2.Common;
 using System.IO;
-using UnityEngine;
 using System.Text;
 
 public class DPBFFileTest
@@ -33,7 +32,7 @@ public class DPBFFileTest
 
         // Test that the data returned matches.
         var data = package.GetBytesByTGI(dummyTGI);
-        Assert.IsTrue(data == dummyResourceBytes);
+        Assert.IsTrue(Encoding.ASCII.GetString(dummyResourceBytes) == Encoding.ASCII.GetString(data));
 
         // Save the package to a file and dispose of it.
         package.WriteToFile();
