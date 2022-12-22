@@ -23,7 +23,8 @@ namespace OpenTS2.Content.Changes
                 GlobalTGI = tgi.LocalGroupID(package.GroupID),
                 InternalTGI = tgi,
                 Dynamic = true,
-                Package = package
+                Package = package,
+                FileSize = (uint)FileData.Length
             };
         }
         public ChangedFile(AbstractAsset asset, byte[] fileData) : this(fileData, asset.InternalTGI, asset.Package)

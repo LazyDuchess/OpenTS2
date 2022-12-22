@@ -311,7 +311,7 @@ namespace OpenTS2.Files.Formats.DBPF
         {
             _filePath = file;
             GroupID = FileUtils.GroupHash(Path.GetFileNameWithoutExtension(file));
-            var stream = Filesystem.OpenRead(file);
+            var stream = File.OpenRead(file);
             Read(stream);
             _changes.Dirty = false;
         }
@@ -403,6 +403,7 @@ namespace OpenTS2.Files.Formats.DBPF
             }
             _compressionDIR = (DIRAsset)GetAssetByTGI(ResourceKey.DIR);
         }
+
         /// <summary>
         /// Write and clear all changes to FilePath.
         /// </summary>
@@ -412,7 +413,7 @@ namespace OpenTS2.Files.Formats.DBPF
             {
                 Dispose();
                 Provider?.RemovePackage(this);
-                Filesystem.Delete(FilePath);
+                File.Delete(FilePath);
                 Changes.Clear();
                 _deleted = true;
                 return;
@@ -420,7 +421,7 @@ namespace OpenTS2.Files.Formats.DBPF
             var data = Serialize();
             Dispose();
             Filesystem.Write(FilePath, data);
-            var stream = Filesystem.OpenRead(FilePath);
+            var stream = File.OpenRead(FilePath);
             Read(stream);
             Changes.Clear();
             return;

@@ -73,3 +73,6 @@ crashlytics-build.properties
 
 # OpenTS2 personal configuration
 config.json
+
+# OpenTS2 - Reserved for CI output
+/[Tt]est[Ff]iles/

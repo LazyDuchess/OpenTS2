@@ -8,6 +8,7 @@ using UnityEngine.UI;
 using OpenTS2.Files;
 using OpenTS2.Files.Formats.Reia;
 using System.Diagnostics;
+using System.IO;
 
 namespace OpenTS2.Engine.Tests
 {
@@ -28,14 +29,16 @@ namespace OpenTS2.Engine.Tests
 
         private void Start()
         {
-            var streamFs = Filesystem.OpenRead(reiaPath);
+            var realPath = Filesystem.GetRealPath(reiaPath);
+            var streamFs = File.OpenRead(realPath);
             reia = ReiaFile.Read(streamFs, stream);
         }
 
         void Reload()
         {
             reia.Dispose();
-            var streamFs = Filesystem.OpenRead(reiaPath);
+            var realPath = Filesystem.GetRealPath(reiaPath);
+            var streamFs = File.OpenRead(realPath);
             reia = ReiaFile.Read(streamFs, stream);
             reload = false;
             frameCounter = 0f;

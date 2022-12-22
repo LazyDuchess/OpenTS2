@@ -17,7 +17,7 @@ public class ContentTest
         stringSetData.Strings[Languages.USEnglish].Add(new StringValue(usString));
         var stringSet = new StringSetAsset(stringSetData);
 
-        // Test US Localisation String.
+        // Test US Localization String.
         Assert.AreEqual(usString, stringSet.StringData.GetString(0, Languages.USEnglish));
 
         // Test fallback to US String when UK Language (or any other) is not present.

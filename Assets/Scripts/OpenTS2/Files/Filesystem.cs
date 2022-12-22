@@ -67,22 +67,6 @@ namespace OpenTS2.Files
         {
             var userPath = s_pathProvider.GetUserPath();
             var packageList = RemoveNeighborhoodAndCCPackagesFromList(GetPackagesInDirectory(userPath));
-            /*
-            var collectionsPath = Path.Combine(userPath, "Collections");
-            var lockedBinsPath = Path.Combine(userPath, "LockedBins");
-            var lotCatalogPath = Path.Combine(userPath, "LotCatalog");
-            var petBreedsPath = Path.Combine(userPath, "PetBreeds");
-            var petCoatsPath = Path.Combine(userPath, "PetCoats");
-            var savedSimsPath = Path.Combine(userPath, "SavedSims");
-            var thumbnailsPath = Path.Combine(userPath, "Thumbnails");
-            var packageList = new List<string>();
-            packageList.AddRange(GetPackagesInDirectory(collectionsPath));
-            packageList.AddRange(GetPackagesInDirectory(lockedBinsPath));
-            packageList.AddRange(GetPackagesInDirectory(lotCatalogPath));
-            packageList.AddRange(GetPackagesInDirectory(petBreedsPath));
-            packageList.AddRange(GetPackagesInDirectory(petCoatsPath));
-            packageList.AddRange(GetPackagesInDirectory(savedSimsPath));
-            packageList.AddRange(GetPackagesInDirectory(thumbnailsPath));*/
             return packageList;
         }
 
@@ -266,28 +250,9 @@ namespace OpenTS2.Files
             path = FileUtils.CleanPath(path);
             return path;
         }
-        /// <summary>
-        /// Opens a file for writing.
-        /// </summary>
-        /// <param name="path">Unparsed path</param>
-        /// <returns>A FileStream</returns>
-        public static FileStream OpenWrite(string path)
-        {
-            return File.OpenWrite(GetRealPath(path));
-        }
 
         /// <summary>
-        /// Opens a file for reading.
-        /// </summary>
-        /// <param name="path">Unparsed path</param>
-        /// <returns>A FileStream</returns>
-        public static FileStream OpenRead(string path)
-        {
-            return File.OpenRead(GetRealPath(path));
-        }
-
-        /// <summary>
-        /// Writes a byte array into a file.
+        /// Writes a byte array into a file, creating all necessary directories.
         /// </summary>
         /// <param name="path">Path to output file.</param>
         /// <param name="bytes">Byte array to write.</param>
@@ -297,29 +262,18 @@ namespace OpenTS2.Files
         }
 
         /// <summary>
-        /// Writes a byte array into a file.
+        /// Writes a byte array into a file, creating all necessary directories.
         /// </summary>
         /// <param name="path">Path to output file.</param>
         /// <param name="bytes">Byte array to write.</param>
         public static void Write(string path, byte[] bytes, int size)
         {
-            var realPath = GetRealPath(path);
-            var dir = Path.GetDirectoryName(realPath);
+            var dir = Path.GetDirectoryName(path);
             if (!Directory.Exists(dir) && !string.IsNullOrEmpty(dir))
                 Directory.CreateDirectory(dir);
-            var fStream = new FileStream(realPath, FileMode.Create, FileAccess.Write);
+            var fStream = new FileStream(path, FileMode.Create, FileAccess.Write);
             fStream.Write(bytes, 0, size);
             fStream.Dispose();
-            //File.WriteAllBytes(realPath, bytes);
-        }
-
-        /// <summary>
-        /// Deletes a file
-        /// </summary>
-        /// <param name="path">Path to file to delete.</param>
-        public static void Delete(string path)
-        {
-            File.Delete(path);
         }
     }
 }
