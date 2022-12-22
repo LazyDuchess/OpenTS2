@@ -71,7 +71,7 @@ namespace OpenTS2.Files.Formats.DBPF
 
         public byte[] GetBytes()
         {
-            return Package.GetEntry(this);
+            return Package.GetBytes(this);
         }
 
         public T GetAsset<T>() where T : AbstractAsset

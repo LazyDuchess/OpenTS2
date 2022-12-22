@@ -32,7 +32,7 @@ public class DPBFFileTest
         Assert.IsTrue(package.Entries.Count == 1);
 
         // Test that the data returned matches.
-        var data = package.GetItemByTGI(dummyTGI);
+        var data = package.GetBytesByTGI(dummyTGI);
         Assert.IsTrue(data == dummyResourceBytes);
 
         // Save the package to a file and dispose of it.
@@ -46,7 +46,7 @@ public class DPBFFileTest
         Assert.IsTrue(package.Entries.Count == 1);
 
         // Test that the entry matches with what we wrote earlier.
-        var dummyResource = loadedPackage.GetItemByTGI(dummyTGI);
+        var dummyResource = loadedPackage.GetBytesByTGI(dummyTGI);
         Assert.IsTrue(Encoding.ASCII.GetString(dummyResource) == Encoding.ASCII.GetString(dummyResourceBytes));
 
         // Dispose of the package and delete the file.

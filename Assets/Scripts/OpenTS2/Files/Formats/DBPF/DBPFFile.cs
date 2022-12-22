@@ -506,7 +506,7 @@ namespace OpenTS2.Files.Formats.DBPF
                 writer.Write((int)filePosition);
                 wStream.Position = filePosition;
                 var entry = entries[i];
-                var entryData = GetEntry(entry);
+                var entryData = GetBytes(entry);
                 if (dirAsset != null && dirAsset.GetUncompressedSize(entry.InternalTGI) != 0)
                 {
                     entryData = DBPFCompression.Compress(entryData);
@@ -541,7 +541,7 @@ namespace OpenTS2.Files.Formats.DBPF
                 }
                 else
                 {
-                    var uncompressedSize = InternalUncompressedSize(element);
+                    var uncompressedSize = InternalGetUncompressedSize(element);
                     if (uncompressedSize > 0)
                         dirAsset.SizeByInternalTGI[element.InternalTGI] = uncompressedSize;
                 }
@@ -562,7 +562,7 @@ namespace OpenTS2.Files.Formats.DBPF
         /// </summary>
         /// <param name="entry">Entry to retrieve data for.</param>
         /// <returns>Data for entry.</returns>
-        public byte[] GetEntry(DBPFEntry entry, bool ignoreDeleted = true)
+        public byte[] GetBytes(DBPFEntry entry, bool ignoreDeleted = true)
         {
             if (ignoreDeleted)
             {
@@ -573,7 +573,7 @@ namespace OpenTS2.Files.Formats.DBPF
                 return Changes.ChangedEntries[entry.InternalTGI].Bytes;
             _reader.Seek(SeekOrigin.Begin, entry.FileOffset);
             var fileBytes = _reader.ReadBytes((int)entry.FileSize);
-            var uncompressedSize = InternalUncompressedSize(entry);
+            var uncompressedSize = InternalGetUncompressedSize(entry);
             if (uncompressedSize > 0)
             {
                 return DBPFCompression.Decompress(fileBytes, uncompressedSize);
@@ -586,7 +586,7 @@ namespace OpenTS2.Files.Formats.DBPF
         /// </summary>
         /// <param name="tgi">The TGI of the entry.</param>
         /// <returns>The entry's data.</returns>
-        public byte[] GetItemByTGI(ResourceKey tgi, bool ignoreDeleted = true)
+        public byte[] GetBytesByTGI(ResourceKey tgi, bool ignoreDeleted = true)
         {
             if (ignoreDeleted)
             {
@@ -596,12 +596,12 @@ namespace OpenTS2.Files.Formats.DBPF
             if (Changes.ChangedEntries.ContainsKey(tgi))
                 return Changes.ChangedEntries[tgi].Bytes;
             if (_entryByTGI.ContainsKey(tgi))
-                return GetEntry(_entryByTGI[tgi]);
+                return GetBytes(_entryByTGI[tgi]);
             else
                 return null;
         }
 
-        uint InternalUncompressedSize(DBPFEntry entry)
+        uint InternalGetUncompressedSize(DBPFEntry entry)
         {
             if (entry.InternalTGI.TypeID == TypeIDs.DIR)
                 return 0;
@@ -634,10 +634,10 @@ namespace OpenTS2.Files.Formats.DBPF
                 return null;
             if (Changes.ChangedEntries.ContainsKey(entry.InternalTGI))
                 return Changes.ChangedEntries[entry.InternalTGI].Asset;
-            var item = GetEntry(entry, ignoreDeleted);
+            var item = GetBytes(entry, ignoreDeleted);
             var codec = Codecs.Get(entry.GlobalTGI.TypeID);
             var asset = codec.Deserialize(item, entry.GlobalTGI, this);
-            asset.Compressed = InternalUncompressedSize(entry) > 0;
+            asset.Compressed = InternalGetUncompressedSize(entry) > 0;
             asset.GlobalTGI = entry.GlobalTGI;
             asset.InternalTGI = entry.InternalTGI;
             asset.Package = this;
