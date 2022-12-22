@@ -567,7 +567,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Image: {fileID: 683157549}
-  PackageToLoad: '%UserDataDir%/Neighborhoods/N007/Thumbnails/N007_FamilyThumbnails.package'
+  PackageToLoad: '%UserDataDir%/Neighborhoods/N001/Thumbnails/N001_FamilyThumbnails.package'
 --- !u!4 &1947281170
 Transform:
   m_ObjectHideFlags: 0

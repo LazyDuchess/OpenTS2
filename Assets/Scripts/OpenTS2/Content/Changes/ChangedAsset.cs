@@ -40,7 +40,7 @@ namespace OpenTS2.Content.Changes
                 Package = asset.Package
             };
         }
-        public ChangedAsset(AbstractAsset asset) : this(asset, Codecs.Get(asset.TGI.TypeID))
+        public ChangedAsset(AbstractAsset asset) : this(asset, Codecs.Get(asset.GlobalTGI.TypeID))
         {
         }
     }

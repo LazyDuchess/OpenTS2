@@ -21,23 +21,22 @@ namespace OpenTS2.Content
     /// </summary>
     public abstract class AbstractAsset : ICloneable
     {
-        public ResourceKey TGI
+        /// <summary>
+        /// Global TGI.
+        /// </summary>
+        public ResourceKey GlobalTGI
         {
             get
             {
-                return GlobalTGI;
-            }
-            set
-            {
-                InternalTGI = value;
-                GlobalTGI = value.LocalGroupID(Package.GroupID);
+                if (Package == null)
+                    return TGI;
+                return TGI.LocalGroupID(Package.GroupID);
             }
         }
-        public ResourceKey GlobalTGI = ResourceKey.Default;
         /// <summary>
-        /// Original TGI, as written to file.
+        /// Internal TGI, relative to parent package.
         /// </summary>
-        public ResourceKey InternalTGI = ResourceKey.Default;
+        public ResourceKey TGI = ResourceKey.Default;
         public DBPFFile Package;
         public bool Compressed
         {
@@ -74,23 +73,22 @@ namespace OpenTS2.Content
         /// </summary>
         public void Delete()
         {
-            Package.Changes.Delete(this.InternalTGI);
+            Package.Changes.Delete(this.TGI);
         }
         /// <summary>
         /// Unmark this asset as deleted in memory.
         /// </summary>
         public void Restore()
         {
-            Package.Changes.Restore(this.InternalTGI);
+            Package.Changes.Restore(this.TGI);
         }
 
         public object Clone()
         {
             var codec = Codecs.Get(TGI.TypeID);
             var serialized = codec.Serialize(this);
-            var clone = codec.Deserialize(serialized, this.GlobalTGI, Package);
-            clone.GlobalTGI = GlobalTGI;
-            clone.InternalTGI = InternalTGI;
+            var clone = codec.Deserialize(serialized, TGI, Package);
+            clone.TGI = TGI;
             clone.Package = Package;
             clone.Compressed = Compressed;
             return clone;

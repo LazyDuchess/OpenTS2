@@ -20,14 +20,13 @@ namespace OpenTS2.Content.Changes
             }
             this.Entry = new DBPFEntry()
             {
-                GlobalTGI = tgi.LocalGroupID(package.GroupID),
-                InternalTGI = tgi,
+                TGI = tgi,
                 Dynamic = true,
                 Package = package,
                 FileSize = (uint)FileData.Length
             };
         }
-        public ChangedFile(AbstractAsset asset, byte[] fileData) : this(fileData, asset.InternalTGI, asset.Package)
+        public ChangedFile(AbstractAsset asset, byte[] fileData) : this(fileData, asset.TGI, asset.Package)
         {
 
         }

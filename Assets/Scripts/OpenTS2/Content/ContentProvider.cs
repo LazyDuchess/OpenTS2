@@ -200,9 +200,9 @@ namespace OpenTS2.Content
         /// <returns>Content entry for package.</returns>
         public DBPFFile AddPackage(string path)
         {
-            var realPath = Filesystem.GetRealPath(path);
-            if (_entryByPath.ContainsKey(realPath))
-                return _entryByPath[realPath];
+            path = Filesystem.GetRealPath(path);
+            if (_entryByPath.ContainsKey(path))
+                return _entryByPath[path];
             var package = new DBPFFile(path);
             InternalAddPackage(package);
             return package;

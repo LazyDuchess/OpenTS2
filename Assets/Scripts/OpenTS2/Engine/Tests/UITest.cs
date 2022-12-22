@@ -20,13 +20,20 @@ namespace OpenTS2.Engine.Tests
     public class UITest : MonoBehaviour
     {
         public RawImage Image;
-        public string PackageToLoad = "%UserDataDirectory%/Neighborhoods/N007/Thumbnails/N007_FamilyThumbnails.package";
+        public string PackageToLoad = "%UserDataDirectory%/Neighborhoods/N001/Thumbnails/N001_FamilyThumbnails.package";
 
         void Start()
         {
             var contentManager = ContentManager.Get();
             contentManager.Provider.AddPackage(PackageToLoad);
-            var texture = contentManager.Provider.GetAsset<TextureAsset>(new ResourceKey(0x00000001, "N007_FamilyThumbnails", 0x8C3CE95A));
+            var resKey = new ResourceKey(0x00000001, "N001_FamilyThumbnails", 0x8C3CE95A);
+            var hasFile = contentManager.Provider.GetEntry(resKey);
+            if (hasFile == null)
+            {
+                Debug.Log("CANT FIND FILE!");
+                return;
+            }
+            var texture = contentManager.Provider.GetAsset<TextureAsset>(resKey);
             Image.texture = texture.Texture;
         }
     }

@@ -55,10 +55,23 @@ namespace OpenTS2.Files.Formats.DBPF
     /// </summary>
     public class DBPFEntry
     {
-        //ID of file, type and group
-        public virtual ResourceKey GlobalTGI { get; set; } = ResourceKey.Default;
+        /// <summary>
+        /// Global TGI.
+        /// </summary>
+        public virtual ResourceKey GlobalTGI
+        {
+            get
+            {
+                if (Package == null)
+                    return TGI;
+                return TGI.LocalGroupID(Package.GroupID);
+            }
+        }
 
-        public virtual ResourceKey InternalTGI { get; set; } = ResourceKey.Default;
+        /// <summary>
+        /// Internal TGI, relative to parent package.
+        /// </summary>
+        public virtual ResourceKey TGI { get; set; } = ResourceKey.Default;
 
         //A 4-byte unsigned integer specifying the offset to the entry's data from the beginning of the archive
         public uint FileOffset;
@@ -93,20 +106,16 @@ namespace OpenTS2.Files.Formats.DBPF
             {
                 return Change.Asset.GlobalTGI;
             }
-            set
-            {
-                Change.Asset.GlobalTGI = value;
-            }
         }
-        public override ResourceKey InternalTGI
+        public override ResourceKey TGI
         {
             get
             {
-                return Change.Asset.InternalTGI;
+                return Change.Asset.TGI;
             }
             set
             {
-                Change.Asset.InternalTGI = value;
+                Change.Asset.TGI = value;
             }
         }
         public ChangedAsset Change;
