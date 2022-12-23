@@ -3,7 +3,7 @@ using OpenTS2.Content.DBPF;
 using OpenTS2.Client;
 using System.Collections.Generic;
 
-public class ContentTest
+public class StringSetTest
 {
     [Test]
     public void StringSetLocalizationTest()

@@ -16,11 +16,27 @@ namespace OpenTS2.Content
         }
         static EPManager s_instance;
 
+        public int InstalledProducts
+        {
+            get
+            {
+                return _installedProducts;
+            }
+            set
+            {
+                _installedProducts = value;
+            }
+        }
+
         //mask of all products, minus store.
-        readonly int _installedProducts = 0x3EFFF;
+        int _installedProducts = 0x3EFFF;
         public EPManager()
         {
             s_instance = this;
+        }
+        public EPManager(int installedProducts) : this()
+        {
+            InstalledProducts = installedProducts;
         }
         public static List<ProductFlags> GetProductsInMask(int productMask)
         {
