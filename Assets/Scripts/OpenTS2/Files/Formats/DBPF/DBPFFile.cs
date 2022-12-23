@@ -156,7 +156,6 @@ namespace OpenTS2.Files.Formats.DBPF
             public void Set(AbstractAsset asset)
             {
                 asset.Package = _owner;
-                asset.TGI = asset.TGI;
                 var changedAsset = new ChangedAsset(asset);
                 ChangedEntries[asset.TGI] = changedAsset;
                 InternalRestore(asset.TGI);
