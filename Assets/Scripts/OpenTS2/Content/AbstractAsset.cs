@@ -83,6 +83,10 @@ namespace OpenTS2.Content
             Package.Changes.Restore(this.TGI);
         }
 
+        /// <summary>
+        /// Makes a copy of the asset.
+        /// </summary>
+        /// <returns>Copy of the asset.</returns>
         public object Clone()
         {
             var codec = Codecs.Get(TGI.TypeID);
