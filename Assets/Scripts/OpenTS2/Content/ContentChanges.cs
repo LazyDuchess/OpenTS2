@@ -32,9 +32,9 @@ namespace OpenTS2.Content
             }
         }
         /// <summary>
-        /// Write all changes to disk.
+        /// Write all changes to the filesystem.
         /// </summary>
-        public void SaveChangesToDisk()
+        public void SaveChanges()
         {
             var entries = _contentProvider.ContentEntries;
             foreach(var element in entries)

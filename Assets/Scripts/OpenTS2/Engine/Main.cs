@@ -23,8 +23,8 @@ namespace OpenTS2.Engine
                 return;
             var settings = new Settings();
             var epManager = new EPManager();
-            var contentManager = new ContentManager();
-            var objectManager = new ObjectManager(contentManager.Provider);
+            var contentProvider = new ContentProvider();
+            var objectManager = new ObjectManager(contentProvider);
             Filesystem.Initialize(new JSONPathProvider(), epManager);
             CodecAttribute.Initialize();
             //Initialize the game assembly, do all reflection things.

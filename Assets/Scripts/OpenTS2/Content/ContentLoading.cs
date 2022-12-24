@@ -16,83 +16,44 @@ using OpenTS2.Files;
 namespace OpenTS2.Content
 {
     /// <summary>
-    /// Manages the game's asset saving/loading/caching and its filesystem.
+    /// Manages loading game content to the provider.
     /// </summary>
-    public class ContentManager
+    public static class ContentLoading
     {
-        public ContentProvider Provider;
-        public LoadProgress ContentLoadProgress;
-        static ContentManager s_instance;
-        Settings Settings
-        {
-            get
-            {
-                return Settings.Get();
-            }
-        }
-
-        public ContentCache Cache
-        {
-            get
-            {
-                return Provider.Cache;
-            }
-        }
-
-        public ContentChanges Changes
-        {
-            get
-            {
-                return Provider.Changes;
-            }
-        }
-
-        public static ContentManager Get()
-        {
-            return s_instance;
-        }
-
-        public ContentManager()
-        {
-            Provider = new ContentProvider();
-            ContentLoadProgress = new LoadProgress();
-            s_instance = this;
-        }
-
         /// <summary>
         /// Synchronously load startup content, bare minimum to display a loading screen.
         /// </summary>
-        public void LoadContentStartup()
+        public static void LoadContentStartup()
         {
             var startupPackages = Filesystem.GetStartupPackages();
-            if (Settings.CustomContentEnabled)
+            if (Settings.Get().CustomContentEnabled)
                 startupPackages.AddRange(Filesystem.GetStartupDownloadPackages());
-            Provider.AddPackages(startupPackages);
+            ContentProvider.Get().AddPackages(startupPackages);
         }
 
         /// <summary>
         /// Asynchronously load game content.
         /// </summary>
         /// <returns>Async task.</returns>
-        public async Task LoadGameContentAsync()
+        public static async Task LoadGameContentAsync(LoadProgress loadProgress)
         {
             var gamePackages = Filesystem.GetMainPackages();
             gamePackages.AddRange(Filesystem.GetUserPackages());
-            if (Settings.CustomContentEnabled)
+            if (Settings.Get().CustomContentEnabled)
                 gamePackages.AddRange(Filesystem.GetStreamedDownloadPackages());
-            await Provider.AddPackagesAsync(gamePackages, ContentLoadProgress);
+            await ContentProvider.Get().AddPackagesAsync(gamePackages, loadProgress);
         }
 
         /// <summary>
         /// Synchronously load game content.
         /// </summary>
-        public void LoadGameContentSync()
+        public static void LoadGameContentSync()
         {
             var gamePackages = Filesystem.GetMainPackages();
             gamePackages.AddRange(Filesystem.GetUserPackages());
-            if (Settings.CustomContentEnabled)
+            if (Settings.Get().CustomContentEnabled)
                 gamePackages.AddRange(Filesystem.GetStreamedDownloadPackages());
-            Provider.AddPackages(gamePackages);
+            ContentProvider.Get().AddPackages(gamePackages);
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using OpenTS2.Common;
 using OpenTS2.Content.DBPF;
-using OpenTS2.Content.Listeners;
 using OpenTS2.Files.Formats.DBPF;
 using System;
 using System.Collections.Generic;

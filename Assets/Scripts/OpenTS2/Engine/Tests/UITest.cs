@@ -24,16 +24,16 @@ namespace OpenTS2.Engine.Tests
 
         void Start()
         {
-            var contentManager = ContentManager.Get();
-            contentManager.Provider.AddPackage(PackageToLoad);
+            var contentProvider = ContentProvider.Get();
+            contentProvider.AddPackage(PackageToLoad);
             var resKey = new ResourceKey(0x00000001, "N001_FamilyThumbnails", 0x8C3CE95A);
-            var hasFile = contentManager.Provider.GetEntry(resKey);
+            var hasFile = contentProvider.GetEntry(resKey);
             if (hasFile == null)
             {
                 Debug.Log("CANT FIND FILE!");
                 return;
             }
-            var texture = contentManager.Provider.GetAsset<TextureAsset>(resKey);
+            var texture = contentProvider.GetAsset<TextureAsset>(resKey);
             Image.texture = texture.Texture;
         }
     }

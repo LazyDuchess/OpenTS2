@@ -20,16 +20,15 @@ namespace OpenTS2.Content
         public ResourceKey TGI = ResourceKey.Default;
         private readonly ContentProvider _contentProvider;
 
-        public CacheKey(ResourceKey tgi, DBPFFile package = null, ContentProvider provider = null)
+        public CacheKey(ResourceKey tgi, DBPFFile package = null, ContentProvider contentProvider = null)
         {
             this.TGI = tgi;
             this.File = package;
-            if (provider == null)
+            if (contentProvider == null)
             {
-                var contentManager = ContentManager.Get();
-                provider = contentManager.Provider;
+                contentProvider = ContentProvider.Get();
             }
-            this._contentProvider = provider;
+            this._contentProvider = contentProvider;
             if (package == null && this._contentProvider != null)
             {
                 this.File = this._contentProvider.GetEntry(this.TGI)?.Package;

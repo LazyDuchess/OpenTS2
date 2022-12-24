@@ -16,6 +16,8 @@ namespace OpenTS2.Engine.Tests
 {
     public class AsyncTest : MonoBehaviour
     {
+        LoadProgress _loadProgress = new LoadProgress();
+
         public AudioSource MusicSource;
         public Text ProgressText;
         public Text ObjectsText;
@@ -28,36 +30,34 @@ namespace OpenTS2.Engine.Tests
         // Start is called before the first frame update
         void Start()
         {
-            var contentManager = ContentManager.Get();
-            contentManager.LoadContentStartup();
+            ContentLoading.LoadContentStartup();
             PluginSupport.Initialize();
             MusicSource.clip = AudioManager.SplashAudio.Clip;
             MusicSource.Play();
             stopW = new Stopwatch();
             stopW.Start();
             if (async)
-                contentManager.LoadGameContentAsync().ContinueWith((task) => { OnFinishLoading(); }, TaskScheduler.FromCurrentSynchronizationContext());
+                ContentLoading.LoadGameContentAsync(_loadProgress).ContinueWith((task) => { OnFinishLoading(); }, TaskScheduler.FromCurrentSynchronizationContext());
             else
             {
-                contentManager.LoadGameContentSync();
+                ContentLoading.LoadGameContentSync();
                 OnFinishLoading();
             }
         }
 
         void Update()
         {
-            var contentManager = ContentManager.Get();
-            ProgressText.text = Mathf.Round(contentManager.ContentLoadProgress.Percentage * 100f).ToString() + "%";
+            ProgressText.text = Mathf.Round(_loadProgress.Percentage * 100f).ToString() + "%";
         }
 
         void OnFinishLoading()
         {
-            var contentManager = ContentManager.Get();
+            var contentProvider = ContentProvider.Get();
             var oMgr = ObjectManager.Get();
             oMgr.Initialize();
             stopW.Stop();
             UnityEngine.Debug.Log("Done loading packages!");
-            UnityEngine.Debug.Log(contentManager.Provider.ContentEntries.Count + " packages loaded.");
+            UnityEngine.Debug.Log(contentProvider.ContentEntries.Count + " packages loaded.");
             UnityEngine.Debug.Log("Package loading took " + (stopW.ElapsedTicks * 1000000 / Stopwatch.Frequency) + " microseconds");
             var objectStr = "Object Amount: " + oMgr.Objects.Count + System.Environment.NewLine;
             for(var i=0;i<200;i++)
@@ -68,8 +68,8 @@ namespace OpenTS2.Engine.Tests
                 objectStr += element.Definition.FileName + " (" + "0x"+element.GUID.ToString("X8") + ")" + System.Environment.NewLine;
             }
             ObjectsText.text = objectStr;
-            PopupBackgroundImage.texture = contentManager.Provider.GetAsset<TextureAsset>(new ResourceKey(0xA9600400, 0x499DB772, 0x856DDBAC)).Texture;
-            BackgroundImage.texture = contentManager.Provider.GetAsset<TextureAsset>(new ResourceKey(0xCCC9AF70, 0x499DB772, 0x856DDBAC)).Texture;
+            PopupBackgroundImage.texture = contentProvider.GetAsset<TextureAsset>(new ResourceKey(0xA9600400, 0x499DB772, 0x856DDBAC)).Texture;
+            BackgroundImage.texture = contentProvider.GetAsset<TextureAsset>(new ResourceKey(0xCCC9AF70, 0x499DB772, 0x856DDBAC)).Texture;
         }
     }
 }

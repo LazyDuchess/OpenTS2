@@ -16,8 +16,8 @@ namespace OpenTS2.Audio
         {
             get
             {
-                var content = ContentManager.Get();
-                return content.Provider.GetAsset<AudioAsset>(s_splashKey);
+                var contentProvider = ContentProvider.Get();
+                return contentProvider.GetAsset<AudioAsset>(s_splashKey);
             }
         }
     }

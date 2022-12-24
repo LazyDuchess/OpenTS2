@@ -20,6 +20,11 @@ namespace OpenTS2.Content
     /// </summary>
     public class ContentProvider : IDisposable
     {
+        static ContentProvider s_instance;
+        public static ContentProvider Get()
+        {
+            return s_instance;
+        }
         public Dictionary<ResourceKey, DBPFEntry> ResourceMap
         {
             get { return _resourceMap; }
@@ -40,6 +45,7 @@ namespace OpenTS2.Content
 
         public ContentProvider()
         {
+            s_instance = this;
             this.Changes = new ContentChanges(this);
             this.Cache = new ContentCache(this);
         }

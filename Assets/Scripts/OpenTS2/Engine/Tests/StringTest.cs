@@ -28,8 +28,7 @@ namespace OpenTS2.Engine.Tests
         // Start is called before the first frame update
         void Start()
         {
-            var contentManager = ContentManager.Get();
-            var contentProvider = contentManager.Provider;
+            var contentProvider = ContentProvider.Get();
             var stopWatch = new Stopwatch();
             var stopWatchSTR = new Stopwatch();
             var stopWatchSTR2 = new Stopwatch();

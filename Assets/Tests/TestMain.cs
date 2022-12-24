@@ -17,7 +17,7 @@ public static class TestMain
         if (s_initialized)
             return;
         var epManager = new EPManager((int)ProductFlags.BaseGame);
-        var contentManager = new ContentManager();
+        var contentProvider = new ContentProvider();
         Filesystem.Initialize(new TestPathProvider(), epManager);
         CodecAttribute.Initialize();
         AssemblyHelper.InitializeLoadedAssemblies();
