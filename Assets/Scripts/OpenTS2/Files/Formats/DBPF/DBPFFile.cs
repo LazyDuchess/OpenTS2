@@ -196,7 +196,7 @@ namespace OpenTS2.Files.Formats.DBPF
         }
         bool _deleted = false;
         public bool DeleteIfEmpty = true;
-        private readonly DBPFFileChanges _changes;
+        private DBPFFileChanges _changes;
         public ContentProvider Provider = null;
         
         /// <summary>
@@ -410,9 +410,10 @@ namespace OpenTS2.Files.Formats.DBPF
             Filesystem.Write(FilePath, data);
             var stream = File.OpenRead(FilePath);
             Read(stream);
-            Changes.Clear();
+            _changes = new DBPFFileChanges(this);
             return;
         }
+
         /// <summary>
         /// Serializes package with all resource changes, additions and deletions.
         /// </summary>
