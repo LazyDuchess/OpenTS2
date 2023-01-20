@@ -13,7 +13,6 @@ using OpenTS2.Files.Utils;
 using OpenTS2.Common;
 using OpenTS2.Common.Utils;
 using OpenTS2.Content;
-using OpenTS2.Content.Changes;
 using OpenTS2.Content.DBPF;
 
 namespace OpenTS2.Files.Formats.DBPF
@@ -38,7 +37,7 @@ namespace OpenTS2.Files.Formats.DBPF
 
             public bool Dirty = false;
             public Dictionary<ResourceKey, bool> DeletedEntries = new Dictionary<ResourceKey, bool>();
-            public Dictionary<ResourceKey, AbstractChanged> ChangedEntries = new Dictionary<ResourceKey, AbstractChanged>();
+            public Dictionary<ResourceKey, DynamicDBPFEntry> ChangedEntries = new Dictionary<ResourceKey, DynamicDBPFEntry>();
 
             public DBPFFileChanges(DBPFFile owner)
             {
@@ -156,11 +155,18 @@ namespace OpenTS2.Files.Formats.DBPF
             public void Set(AbstractAsset asset)
             {
                 asset.Package = _owner;
-                var changedAsset = new ChangedAsset(asset);
-                ChangedEntries[asset.TGI] = changedAsset;
+                if (!ChangedEntries.TryGetValue(asset.TGI, out DynamicDBPFEntry changedEntry))
+                    changedEntry = new DynamicDBPFEntry();
+                changedEntry.Package = _owner;
+                changedEntry.TGI = asset.TGI;
+                
+                var changedAsset = new ChangedResourceDataAsset(asset, Codecs.Get(asset.TGI.TypeID));
+                changedEntry.Change.Data = changedAsset;
+                changedEntry.Change.Compressed = asset.Compressed;
+                ChangedEntries[asset.TGI] = changedEntry;
                 InternalRestore(asset.TGI);
                 Dirty = true;
-                Provider?.UpdateOrAddToResourceMap(changedAsset.Entry);
+                Provider?.UpdateOrAddToResourceMap(changedEntry);
                 RefreshCache(asset.TGI);
             }
             /// <summary>
@@ -171,14 +177,37 @@ namespace OpenTS2.Files.Formats.DBPF
             /// <param name="compressed">Compress?</param>
             public void Set(byte[] bytes, ResourceKey tgi, bool compressed)
             {
-                var changedFile = new ChangedFile(bytes, tgi, _owner, Codecs.Get(tgi.TypeID))
-                {
-                    Compressed = compressed
-                };
-                ChangedEntries[tgi] = changedFile;
+                var changedData = new ChangedResourceDataBytes(bytes, tgi, Codecs.Get(tgi.TypeID), _owner);
+                if (!ChangedEntries.TryGetValue(tgi, out DynamicDBPFEntry changedEntry))
+                    changedEntry = new DynamicDBPFEntry();
+                changedEntry.TGI = tgi;
+                changedEntry.Change.Data = changedData;
+                changedEntry.Change.Compressed = compressed;
+                ChangedEntries[tgi] = changedEntry;
                 InternalRestore(tgi);
                 Dirty = true;
-                Provider?.UpdateOrAddToResourceMap(changedFile.Entry);
+                Provider?.UpdateOrAddToResourceMap(changedEntry);
+                RefreshCache(tgi);
+            }
+
+            /// <summary>
+            /// Sets compression for a resource.
+            /// </summary>
+            /// <param name="tgi">Resource TGI.</param>
+            /// <param name="compressed">Compress?</param>
+            public void SetCompressed(ResourceKey tgi, bool compressed)
+            {
+                if (!ChangedEntries.TryGetValue(tgi, out DynamicDBPFEntry changedEntry))
+                {
+                    changedEntry = new DynamicDBPFEntry();
+                    changedEntry.Change.Data = new ChangedResourceDataEntry(_owner.GetEntryByTGI(tgi));
+                }
+                changedEntry.TGI = tgi;
+                changedEntry.Change.Compressed = compressed;
+                ChangedEntries[tgi] = changedEntry;
+                InternalRestore(tgi);
+                Dirty = true;
+                Provider?.UpdateOrAddToResourceMap(changedEntry);
                 RefreshCache(tgi);
             }
         }
@@ -260,7 +289,7 @@ namespace OpenTS2.Files.Formats.DBPF
                 }
                 foreach(var element in Changes.ChangedEntries)
                 {
-                    finalEntries.Add(element.Value.Entry);
+                    finalEntries.Add(element.Value);
                 }
                 return finalEntries;
             }
@@ -494,7 +523,7 @@ namespace OpenTS2.Files.Formats.DBPF
                 writer.Write((int)filePosition);
                 wStream.Position = filePosition;
                 var entry = entries[i];
-                var entryData = GetBytes(entry);
+                var entryData = entry.GetBytes();
                 if (dirAsset != null && dirAsset.GetUncompressedSize(entry.TGI) != 0)
                 {
                     entryData = DBPFCompression.Compress(entryData);
@@ -525,7 +554,7 @@ namespace OpenTS2.Files.Formats.DBPF
                 if (element is DynamicDBPFEntry dynamicEntry)
                 {
                     if (dynamicEntry.Change.Compressed)
-                        dirAsset.SizeByInternalTGI[element.TGI] = (uint)dynamicEntry.Change.Bytes.Length;
+                        dirAsset.SizeByInternalTGI[element.TGI] = (uint)dynamicEntry.FileSize;
                 }
                 else
                 {
@@ -558,7 +587,7 @@ namespace OpenTS2.Files.Formats.DBPF
                     return null;
             }
             if (Changes.ChangedEntries.ContainsKey(entry.TGI))
-                return Changes.ChangedEntries[entry.TGI].Bytes;
+                return Changes.ChangedEntries[entry.TGI].Change.Data.GetBytes();
             _reader.Seek(SeekOrigin.Begin, entry.FileOffset);
             var fileBytes = _reader.ReadBytes((int)entry.FileSize);
             var uncompressedSize = InternalGetUncompressedSize(entry);
@@ -582,7 +611,7 @@ namespace OpenTS2.Files.Formats.DBPF
                     return null;
             }
             if (Changes.ChangedEntries.ContainsKey(tgi))
-                return Changes.ChangedEntries[tgi].Bytes;
+                return Changes.ChangedEntries[tgi].Change.Data.GetBytes();
             if (_entryByTGI.ContainsKey(tgi))
                 return GetBytes(_entryByTGI[tgi]);
             else
@@ -621,7 +650,7 @@ namespace OpenTS2.Files.Formats.DBPF
             if (Changes.DeletedEntries.ContainsKey(entry.TGI) && ignoreDeleted)
                 return null;
             if (Changes.ChangedEntries.ContainsKey(entry.TGI))
-                return Changes.ChangedEntries[entry.TGI].Asset;
+                return Changes.ChangedEntries[entry.TGI].Change.Data.GetAsset();
             var item = GetBytes(entry, ignoreDeleted);
             var codec = Codecs.Get(entry.GlobalTGI.TypeID);
             var asset = codec.Deserialize(item, entry.GlobalTGI, this);
@@ -629,6 +658,11 @@ namespace OpenTS2.Files.Formats.DBPF
             asset.TGI = entry.TGI;
             asset.Package = this;
             return asset;
+        }
+
+        public bool IsCompressed(DBPFEntry entry)
+        {
+            return InternalGetUncompressedSize(entry) > 0;
         }
 
         public T GetAssetByTGI<T>(ResourceKey tgi, bool ignoreDeleted = true) where T : AbstractAsset
@@ -654,7 +688,7 @@ namespace OpenTS2.Files.Formats.DBPF
             if (Changes.DeletedEntries.ContainsKey(tgi) && ignoreDeleted)
                 return null;
             if (Changes.ChangedEntries.ContainsKey(tgi))
-                return Changes.ChangedEntries[tgi].Entry;
+                return Changes.ChangedEntries[tgi];
             if (_entryByTGI.ContainsKey(tgi))
                 return _entryByTGI[tgi];
             else

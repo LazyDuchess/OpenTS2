@@ -10,7 +10,6 @@ using System.Linq;
 using System.Text;
 using OpenTS2.Common;
 using OpenTS2.Content;
-using OpenTS2.Content.Changes;
 
 namespace OpenTS2.Files.Formats.DBPF
 {
@@ -58,7 +57,7 @@ namespace OpenTS2.Files.Formats.DBPF
         /// <summary>
         /// Global TGI.
         /// </summary>
-        public virtual ResourceKey GlobalTGI
+        public ResourceKey GlobalTGI
         {
             get
             {
@@ -71,7 +70,7 @@ namespace OpenTS2.Files.Formats.DBPF
         /// <summary>
         /// Internal TGI, relative to parent package.
         /// </summary>
-        public virtual ResourceKey TGI { get; set; } = ResourceKey.Default;
+        public ResourceKey TGI { get; set; } = ResourceKey.Default;
 
         //A 4-byte unsigned integer specifying the offset to the entry's data from the beginning of the archive
         public uint FileOffset;
@@ -79,10 +78,9 @@ namespace OpenTS2.Files.Formats.DBPF
         //A 4-byte unsigned integer specifying the size of the entry's data
         public virtual uint FileSize { get; set; }
 
-        public bool Dynamic = false;
         public DBPFFile Package;
 
-        public byte[] GetBytes()
+        public virtual byte[] GetBytes()
         {
             return Package.GetBytes(this);
         }
@@ -92,38 +90,9 @@ namespace OpenTS2.Files.Formats.DBPF
             return GetAsset() as T;
         }
 
-        public AbstractAsset GetAsset()
+        public virtual AbstractAsset GetAsset()
         {
             return Package.GetAsset(this);
-        }
-    }
-
-    public class DynamicDBPFEntry : DBPFEntry
-    {
-        public override ResourceKey GlobalTGI
-        {
-            get
-            {
-                return Change.Asset.GlobalTGI;
-            }
-        }
-        public override ResourceKey TGI
-        {
-            get
-            {
-                return Change.Asset.TGI;
-            }
-            set
-            {
-                Change.Asset.TGI = value;
-            }
-        }
-        public ChangedAsset Change;
-        public override uint FileSize { 
-            get
-            {
-                return (uint)Change.Bytes.Length;
-            }
         }
     }
 }
