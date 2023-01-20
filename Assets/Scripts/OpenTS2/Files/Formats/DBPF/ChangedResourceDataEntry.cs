@@ -14,6 +14,9 @@ namespace OpenTS2.Files.Formats.DBPF
     public class ChangedResourceDataEntry : ChangedResourceData
     {
         private DBPFEntry _dbpfEntry;
+
+        public override uint FileSize => _dbpfEntry.FileSize;
+
         public ChangedResourceDataEntry(DBPFEntry entry)
         {
             this._dbpfEntry = entry;

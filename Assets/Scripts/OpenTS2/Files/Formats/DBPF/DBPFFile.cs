@@ -195,20 +195,20 @@ namespace OpenTS2.Files.Formats.DBPF
             /// </summary>
             /// <param name="tgi">Resource TGI.</param>
             /// <param name="compressed">Compress?</param>
-            public void SetCompressed(ResourceKey tgi, bool compressed)
+            public void SetCompressed(DBPFEntry entry, bool compressed)
             {
-                if (!ChangedEntries.TryGetValue(tgi, out DynamicDBPFEntry changedEntry))
+                if (!ChangedEntries.TryGetValue(entry.TGI, out DynamicDBPFEntry changedEntry))
                 {
                     changedEntry = new DynamicDBPFEntry();
-                    changedEntry.Change.Data = new ChangedResourceDataEntry(_owner.GetEntryByTGI(tgi));
+                    changedEntry.Change.Data = new ChangedResourceDataEntry(entry);
                 }
-                changedEntry.TGI = tgi;
+                changedEntry.TGI = entry.TGI;
                 changedEntry.Change.Compressed = compressed;
-                ChangedEntries[tgi] = changedEntry;
-                InternalRestore(tgi);
+                ChangedEntries[entry.TGI] = changedEntry;
+                InternalRestore(entry.TGI);
                 Dirty = true;
                 Provider?.UpdateOrAddToResourceMap(changedEntry);
-                RefreshCache(tgi);
+                RefreshCache(entry.TGI);
             }
         }
 
@@ -579,15 +579,15 @@ namespace OpenTS2.Files.Formats.DBPF
         /// </summary>
         /// <param name="entry">Entry to retrieve data for.</param>
         /// <returns>Data for entry.</returns>
-        public byte[] GetBytes(DBPFEntry entry, bool ignoreDeleted = true)
+        public byte[] GetBytes(DBPFEntry entry, bool ignoreChanges = false)
         {
-            if (ignoreDeleted)
+            if (!ignoreChanges)
             {
                 if (Changes.DeletedEntries.ContainsKey(entry.TGI))
                     return null;
+                if (Changes.ChangedEntries.ContainsKey(entry.TGI))
+                    return Changes.ChangedEntries[entry.TGI].Change.Data.GetBytes();
             }
-            if (Changes.ChangedEntries.ContainsKey(entry.TGI))
-                return Changes.ChangedEntries[entry.TGI].Change.Data.GetBytes();
             _reader.Seek(SeekOrigin.Begin, entry.FileOffset);
             var fileBytes = _reader.ReadBytes((int)entry.FileSize);
             var uncompressedSize = InternalGetUncompressedSize(entry);
@@ -603,15 +603,15 @@ namespace OpenTS2.Files.Formats.DBPF
         /// </summary>
         /// <param name="tgi">The TGI of the entry.</param>
         /// <returns>The entry's data.</returns>
-        public byte[] GetBytesByTGI(ResourceKey tgi, bool ignoreDeleted = true)
+        public byte[] GetBytesByTGI(ResourceKey tgi, bool ignoreChanges = false)
         {
-            if (ignoreDeleted)
+            if (!ignoreChanges)
             {
                 if (Changes.DeletedEntries.ContainsKey(tgi))
                     return null;
+                if (Changes.ChangedEntries.ContainsKey(tgi))
+                    return Changes.ChangedEntries[tgi].Change.Data.GetBytes();
             }
-            if (Changes.ChangedEntries.ContainsKey(tgi))
-                return Changes.ChangedEntries[tgi].Change.Data.GetBytes();
             if (_entryByTGI.ContainsKey(tgi))
                 return GetBytes(_entryByTGI[tgi]);
             else
@@ -635,9 +635,9 @@ namespace OpenTS2.Files.Formats.DBPF
         /// </summary>
         /// <param name="entry">The DBPF Entry</param>
         /// <returns></returns>
-        public AbstractAsset GetAsset<T>(DBPFEntry entry, bool ignoreDeleted = true) where T : AbstractAsset
+        public AbstractAsset GetAsset<T>(DBPFEntry entry, bool ignoreChanges = false) where T : AbstractAsset
         {
-            return GetAsset(entry, ignoreDeleted) as T;
+            return GetAsset(entry, ignoreChanges) as T;
         }
 
         /// <summary>
@@ -645,13 +645,13 @@ namespace OpenTS2.Files.Formats.DBPF
         /// </summary>
         /// <param name="entry">The DBPF Entry</param>
         /// <returns></returns>
-        public AbstractAsset GetAsset(DBPFEntry entry, bool ignoreDeleted = true)
+        public AbstractAsset GetAsset(DBPFEntry entry, bool ignoreChanges = false)
         {
-            if (Changes.DeletedEntries.ContainsKey(entry.TGI) && ignoreDeleted)
+            if (Changes.DeletedEntries.ContainsKey(entry.TGI) && !ignoreChanges)
                 return null;
-            if (Changes.ChangedEntries.ContainsKey(entry.TGI))
+            if (Changes.ChangedEntries.ContainsKey(entry.TGI) && !ignoreChanges)
                 return Changes.ChangedEntries[entry.TGI].Change.Data.GetAsset();
-            var item = GetBytes(entry, ignoreDeleted);
+            var item = GetBytes(entry, ignoreChanges);
             var codec = Codecs.Get(entry.GlobalTGI.TypeID);
             var asset = codec.Deserialize(item, entry.GlobalTGI, this);
             asset.Compressed = InternalGetUncompressedSize(entry) > 0;
@@ -665,15 +665,15 @@ namespace OpenTS2.Files.Formats.DBPF
             return InternalGetUncompressedSize(entry) > 0;
         }
 
-        public T GetAssetByTGI<T>(ResourceKey tgi, bool ignoreDeleted = true) where T : AbstractAsset
+        public T GetAssetByTGI<T>(ResourceKey tgi, bool ignoreChanges = false) where T : AbstractAsset
         {
-            return GetAssetByTGI(tgi, ignoreDeleted) as T;
+            return GetAssetByTGI(tgi, ignoreChanges) as T;
         }
-        public AbstractAsset GetAssetByTGI(ResourceKey tgi, bool ignoreDeleted = true)
+        public AbstractAsset GetAssetByTGI(ResourceKey tgi, bool ignoreChanges = false)
         {
-            var entry = GetEntryByTGI(tgi, ignoreDeleted);
+            var entry = GetEntryByTGI(tgi, ignoreChanges);
             if (entry != null)
-                return GetAsset(entry, ignoreDeleted);
+                return GetAsset(entry, ignoreChanges);
             else
                 return null;
         }
@@ -683,11 +683,11 @@ namespace OpenTS2.Files.Formats.DBPF
         /// </summary>
         /// <param name="tgi">The TGI of the entry.</param>
         /// <returns>The entry.</returns>
-        public DBPFEntry GetEntryByTGI(ResourceKey tgi , bool ignoreDeleted = true)
+        public DBPFEntry GetEntryByTGI(ResourceKey tgi , bool ignoreChanges = false)
         {
-            if (Changes.DeletedEntries.ContainsKey(tgi) && ignoreDeleted)
+            if (Changes.DeletedEntries.ContainsKey(tgi) && !ignoreChanges)
                 return null;
-            if (Changes.ChangedEntries.ContainsKey(tgi))
+            if (Changes.ChangedEntries.ContainsKey(tgi) && !ignoreChanges)
                 return Changes.ChangedEntries[tgi];
             if (_entryByTGI.ContainsKey(tgi))
                 return _entryByTGI[tgi];

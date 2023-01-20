@@ -3,6 +3,8 @@ using OpenTS2.Files.Formats.DBPF;
 using OpenTS2.Common;
 using System.IO;
 using System.Text;
+using OpenTS2.Content;
+using OpenTS2.Content.DBPF;
 
 public class DPBFFileTest
 {
@@ -53,5 +55,41 @@ public class DPBFFileTest
 
         if (File.Exists(packagePath))
             File.Delete(packagePath);
+    }
+
+    [Test]
+    public void DBPPFFileSaveCompressedEntryTest()
+    {
+        TestMain.Initialize();
+        var packageSavePath = "TestFiles/TestPackage.package";
+        var packageLoadPath = "TestAssets/TestPackage.package";
+        var package = new DBPFFile(packageLoadPath);
+        var stringEntry = package.GetEntryByTGI(new ResourceKey(1, GroupIDs.Local, TypeIDs.STR));
+        Assert.IsNotNull(stringEntry);
+
+        // Set compression to true for entry.
+        package.Changes.SetCompressed(stringEntry, true);
+        package.FilePath = packageSavePath;
+
+        // Save the package to a file and dispose of it.
+        package.WriteToFile();
+        package.Dispose();
+
+        // Reload the package we just saved.
+        var loadedPackage = new DBPFFile(packageSavePath);
+
+        // Should have 2 entries (compression directory)
+        Assert.IsTrue(package.Entries.Count == 2);
+
+        var stringEntryLoaded = loadedPackage.GetEntryByTGI(new ResourceKey(1, GroupIDs.Local, TypeIDs.STR));
+        
+        // Make sure the entry is compressed.
+        Assert.IsTrue(loadedPackage.IsCompressed(stringEntryLoaded));
+
+        // Dispose of the package and delete the file.
+        loadedPackage.Dispose();
+
+        if (File.Exists(packageSavePath))
+            File.Delete(packageSavePath);
     }
 }

@@ -30,5 +30,6 @@ namespace OpenTS2.Files.Formats.DBPF
         {
             return _asset;
         }
+        public override uint FileSize => (uint)GetBytes().Length;
     }
 }

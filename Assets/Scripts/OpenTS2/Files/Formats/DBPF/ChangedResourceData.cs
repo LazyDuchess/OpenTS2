@@ -15,6 +15,7 @@ namespace OpenTS2.Files.Formats.DBPF
     {
         public abstract byte[] GetBytes();
         public abstract AbstractAsset GetAsset();
+        public abstract uint FileSize { get; }
         public T GetAsset<T>() where T : AbstractAsset
         {
             return GetAsset() as T;

@@ -14,7 +14,7 @@ namespace OpenTS2.Files.Formats.DBPF
         {
             get
             {
-                return (uint)Change.Data.GetBytes().Length;
+                return Change.Data.FileSize;
             }
         }
         public override byte[] GetBytes()

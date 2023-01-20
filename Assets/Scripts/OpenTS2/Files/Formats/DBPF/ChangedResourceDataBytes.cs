@@ -34,5 +34,6 @@ namespace OpenTS2.Files.Formats.DBPF
                 return null;
             return _codec.Deserialize(_bytes, _tgi, _package);
         }
+        public override uint FileSize => (uint)GetBytes().Length;
     }
 }

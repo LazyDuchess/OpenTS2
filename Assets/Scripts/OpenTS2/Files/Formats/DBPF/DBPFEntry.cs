@@ -79,10 +79,10 @@ namespace OpenTS2.Files.Formats.DBPF
         public virtual uint FileSize { get; set; }
 
         public DBPFFile Package;
-
+        
         public virtual byte[] GetBytes()
         {
-            return Package.GetBytes(this);
+            return Package.GetBytes(this, true);
         }
 
         public T GetAsset<T>() where T : AbstractAsset
@@ -92,7 +92,7 @@ namespace OpenTS2.Files.Formats.DBPF
 
         public virtual AbstractAsset GetAsset()
         {
-            return Package.GetAsset(this);
+            return Package.GetAsset(this, true);
         }
     }
 }
