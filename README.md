@@ -39,6 +39,6 @@ We follow the layout of a normal Unity project except:
 
 ## Testing
 
-We currently use the [Unity Test Runner](https://docs.unity3d.com/2017.4/Documentation/Manual/testing-editortestsrunner.html)
+We currently use the [Unity Test Runner](https://docs.unity3d.com/2020.3/Documentation/Manual/testing-editortestsrunner.html)
 for unit testing code. These tests can be run inside of unity through the test runner tab or if you use Rider as your C#
 editor, inside of it.
