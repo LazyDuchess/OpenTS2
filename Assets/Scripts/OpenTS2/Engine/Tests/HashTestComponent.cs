@@ -46,20 +46,6 @@ namespace OpenTS2.Engine.Tests
 
             var modelhash = "age4_0_gmnd";
             Debug.Log("0x" + FileUtils.LowHash(modelhash).ToString("X8") + " - 0x" + FileUtils.HighHash(modelhash).ToString("X8"));
-            /*
-            var packageLocation = "C:/Users/Duchess/Documents/EA Games/The Sims™ 2 Ultimate Collection/Downloads/ld_HeightCheater.package";
-            Debug.Log("making group from " + Path.GetFileNameWithoutExtension(packageLocation));
-            var reftg = new ResourceKey("HeightCheater_cres", 0x1C050000, 0xE519C933);
-            var package = new DBPFFile(packageLocation);
-            var entry = package.GetItemByTGI(reftg);
-            if (entry != null)
-                Debug.Log("Found HeightCheater_cres!");
-            var objectTGI = new ResourceKey(0x000041A7, "ld_HeightCheater", 0x4F424A44);
-            Debug.Log(objectTGI);
-            var entry2 = package.GetItemByTGI(objectTGI);
-            if (entry2 != null)
-                Debug.Log("Found Object!");*/
-            //Debug.Log(reftg.ToString());
         }
     }
 }
