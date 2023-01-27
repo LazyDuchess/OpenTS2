@@ -16,7 +16,7 @@ namespace OpenTS2.Content.DBPF
             get
             {
                 if (_clip == null)
-                    _clip = WavUtility.ToAudioClip(AudioData, 0, GlobalTGI.ToString());
+                    _clip = WAV.ToAudioClip(AudioData, GlobalTGI.ToString());
                 return _clip;
             }
         }
