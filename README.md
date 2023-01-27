@@ -26,7 +26,8 @@ This Source Code Form is subject to the terms of the Mozilla Public License, v. 
 * A copy of The Sims 2 Ultimate Collection
 
 ## Setup
-You need to have a "config.json" file in the root folder that provides paths to your Sims 2 UC installation and user directories. Copy the "config.example.json" file and rename it to "config.json" to start off, and type in your own paths.
+1. You need to have a "config.json" file in the root folder that provides paths to your Sims 2 UC installation and user directories. Copy the "config.example.json" file and rename it to "config.json" to start off, and type in your own paths.
+2. In Unity, make sure Edit > Preferences > External Tools > External Script Editor is set to Visual Studio. By default it opens files separately as opposed to in a solution.
 
 ## Project Structure
 
