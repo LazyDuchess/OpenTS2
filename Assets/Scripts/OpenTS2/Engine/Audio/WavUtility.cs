@@ -125,11 +125,14 @@ namespace OpenTS2.Engine.Audio
 			while (i < convertedSize)
 			{
 				offset = i * x + headerOffset;
+				// Apartment Life splash music fails to load otherwise.
+				if (source.Length <= offset)
+					break;
 				data[i] = (float)BitConverter.ToInt16(source, offset) / maxValue;
 				++i;
 			}
 
-			Debug.AssertFormat(data.Length == convertedSize, "AudioClip .wav data is wrong size: {0} == {1}", data.Length, convertedSize);
+			//Debug.AssertFormat(data.Length == convertedSize, "AudioClip .wav data is wrong size: {0} == {1}", data.Length, convertedSize);
 
 			return data;
 		}
