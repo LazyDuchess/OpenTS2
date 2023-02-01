@@ -50,7 +50,6 @@ namespace OpenTS2.Files.Formats.DBPF
             }
 
             asset = (ObjectDefinitionAsset)BoxedAsset;
-            asset.GUID = (uint)(asset.GUID2 << 16) + (uint)asset.GUID1;
 
             return asset;
         }

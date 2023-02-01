@@ -9,7 +9,56 @@ namespace OpenTS2.Content.DBPF
     public class ObjectDefinitionAsset : AbstractAsset
     {
         public string FileName;
-        public uint GUID;
+
+        public uint GUID
+        {
+            get { return (uint)(GUID2 << 16) + (uint)GUID1; }
+            set
+            {
+                GUID1 = (ushort)(value & 0xFFFF0000);
+                GUID2 = (ushort)(value & 0x0000FFFF);
+            }
+        }
+
+        public uint ProxyGUID
+        {
+            get { return (uint)(ProxyGUID2 << 16) + (uint)ProxyGUID1; }
+            set
+            {
+                ProxyGUID1 = (ushort)(value & 0xFFFF0000);
+                ProxyGUID2 = (ushort)(value & 0x0000FFFF);
+            }
+        }
+
+        public uint JobObjectGUID
+        {
+            get { return (uint)(JobObjGUID2 << 16) + (uint)JobObjGUID1; }
+            set
+            {
+                JobObjGUID1 = (ushort)(value & 0xFFFF0000);
+                JobObjGUID2 = (ushort)(value & 0x0000FFFF);
+            }
+        }
+
+        public uint BaseGUID
+        {
+            get { return (uint)(BaseGUID2 << 16) + (uint)BaseGUID1; }
+            set
+            {
+                BaseGUID1 = (ushort)(value & 0xFFFF0000);
+                BaseGUID2 = (ushort)(value & 0x0000FFFF);
+            }
+        }
+
+        public uint ObjectModelGUID
+        {
+            get { return (uint)(ObjModelGUID2 << 16) + (uint)ObjModelGUID1; }
+            set
+            {
+                ObjModelGUID1 = (ushort)(value & 0xFFFF0000);
+                ObjModelGUID2 = (ushort)(value & 0x0000FFFF);
+            }
+        }
 
         public ushort GameVer1 { get; set; }
         public ushort GameVer2 { get; set; }
