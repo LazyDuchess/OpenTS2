@@ -34,7 +34,7 @@ namespace OpenTS2.Content.DBPF
             "DiagonalSelectorGUID1",
             "DiagonalSelectorGUID2",
             "GridAlignedSelectorGUID1",
-            "DiagonalSelectorGUID2",
+            "GridAlignedSelectorGUID2",
             "ObjOwnershipFlags",
             "IgnoreGlobalSimField",
             "CannotMoveOutWith",
@@ -123,6 +123,26 @@ namespace OpenTS2.Content.DBPF
             {
                 GUID1 = (ushort)(value & 0xFFFF);
                 GUID2 = (ushort)(value >> 16);
+            }
+        }
+
+        public uint DiagonalSelectorGUID
+        {
+            get { return (uint)(DiagonalSelectorGUID2 << 16) + (uint)DiagonalSelectorGUID1; }
+            set
+            {
+                DiagonalSelectorGUID1 = (ushort)(value & 0xFFFF);
+                DiagonalSelectorGUID2 = (ushort)(value >> 16);
+            }
+        }
+
+        public uint GridAlignedSelectorGUID
+        {
+            get { return (uint)(GridAlignedSelectorGUID2 << 16) + (uint)GridAlignedSelectorGUID1; }
+            set
+            {
+                GridAlignedSelectorGUID1 = (ushort)(value & 0xFFFF);
+                GridAlignedSelectorGUID2 = (ushort)(value >> 16);
             }
         }
 

@@ -29,26 +29,19 @@ namespace OpenTS2.Files.Formats.DBPF
             var asset = new ObjectDefinitionAsset();
             var stream = new MemoryStream(bytes);
             var reader = IoBuffer.FromStream(stream, ByteOrder.LITTLE_ENDIAN);
-            int offset = 0;
 
             asset.FileName = reader.ReadNullTerminatedUTF8();
-            offset += 64 * sizeof(byte);
 
-            object BoxedAsset = RuntimeHelpers.GetObjectValue(asset);
+            reader.Seek(SeekOrigin.Begin, 64);
 
-            foreach (string element in ObjectDefinitionAsset.Fields)
+            var assetType = typeof(ObjectDefinitionAsset);
+
+            foreach (var field in ObjectDefinitionAsset.Fields)
             {
-                reader.Seek(SeekOrigin.Begin, offset);
-
-                if (element != "unused")
-                {
-                    asset.GetType().GetProperty(element).SetValue(BoxedAsset, reader.ReadUInt16());
-                }
-
-                offset += sizeof(short);
+                if (field == "unused")
+                    continue;
+                assetType.GetProperty(field).SetValue(asset, reader.ReadUInt16());
             }
-
-            asset = (ObjectDefinitionAsset)BoxedAsset;
             return asset;
         }
     }
