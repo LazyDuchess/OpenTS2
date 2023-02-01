@@ -70,7 +70,7 @@ namespace OpenTS2.Files.Formats.DBPF
         /// <summary>
         /// Internal TGI, relative to parent package.
         /// </summary>
-        public ResourceKey TGI { get; set; } = ResourceKey.Default;
+        public ResourceKey TGI { get; set; } = default(ResourceKey);
 
         //A 4-byte unsigned integer specifying the offset to the entry's data from the beginning of the archive
         public uint FileOffset;

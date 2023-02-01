@@ -36,7 +36,7 @@ namespace OpenTS2.Content
         /// <summary>
         /// Internal TGI, relative to parent package.
         /// </summary>
-        public ResourceKey TGI = ResourceKey.Default;
+        public ResourceKey TGI = default(ResourceKey);
         public DBPFFile Package;
         public bool Compressed
         {

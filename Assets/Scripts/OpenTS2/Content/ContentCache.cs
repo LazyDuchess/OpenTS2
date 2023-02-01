@@ -17,7 +17,7 @@ namespace OpenTS2.Content
     public class CacheKey
     {
         public DBPFFile File = null;
-        public ResourceKey TGI = ResourceKey.Default;
+        public ResourceKey TGI = default(ResourceKey);
         private readonly ContentProvider _contentProvider;
 
         public CacheKey(ResourceKey tgi, DBPFFile package = null, ContentProvider contentProvider = null)

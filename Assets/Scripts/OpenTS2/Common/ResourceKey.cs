@@ -17,12 +17,8 @@ namespace OpenTS2.Common
     /// <summary>
     /// Type, Group and Instance ID reference for packaged resources.
     /// </summary>
-    public class ResourceKey
+    public struct ResourceKey
     {
-        public static ResourceKey Default
-        {
-            get { return s_default; }
-        }
         public static ResourceKey DIR
         {
             get { return s_dir; }
@@ -48,7 +44,6 @@ namespace OpenTS2.Common
             get { return _typeID; }
         }
 
-        static readonly ResourceKey s_default = new ResourceKey(0, 0, 0);
         static readonly ResourceKey s_dir = new ResourceKey(0x286B1F03, 0xE86B1EEF, 0xE86B1EEF);
 
         private readonly uint _instanceID;
@@ -186,7 +181,7 @@ namespace OpenTS2.Common
 
         public override bool Equals(object obj)
         {
-            return Equals(obj as ResourceKey);
+            return (obj is ResourceKey other && this.Equals(other));
         }
 
         public bool Equals(ResourceKey obj)

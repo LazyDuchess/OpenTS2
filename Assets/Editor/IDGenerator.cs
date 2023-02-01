@@ -10,7 +10,7 @@ namespace OpenTS2.Editor
     class IDGenerator : EditorWindow
     {
         bool _hasResult = false;
-        ResourceKey _result = ResourceKey.Default;
+        ResourceKey _result = default(ResourceKey);
         string _filename;
         void OnGUI()
         {
