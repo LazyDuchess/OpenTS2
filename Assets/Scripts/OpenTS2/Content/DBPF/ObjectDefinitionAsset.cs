@@ -8,6 +8,112 @@ namespace OpenTS2.Content.DBPF
 {
     public class ObjectDefinitionAsset : AbstractAsset
     {
+        public static readonly string[] Fields =
+        {
+            "GameVer1",
+            "GameVer2",
+            "InitialStackSize",
+            "DefaultWallAdjacentFlags",
+            "DefaultPlacementFlags",
+            "DefaultWallPlacementFlags",
+            "DefaultAllowedHeightFlags",
+            "InteractionTableIDPointer",
+            "InteractionGroup",
+            "ObjType",
+            "MultiTileMasterID",
+            "MultiTileSubIndex",
+            "UseDefaultPlacementFlags",
+            "LookAtScore",
+            "GUID1",
+            "GUID2",
+            "ItemIsUnlockable",
+            "CatalogUseFlags",
+            "BuyPrice",
+            "BodyStringsIDPointer",
+            "SlotIDPointer",
+            "DiagonalSelectorGUID1",
+            "DiagonalSelectorGUID2",
+            "GridAlignedSelectorGUID1",
+            "DiagonalSelectorGUID2",
+            "ObjOwnershipFlags",
+            "IgnoreGlobalSimField",
+            "CannotMoveOutWith",
+            "Hauntable",
+            "ProxyGUID1",
+            "ProxyGUID2",
+            "SlotGroup",
+            "AspirationFlags",
+            "MemorySubjectiveFeeling",
+            "SalePrice",
+            "InitialDepreciation",
+            "DailyDepreciation",
+            "SelfDepreciating",
+            "Depreciationlimit",
+            "RoomSortflags",
+            "FunctionSortFlags",
+            "CatalogStringsIDPointer",
+            "IsGlobalSimObj",
+            "ToolTipNameType",
+            "TemplateVer",
+            "NicenessMultiplier",
+            "NoDuplicateOnPlacement",
+            "WantCategory",
+            "NoNewNameFromTemplate",
+            "ObjVer",
+            "DefaultThumbnailID",
+            "MotiveEffectsID",
+            "JobObjGUID1",
+            "JobObjGUID2",
+            "CatalogPopupID",
+            "IgnoreCurrentModelIndexInIcons",
+            "LevelOffset",
+            "HasShadow",
+            "NumAttributes",
+            "NumObjArrays",
+            "unused",
+            "FrontDirection",
+            "unused",
+            "MultiTileLeadObj",
+            "ExpansionFlag",
+            "unused",
+            "ChairEntryFlags",
+            "TileWidth",
+            "InhibitSuitCopying",
+            "BuildModeType",
+            "BaseGUID1",
+            "BaseGUID2",
+            "ObjModelGUID1",
+            "ObjModelGUID2",
+            "BuildModeSubsort",
+            "unused",
+            "unused",
+            "FootprintMask",
+            "unused",
+            "unused",
+            "unused",
+            "unused",
+            "HungerRating",
+            "ComfortRating",
+            "HygieneRating",
+            "BladderRating",
+            "EnergyRating",
+            "FunRating",
+            "RoomRating",
+            "SkillFlags",
+            "NumTypeAttributes",
+            "MiscFlags",
+            "unused",
+            "unused",
+            "FunctionPointerSubSortAndSubtype",
+            "DowntownSort",
+            "KeepBuying",
+            "VacationSort",
+            "ResetLotAction",
+            "ObjType3d",
+            "CommunitySort",
+            "DreamFlags"
+        };
+
         public string FileName;
 
         public uint GUID
@@ -15,8 +121,8 @@ namespace OpenTS2.Content.DBPF
             get { return (uint)(GUID2 << 16) + (uint)GUID1; }
             set
             {
-                GUID1 = (ushort)(value & 0xFFFF0000);
-                GUID2 = (ushort)(value & 0x0000FFFF);
+                GUID1 = (ushort)(value & 0xFFFF);
+                GUID2 = (ushort)(value >> 16);
             }
         }
 
@@ -25,8 +131,8 @@ namespace OpenTS2.Content.DBPF
             get { return (uint)(ProxyGUID2 << 16) + (uint)ProxyGUID1; }
             set
             {
-                ProxyGUID1 = (ushort)(value & 0xFFFF0000);
-                ProxyGUID2 = (ushort)(value & 0x0000FFFF);
+                ProxyGUID1 = (ushort)(value & 0xFFFF);
+                ProxyGUID2 = (ushort)(value >> 16);
             }
         }
 
@@ -35,8 +141,8 @@ namespace OpenTS2.Content.DBPF
             get { return (uint)(JobObjGUID2 << 16) + (uint)JobObjGUID1; }
             set
             {
-                JobObjGUID1 = (ushort)(value & 0xFFFF0000);
-                JobObjGUID2 = (ushort)(value & 0x0000FFFF);
+                JobObjGUID1 = (ushort)(value & 0xFFFF);
+                JobObjGUID2 = (ushort)(value >> 16);
             }
         }
 
@@ -45,8 +151,8 @@ namespace OpenTS2.Content.DBPF
             get { return (uint)(BaseGUID2 << 16) + (uint)BaseGUID1; }
             set
             {
-                BaseGUID1 = (ushort)(value & 0xFFFF0000);
-                BaseGUID2 = (ushort)(value & 0x0000FFFF);
+                BaseGUID1 = (ushort)(value & 0xFFFF);
+                BaseGUID2 = (ushort)(value >> 16);
             }
         }
 
@@ -55,8 +161,8 @@ namespace OpenTS2.Content.DBPF
             get { return (uint)(ObjModelGUID2 << 16) + (uint)ObjModelGUID1; }
             set
             {
-                ObjModelGUID1 = (ushort)(value & 0xFFFF0000);
-                ObjModelGUID2 = (ushort)(value & 0x0000FFFF);
+                ObjModelGUID1 = (ushort)(value & 0xFFFF);
+                ObjModelGUID2 = (ushort)(value >> 16);
             }
         }
 
