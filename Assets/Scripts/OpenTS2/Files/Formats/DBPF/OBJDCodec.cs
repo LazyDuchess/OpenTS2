@@ -38,9 +38,10 @@ namespace OpenTS2.Files.Formats.DBPF
 
             foreach (var field in ObjectDefinitionAsset.Fields)
             {
+                var value = reader.ReadUInt16();
                 if (field == "unused")
                     continue;
-                assetType.GetProperty(field).SetValue(asset, reader.ReadUInt16());
+                assetType.GetProperty(field).SetValue(asset, value);
             }
             return asset;
         }
