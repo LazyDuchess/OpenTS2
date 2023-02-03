@@ -11,7 +11,15 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name != 'pull_request_target' || contains(github.event.pull_request.labels.*.name, 'safe to test')
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout repository
+        if: ${{ github.event_name != 'pull_request_target' }}
+        uses: actions/checkout@v2
+      - name: Checkout repository (Pull Request Target)
+        if: ${{ github.event_name == 'pull_request_target' }}
+        uses: actions/checkout@v2
+        with:
+          ref: "refs/pull/${{ github.event.number }}/merge"
+
       - uses: actions/cache@v2
         with:
           path: ./Library
