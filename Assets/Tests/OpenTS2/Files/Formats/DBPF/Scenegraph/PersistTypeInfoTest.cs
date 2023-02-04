@@ -3,7 +3,7 @@ using NUnit.Framework;
 using OpenTS2.Files.Formats.DBPF.Scenegraph;
 using OpenTS2.Files.Utils;
 
-public class PeristTypeInfoTest
+public class PersistTypeInfoTest
 {
     [Test]
     public void DeserializesFromKnownData()
