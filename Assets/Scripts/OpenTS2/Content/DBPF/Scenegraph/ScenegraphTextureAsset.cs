@@ -1,0 +1,172 @@
+﻿using System;
+using System.Linq;
+using OpenTS2.Files.Formats.DBPF.Scenegraph.Block;
+using UnityEngine;
+
+namespace OpenTS2.Content.DBPF.Scenegraph
+{
+    public class ScenegraphTextureAsset : AbstractAsset
+    {
+        public ImageDataBlock ImageDataBlock { get; }
+
+        public ScenegraphTextureAsset(ImageDataBlock imageDataBlock)
+        {
+            ImageDataBlock = imageDataBlock;
+        }
+
+        private Texture2D _texture;
+
+        // TODO: resolve LIFO references here.
+        //       Also, maybe we should just use `ContentProvider.Get` and compute this eagerly instead of having a
+        //       ContentProvider passed in here. That way we could also drop having to store the full ImageDataBlock
+        //       and just have the more compact Texture2D.
+        public Texture2D GetSelectedImageAsUnityTexture(ContentProvider provider)
+        {
+            if (_texture != null)
+            {
+                return _texture;
+            }
+
+            var subImage = ImageDataBlock.SubImages[ImageDataBlock.SelectedImage];
+            _texture = SubImageToTexture(ImageDataBlock.ColorFormat, ImageDataBlock.Width, ImageDataBlock.Height, subImage);
+            return _texture;
+        }
+
+        /// <summary>
+        /// Compute the full Texture2D with mipmaps using the SubImage data.
+        /// </summary>
+        public static Texture2D SubImageToTexture(ScenegraphTextureFormat colorFormat, int width, int height, SubImage subImage)
+        {
+            // Iterate backwards through the MipMap looking for the first non-LIFO mip.
+            var highestReadableMipLevel = 0;
+            for (int i = subImage.MipMap.Length - 1; i >= 0; i--)
+            {
+                if (subImage.MipMap[i] is LifoReferenceMip)
+                {
+                    continue;
+                }
+
+                highestReadableMipLevel++;
+            }
+            
+            // Iterate up to the first non-LIFO mip.
+            for (int i = 0; i < (subImage.MipMap.Length - highestReadableMipLevel); i++)
+            {
+                width /= 2;
+                height /= 2;
+            }
+
+            var format = ScenegraphTextureFormatToUnity(colorFormat);
+            var texture = new Texture2D(width, height, format, mipChain: true);
+
+            var currentMipLevel = 0;
+            for (int i = highestReadableMipLevel - 1; i >= 0; i--)
+            {
+                Debug.Assert(subImage.MipMap[i] is ByteArrayMip);
+                var mip = subImage.MipMap[i] as ByteArrayMip;
+
+                var pixelData = ConvertPixelDataForUnity(colorFormat, mip.Data, width, height);
+                texture.SetPixelData(pixelData, currentMipLevel);
+
+                currentMipLevel++;
+                width /= 2;
+                height /= 2;
+            }
+
+            return texture;
+        }
+
+        private static byte[] ConvertPixelDataForUnity(ScenegraphTextureFormat format, byte[] data, int width,
+            int height)
+        {
+            switch (format)
+            {
+                // All of these can be used as-is without conversion.
+                case ScenegraphTextureFormat.RGBA32:
+                case ScenegraphTextureFormat.RGB24:
+                case ScenegraphTextureFormat.Alpha8:
+                case ScenegraphTextureFormat.DXT1:
+                case ScenegraphTextureFormat.Luminance8:
+                case ScenegraphTextureFormat.Luminance16:
+                case ScenegraphTextureFormat.DXT5:
+                case ScenegraphTextureFormat.RGB24_repeat:
+                    return data;
+                // This needs a conversion as unity no longer supports DXT-3 natively.
+                case ScenegraphTextureFormat.DXT3:
+                    return ConvertDxt3ToRgba(data, width, height);
+                default:
+                    throw new NotImplementedException($"Cannot convert texture of type {format} for unity");
+            }
+        }
+
+        private static TextureFormat ScenegraphTextureFormatToUnity(ScenegraphTextureFormat format)
+        {
+            var unityFormat = format switch
+            {
+                ScenegraphTextureFormat.RGBA32 => TextureFormat.RGBA32,
+                ScenegraphTextureFormat.RGB24 => TextureFormat.RGB24,
+                ScenegraphTextureFormat.Alpha8 => TextureFormat.Alpha8,
+                ScenegraphTextureFormat.DXT1 => TextureFormat.DXT1,
+                // Note, DXT3 is converted to RGBA.
+                ScenegraphTextureFormat.DXT3 => TextureFormat.RGBA32,
+                ScenegraphTextureFormat.Luminance8 => TextureFormat.R8,
+                ScenegraphTextureFormat.Luminance16 => TextureFormat.R16,
+                ScenegraphTextureFormat.DXT5 => TextureFormat.DXT5,
+                ScenegraphTextureFormat.RGB24_repeat => TextureFormat.RGB24,
+                _ => throw new ArgumentOutOfRangeException(nameof(format), format, null)
+            };
+            return unityFormat;
+        }
+
+        private static byte[] ConvertDxt3ToRgba(byte[] data, int width, int height)
+        {
+            // TODO: Should we bother optimizing this? Currently we let unity load the texture as DXT5, convert it to
+            //       RGBA32 and fix the alpha values. The only difference in DXT3 and DXT5 is how alpha values are
+            //       encoded. We can probably change this to an optimized C/C++ implementation if this
+            //       really is a bottleneck.
+            // Will contain 4-bit alpha values for each pixel. We take a max of 16 here because a DXT image must
+            // contain at least one 4x4 block.
+            var alphaValues = new byte[Math.Max(width * height, 16)];
+
+            // Iterate in 4x4 blocks of encoded pixels.
+            // Each of the blocks contains 16 bytes of color and alpha data.
+            for (var i = 0; i < data.Length / 16; i++)
+            {
+                var blockX = i % Math.Max(width / 4, 1);
+                var blockY = i / Math.Max(width / 4, 1);
+                var outputIndex = blockX * 4 + (blockY * width * 4);
+                var inputBlockDataIndex = i * 16;
+
+                // DXT3 stores 16 4-bit alpha values starting at `i`.
+                for (var j = 0; j < 4; j++)
+                {
+                    for (var k = 0; k < 4; k++)
+                    {
+                        var pixelIndex = (j * 4) + k;
+                        // Get the lower 4-bits if we're at pixels 0, 2, 4 etc or the higher 4-bits for even pixels.
+                        alphaValues[outputIndex + (j * width) + k] = (pixelIndex % 2) switch
+                        {
+                            0 => (byte)(data[inputBlockDataIndex + (pixelIndex / 2)] & 0xF),
+                            _ => (byte)((data[inputBlockDataIndex + (pixelIndex / 2)] >> 4) & 0xF)
+                        };
+                    }
+                }
+            }
+
+            var asTexture = new Texture2D(width, height, TextureFormat.DXT5, mipChain: false);
+            asTexture.SetPixelData(data, mipLevel: 0);
+            asTexture.Apply();
+
+            var pixels = asTexture.GetPixels();
+            for (var i = 0; i < pixels.Length; i++)
+            {
+                pixels[i].a = alphaValues[i] / (float)0xF;
+            }
+
+            var asRgbaTexture = new Texture2D(width, height, TextureFormat.RGBA32, false);
+            asRgbaTexture.SetPixels(pixels);
+            asRgbaTexture.Apply();
+            return asRgbaTexture.GetRawTextureData();
+        }
+    }
+}
