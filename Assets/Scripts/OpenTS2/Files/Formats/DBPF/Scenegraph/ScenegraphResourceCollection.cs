@@ -21,6 +21,25 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph
         {
             Blocks = new List<ScenegraphDataBlock>();
         }
+        
+        /// <summary>
+        /// Deserializes a ScenegraphResourceCollection containing only a single data block of type T.
+        /// </summary>
+        public static T DeserializeSingletonScenegraphBlock<T>(IoBuffer reader) where T : ScenegraphDataBlock
+        {
+            var collection = Deserialize(reader);
+            if (collection.Blocks.Count != 1)
+            {
+                throw new Exception($"Expected single Scenegraph block, got {collection.Blocks.Count}");
+            }
+
+            var block = collection.Blocks[0];
+            if (!(block is T dataBlock))
+            {
+                throw new Exception($"Wanted single block of type {typeof(T)}, got {block.GetType()}");
+            }
+            return dataBlock;
+        }
 
 
         private const uint ScenegraphHeader = 0xFFFF0001;
@@ -72,7 +91,8 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph
         private static readonly Dictionary<uint, IScenegraphDataBlockReader<ScenegraphDataBlock>> BlockReaders =
             new Dictionary<uint, IScenegraphDataBlockReader<ScenegraphDataBlock>>()
             {
-                { TagExtensionBlock.TYPE_ID, new TagExtensionBlockReader() }
+                { TagExtensionBlock.TYPE_ID, new TagExtensionBlockReader() },
+                { ImageDataBlock.TYPE_ID, new ImageDataBlockReader() },
             };
     }
 }

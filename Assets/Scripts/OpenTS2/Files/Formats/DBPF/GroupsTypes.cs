@@ -15,6 +15,11 @@ namespace OpenTS2.Files.Formats.DBPF
     //Could be enums, but I kinda like this better.
     public static class TypeIDs
     {
+        /// <summary>
+        /// Texture Image in an RCOL wrapper.
+        /// </summary>
+        public const uint SCENEGRAPH_TXTR = Scenegraph.Block.ImageDataBlock.TYPE_ID;
+        
         public const uint STR = 0x53545223;
         public const uint IMG = 0x856DDBAC;
         public const uint IMG2 = 0x8C3CE95A;
