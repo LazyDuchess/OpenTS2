@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Linq;
+using OpenTS2.Common;
+using OpenTS2.Files.Formats.DBPF;
 using OpenTS2.Files.Formats.DBPF.Scenegraph.Block;
 using UnityEngine;
 
@@ -16,8 +18,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
 
         private Texture2D _texture;
 
-        // TODO: resolve LIFO references here.
-        //       Also, maybe we should just use `ContentProvider.Get` and compute this eagerly instead of having a
+        // TODO: Maybe we should just use `ContentProvider.Get` and compute this eagerly instead of having a
         //       ContentProvider passed in here. That way we could also drop having to store the full ImageDataBlock
         //       and just have the more compact Texture2D.
         public Texture2D GetSelectedImageAsUnityTexture(ContentProvider provider)
@@ -28,44 +29,40 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             }
 
             var subImage = ImageDataBlock.SubImages[ImageDataBlock.SelectedImage];
-            _texture = SubImageToTexture(ImageDataBlock.ColorFormat, ImageDataBlock.Width, ImageDataBlock.Height, subImage);
+            _texture = SubImageToTexture(provider, ImageDataBlock.ColorFormat, ImageDataBlock.Width, ImageDataBlock.Height, subImage);
             return _texture;
         }
 
         /// <summary>
         /// Compute the full Texture2D with mipmaps using the SubImage data.
         /// </summary>
-        public static Texture2D SubImageToTexture(ScenegraphTextureFormat colorFormat, int width, int height, SubImage subImage)
+        public static Texture2D SubImageToTexture(ContentProvider provider, ScenegraphTextureFormat colorFormat, int width, int height, SubImage subImage)
         {
-            // Iterate backwards through the MipMap looking for the first non-LIFO mip.
-            var highestReadableMipLevel = 0;
-            for (int i = subImage.MipMap.Length - 1; i >= 0; i--)
-            {
-                if (subImage.MipMap[i] is LifoReferenceMip)
-                {
-                    continue;
-                }
-
-                highestReadableMipLevel++;
-            }
-            
-            // Iterate up to the first non-LIFO mip.
-            for (int i = 0; i < (subImage.MipMap.Length - highestReadableMipLevel); i++)
-            {
-                width /= 2;
-                height /= 2;
-            }
-
             var format = ScenegraphTextureFormatToUnity(colorFormat);
             var texture = new Texture2D(width, height, format, mipChain: true);
 
             var currentMipLevel = 0;
-            for (int i = highestReadableMipLevel - 1; i >= 0; i--)
+            for (int i = subImage.MipMap.Length - 1; i >= 0; i--)
             {
-                Debug.Assert(subImage.MipMap[i] is ByteArrayMip);
-                var mip = subImage.MipMap[i] as ByteArrayMip;
+                var mip = subImage.MipMap[i];
+                byte[] mipData;
+                switch (mip)
+                {
+                    case LifoReferenceMip lifoReferenceMip:
+                    {
+                        var lifoAsset = provider.GetAsset<ScenegraphMipLevelInfoAsset>(
+                            new ResourceKey(lifoReferenceMip.LifoName, 0x1C0532FA, TypeIDs.SCENEGRAPH_LIFO));
+                        mipData = lifoAsset.MipData;
+                        break;
+                    }
+                    case ByteArrayMip byteArrayMip:
+                        mipData = byteArrayMip.Data;
+                        break;
+                    default:
+                        throw new ArgumentException($"SubImage has invalid mip type: {mip}");
+                }
 
-                var pixelData = ConvertPixelDataForUnity(colorFormat, mip.Data, width, height);
+                var pixelData = ConvertPixelDataForUnity(colorFormat, mipData, width, height);
                 texture.SetPixelData(pixelData, currentMipLevel);
 
                 currentMipLevel++;

@@ -653,6 +653,10 @@ namespace OpenTS2.Files.Formats.DBPF
                 return Changes.ChangedEntries[entry.TGI].Change.Data.GetAsset();
             var item = GetBytes(entry, ignoreChanges);
             var codec = Codecs.Get(entry.GlobalTGI.TypeID);
+            if (codec == null)
+            {
+                throw new ArgumentException($"No codec to handle type {entry.GlobalTGI.TypeID}");
+            }
             var asset = codec.Deserialize(item, entry.GlobalTGI, this);
             asset.Compressed = InternalGetUncompressedSize(entry) > 0;
             asset.TGI = entry.TGI;

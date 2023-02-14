@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using NUnit.Framework;
+using OpenTS2.Content;
 using OpenTS2.Content.DBPF.Scenegraph;
 using OpenTS2.Files.Formats.DBPF.Scenegraph.Block;
 using UnityEngine;
@@ -22,7 +23,8 @@ public class ScenegraphTextureAssetTest
         var mip = new ImageMip[] { new ByteArrayMip(imageData) };
         var subImage = new SubImage(mip, Color.white, 1.0f);
         
-        var toTexture = ScenegraphTextureAsset.SubImageToTexture(ScenegraphTextureFormat.DXT3, 128, 128, subImage);
+        var toTexture = ScenegraphTextureAsset.SubImageToTexture(ContentProvider.Get(), ScenegraphTextureFormat.DXT3,
+            128, 128, subImage);
 
         var actualImage = new Texture2D(128, 128, TextureFormat.RGBA32, mipChain:false);
         actualImage.LoadImage(File.ReadAllBytes("TestAssets/Scenegraph/brick-texture.png"));
@@ -43,7 +45,8 @@ public class ScenegraphTextureAssetTest
         var mip = new ImageMip[] { new ByteArrayMip(imageData) };
         var subImage = new SubImage(mip, Color.white, 1.0f);
         
-        var toTexture = ScenegraphTextureAsset.SubImageToTexture(ScenegraphTextureFormat.DXT3, 256, 128, subImage);
+        var toTexture = ScenegraphTextureAsset.SubImageToTexture(ContentProvider.Get(), ScenegraphTextureFormat.DXT3,
+            256, 128, subImage);
         
         var actualImage = new Texture2D(128, 128, TextureFormat.RGBA32, mipChain:false);
         actualImage.LoadImage(File.ReadAllBytes("TestAssets/Scenegraph/cc0-logo.png"));
