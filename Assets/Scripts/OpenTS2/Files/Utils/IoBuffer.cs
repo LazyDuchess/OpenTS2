@@ -247,6 +247,16 @@ namespace OpenTS2.Files.Utils
         }
 
         /// <summary>
+        /// Reads a string whose length is prefixed by a uint32.
+        /// </summary>
+        /// <returns>A string.</returns>
+        public string ReadUint32PrefixedString()
+        {
+            var length = ReadInt32();
+            return Encoding.ASCII.GetString(Reader.ReadBytes(length));
+        }
+
+        /// <summary>
         /// Reads a C string from the current stream.
         /// </summary>
         /// <returns>A string.</returns>
