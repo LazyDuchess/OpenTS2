@@ -20,6 +20,7 @@ namespace OpenTS2.Files.Formats.DBPF
         /// </summary>
         public const uint SCENEGRAPH_TXTR = Scenegraph.Block.ImageDataBlock.TYPE_ID;
         public const uint SCENEGRAPH_LIFO = Scenegraph.Block.MipLevelInfoBlock.TYPE_ID;
+        public const uint SCENEGRAPH_GMDC = Scenegraph.Block.GeometryDataContainerBlock.TYPE_ID;
         
         public const uint STR = 0x53545223;
         public const uint IMG = 0x856DDBAC;
