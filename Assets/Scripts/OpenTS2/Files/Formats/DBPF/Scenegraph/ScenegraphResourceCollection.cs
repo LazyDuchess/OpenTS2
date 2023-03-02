@@ -94,6 +94,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph
                 { TagExtensionBlock.TYPE_ID, new TagExtensionBlockReader() },
                 { ImageDataBlock.TYPE_ID, new ImageDataBlockReader() },
                 { MipLevelInfoBlock.TYPE_ID, new MipLevelInfoBlockReader() },
+                { GeometryDataContainerBlock.TYPE_ID, new GeometryDataContainerBlockReader() },
             };
     }
 }
