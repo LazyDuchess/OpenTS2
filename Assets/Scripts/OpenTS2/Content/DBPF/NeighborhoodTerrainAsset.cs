@@ -18,7 +18,7 @@ namespace OpenTS2.Content.DBPF
             (Width, Height, SeaLevel, TerrainType, VertexHeights) =
             (width, height, seaLevel, terrainType, vertexHeights);
 
-        public Mesh GetMesh()
+        public Mesh MakeMesh()
         {
             var width = VertexHeights.values.GetLength(0);
             var height = VertexHeights.values.GetLength(1);
@@ -29,18 +29,17 @@ namespace OpenTS2.Content.DBPF
             {
                 for(var j=0;j<height;j++)
                 {
-                    // 10 is the actual size of a cell in the neighborhood terrain grid.
+                    // 10 is the actual size of a cell in the neighborhood terrain grid. This translates to lot sizes such as a 10x10 in-game lot being a single cell.
                     var vertexPosition = new Vector3(i * 10f, VertexHeights.values[i, j], j * 10f);
                     terrainVertices.Add(vertexPosition);
                 }
             }
 
-            
-
             terrainMesh.SetVertices(terrainVertices);
 
             width--;
             height--;
+
             int[] terrainIndices = new int[width * height * 6];
             for (int ti = 0, vi = 0, i = 0; i < width; i++, vi++)
             {
@@ -54,9 +53,7 @@ namespace OpenTS2.Content.DBPF
             }
 
             terrainMesh.SetIndices(terrainIndices, MeshTopology.Triangles, 0);
-
             terrainMesh.RecalculateNormals();
-
             return terrainMesh;
         }
 
