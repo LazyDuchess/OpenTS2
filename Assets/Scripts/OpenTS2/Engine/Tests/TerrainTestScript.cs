@@ -8,6 +8,8 @@ using UnityEngine;
 public class TerrainTestScript : MonoBehaviour
 {
     public Terrain terrain;
+
+    public MeshFilter terrainMeshFilter;
     
     public string PackageToLoad = "%UserDataDir%/Neighborhoods/N001/N001_Neighborhood.package";
 
@@ -23,7 +25,8 @@ public class TerrainTestScript : MonoBehaviour
         var terrainAsset =
             contentProvider.GetAsset<NeighborhoodTerrainAsset>(
                 new ResourceKey(0x0, groupName, TypeIDs.NHOOD_TERRAIN));
-        terrainAsset.ApplyToTerrain(terrain);
+        //terrainAsset.ApplyToTerrain(terrain);
+        terrainMeshFilter.mesh = terrainAsset.GetMesh();
     }
     
 }
