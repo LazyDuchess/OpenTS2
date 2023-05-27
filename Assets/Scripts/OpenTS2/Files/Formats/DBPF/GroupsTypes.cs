@@ -34,6 +34,7 @@ namespace OpenTS2.Files.Formats.DBPF
         /// dynamiclinklibrary CRC32 hash
         public const uint DLL = 0x7582DEC6;
         public const uint CTSS = 0x43545353;
+        public const uint UI = 0x0;
     }
     public static class GroupIDs
     {

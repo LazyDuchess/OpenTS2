@@ -24,6 +24,8 @@ namespace OpenTS2.Files
         static IPathProvider s_pathProvider;
         static EPManager s_epManager;
 
+        public static IPathProvider PathProvider => s_pathProvider;
+
         static string UserDataDirectory
         {
             get { return "%UserDataDir%"; }
