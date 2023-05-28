@@ -30,9 +30,9 @@ namespace OpenTS2.UI
             if (imageAsset != null)
             {
                 rawImage.texture = imageAsset.Texture;
-                rawImage.SetNativeSize();
-                rawImage.color = Color.white;
             }
+            else
+                rawImage.color = new Color(0f, 0f, 0f, 0f);
             return uiComponent;
         }
     }

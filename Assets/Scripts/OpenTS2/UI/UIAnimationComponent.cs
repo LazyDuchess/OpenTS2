@@ -33,7 +33,6 @@ namespace OpenTS2.UI
             _timer = 0f;
             UpdateFrame();
             var rawImage = RawImageComponent;
-            rawImage.SetNativeSize();
         }
         private void OnDestroy()
         {

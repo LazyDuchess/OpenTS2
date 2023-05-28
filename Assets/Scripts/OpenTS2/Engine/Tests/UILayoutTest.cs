@@ -45,6 +45,7 @@ namespace OpenTS2.Engine.Tests
             //var key = new ResourceKey(0x49000000, 0xA99D8A11, TypeIDs.UI);
             //var key = new ResourceKey(0x49001010, 0xA99D8A11, TypeIDs.UI);
             //var key = new ResourceKey(0x49060005, 0xA99D8A11, TypeIDs.UI);
+            //var key = new ResourceKey(0x49001024, 0xA99D8A11, TypeIDs.UI);
             var mainMenuUILayout = contentProvider.GetAsset<UILayout>(key);
             mainMenuUILayout.Instantiate(Canvas);
         }
