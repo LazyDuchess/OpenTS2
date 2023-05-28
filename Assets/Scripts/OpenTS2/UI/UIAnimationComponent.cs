@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
+using OpenTS2.Engine;
 
 namespace OpenTS2.UI
 {
@@ -26,12 +27,26 @@ namespace OpenTS2.UI
         private float _timer = 0f;
         public void SetTexture(Texture2D texture, int width)
         {
+            DisposeFrames();
             _frames = UIUtils.SplitTextureHorizontalSequence(texture, width);
             _currentFrame = 0;
             _timer = 0f;
             UpdateFrame();
             var rawImage = RawImageComponent;
             rawImage.SetNativeSize();
+        }
+        private void OnDestroy()
+        {
+            DisposeFrames();
+        }
+        protected void DisposeFrames()
+        {
+            if (_frames == null)
+                return;
+            foreach(var frame in _frames)
+            {
+                frame.Free();
+            }
         }
         protected void UpdateFrame()
         {

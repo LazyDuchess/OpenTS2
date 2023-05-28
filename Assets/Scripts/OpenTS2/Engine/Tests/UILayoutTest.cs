@@ -16,17 +16,25 @@ namespace OpenTS2.Engine.Tests
     public class UILayoutTest : MonoBehaviour
     {
         public Transform Canvas;
+        private readonly string RelativeUIPackagePath = "Res/UI/ui.package";
         void LoadAllUIPackages()
         {
             var contentProvider = ContentProvider.Get();
-            var relativePackagePath = "Res/UI/ui.package";
             var products = EPManager.Get().GetInstalledProducts();
             foreach(var product in products)
             {
-                var fullPath = Path.Combine(Filesystem.PathProvider.GetDataPathForProduct(product), relativePackagePath);
+                var fullPath = Path.Combine(Filesystem.PathProvider.GetDataPathForProduct(product), RelativeUIPackagePath);
                 contentProvider.AddPackage(fullPath);
             }
         }
+
+        void LoadBGUIPackage()
+        {
+            var contentProvider = ContentProvider.Get();
+            var fullPath = Path.Combine(Filesystem.PathProvider.GetDataPathForProduct(ProductFlags.BaseGame), RelativeUIPackagePath);
+            contentProvider.AddPackage(fullPath);
+        }
+
         private void Start()
         {
             LoadAllUIPackages();

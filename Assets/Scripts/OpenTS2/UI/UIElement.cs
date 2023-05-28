@@ -13,6 +13,7 @@ namespace OpenTS2.UI
 {
     public class UIElement
     {
+        public bool Visible = true;
         public uint ID = 0x0;
         public Rect Area = Rect.zero;
         public Color32 FillColor = Color.black;
@@ -27,11 +28,13 @@ namespace OpenTS2.UI
             Area = properties.GetRectProperty("area");
             FillColor = properties.GetColorProperty("fillcolor");
             Caption = properties.GetProperty("caption");
+            Visible = properties.GetBoolProperty("winflag_visible");
         }
 
         public virtual UIComponent Instantiate(Transform parent)
         {
             var element = new GameObject(ToString());
+            element.SetActive(Visible);
             element.transform.SetParent(parent);
             var rectTransform = element.AddComponent<RectTransform>();
             rectTransform.pivot = new Vector2(0f, 1f);

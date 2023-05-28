@@ -70,6 +70,13 @@ namespace OpenTS2.UI
             }
             return list;
         }
+
+        public bool GetBoolProperty(string property)
+        {
+            if (_properties.TryGetValue(property, out string value))
+                return value == "yes";
+            return false;
+        }
         public string GetProperty(string property)
         {
             if (_properties.TryGetValue(property, out string value))
