@@ -17,8 +17,15 @@ namespace OpenTS2.UI
                 case "GZWinBMP":
                     element = new UIBMPElement();
                     break;
+                case "GZWinText":
+                    element = new UITextElement();
+                    break;
                 case "GZWinBtn":
                     element = new UIButtonElement();
+                    break;
+                    // Animated elements use this.
+                case "0x4d9ccdb1":
+                    element = new UIAnimationElement();
                     break;
                 default:
                     element = new UIElement();
