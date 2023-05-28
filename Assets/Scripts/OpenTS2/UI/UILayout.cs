@@ -34,10 +34,15 @@ namespace OpenTS2.UI
             }
         }
 
-        public void Instantiate(Transform parent)
+        public GameObject[] Instantiate(Transform parent)
         {
-            foreach (var element in Elements)
-                element.Instantiate(parent);
+            var elementArray = new GameObject[Elements.Count];
+            for (var i = 0; i < Elements.Count; i++)
+            {
+                var gameObject = Elements[i].Instantiate(parent);
+                elementArray[i] = gameObject;
+            }
+            return elementArray;
         }
     }
 }

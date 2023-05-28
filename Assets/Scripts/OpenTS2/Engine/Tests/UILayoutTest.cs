@@ -32,7 +32,7 @@ namespace OpenTS2.Engine.Tests
             mainMenuUILayout.Instantiate(Canvas);
             foreach(var element in mainMenuUILayout.AllElements)
             {
-                Debug.Log($"Caption :{element.Caption}, ID: 0x{element.ID.ToString("X8")}");
+                Debug.Log(element.ToString());
             }
         }
     }

@@ -18,36 +18,33 @@ namespace OpenTS2.UI
         public Color32 FillColor = Color.black;
         public string Caption = "";
         public List<UIElement> Children = new List<UIElement>();
-        public ResourceKey Image = default;
         public UIElement Parent = null;
 
-        public void Instantiate(Transform parent)
+        public virtual void ParseProperties(UIProperties properties)
         {
-            var contentProvider = ContentProvider.Get();
-            var tex = contentProvider.GetAsset<TextureAsset>(Image);
+            ID = properties.GetHexProperty("id");
+            Area = properties.GetRectProperty("area");
+            FillColor = properties.GetColorProperty("fillcolor");
+            Caption = properties.GetProperty("caption");
+        }
+
+        public virtual GameObject Instantiate(Transform parent)
+        {
             var element = new GameObject(ToString());
             element.transform.SetParent(parent);
             var rawImage = element.AddComponent<RawImage>();
-            if (tex != null)
-                rawImage.texture = tex.Texture;
-            else
-                rawImage.color = FillColor;
+            rawImage.color = FillColor;
             var rectTransform = element.GetComponent<RectTransform>();
             rectTransform.pivot = new Vector2(0f, 1f);
             rectTransform.anchorMin = new Vector2(0f, 1f);
             rectTransform.anchorMax = new Vector2(0f, 1f);
             rectTransform.anchoredPosition = new Vector2(Area.x, -Area.y);
-
-            //rectTransform.position = new Vector2(Area.x, Area.y);
-            //rectTransform.sizeDelta = new Vector2(Area.width, Area.height);
-            rawImage.SetNativeSize();
-            if (tex == null)
-                rectTransform.sizeDelta = new Vector2(Area.width, Area.height);
+            rectTransform.sizeDelta = new Vector2(Area.width, Area.height);
             foreach (var child in Children)
             {
-                //if (!child.Image.Equals(default(ResourceKey)))
-                    child.Instantiate(element.transform);
+                child.Instantiate(element.transform);
             }
+            return element;
         }
 
         public override string ToString()
