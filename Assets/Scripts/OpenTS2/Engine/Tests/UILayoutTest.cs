@@ -16,7 +16,11 @@ namespace OpenTS2.Engine.Tests
     public class UILayoutTest : MonoBehaviour
     {
         public Transform Canvas;
+        public string Key = "0x49001017";
+        public bool Reload = false;
+        public bool LoadPackagesFromAllEPs = true;
         private readonly string RelativeUIPackagePath = "Res/UI/ui.package";
+        private List<UIComponent> _instances = new List<UIComponent>();
         void LoadAllUIPackages()
         {
             var contentProvider = ContentProvider.Get();
@@ -35,19 +39,53 @@ namespace OpenTS2.Engine.Tests
             contentProvider.AddPackage(fullPath);
         }
 
+        void CreateUI()
+        {
+            try
+            {
+                foreach (var instance in _instances)
+                {
+                    Destroy(instance.gameObject);
+                }
+                _instances.Clear();
+                var contentProvider = ContentProvider.Get();
+                var key = new ResourceKey(Convert.ToUInt32(Key, 16), 0xA99D8A11, TypeIDs.UI);
+                var uiLayout = contentProvider.GetAsset<UILayout>(key);
+                _instances.AddRange(uiLayout.Instantiate(Canvas));
+            }
+            catch(Exception e)
+            {
+                Debug.LogError(e);
+            }
+        }
+
+        private void Update()
+        {
+            if (Reload)
+            {
+                CreateUI();
+                Reload = false;
+            }
+        }
+
         private void Start()
         {
-            LoadAllUIPackages();
+            if (LoadPackagesFromAllEPs)
+                LoadAllUIPackages();
+            else
+                LoadBGUIPackage();
+            CreateUI();
+            /*
             var contentProvider = ContentProvider.Get();
             // Main Menu
-            var key = new ResourceKey(0x49001017, 0xA99D8A11, TypeIDs.UI);
+            //var key = new ResourceKey(0x49001017, 0xA99D8A11, TypeIDs.UI);
             // Neighborhood View
-            //var key = new ResourceKey(0x49000000, 0xA99D8A11, TypeIDs.UI);
+            var key = new ResourceKey(0x49000000, 0xA99D8A11, TypeIDs.UI);
             //var key = new ResourceKey(0x49001010, 0xA99D8A11, TypeIDs.UI);
             //var key = new ResourceKey(0x49060005, 0xA99D8A11, TypeIDs.UI);
             //var key = new ResourceKey(0x49001024, 0xA99D8A11, TypeIDs.UI);
             var mainMenuUILayout = contentProvider.GetAsset<UILayout>(key);
-            mainMenuUILayout.Instantiate(Canvas);
+            _instances.AddRange(mainMenuUILayout.Instantiate(Canvas));*/
         }
     }
 }
