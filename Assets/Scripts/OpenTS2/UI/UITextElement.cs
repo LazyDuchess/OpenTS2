@@ -11,6 +11,15 @@ namespace OpenTS2.UI
 {
     public class UITextElement : UIElement
     {
+        public override void ParseProperties(UIProperties properties)
+        {
+            base.ParseProperties(properties);
+            if (properties.HasProperty("captionres"))
+            {
+                var captionRes = properties.GetCaptionRes();
+                Caption = captionRes.GetLocalizedString();
+            }
+        }
         public override UIComponent Instantiate(Transform parent)
         {
             var uiComponent = base.Instantiate(parent);

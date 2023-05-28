@@ -152,7 +152,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53ba3ed51b4e9df4a92af5a89d816196, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Language: 1
   Canvas: {fileID: 272227683}
+  Key: 0x090617B7
+  Reload: 0
+  LoadPackagesFromAllEPs: 1
 --- !u!4 &28655043
 Transform:
   m_ObjectHideFlags: 0

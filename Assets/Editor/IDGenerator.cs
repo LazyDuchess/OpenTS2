@@ -19,7 +19,7 @@ namespace OpenTS2.Editor
             if (GUILayout.Button("OK"))
             {
                 _hasResult = true;
-                _result = new ResourceKey(_filename, 0, 0);
+                _result = new ResourceKey(_filename, _filename, 0);
             }
 
             if (GUILayout.Button("Cancel"))
@@ -30,6 +30,7 @@ namespace OpenTS2.Editor
                 EditorGUILayout.LabelField(_filename+":");
                 EditorGUILayout.LabelField("Instance: 0x" + _result.InstanceID.ToString("X8"));
                 EditorGUILayout.LabelField("Instance(High): 0x" + _result.InstanceHigh.ToString("X8"));
+                EditorGUILayout.LabelField("Group: 0x" + _result.GroupID.ToString("X8"));
             }
         }
         [MenuItem("OpenTS2/Resource Key/From Filename")]

@@ -1,4 +1,5 @@
-﻿using OpenTS2.Common;
+﻿using OpenTS2.Client;
+using OpenTS2.Common;
 using OpenTS2.Content;
 using OpenTS2.Files;
 using OpenTS2.Files.Formats.DBPF;
@@ -15,6 +16,7 @@ namespace OpenTS2.Engine.Tests
 {
     public class UILayoutTest : MonoBehaviour
     {
+        public Languages Language = Languages.USEnglish;
         public Transform Canvas;
         public string Key = "0x49001017";
         public bool Reload = false;
@@ -23,26 +25,22 @@ namespace OpenTS2.Engine.Tests
         private List<UIComponent> _instances = new List<UIComponent>();
         void LoadAllUIPackages()
         {
-            var contentProvider = ContentProvider.Get();
-            var products = EPManager.Get().GetInstalledProducts();
-            foreach(var product in products)
-            {
-                var fullPath = Path.Combine(Filesystem.PathProvider.GetDataPathForProduct(product), RelativeUIPackagePath);
-                contentProvider.AddPackage(fullPath);
-            }
+            EPManager.Get().InstalledProducts = 0x3EFFF;
+            ContentLoading.LoadContentStartup();
         }
 
         void LoadBGUIPackage()
         {
-            var contentProvider = ContentProvider.Get();
-            var fullPath = Path.Combine(Filesystem.PathProvider.GetDataPathForProduct(ProductFlags.BaseGame), RelativeUIPackagePath);
-            contentProvider.AddPackage(fullPath);
+            EPManager.Get().InstalledProducts = (int)ProductFlags.BaseGame;
+            ContentLoading.LoadContentStartup();
         }
 
         void CreateUI()
         {
             try
             {
+                var settings = Settings.Get();
+                settings.Language = Language;
                 foreach (var instance in _instances)
                 {
                     Destroy(instance.gameObject);
@@ -70,6 +68,8 @@ namespace OpenTS2.Engine.Tests
 
         private void Start()
         {
+            var settings = Settings.Get();
+            settings.CustomContentEnabled = false;
             if (LoadPackagesFromAllEPs)
                 LoadAllUIPackages();
             else

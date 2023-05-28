@@ -1,4 +1,6 @@
 ﻿using OpenTS2.Common;
+using OpenTS2.Content;
+using OpenTS2.Content.DBPF;
 using OpenTS2.Files.Formats.DBPF;
 using System;
 using System.Collections.Generic;
@@ -11,7 +13,41 @@ namespace OpenTS2.UI
 {
     public class UIProperties
     {
+        public struct CaptionLocalization
+        {
+            public ResourceKey StringSet;
+            public int StringID;
+            public CaptionLocalization(ResourceKey stringSet, int stringId)
+            {
+                StringSet = stringSet;
+                StringID = stringId;
+            }
+            public string GetLocalizedString()
+            {
+                var contentProvider = ContentProvider.Get();
+                var stringSet = contentProvider.GetAsset<StringSetAsset>(StringSet);
+                if (stringSet == null)
+                    return "";
+                return stringSet.GetString(StringID);
+            }
+        }
         private Dictionary<string, string> _properties = new Dictionary<string, string>();
+
+        public bool HasProperty(string property)
+        {
+            return _properties.ContainsKey(property);
+        }
+
+        public CaptionLocalization GetCaptionRes()
+        {
+            var stringArray = GetStringListProperty("captionres");
+            var group = Convert.ToUInt32(stringArray[0], 16);
+            var strAndID = stringArray[1];
+            var strInstance = Convert.ToUInt32(strAndID.Substring(0,4), 16);
+            var stringId = Convert.ToInt32(strAndID.Substring(4), 16) - 1;
+            return new CaptionLocalization(new ResourceKey(strInstance, group, TypeIDs.STR), stringId);
+        }
+
         public uint GetHexProperty(string property)
         {
             var value = GetProperty(property);
@@ -40,6 +76,23 @@ namespace OpenTS2.UI
             var height = floatArray[3] - y;
             return new Rect(x, y, width, height);
         }
+
+        public List<string> GetStringListProperty(string property)
+        {
+            var list = new List<string>();
+            var value = GetProperty(property);
+            if (value == null)
+                return list;
+            // Remove start ( and end )
+            value = value.Substring(1, value.Length - 2);
+            var split = value.Split(',');
+            foreach (var element in split)
+            {
+                list.Add(element);
+            }
+            return list;
+        }
+
         public List<uint> GetHexListProperty(string property)
         {
             var list = new List<uint>();
