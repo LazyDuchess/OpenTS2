@@ -34,7 +34,11 @@ namespace OpenTS2.UI
         public Rect GetRectProperty(string property)
         {
             var floatArray = GetFloatListProperty(property);
-            return new Rect(floatArray[0], floatArray[1], floatArray[2], floatArray[3]);
+            var x = floatArray[0];
+            var y = floatArray[1];
+            var width = floatArray[2] - x;
+            var height = floatArray[3] - y;
+            return new Rect(x, y, width, height);
         }
         public List<uint> GetHexListProperty(string property)
         {

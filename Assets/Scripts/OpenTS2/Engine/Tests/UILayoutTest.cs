@@ -24,9 +24,9 @@ namespace OpenTS2.Engine.Tests
             uiPackageLocation = Path.Combine(Filesystem.PathProvider.GetDataPathForProduct(ProductFlags.Mansion), "Res/UI/ui.package");
             contentProvider.AddPackage(uiPackageLocation);
             // Main Menu
-            var key = new ResourceKey(0x49001017, 0xA99D8A11, TypeIDs.UI);
+            //var key = new ResourceKey(0x49001017, 0xA99D8A11, TypeIDs.UI);
             // Neighborhood View
-            //var key = new ResourceKey(0x49000000, 0xA99D8A11, TypeIDs.UI);
+            var key = new ResourceKey(0x49000000, 0xA99D8A11, TypeIDs.UI);
             //var key = new ResourceKey(0x49001010, 0xA99D8A11, TypeIDs.UI);
             var mainMenuUILayout = contentProvider.GetAsset<UILayout>(key);
             mainMenuUILayout.Instantiate(Canvas);
