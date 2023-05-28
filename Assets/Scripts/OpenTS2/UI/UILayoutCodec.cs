@@ -63,6 +63,9 @@ namespace OpenTS2.UI
                     if (properties.TryGetValue("id", out string id))
                         element.ID = Convert.ToUInt32(id, 16);
 
+                    if (properties.TryGetValue("image", out string image))
+                        element.Image = ParseImageKey(image);
+
                     element.Parent = currentElement;
 
                     if (currentElement == null)
@@ -75,16 +78,35 @@ namespace OpenTS2.UI
             return asset;
         }
 
+        ResourceKey ParseImageKey(string value)
+        {
+            var uintArray = ParseIDArray(value);
+            return new ResourceKey(uintArray[1], uintArray[0], TypeIDs.IMG);
+        }
+
         Color32 ParseColor32(string value)
         {
             var intArray = ParseFloatArray(value);
-            return new Color32((byte)intArray[0], (byte)intArray[1], (byte)intArray[2], 255);
+            return new Color32((byte)intArray[0], (byte)intArray[1], (byte)intArray[2], 0);
         }
 
         Rect ParseRect(string value)
         {
             var floatArray = ParseFloatArray(value);
             return new Rect(floatArray[0], floatArray[1], floatArray[2], floatArray[3]);
+        }
+
+        List<uint> ParseIDArray(string value)
+        {
+            // Remove start ( and end )
+            value = value.Substring(1, value.Length - 2);
+            var split = value.Split(',');
+            var uintList = new List<uint>();
+            foreach (var element in split)
+            {
+                uintList.Add(Convert.ToUInt32(element, 16));
+            }
+            return uintList;
         }
 
         List<float> ParseFloatArray(string value)
