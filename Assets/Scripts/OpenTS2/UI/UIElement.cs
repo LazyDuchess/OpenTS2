@@ -19,6 +19,7 @@ namespace OpenTS2.UI
         public string Caption = "";
         public List<UIElement> Children = new List<UIElement>();
         public UIElement Parent = null;
+        protected virtual Type UIComponentType => typeof(UIComponent);
 
         public virtual void ParseProperties(UIProperties properties)
         {
@@ -28,23 +29,24 @@ namespace OpenTS2.UI
             Caption = properties.GetProperty("caption");
         }
 
-        public virtual GameObject Instantiate(Transform parent)
+        public virtual UIComponent Instantiate(Transform parent)
         {
             var element = new GameObject(ToString());
             element.transform.SetParent(parent);
-            var rawImage = element.AddComponent<RawImage>();
-            rawImage.color = FillColor;
-            var rectTransform = element.GetComponent<RectTransform>();
+            var rectTransform = element.AddComponent<RectTransform>();
             rectTransform.pivot = new Vector2(0f, 1f);
             rectTransform.anchorMin = new Vector2(0f, 1f);
             rectTransform.anchorMax = new Vector2(0f, 1f);
             rectTransform.anchoredPosition = new Vector2(Area.x, -Area.y);
             rectTransform.sizeDelta = new Vector2(Area.width, Area.height);
+
+            var uiComponent = element.AddComponent(UIComponentType);
+
             foreach (var child in Children)
             {
                 child.Instantiate(element.transform);
             }
-            return element;
+            return (UIComponent)uiComponent;
         }
 
         public override string ToString()

@@ -14,25 +14,26 @@ namespace OpenTS2.UI
     public class UIBMPElement : UIElement
     {
         public ResourceKey Image = default;
+        protected override Type UIComponentType => typeof(UIBMPComponent);
         public override void ParseProperties(UIProperties properties)
         {
             base.ParseProperties(properties);
             Image = properties.GetImageKeyProperty("image");
         }
 
-        public override GameObject Instantiate(Transform parent)
+        public override UIComponent Instantiate(Transform parent)
         {
-            var gameObject = base.Instantiate(parent);
-            var rawImage = gameObject.GetComponent<RawImage>();
+            var uiComponent = base.Instantiate(parent);
             var contentProvider = ContentProvider.Get();
             var imageAsset = contentProvider.GetAsset<TextureAsset>(Image);
+            var rawImage = uiComponent.gameObject.AddComponent<RawImage>();
             if (imageAsset != null)
             {
                 rawImage.texture = imageAsset.Texture;
                 rawImage.SetNativeSize();
                 rawImage.color = Color.white;
             }
-            return gameObject;
+            return uiComponent;
         }
     }
 }

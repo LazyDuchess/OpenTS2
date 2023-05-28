@@ -17,6 +17,9 @@ namespace OpenTS2.UI
                 case "GZWinBMP":
                     element = new UIBMPElement();
                     break;
+                case "GZWinBtn":
+                    element = new UIButtonElement();
+                    break;
                 default:
                     element = new UIElement();
                     break;

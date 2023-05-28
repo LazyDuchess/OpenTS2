@@ -34,13 +34,13 @@ namespace OpenTS2.UI
             }
         }
 
-        public GameObject[] Instantiate(Transform parent)
+        public UIComponent[] Instantiate(Transform parent)
         {
-            var elementArray = new GameObject[Elements.Count];
+            var elementArray = new UIComponent[Elements.Count];
             for (var i = 0; i < Elements.Count; i++)
             {
-                var gameObject = Elements[i].Instantiate(parent);
-                elementArray[i] = gameObject;
+                var uiElement = Elements[i].Instantiate(parent);
+                elementArray[i] = uiElement;
             }
             return elementArray;
         }

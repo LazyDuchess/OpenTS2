@@ -30,10 +30,6 @@ namespace OpenTS2.Engine.Tests
             //var key = new ResourceKey(0x49001010, 0xA99D8A11, TypeIDs.UI);
             var mainMenuUILayout = contentProvider.GetAsset<UILayout>(key);
             mainMenuUILayout.Instantiate(Canvas);
-            foreach(var element in mainMenuUILayout.AllElements)
-            {
-                Debug.Log(element.ToString());
-            }
         }
     }
 }
