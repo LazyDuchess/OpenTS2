@@ -13,11 +13,11 @@ namespace OpenTS2.UI
 {
     public class UIProperties
     {
-        public struct CaptionLocalization
+        public struct StringReference
         {
             public ResourceKey StringSet;
             public int StringID;
-            public CaptionLocalization(ResourceKey stringSet, int stringId)
+            public StringReference(ResourceKey stringSet, int stringId)
             {
                 StringSet = stringSet;
                 StringID = stringId;
@@ -38,14 +38,14 @@ namespace OpenTS2.UI
             return _properties.ContainsKey(property);
         }
 
-        public CaptionLocalization GetCaptionRes()
+        public StringReference GetStringSetProperty(string property)
         {
-            var stringArray = GetStringListProperty("captionres");
+            var stringArray = GetStringListProperty(property);
             var group = Convert.ToUInt32(stringArray[0], 16);
             var strAndID = stringArray[1];
             var strInstance = Convert.ToUInt32(strAndID.Substring(0,4), 16);
             var stringId = Convert.ToInt32(strAndID.Substring(4), 16) - 1;
-            return new CaptionLocalization(new ResourceKey(strInstance, group, TypeIDs.STR), stringId);
+            return new StringReference(new ResourceKey(strInstance, group, TypeIDs.STR), stringId);
         }
 
         public uint GetHexProperty(string property)
@@ -65,7 +65,7 @@ namespace OpenTS2.UI
         public Color32 GetColorProperty(string property)
         {
             var floatArray = GetFloatListProperty(property);
-            return new Color32((byte)floatArray[0], (byte)floatArray[1], (byte)floatArray[2], 0);
+            return new Color32((byte)floatArray[0], (byte)floatArray[1], (byte)floatArray[2], 255);
         }
         public Rect GetRectProperty(string property)
         {
@@ -142,6 +142,15 @@ namespace OpenTS2.UI
             Key,
             Value
         }
+        public override string ToString()
+        {
+            var str = "";
+            foreach(var prop in _properties)
+            {
+                str += $"{prop.Key} = {prop.Value} | ";
+            }
+            return str;
+        }
         public UIProperties(string properties)
         {
             var currentlyReading = Reading.None;
@@ -204,6 +213,8 @@ namespace OpenTS2.UI
                     }
                 }
             }
+            if (currentlyReading == Reading.Value)
+                _properties[currentKey.Trim()] = currentValue.Trim();
         }
     }
 }

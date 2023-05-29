@@ -11,19 +11,22 @@ namespace OpenTS2.UI
 {
     public class UITextElement : UIElement
     {
+        public Color32 ForeColor = Color.black;
         public override void ParseProperties(UIProperties properties)
         {
             base.ParseProperties(properties);
             if (properties.HasProperty("captionres"))
             {
-                var captionRes = properties.GetCaptionRes();
+                var captionRes = properties.GetStringSetProperty("captionres");
                 Caption = captionRes.GetLocalizedString();
             }
+            ForeColor = properties.GetColorProperty("forecolor");
         }
         public override UIComponent Instantiate(Transform parent)
         {
             var uiComponent = base.Instantiate(parent);
             var text = uiComponent.gameObject.AddComponent<Text>();
+            text.color = ForeColor;
             text.text = Caption;
             text.font = AssetController.DefaultFont;
             text.fontSize = 14;

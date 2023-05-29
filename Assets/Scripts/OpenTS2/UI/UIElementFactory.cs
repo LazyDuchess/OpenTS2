@@ -17,6 +17,9 @@ namespace OpenTS2.UI
                 case "GZWinBMP":
                     element = new UIBMPElement();
                     break;
+                case "GZWinFlatRect":
+                    element = new UIFlatRectElement();
+                    break;
                 case "GZWinText":
                     element = new UITextElement();
                     break;
