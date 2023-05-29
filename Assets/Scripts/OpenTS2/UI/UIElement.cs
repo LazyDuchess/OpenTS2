@@ -11,6 +11,9 @@ using UnityEngine.UI;
 
 namespace OpenTS2.UI
 {
+    /// <summary>
+    /// Generic UI Element.
+    /// </summary>
     public class UIElement
     {
         public bool Visible = true;

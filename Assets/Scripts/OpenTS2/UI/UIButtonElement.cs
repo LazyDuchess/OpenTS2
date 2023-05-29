@@ -7,6 +7,9 @@ using UnityEngine;
 
 namespace OpenTS2.UI
 {
+    /// <summary>
+    /// UI Button.
+    /// </summary>
     public class UIButtonElement : UIBMPElement
     {
         public override UIComponent Instantiate(Transform parent)
@@ -15,7 +18,7 @@ namespace OpenTS2.UI
             var rawImage = uiComponent.RawImageComponent;
             if (rawImage.texture != null)
             {
-                rawImage.texture = UIUtils.SplitTextureHorizontalSequence(rawImage.texture as Texture2D, (int)Area.width)[0];
+                rawImage.texture = UIUtils.SplitTextureHorizontalSequence(rawImage.texture as Texture2D, rawImage.texture.width / 4)[0];
             }
             return uiComponent;
         }

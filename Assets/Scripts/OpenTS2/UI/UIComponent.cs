@@ -8,6 +8,9 @@ using UnityEngine.UI;
 
 namespace OpenTS2.UI
 {
+    /// <summary>
+    /// Generic UI Element Component.
+    /// </summary>
     public class UIComponent : MonoBehaviour
     {
         public UIElement Element;

@@ -7,6 +7,9 @@ using UnityEngine;
 
 namespace OpenTS2.UI
 {
+    /// <summary>
+    /// Animated UI Element.
+    /// </summary>
     public class UIAnimationElement : UIBMPElement
     {
         protected override Type UIComponentType => typeof(UIAnimationComponent);

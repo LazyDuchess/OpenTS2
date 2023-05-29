@@ -9,6 +9,9 @@ using OpenTS2.Engine;
 
 namespace OpenTS2.UI
 {
+    /// <summary>
+    /// Static Image UI Component.
+    /// </summary>
     public class UIBMPComponent : UIComponent
     {
         public bool OwnTexture = false;

@@ -11,6 +11,9 @@ using UnityEngine.UI;
 
 namespace OpenTS2.UI
 {
+    /// <summary>
+    /// Static image UI Element.
+    /// </summary>
     public class UIBMPElement : UIElement
     {
         public ResourceKey Image = default;

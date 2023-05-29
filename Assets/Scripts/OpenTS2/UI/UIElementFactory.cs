@@ -6,8 +6,16 @@ using System.Threading.Tasks;
 
 namespace OpenTS2.UI
 {
+    /// <summary>
+    /// Creates UI Elements.
+    /// </summary>
     public static class UIElementFactory
     {
+        /// <summary>
+        /// Creates an instance of the appropriate UI Element class, given properties.
+        /// </summary>
+        /// <param name="properties">UI Properties</param>
+        /// <returns></returns>
         public static UIElement CreateFromProperties(UIProperties properties)
         {
             var cls = properties.GetProperty("clsid");

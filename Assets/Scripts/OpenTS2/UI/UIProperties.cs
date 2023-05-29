@@ -11,6 +11,9 @@ using UnityEngine;
 
 namespace OpenTS2.UI
 {
+    /// <summary>
+    /// Represents properties for UI elements, such as class id, id, style, etc.
+    /// </summary>
     public class UIProperties
     {
         public struct StringReference

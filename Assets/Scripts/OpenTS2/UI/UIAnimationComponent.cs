@@ -9,6 +9,9 @@ using OpenTS2.Engine;
 
 namespace OpenTS2.UI
 {
+    /// <summary>
+    /// Animated UI element, amount of frames is texture width divided by Area width.
+    /// </summary>
     public class UIAnimationComponent : UIBMPComponent
     {
         public float Speed = 0.04f;
@@ -25,6 +28,12 @@ namespace OpenTS2.UI
         private int _currentFrame = 0;
         private Texture2D[] _frames;
         private float _timer = 0f;
+
+        /// <summary>
+        /// Set this UI element's animated texture.
+        /// </summary>
+        /// <param name="texture">Texture</param>
+        /// <param name="width">Width of each frame</param>
         public void SetTexture(Texture2D texture, int width)
         {
             DisposeFrames();
@@ -32,7 +41,6 @@ namespace OpenTS2.UI
             _currentFrame = 0;
             _timer = 0f;
             UpdateFrame();
-            var rawImage = RawImageComponent;
         }
         private void OnDestroy()
         {

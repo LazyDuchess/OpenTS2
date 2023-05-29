@@ -8,9 +8,18 @@ using UnityEngine;
 
 namespace OpenTS2.UI
 {
+    /// <summary>
+    /// Represents a UI Script.
+    /// </summary>
     public class UILayout : AbstractAsset
     {
+        /// <summary>
+        /// Returns root elements.
+        /// </summary>
         public List<UIElement> Elements = new List<UIElement>();
+        /// <summary>
+        /// Returns all elements recursively.
+        /// </summary>
         public List<UIElement> AllElements
         {
             get

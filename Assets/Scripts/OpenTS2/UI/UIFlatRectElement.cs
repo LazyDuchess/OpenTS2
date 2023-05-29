@@ -8,6 +8,9 @@ using UnityEngine.UI;
 
 namespace OpenTS2.UI
 {
+    /// <summary>
+    /// Colored rectangle.
+    /// </summary>
     public class UIFlatRectElement : UIElement
     {
         public enum Styles

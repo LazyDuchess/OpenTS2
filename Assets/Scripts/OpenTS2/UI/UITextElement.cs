@@ -9,6 +9,9 @@ using UnityEngine.UI;
 
 namespace OpenTS2.UI
 {
+    /// <summary>
+    /// UI Text.
+    /// </summary>
     public class UITextElement : UIElement
     {
         public TextAnchor Alignment = TextAnchor.MiddleCenter;
