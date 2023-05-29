@@ -11,6 +11,7 @@ namespace OpenTS2.UI
 {
     public class UITextElement : UIElement
     {
+        public TextAnchor Alignment = TextAnchor.MiddleCenter;
         public Color32 ForeColor = Color.black;
         public override void ParseProperties(UIProperties properties)
         {
@@ -21,6 +22,40 @@ namespace OpenTS2.UI
                 Caption = captionRes.GetLocalizedString();
             }
             ForeColor = properties.GetColorProperty("forecolor");
+            var align = properties.GetProperty("align");
+            if (align != null)
+            {
+                switch(align)
+                {
+                    case "lefttop":
+                        Alignment = TextAnchor.UpperLeft;
+                        break;
+                    case "centertop":
+                        Alignment = TextAnchor.UpperCenter;
+                        break;
+                    case "righttop":
+                        Alignment = TextAnchor.UpperRight;
+                        break;
+                    case "leftcenter":
+                        Alignment = TextAnchor.MiddleLeft;
+                        break;
+                    case "center":
+                        Alignment = TextAnchor.MiddleCenter;
+                        break;
+                    case "rightcenter":
+                        Alignment = TextAnchor.MiddleRight;
+                        break;
+                    case "leftbottom":
+                        Alignment = TextAnchor.LowerLeft;
+                        break;
+                    case "centerbottom":
+                        Alignment = TextAnchor.LowerCenter;
+                        break;
+                    case "rightbottom":
+                        Alignment = TextAnchor.LowerRight;
+                        break;
+                }
+            }
         }
         public override UIComponent Instantiate(Transform parent)
         {
@@ -30,7 +65,7 @@ namespace OpenTS2.UI
             text.text = Caption;
             text.font = AssetController.DefaultFont;
             text.fontSize = 14;
-            text.alignment = TextAnchor.UpperCenter;
+            text.alignment = Alignment;
             return uiComponent;
         }
     }
