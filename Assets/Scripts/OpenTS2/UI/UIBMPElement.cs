@@ -14,22 +14,30 @@ namespace OpenTS2.UI
     public class UIBMPElement : UIElement
     {
         public ResourceKey Image = default;
+        public bool EdgeImage = false;
         protected override Type UIComponentType => typeof(UIBMPComponent);
         public override void ParseProperties(UIProperties properties)
         {
             base.ParseProperties(properties);
             Image = properties.GetImageKeyProperty("image");
+            EdgeImage = properties.GetBoolProperty("edgeimage");
         }
 
         public override UIComponent Instantiate(Transform parent)
         {
-            var uiComponent = base.Instantiate(parent);
+            var uiComponent = base.Instantiate(parent) as UIBMPComponent;
             var contentProvider = ContentProvider.Get();
             var imageAsset = contentProvider.GetAsset<TextureAsset>(Image);
             var rawImage = uiComponent.gameObject.AddComponent<RawImage>();
             if (imageAsset != null)
             {
-                rawImage.texture = imageAsset.Texture;
+                if (EdgeImage)
+                {
+                    rawImage.texture = UIUtils.MakeEdgeImage(imageAsset.Texture, (int)Area.width, (int)Area.height);
+                    uiComponent.OwnTexture = true;
+                }
+                else
+                    rawImage.texture = imageAsset.Texture;
             }
             else
                 rawImage.color = new Color(0f, 0f, 0f, 0f);
