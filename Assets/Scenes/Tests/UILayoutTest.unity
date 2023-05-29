@@ -154,7 +154,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Language: 1
   Canvas: {fileID: 272227683}
-  Key: 0x49001017
+  Key: 0x49001000
   Reload: 0
   LoadPackagesFromAllEPs: 1
 --- !u!4 &28655043
@@ -521,7 +521,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2467515431058217605, guid: 188047b711783b74aa73c17ff9d66147, type: 3}
       propertyPath: m_Name
-      value: AssetController
+      value: Startup Controller
       objectReference: {fileID: 0}
     - target: {fileID: 2467515431058217606, guid: 188047b711783b74aa73c17ff9d66147, type: 3}
       propertyPath: m_RootOrder

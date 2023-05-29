@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 2467515431058217606}
   - component: {fileID: 6889856724969260489}
   m_Layer: 0
-  m_Name: AssetController
+  m_Name: Startup Controller
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
