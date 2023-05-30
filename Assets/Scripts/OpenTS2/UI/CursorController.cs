@@ -50,7 +50,7 @@ namespace OpenTS2.UI {
         {
             RegisterCursor(CursorType.Default, ProductFlags.BaseGame, "arrow_8.cur");
             RegisterCursor(CursorType.Hourglass, ProductFlags.BaseGame, "Hourglass_8.ani");
-            // Sledgehammer was added in Pets, IIRC, so Pets and later all come with the cursor in the UI files.
+            // Sledgehammer was added in Pets, so Pets and later all come with the cursor in the UI files.
             RegisterCursorFromLatestProduct(CursorType.Sledgehammer, "Sledgehammer_8.cur");
         }
 
