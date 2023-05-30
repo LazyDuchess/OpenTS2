@@ -127,7 +127,7 @@ namespace OpenTS2.Files.Formats.DBPF
                     break;
             }
             if (asset?.Texture != null)
-                asset.Texture.name = $"[{formatName}] {tgi.ToString()}";
+                asset.Texture.name = $"[{formatName}] {tgi}";
             return asset;
         }
     }
