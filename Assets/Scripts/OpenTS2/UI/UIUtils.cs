@@ -36,6 +36,8 @@ namespace OpenTS2.UI
             var bottomRight = vSequences2[2];
 
             var finalEdgeImage = new Texture2D(width, height);
+            finalEdgeImage.name = texture.name;
+
             // Top Left Corner
             finalEdgeImage.SetPixels(0, 0, splitWidth, splitHeight, topLeft.GetPixels());
             // Bottom Left Corner
@@ -121,6 +123,7 @@ namespace OpenTS2.UI
                 var newTexture = new Texture2D(texture.width, size);
                 newTexture.SetPixels(0, 0, texture.width, size, pixels);
                 newTexture.Apply();
+                newTexture.name = texture.name;
                 array[i] = newTexture;
             }
             return array;
@@ -136,6 +139,7 @@ namespace OpenTS2.UI
                 var newTexture = new Texture2D(size, texture.height);
                 newTexture.SetPixels(0,0,size,texture.height, pixels);
                 newTexture.Apply();
+                newTexture.name = texture.name;
                 array[i] = newTexture;
             }
             return array;

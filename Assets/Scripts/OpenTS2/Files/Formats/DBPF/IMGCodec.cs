@@ -91,23 +91,26 @@ namespace OpenTS2.Files.Formats.DBPF
         /// <param name="bytes">Bytes to parse</param>
         public override AbstractAsset Deserialize(byte[] bytes, ResourceKey tgi, DBPFFile sourceFile)
         {
-            // TODO - figure out JFIF ALFA block.
             // 0: TGA, 1: PNG, 2: JPG
             var fileType = 0;
+            var formatName = "";
             var pngCheck = Encoding.UTF8.GetString(bytes, 1, 3);
             var jpgCheck = Encoding.UTF8.GetString(bytes, 6, 4);
             if (pngCheck == "PNG")
                 fileType = 1;
             else if (jpgCheck == "JFIF")
                 fileType = 2;
+            TextureAsset asset = null;
             switch (fileType)
             {
                 case 0:
-                    return new TextureAsset(CreateTGATexture(bytes));
-
+                    asset = new TextureAsset(CreateTGATexture(bytes));
+                    formatName = "TGA";
+                    break;
                 case 1:
-                    return new TextureAsset(CreatePNGTexture(bytes));
-
+                    asset = new TextureAsset(CreatePNGTexture(bytes));
+                    formatName = "PNG";
+                    break;
                 case 2:
                     {
                         byte[] alphaChannel = JpegFileWithAlfaSegment.GetTransparencyFromAlfaSegment(bytes);
@@ -117,10 +120,14 @@ namespace OpenTS2.Files.Formats.DBPF
                                 CreateJPGTextureWithAlphaChannel(bytes, alphaChannel));
                         }
 
-                        return new TextureAsset(CreateJPGTexture(bytes));
+                        asset = new TextureAsset(CreateJPGTexture(bytes));
+                        formatName = "JPG";
                     }
+                    break;
             }
-            return null;
+            if (asset?.Texture != null)
+                asset.Texture.name = $"{tgi.ToString()} - [{formatName}]";
+            return asset;
         }
     }
 }
