@@ -10,8 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 2467515431058217606}
   - component: {fileID: 6889856724969260489}
+  - component: {fileID: 5395210396068068221}
   m_Layer: 0
-  m_Name: Startup Controller
+  m_Name: Scene Startup
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -44,3 +45,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _defaultFont: {fileID: 12800000, guid: 0b89e5cf40aeb5041b1628fc5265cadb, type: 3}
+--- !u!114 &5395210396068068221
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2467515431058217605}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a9ce02e546d0c347965dd175518f4f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
