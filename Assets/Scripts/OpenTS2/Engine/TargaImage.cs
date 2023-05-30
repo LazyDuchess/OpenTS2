@@ -366,7 +366,7 @@ namespace Paloma
             get { return this.intPadding; }
         }
 
-        public TargaImage(byte[] filebytes) : this()
+        public TargaImage(byte[] filebytes, bool filter) : this()
         {
             MemoryStream filestream = null;
             BinaryReader binReader = null;
@@ -383,7 +383,7 @@ namespace Paloma
                             this.LoadTGAFooterInfo(binReader);
                             this.LoadTGAHeaderInfo(binReader);
                             this.LoadTGAExtensionArea(binReader);
-                            this.LoadTGAImage(binReader);
+                            this.LoadTGAImage(binReader, filter);
                         }
                     }
                     else
@@ -396,7 +396,7 @@ namespace Paloma
         /// <summary>
         /// Creates a new instance of the TargaImage object with strFileName as the image loaded.
         /// </summary>
-        public TargaImage(string strFileName) : this()
+        public TargaImage(string strFileName, bool filter) : this()
         {
             // make sure we have a .tga file
             if (System.IO.Path.GetExtension(strFileName).ToLower() == ".tga")
@@ -424,7 +424,7 @@ namespace Paloma
                                     this.LoadTGAFooterInfo(binReader);
                                     this.LoadTGAHeaderInfo(binReader);
                                     this.LoadTGAExtensionArea(binReader);
-                                    this.LoadTGAImage(binReader);
+                                    this.LoadTGAImage(binReader, filter);
                                 }
                             }
                             else
@@ -1018,7 +1018,7 @@ namespace Paloma
         /// Also loads the color map, if any, into the Image Bitmap.
         /// </summary>
         /// <param name="binReader">A BinaryReader that points the loaded file byte stream.</param>
-        private void LoadTGAImage(BinaryReader binReader)
+        private void LoadTGAImage(BinaryReader binReader, bool filter)
         {
             //**************  NOTE  *******************
             // The memory allocated for Microsoft Bitmaps must be aligned on a 32bit boundary.
@@ -1041,8 +1041,15 @@ namespace Paloma
 
             // create a Bitmap object using the image Width, Height,
             // Stride, PixelFormat and the pointer to the pinned byte array.
-            bmpTargaImage = new Texture2D((int)this.objTargaHeader.Width, (int)this.objTargaHeader.Height, pf, false, false);
-
+            if (!filter)
+            {
+                bmpTargaImage = new Texture2D((int)this.objTargaHeader.Width, (int)this.objTargaHeader.Height, pf, 1, false);
+                bmpTargaImage.filterMode = FilterMode.Point;
+            }
+            else
+            {
+                bmpTargaImage = new Texture2D((int)this.objTargaHeader.Width, (int)this.objTargaHeader.Height, pf, false, false);
+            }
             // Unity does not properly support BGRA32, so we should manually swap the data
             // If this becomes a performance bottle-neck, you can always do the swap in a shader
             /*
@@ -1281,9 +1288,9 @@ namespace Paloma
         /// </summary>
         /// <param name="sFileName">The Targa image filename</param>
         /// <returns>A Bitmap object with the Targa image loaded into it.</returns>
-        public static Texture2D LoadTargaImage(string sFileName)
+        public static Texture2D LoadTargaImage(string sFileName, bool filter)
         {
-            TargaImage ti = new TargaImage(sFileName);
+            TargaImage ti = new TargaImage(sFileName, filter);
             return ti.bmpTargaImage;
         }
     }

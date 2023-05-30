@@ -82,7 +82,8 @@ namespace OpenTS2.Files.Formats.DBPF
 
         Texture2D CreateTGATexture(byte[] source)
         {
-            return new Paloma.TargaImage(source).bmpTargaImage;
+            var texture = new Paloma.TargaImage(source, false).bmpTargaImage;
+            return texture;
         }
 
         /// <summary>
