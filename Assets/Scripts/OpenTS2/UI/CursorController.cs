@@ -12,7 +12,8 @@ namespace OpenTS2.UI {
         static CursorController s_singleton = null;
         public enum CursorType
         {
-            Default
+            Default,
+            Hourglass
         }
 
         public static CursorType Cursor = CursorType.Default;
@@ -41,6 +42,7 @@ namespace OpenTS2.UI {
         void RegisterCursors()
         {
             RegisterCursor(CursorType.Default, ProductFlags.BaseGame, "arrow_8.cur");
+            RegisterCursor(CursorType.Hourglass, ProductFlags.BaseGame, "Hourglass_8.ani");
         }
 
 #if !UNITY_EDITOR
