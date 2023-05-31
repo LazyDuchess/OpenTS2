@@ -40,7 +40,7 @@ namespace OpenTS2.UI
                     uiComponent.OwnTexture = true;
                 }
                 else
-                    rawImage.texture = imageAsset.Texture;
+                    uiComponent.SetTexture(imageAsset);
             }
             else
                 rawImage.color = new Color(0f, 0f, 0f, 0f);

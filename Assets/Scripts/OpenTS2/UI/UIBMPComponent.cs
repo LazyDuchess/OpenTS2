@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 using OpenTS2.Engine;
+using OpenTS2.Content.DBPF;
 
 namespace OpenTS2.UI
 {
@@ -37,8 +38,19 @@ namespace OpenTS2.UI
                 RawImageComponent.color = value;
             }
         }
+        private TextureAsset _textureReference;
         public bool OwnTexture = false;
         public RawImage RawImageComponent => GetComponent<RawImage>();
+
+        public void SetNativeSize()
+        {
+            RawImageComponent.SetNativeSize();
+        }
+        public void SetTexture(TextureAsset asset)
+        {
+            _textureReference = asset;
+            RawImageComponent.texture = asset.Texture;
+        }
         private void OnDestroy()
         {
             if (OwnTexture)

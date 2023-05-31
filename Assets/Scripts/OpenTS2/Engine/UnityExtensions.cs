@@ -9,7 +9,7 @@ namespace OpenTS2.Engine
 {
     internal static class UnityExtensions
     {
-        public static void Free(this Texture2D obj)
+        public static void Free(this UnityEngine.Object obj)
         {
             UnityEngine.Object.DestroyImmediate(obj);
         }

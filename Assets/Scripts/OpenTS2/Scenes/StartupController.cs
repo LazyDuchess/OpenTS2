@@ -22,11 +22,12 @@ namespace OpenTS2.Scenes
         public Transform Canvas;
         public float FadeOutTime = 1f;
         public AudioSource MusicSource;
-        public RawImage InitialLoadScreenBackgroundImage;
-        public RawImage InitialLoadScreenLogoImage;
+        public UIBMPComponent InitialLoadScreenBackgroundImage;
+        public UIBMPComponent InitialLoadScreenLogoImage;
         public ReiaPlayer InitialLoadScreenReiaPlayer;
         public bool EnableReia = true;
         public bool StreamReia = true;
+        private AudioAsset _splashAudio;
         private ResourceKey _initialLoadScreenReiaKey = new ResourceKey(0x8DA3ADE7, 0x499DB772, TypeIDs.UI);
         private ResourceKey _initialLoadScreenBackgroundKey = new ResourceKey(0xCCC9AF80, 0x499DB772, TypeIDs.IMG);
         private ResourceKey _initialLoadScreenLogoKey = new ResourceKey(0x8CBB9323, 0x499DB772, TypeIDs.IMG);
@@ -40,7 +41,8 @@ namespace OpenTS2.Scenes
             PluginSupport.Initialize();
             if (MusicSource != null)
             {
-                MusicSource.clip = AudioManager.SplashAudio.Clip;
+                _splashAudio = AudioManager.SplashAudio;
+                MusicSource.clip = _splashAudio.Clip;
                 MusicSource.Play();
             }
             if (EnableReia)
@@ -58,7 +60,7 @@ namespace OpenTS2.Scenes
                 var bgAsset = contentProvider.GetAsset<TextureAsset>(_initialLoadScreenBackgroundKey);
                 if (bgAsset != null)
                 {
-                    InitialLoadScreenBackgroundImage.texture = bgAsset.Texture;
+                    InitialLoadScreenBackgroundImage.SetTexture(bgAsset);
                     InitialLoadScreenBackgroundImage.SetNativeSize();
                 }
             }
@@ -67,7 +69,7 @@ namespace OpenTS2.Scenes
                 var fgAsset = contentProvider.GetAsset<TextureAsset>(_initialLoadScreenLogoKey);
                 if (fgAsset != null)
                 {
-                    InitialLoadScreenLogoImage.texture = fgAsset.Texture;
+                    InitialLoadScreenLogoImage.SetTexture(fgAsset);
                     InitialLoadScreenLogoImage.SetNativeSize();
                 }
             }
@@ -109,9 +111,9 @@ namespace OpenTS2.Scenes
         void FadeOutLoading()
         {
             if (InitialLoadScreenBackgroundImage != null)
-                StartCoroutine(FadeOut(InitialLoadScreenBackgroundImage, FadeOutTime));
+                StartCoroutine(FadeOut(InitialLoadScreenBackgroundImage.RawImageComponent, FadeOutTime));
             if (InitialLoadScreenLogoImage != null)
-                StartCoroutine(FadeOut(InitialLoadScreenLogoImage, FadeOutTime));
+                StartCoroutine(FadeOut(InitialLoadScreenLogoImage.RawImageComponent, FadeOutTime));
             if (InitialLoadScreenReiaPlayer != null)
                 StartCoroutine(FadeOut(InitialLoadScreenReiaPlayer.GetComponent<RawImage>(), FadeOutTime));
         }

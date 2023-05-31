@@ -64,24 +64,36 @@ namespace OpenTS2.Content
             return (TGI.InstanceHigh == obj.TGI.InstanceHigh && TGI.InstanceID == obj.TGI.InstanceID && TGI.GroupID == obj.TGI.GroupID && TGI.TypeID == obj.TGI.TypeID && obj.File == File);
         }
     }
+
+    public class CacheValue
+    {
+        public WeakReference WeakRef;
+        public UnityEngine.Object[] UnmanagedResources;
+        public CacheValue(WeakReference weakReference, UnityEngine.Object[] unmanagedResources)
+        {
+            WeakRef = weakReference;
+            UnmanagedResources = unmanagedResources;
+        }
+    }
+
     /// <summary>
     /// Manages caching for game content.
     /// </summary>
     public class ContentCache
     {
         // Dictionary to contain the temporary cache.
-        Dictionary<CacheKey, WeakReference> _cache;
+        public Dictionary<CacheKey, CacheValue> Cache;
         public ContentProvider Provider;
 
         public ContentCache(ContentProvider provider)
         {
             Provider = provider;
-            _cache = new Dictionary<CacheKey, WeakReference>();
+            Cache = new Dictionary<CacheKey, CacheValue>();
         }
 
         public void Clear()
         {
-            _cache.Clear();
+            Cache.Clear();
         }
 
         public void Remove(ResourceKey key, DBPFFile package)
@@ -96,30 +108,36 @@ namespace OpenTS2.Content
 
         public void Remove(CacheKey key)
         {
-            if (_cache.ContainsKey(key))
-                _cache.Remove(key);
+            if (Cache.ContainsKey(key))
+                Cache.Remove(key);
         }
 
         WeakReference GetOrAddInternal(CacheKey key, Func<CacheKey, AbstractAsset> objectFactory)
         {
-            if (_cache.TryGetValue(key, out WeakReference result))
+            if (Cache.TryGetValue(key, out CacheValue result))
             {
-                if (result.Target != null && result.IsAlive)
+                if (result.WeakRef.Target != null && result.WeakRef.IsAlive)
                 {
-                    return result;
+                    return result.WeakRef;
                 }
                 else
                 {
-                    result = new WeakReference(objectFactory(key));
-                    _cache[key] = result;
-                    return result;
+                    var asset = objectFactory(key);
+                    if (asset == null)
+                        return null;
+                    result = new CacheValue(new WeakReference(asset), asset.GetUnmanagedResources());
+                    Cache[key] = result;
+                    return result.WeakRef;
                 }
             }
             else
             {
-                result = new WeakReference(objectFactory(key));
-                _cache[key] = result;
-                return result;
+                var asset = objectFactory(key);
+                if (asset == null)
+                    return null;
+                result = new CacheValue(new WeakReference(asset), asset.GetUnmanagedResources());
+                Cache[key] = result;
+                return result.WeakRef;
             }
         }
 
@@ -154,7 +172,10 @@ namespace OpenTS2.Content
         /// <returns>A strong reference to the cached object.</returns>
         public AbstractAsset GetOrAdd(CacheKey key, Func<CacheKey, AbstractAsset> objectFactory)
         {
-            return GetOrAddInternal(key, objectFactory).Target as AbstractAsset;
+            var result = GetOrAddInternal(key, objectFactory);
+            if (result == null)
+                return null;
+            return result.Target as AbstractAsset;
         }
 
         public WeakReference GetWeakReference(ResourceKey key, DBPFFile package)
@@ -169,14 +190,14 @@ namespace OpenTS2.Content
 
         public WeakReference GetWeakReference(CacheKey key)
         {
-            if (_cache.ContainsKey(key))
-                return _cache[key];
+            if (Cache.ContainsKey(key))
+                return Cache[key].WeakRef;
             return null;
         }
 
         public void RemoveAllForPackage(DBPFFile package)
         {
-            _cache = _cache.Where(cache => cache.Key.File != package).ToDictionary(x => x.Key, x => x.Value);
+            Cache = Cache.Where(cache => cache.Key.File != package).ToDictionary(x => x.Key, x => x.Value);
         }
     }
 }

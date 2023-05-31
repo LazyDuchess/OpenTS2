@@ -11,15 +11,16 @@ namespace OpenTS2.Content.DBPF
     public class AudioAsset : AbstractAsset
     {
         public byte[] AudioData;
-        public AudioClip Clip
-        {
-            get
-            {
-                if (_clip == null)
-                    _clip = WAV.ToAudioClip(AudioData, GlobalTGI.ToString());
-                return _clip;
-            }
-        }
+        public AudioClip Clip => _clip;
         AudioClip _clip;
+        public AudioAsset(byte[] data)
+        {
+            AudioData = data;
+            _clip = WAV.ToAudioClip(AudioData, GlobalTGI.ToString());
+        }
+        public override UnityEngine.Object[] GetUnmanagedResources()
+        {
+            return new UnityEngine.Object[] { _clip };
+        }
     }
 }

@@ -79,8 +79,8 @@ namespace OpenTS2.UI.Layouts
             var upperLeftKey = RandomUtils.RandomFromList(upperLeftKeys);
             var lowerRightKey = RandomUtils.RandomFromList(lowerRightKeys);
 
-            upperLeftSim.Texture = contentProvider.GetAsset<TextureAsset>(upperLeftKey).Texture;
-            lowerRightSim.Texture = contentProvider.GetAsset<TextureAsset>(lowerRightKey).Texture;
+            upperLeftSim.SetTexture(contentProvider.GetAsset<TextureAsset>(upperLeftKey));
+            lowerRightSim.SetTexture(contentProvider.GetAsset<TextureAsset>(lowerRightKey));
             upperLeftSim.Color = Color.white;
             lowerRightSim.Color = Color.white;
         }

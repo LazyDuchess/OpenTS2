@@ -97,5 +97,10 @@ namespace OpenTS2.Content
             clone.Compressed = Compressed;
             return clone;
         }
+
+        public virtual UnityEngine.Object[] GetUnmanagedResources()
+        {
+            return new UnityEngine.Object[] { };
+        }
     }
 }

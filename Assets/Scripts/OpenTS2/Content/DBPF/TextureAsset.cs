@@ -22,6 +22,11 @@ namespace OpenTS2.Content.DBPF
         {
             _texture2D = texture2D;
         }
+
+        public override UnityEngine.Object[] GetUnmanagedResources()
+        {
+            return new UnityEngine.Object[] { _texture2D };
+        }
         Texture2D _texture2D;
         public Texture2D Texture => _texture2D;
     }

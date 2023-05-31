@@ -134,6 +134,7 @@ GameObject:
   - component: {fileID: 19247259}
   - component: {fileID: 19247261}
   - component: {fileID: 19247260}
+  - component: {fileID: 19247262}
   m_Layer: 5
   m_Name: Initial Load Screen Background
   m_TagString: Untagged
@@ -195,6 +196,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 19247258}
   m_CullTransparentMesh: 1
+--- !u!114 &19247262
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 19247258}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68f59c2b02ecd40468c22f3eb960d4bd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  OwnTexture: 0
 --- !u!1 &322359566
 GameObject:
   m_ObjectHideFlags: 0
@@ -365,6 +379,7 @@ GameObject:
   - component: {fileID: 1334026408}
   - component: {fileID: 1334026410}
   - component: {fileID: 1334026409}
+  - component: {fileID: 1334026411}
   m_Layer: 5
   m_Name: Initial Load Screen Logo
   m_TagString: Untagged
@@ -426,6 +441,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1334026407}
   m_CullTransparentMesh: 1
+--- !u!114 &1334026411
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1334026407}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68f59c2b02ecd40468c22f3eb960d4bd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  OwnTexture: 0
 --- !u!1 &1442540124
 GameObject:
   m_ObjectHideFlags: 0
@@ -504,8 +532,8 @@ MonoBehaviour:
   Canvas: {fileID: 1755469747}
   FadeOutTime: 0.5
   MusicSource: {fileID: 1882356793}
-  InitialLoadScreenBackgroundImage: {fileID: 19247260}
-  InitialLoadScreenLogoImage: {fileID: 1334026409}
+  InitialLoadScreenBackgroundImage: {fileID: 19247262}
+  InitialLoadScreenLogoImage: {fileID: 1334026411}
   InitialLoadScreenReiaPlayer: {fileID: 1690878381}
   EnableReia: 1
   StreamReia: 0
