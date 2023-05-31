@@ -29,7 +29,7 @@ namespace OpenTS2.UI {
         /// <param name="filename">Cursor path relative to TSData.</param>
         private void RegisterCursorRelativePath(CursorType type, string filename)
         {
-            var absolutePath = Filesystem.GetFilepathInNewestAvailableProduct(Path.Combine("Res/UI/Cursors",filename));
+            var absolutePath = Filesystem.GetLatestFilePath(Path.Combine("Res/UI/Cursors",filename));
             if (absolutePath != null)
                 RegisterCursorAbsolutePath(type, absolutePath);
         }

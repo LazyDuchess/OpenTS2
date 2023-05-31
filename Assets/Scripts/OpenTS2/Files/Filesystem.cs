@@ -53,7 +53,7 @@ namespace OpenTS2.Files
         /// </summary>
         /// <param name="filepath">File path relative to TSData</param>
         /// <returns>Absolute file path. Null if file can't be found in any Product.</returns>
-        public static string GetFilepathInNewestAvailableProduct(string filepath)
+        public static string GetLatestFilePath(string filepath)
         {
             var installedProducts = s_epManager.GetInstalledProducts();
             for(var i=installedProducts.Count-1;i>=0;i--)
