@@ -14,6 +14,29 @@ namespace OpenTS2.UI
     /// </summary>
     public class UIBMPComponent : UIComponent
     {
+        public Texture2D Texture
+        {
+            get
+            {
+                return RawImageComponent.texture as Texture2D;
+            }
+            set
+            {
+                RawImageComponent.texture = value;
+            }
+        }
+        public Color Color
+        {
+            get
+            {
+                return RawImageComponent.color;
+            }
+
+            set
+            {
+                RawImageComponent.color = value;
+            }
+        }
         public bool OwnTexture = false;
         public RawImage RawImageComponent => GetComponent<RawImage>();
         private void OnDestroy()

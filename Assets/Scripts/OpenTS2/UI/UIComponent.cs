@@ -19,6 +19,7 @@ namespace OpenTS2.UI
         }
         public UIElement Element;
         public RectTransform RectTransformComponent => GetComponent<RectTransform>();
+        public UIComponent[] Children => transform.GetComponentsInChildren<UIComponent>(true);
 
         public void SetAnchor(AnchorType anchor)
         {

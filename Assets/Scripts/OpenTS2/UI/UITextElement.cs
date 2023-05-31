@@ -16,6 +16,7 @@ namespace OpenTS2.UI
     {
         public TextAnchor Alignment = TextAnchor.MiddleCenter;
         public Color32 ForeColor = Color.black;
+
         public override void ParseProperties(UIProperties properties)
         {
             base.ParseProperties(properties);

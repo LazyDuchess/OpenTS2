@@ -4,11 +4,46 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using OpenTS2.Engine;
+using System;
 
 namespace OpenTS2.UI
 {
     public static class UIUtils
     {
+
+        /// <summary>
+        /// Gets a list of string elements separated by a character.
+        /// </summary>
+        /// <param name="str">String to separate</param>
+        /// <param name="separator">Character to separate string by</param>
+        /// <returns>List of strings</returns>
+        public static List<string> GetCharSeparatedList(string str, char separator)
+        {
+            var split = str.Split(separator);
+            var splitList = new List<string>();
+            foreach (var splitString in split)
+            {
+                if (!string.IsNullOrEmpty(splitString))
+                    splitList.Add(splitString);
+            }
+            return splitList;
+        }
+
+        /// <summary>
+        /// Returns a Key and Value, given a constant in an UI caption. Format is Key=Value.
+        /// </summary>
+        /// <param name="str">Constant</param>
+        /// <returns>Key and Value. Empty key and value if not valid.</returns>
+        public static KeyValuePair<string, string> GetConstant(string str)
+        {
+            if (str.IndexOf('=') < 0)
+                return new KeyValuePair<string, string>("", "");
+            var split = str.Split('=');
+            var key = split[0];
+            var value = split[1];
+            return new KeyValuePair<string, string>(key, value);
+        }
+
         // TODO: Clean this up, sucks atm.
         public static Texture2D MakeEdgeImage(Texture2D texture, int width, int height)
         {
