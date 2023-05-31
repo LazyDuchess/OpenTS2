@@ -92,8 +92,8 @@ namespace OpenTS2.Scenes
         private void OnFinishLoading()
         {
             CursorController.Cursor = CursorController.CursorType.Hourglass;
-            var oMgr = ObjectManager.Get();
-            oMgr.Initialize();
+            var objectManager = ObjectManager.Get();
+            objectManager.Initialize();
             CursorController.Cursor = CursorController.CursorType.Default;
             Debug.Log("All loaded");
             var mainMenu = new MainMenu(Canvas);
