@@ -51,7 +51,7 @@ namespace OpenTS2.UI
 
         private void OnDestroy()
         {
-            _reia.Dispose();
+            _reia?.Dispose();
         }
     }
 }

@@ -507,6 +507,7 @@ MonoBehaviour:
   InitialLoadScreenBackgroundImage: {fileID: 19247260}
   InitialLoadScreenLogoImage: {fileID: 1334026409}
   InitialLoadScreenReiaPlayer: {fileID: 1690878381}
+  EnableReia: 1
   StreamReia: 0
 --- !u!1 &1690878377
 GameObject:
@@ -593,7 +594,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 270428b48761b614c808c1e4a66f188d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Speed: 1
+  Speed: 0
 --- !u!1 &1755469743
 GameObject:
   m_ObjectHideFlags: 0

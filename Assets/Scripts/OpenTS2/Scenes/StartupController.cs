@@ -25,6 +25,7 @@ namespace OpenTS2.Scenes
         public RawImage InitialLoadScreenBackgroundImage;
         public RawImage InitialLoadScreenLogoImage;
         public ReiaPlayer InitialLoadScreenReiaPlayer;
+        public bool EnableReia = true;
         public bool StreamReia = true;
         private ResourceKey _initialLoadScreenReiaKey = new ResourceKey(0x8DA3ADE7, 0x499DB772, TypeIDs.UI);
         private ResourceKey _initialLoadScreenBackgroundKey = new ResourceKey(0xCCC9AF80, 0x499DB772, TypeIDs.IMG);
@@ -42,11 +43,16 @@ namespace OpenTS2.Scenes
                 MusicSource.clip = AudioManager.SplashAudio.Clip;
                 MusicSource.Play();
             }
-            if (InitialLoadScreenReiaPlayer != null)
+            if (EnableReia)
             {
-                InitialLoadScreenReiaPlayer.SetReia(_initialLoadScreenReiaKey, StreamReia);
-                InitialLoadScreenReiaPlayer.Speed = 0f;
+                if (InitialLoadScreenReiaPlayer != null)
+                {
+                    InitialLoadScreenReiaPlayer.SetReia(_initialLoadScreenReiaKey, StreamReia);
+                    InitialLoadScreenReiaPlayer.Speed = 0f;
+                }
             }
+            else
+                InitialLoadScreenReiaPlayer.gameObject.SetActive(false);
             if (InitialLoadScreenBackgroundImage != null)
             {
                 var bgAsset = contentProvider.GetAsset<TextureAsset>(_initialLoadScreenBackgroundKey);
@@ -92,8 +98,8 @@ namespace OpenTS2.Scenes
         private void OnFinishLoading()
         {
             CursorController.Cursor = CursorController.CursorType.Hourglass;
-            var objectManager = ObjectManager.Get();
-            objectManager.Initialize();
+            var oMgr = ObjectManager.Get();
+            oMgr.Initialize();
             CursorController.Cursor = CursorController.CursorType.Default;
             Debug.Log("All loaded");
             var mainMenu = new MainMenu(Canvas);
