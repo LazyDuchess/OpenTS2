@@ -47,6 +47,7 @@ namespace OpenTS2.UI
             rectTransform.sizeDelta = new Vector2(Area.width, Area.height);
 
             var uiComponent = element.AddComponent(UIComponentType);
+            (uiComponent as UIComponent).Element = this;
 
             foreach (var child in Children)
             {

@@ -18,7 +18,7 @@ namespace OpenTS2.UI
             var rawImage = uiComponent.RawImageComponent;
             if (rawImage.texture != null)
             {
-                rawImage.texture = UIUtils.SplitTextureHorizontalSequence(rawImage.texture as Texture2D, rawImage.texture.width / 4)[0];
+                rawImage.texture = UIUtils.SplitTextureHorizontalSequence(rawImage.texture as Texture2D, rawImage.texture.width / 4)[1];
             }
             return uiComponent;
         }

@@ -10,6 +10,7 @@ namespace OpenTS2.UI {
     {
         public static CursorController Singleton => s_singleton;
         static CursorController s_singleton = null;
+
         public enum CursorType
         {
             Default,
@@ -20,7 +21,22 @@ namespace OpenTS2.UI {
         /// <summary>
         /// Current Hardware Cursor being rendered.
         /// </summary>
-        public static CursorType Cursor = CursorType.Default;
+        public static CursorType Cursor
+        {
+            get
+            {
+                return _cursor;
+            }
+            set
+            {
+                _cursor = value;
+                #if !UNITY_EDITOR
+                SetCursorInternal();
+#endif
+            }
+        }
+
+        private static CursorType _cursor = CursorType.Default;
 
         /// <summary>
         /// Registers a cursor relative to TSData, in the newest Product it can be found in.
@@ -68,10 +84,16 @@ namespace OpenTS2.UI {
         }
 
 #if !UNITY_EDITOR
-        void Update()
+        static void SetCursorInternal()
         {
             if (Application.isFocused)
                 HardwareCursors.SetCurrentCursor((int)Cursor);
+        }
+
+
+        void Update()
+        {
+            SetCursorInternal();
         }
 #endif
     }

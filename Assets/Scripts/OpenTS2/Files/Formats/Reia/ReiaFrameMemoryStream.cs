@@ -11,9 +11,10 @@ namespace OpenTS2.Files.Formats.Reia
 {
     public class ReiaFrameMemoryStream : ReiaFrameStream
     {
-        public ReiaFrameMemoryStream(IEnumerator<ReiaFrame> enumerator, IoBuffer io, int frameStartPosition, int width, int height, Stream stream) : base(enumerator, io, frameStartPosition, width, height, stream)
+        private List<ReiaFrame> _frameList;
+        public ReiaFrameMemoryStream(IEnumerator<ReiaFrame> enumerator, List<ReiaFrame> frameList, IoBuffer io, int frameStartPosition, int width, int height, Stream stream) : base(enumerator, io, frameStartPosition, width, height, stream)
         {
-
+            _frameList = frameList;
         }
 
         public override void Reset()
@@ -23,13 +24,8 @@ namespace OpenTS2.Files.Formats.Reia
 
         public override void Dispose()
         {
-            Reset();
-            var item = _enumerator.MoveNext();
-            while (item)
-            {
-                _enumerator.Current?.Dispose();
-                item = _enumerator.MoveNext();
-            }
+            foreach (var frame in _frameList)
+                frame.Dispose();
         }
     }
 }

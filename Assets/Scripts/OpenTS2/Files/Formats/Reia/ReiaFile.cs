@@ -89,7 +89,7 @@ namespace OpenTS2.Files.Formats.Reia
             else
             {
                 var frameEnumerable = ReiaFrame.ReadFrames(io, (int)width, (int)height);
-                frameStream = new ReiaFrameMemoryStream(frameEnumerable.GetEnumerator(), io, (int)ioFrameStreamPosition, (int)width, (int)height, stream);
+                frameStream = new ReiaFrameMemoryStream(frameEnumerable.GetEnumerator(), frameEnumerable, io, (int)ioFrameStreamPosition, (int)width, (int)height, stream);
             }
             return new ReiaFile((int)width, (int)height, (int)fps, (int)numFrames, frameStream);
         }
