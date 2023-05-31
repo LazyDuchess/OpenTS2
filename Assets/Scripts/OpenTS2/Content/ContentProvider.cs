@@ -203,7 +203,7 @@ namespace OpenTS2.Content
         /// Adds a DBPF Package to the filesystem, or returns existing package if already loaded.
         /// </summary>
         /// <param name="path">Path to the package.</param>
-        /// <returns>Content entry for package.</returns>
+        /// <returns>Package.</returns>
         public DBPFFile AddPackage(string path)
         {
             path = Filesystem.GetRealPath(path);

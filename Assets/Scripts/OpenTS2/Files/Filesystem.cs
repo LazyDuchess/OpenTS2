@@ -47,6 +47,25 @@ namespace OpenTS2.Files
             s_epManager = EPManager;
         }
 
+        /// <summary>
+        /// Given a file path relative to TSData, tries to find the absolute path to the file in the latest installed product where the file is available.
+        /// For example, given "Res/UI/Fonts/FontStyle.ini" in an unmodified installation with all products, this would return the University path, as it's the newest EP that has this file.
+        /// </summary>
+        /// <param name="filepath">File path relative to TSData</param>
+        /// <returns>Absolute file path. Null if file can't be found in any Product.</returns>
+        public static string GetFilepathInNewestAvailableProduct(string filepath)
+        {
+            var installedProducts = s_epManager.GetInstalledProducts();
+            for(var i=installedProducts.Count-1;i>=0;i--)
+            {
+                var dataPath = GetDataPathForProduct(installedProducts[i]);
+                var absolutePath = Path.Combine(dataPath, filepath);
+                if (File.Exists(absolutePath))
+                    return absolutePath;
+            }
+            return null;
+        }
+
         public static List<string> GetStartupDownloadPackages()
         {
             var userPath = s_pathProvider.GetUserPath();

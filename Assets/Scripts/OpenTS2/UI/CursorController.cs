@@ -17,20 +17,33 @@ namespace OpenTS2.UI {
             Sledgehammer
         }
 
+        /// <summary>
+        /// Current Hardware Cursor being rendered.
+        /// </summary>
         public static CursorType Cursor = CursorType.Default;
 
-        private void RegisterCursorFromLatestProduct(CursorType type, string filename)
+        /// <summary>
+        /// Registers a cursor relative to TSData, in the newest Product it can be found in.
+        /// </summary>
+        /// <param name="type">Cursor type to register.</param>
+        /// <param name="filename">Cursor path relative to TSData.</param>
+        private void RegisterCursorRelativePath(CursorType type, string filename)
         {
-            var epManager = EPManager.Get();
-            RegisterCursor(type, epManager.GetLatestProduct(), filename);
+            var absolutePath = Filesystem.GetFilepathInNewestAvailableProduct(Path.Combine("Res/UI/Cursors",filename));
+            if (absolutePath != null)
+                RegisterCursorAbsolutePath(type, absolutePath);
         }
 
-        private void RegisterCursor(CursorType type, ProductFlags product, string filename)
+        /// <summary>
+        /// Registers a cursor by its absolute path.
+        /// </summary>
+        /// <param name="type">Cursor type to register.</param>
+        /// <param name="filename">Path to cursor file.</param>
+        private void RegisterCursorAbsolutePath(CursorType type, string filename)
         {
-            var cursorLocation = Path.Combine(Filesystem.GetDataPathForProduct(product), "Res/UI/Cursors", filename);
-            if (File.Exists(cursorLocation))
+            if (File.Exists(filename))
             {
-                HardwareCursors.InitializeCursor((int)type, cursorLocation);
+                HardwareCursors.InitializeCursor((int)type, filename);
             }
         }
 
@@ -48,10 +61,10 @@ namespace OpenTS2.UI {
 
         void RegisterCursors()
         {
-            RegisterCursor(CursorType.Default, ProductFlags.BaseGame, "arrow_8.cur");
-            RegisterCursor(CursorType.Hourglass, ProductFlags.BaseGame, "Hourglass_8.ani");
-            // Sledgehammer was added in Pets, so Pets and later all come with the cursor in the UI files.
-            RegisterCursorFromLatestProduct(CursorType.Sledgehammer, "Sledgehammer_8.cur");
+            RegisterCursorRelativePath(CursorType.Default, "arrow_8.cur");
+            RegisterCursorRelativePath(CursorType.Hourglass, "Hourglass_8.ani");
+            // Sledgehammer was added in Pets.
+            RegisterCursorRelativePath(CursorType.Sledgehammer, "Sledgehammer_8.cur");
         }
 
 #if !UNITY_EDITOR

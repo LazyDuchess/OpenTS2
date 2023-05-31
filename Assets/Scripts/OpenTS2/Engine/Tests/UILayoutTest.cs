@@ -59,6 +59,14 @@ namespace OpenTS2.Engine.Tests
 
         private void Update()
         {
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                var currentCursor = CursorController.Cursor;
+                currentCursor++;
+                if ((int)currentCursor >= Enum.GetValues(typeof(CursorController.CursorType)).Length)
+                    currentCursor = 0;
+                CursorController.Cursor = currentCursor;
+            }
             if (Reload)
             {
                 CreateUI();
