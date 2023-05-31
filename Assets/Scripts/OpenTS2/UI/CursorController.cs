@@ -1,5 +1,6 @@
 using OpenTS2.Content;
 using OpenTS2.Files;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -89,12 +90,23 @@ namespace OpenTS2.UI {
             if (Application.isFocused)
                 HardwareCursors.SetCurrentCursor((int)Cursor);
         }
-
+#endif
 
         void Update()
         {
+#if !UNITY_EDITOR
             SetCursorInternal();
-        }
 #endif
+            if (UIManager.HeldComponent != null)
+            {
+                if (!UIManager.HeldComponent.isActiveAndEnabled)
+                    UIManager.HeldComponent = null;
+            }
+            if (Input.GetMouseButtonUp(0))
+            {
+                UIManager.HeldComponent = null;
+            }
+        }
+
     }
 }
