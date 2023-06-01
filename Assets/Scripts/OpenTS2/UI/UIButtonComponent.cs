@@ -22,6 +22,8 @@ namespace OpenTS2.UI
         public RawImage RawImageComponent => GetComponent<RawImage>();
         public void SetTexture(Texture2D texture)
         {
+            if (texture == null)
+                return;
             _textures = UIUtils.SplitTextureHorizontalSequence(texture, texture.width / 4);
             UpdateTexture();
         }
@@ -35,6 +37,8 @@ namespace OpenTS2.UI
 
         void UpdateTexture()
         {
+            if (_textures == null || _textures.Length < 4)
+                return;
             if (GreyedOut)
                 RawImageComponent.texture = _textures[0];
             else
@@ -58,9 +62,12 @@ namespace OpenTS2.UI
         {
             if (UIManager.HeldComponent == this)
                 UIManager.HeldComponent = null;
+            if (_textures == null)
+                return;
             foreach (var texture in _textures)
             {
-                texture.Free();
+                if (texture != null)
+                    texture.Free();
             }
         }
 

@@ -12,32 +12,31 @@ using UnityEngine;
 
 namespace OpenTS2.UI.Layouts
 {
-    public class MainMenu
+    public class MainMenu : UILayoutInstance
     {
-        public UIComponent Root;
-        private static ResourceKey s_mainMenuKey = new ResourceKey(0x49001017, 0xA99D8A11, TypeIDs.UI);
-
-        public MainMenu(Transform canvas)
+        protected override ResourceKey UILayoutResourceKey => new ResourceKey(0x49001017, 0xA99D8A11, TypeIDs.UI);
+        
+        public MainMenu() : this(MainCanvas)
         {
-            var contentProvider = ContentProvider.Get();
-            var mainMenuLayout = contentProvider.GetAsset<UILayout>(s_mainMenuKey);
-            var components = mainMenuLayout.Instantiate(canvas);
+            
+        }
 
-            Root = components[0];
-            Root.SetAnchor(UIComponent.AnchorType.Center);
-            Root.transform.SetAsFirstSibling();
+        public MainMenu(Transform canvas) : base(canvas)
+        {
+            var root = Components[0];
+            root.SetAnchor(UIComponent.AnchorType.Center);
+            root.transform.SetAsFirstSibling();
 
-            var background = Root.GetChildByID(0x0DA36C7D);
+            var background = root.GetChildByID(0x0DA36C7D);
             background.gameObject.SetActive(true);
-            background.transform.SetParent(Root.transform.parent);
             background.SetAnchor(UIComponent.AnchorType.Center);
             background.transform.SetAsFirstSibling();
 
-            var upperLeftSim = Root.GetChildByID(0xE1) as UIBMPComponent;
-            var lowerRightSim = Root.GetChildByID(0xE3) as UIBMPComponent;
+            var upperLeftSim = root.GetChildByID(0xE1) as UIBMPComponent;
+            var lowerRightSim = root.GetChildByID(0xE3) as UIBMPComponent;
 
             // IDs for the textures for the Sims are stored in a constants table UI element.
-            var constantsTable = Root.GetChildByID(0x4DC1DCE2);
+            var constantsTable = root.GetChildByID(0x4DC1DCE2);
             var constantComponents = constantsTable.Children;
 
             var upperLeftKeys = new List<ResourceKey>();
@@ -74,6 +73,8 @@ namespace OpenTS2.UI.Layouts
                     }
                 }
             }
+
+            var contentProvider = ContentProvider.Get();
 
             // Assign random images to the Sims.
             var upperLeftKey = RandomUtils.RandomFromList(upperLeftKeys);

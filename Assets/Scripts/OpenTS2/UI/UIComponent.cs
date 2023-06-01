@@ -15,7 +15,12 @@ namespace OpenTS2.UI
     {
         public enum AnchorType
         {
-            Center
+            Stretch,
+            Center,
+            BottomLeft,
+            TopLeft,
+            BottomRight,
+            TopRight
         }
         public UIElement Element;
         public RectTransform RectTransformComponent => GetComponent<RectTransform>();
@@ -25,10 +30,41 @@ namespace OpenTS2.UI
         {
             switch(anchor)
             {
+                case AnchorType.Stretch:
+                    RectTransformComponent.anchorMin = new Vector2(0f, 0f);
+                    RectTransformComponent.anchorMax = new Vector2(1f, 1f);
+                    RectTransformComponent.anchoredPosition = Vector2.zero;
+                    RectTransformComponent.sizeDelta = Vector2.zero;
+                    return;
+
                 case AnchorType.Center:
                     RectTransformComponent.anchorMin = new Vector2(0.5f, 0.5f);
                     RectTransformComponent.anchorMax = new Vector2(0.5f, 0.5f);
-                    transform.localPosition = new Vector3(-RectTransformComponent.sizeDelta.x / 2f, RectTransformComponent.sizeDelta.y / 2f, 0f);
+                    RectTransformComponent.anchoredPosition = new Vector2(-RectTransformComponent.sizeDelta.x / 2f, RectTransformComponent.sizeDelta.y / 2f);
+                    return;
+
+                case AnchorType.BottomLeft:
+                    RectTransformComponent.anchorMin = new Vector2(0f, 0f);
+                    RectTransformComponent.anchorMax = new Vector2(0f, 0f);
+                    RectTransformComponent.anchoredPosition = new Vector2(0f, RectTransformComponent.sizeDelta.y);
+                    return;
+
+                case AnchorType.TopLeft:
+                    RectTransformComponent.anchorMin = new Vector2(0f, 1f);
+                    RectTransformComponent.anchorMax = new Vector2(0f, 1f);
+                    RectTransformComponent.anchoredPosition = Vector2.zero;
+                    return;
+
+                case AnchorType.BottomRight:
+                    RectTransformComponent.anchorMin = new Vector2(1f, 0f);
+                    RectTransformComponent.anchorMax = new Vector2(1f, 0f);
+                    RectTransformComponent.anchoredPosition = new Vector2(RectTransformComponent.sizeDelta.x, RectTransformComponent.sizeDelta.y);
+                    return;
+
+                case AnchorType.TopRight:
+                    RectTransformComponent.anchorMin = new Vector2(1f, 1f);
+                    RectTransformComponent.anchorMax = new Vector2(1f, 1f);
+                    RectTransformComponent.anchoredPosition = new Vector2(RectTransformComponent.sizeDelta.x, 0f);
                     return;
             }
         }

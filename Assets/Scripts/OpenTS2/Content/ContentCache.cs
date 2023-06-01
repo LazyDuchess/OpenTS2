@@ -6,6 +6,7 @@
 
 using OpenTS2.Common;
 using OpenTS2.Common.Utils;
+using OpenTS2.Engine;
 using OpenTS2.Files.Formats.DBPF;
 using System;
 using System.Collections;
@@ -65,30 +66,19 @@ namespace OpenTS2.Content
         }
     }
 
-    public class CacheValue
-    {
-        public WeakReference WeakRef;
-        public UnityEngine.Object[] UnmanagedResources;
-        public CacheValue(WeakReference weakReference, UnityEngine.Object[] unmanagedResources)
-        {
-            WeakRef = weakReference;
-            UnmanagedResources = unmanagedResources;
-        }
-    }
-
     /// <summary>
     /// Manages caching for game content.
     /// </summary>
     public class ContentCache
     {
         // Dictionary to contain the temporary cache.
-        public Dictionary<CacheKey, CacheValue> Cache;
+        public Dictionary<CacheKey, WeakReference> Cache;
         public ContentProvider Provider;
 
         public ContentCache(ContentProvider provider)
         {
             Provider = provider;
-            Cache = new Dictionary<CacheKey, CacheValue>();
+            Cache = new Dictionary<CacheKey, WeakReference>();
         }
 
         public void Clear()
@@ -114,20 +104,20 @@ namespace OpenTS2.Content
 
         WeakReference GetOrAddInternal(CacheKey key, Func<CacheKey, AbstractAsset> objectFactory)
         {
-            if (Cache.TryGetValue(key, out CacheValue result))
+            if (Cache.TryGetValue(key, out WeakReference result))
             {
-                if (result.WeakRef.Target != null && result.WeakRef.IsAlive)
+                if (result.Target != null && result.IsAlive && !(result.Target as AbstractAsset).Disposed)
                 {
-                    return result.WeakRef;
+                    return result;
                 }
                 else
                 {
                     var asset = objectFactory(key);
                     if (asset == null)
                         return null;
-                    result = new CacheValue(new WeakReference(asset), asset.GetUnmanagedResources());
+                    result = new WeakReference(asset);
                     Cache[key] = result;
-                    return result.WeakRef;
+                    return result;
                 }
             }
             else
@@ -135,9 +125,9 @@ namespace OpenTS2.Content
                 var asset = objectFactory(key);
                 if (asset == null)
                     return null;
-                result = new CacheValue(new WeakReference(asset), asset.GetUnmanagedResources());
+                result = new WeakReference(asset);
                 Cache[key] = result;
-                return result.WeakRef;
+                return result;
             }
         }
 
@@ -191,7 +181,7 @@ namespace OpenTS2.Content
         public WeakReference GetWeakReference(CacheKey key)
         {
             if (Cache.ContainsKey(key))
-                return Cache[key].WeakRef;
+                return Cache[key];
             return null;
         }
 

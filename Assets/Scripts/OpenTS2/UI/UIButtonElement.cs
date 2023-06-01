@@ -25,11 +25,14 @@ namespace OpenTS2.UI
         }
         public override UIComponent Instantiate(Transform parent)
         {
-            var contentProvider = ContentProvider.Get();
-            var imageAsset = contentProvider.GetAsset<TextureAsset>(Image);
             var uiComponent = base.Instantiate(parent) as UIButtonComponent;
             var rawImage = uiComponent.gameObject.AddComponent<RawImage>();
-            uiComponent.SetTexture(imageAsset.Texture);
+            if (IgnoreMouse)
+                rawImage.raycastTarget = false;
+            var contentProvider = ContentProvider.Get();
+            var imageAsset = contentProvider.GetAsset<TextureAsset>(Image);
+            if (imageAsset != null)
+                uiComponent.SetTexture(imageAsset.Texture);
             return uiComponent;
         }
     }

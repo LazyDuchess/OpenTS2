@@ -19,7 +19,6 @@ namespace OpenTS2.Scenes
 {
     public class StartupController : MonoBehaviour
     {
-        public Transform Canvas;
         public float FadeOutTime = 1f;
         public AudioSource MusicSource;
         public UIBMPComponent InitialLoadScreenBackgroundImage;
@@ -104,7 +103,7 @@ namespace OpenTS2.Scenes
             oMgr.Initialize();
             CursorController.Cursor = CursorController.CursorType.Default;
             Debug.Log("All loaded");
-            var mainMenu = new MainMenu(Canvas);
+            var mainMenu = new MainMenu();
             FadeOutLoading();
         }
 

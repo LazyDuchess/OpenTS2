@@ -32,6 +32,8 @@ namespace OpenTS2.UI
             var contentProvider = ContentProvider.Get();
             var imageAsset = contentProvider.GetAsset<TextureAsset>(Image);
             var rawImage = uiComponent.gameObject.AddComponent<RawImage>();
+            if (IgnoreMouse)
+                rawImage.raycastTarget = false;
             if (imageAsset != null)
             {
                 if (EdgeImage)

@@ -16,6 +16,7 @@ namespace OpenTS2.UI
     /// </summary>
     public class UIElement
     {
+        public bool IgnoreMouse = false;
         public bool Visible = true;
         public uint ID = 0x0;
         public Rect Area = Rect.zero;
@@ -32,6 +33,7 @@ namespace OpenTS2.UI
             FillColor = properties.GetColorProperty("fillcolor");
             Caption = properties.GetProperty("caption");
             Visible = properties.GetBoolProperty("winflag_visible");
+            IgnoreMouse = properties.GetBoolProperty("winflag_ignoremouse");
         }
 
         public virtual UIComponent Instantiate(Transform parent)

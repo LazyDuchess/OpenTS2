@@ -17,7 +17,6 @@ namespace OpenTS2.Engine.Tests
     public class UILayoutTest : MonoBehaviour
     {
         public Languages Language = Languages.USEnglish;
-        public Transform Canvas;
         public string Key = "0x49001017";
         public bool Reload = false;
         public bool LoadPackagesFromAllEPs = true;
@@ -49,7 +48,7 @@ namespace OpenTS2.Engine.Tests
                 var contentProvider = ContentProvider.Get();
                 var key = new ResourceKey(Convert.ToUInt32(Key, 16), 0xA99D8A11, TypeIDs.UI);
                 var uiLayout = contentProvider.GetAsset<UILayout>(key);
-                _instances.AddRange(uiLayout.Instantiate(Canvas));
+                _instances.AddRange(uiLayout.Instantiate(UIManager.MainCanvas.transform));
             }
             catch(Exception e)
             {

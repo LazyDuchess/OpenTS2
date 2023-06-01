@@ -102,7 +102,7 @@ namespace OpenTS2.UI {
                 if (!UIManager.HeldComponent.isActiveAndEnabled)
                     UIManager.HeldComponent = null;
             }
-            if (Input.GetMouseButtonUp(0))
+            if (!Input.GetMouseButton(0))
             {
                 UIManager.HeldComponent = null;
             }

@@ -6,6 +6,7 @@
 
 using OpenTS2.Common;
 using OpenTS2.Common.Utils;
+using OpenTS2.Engine;
 using OpenTS2.Files.Formats.DBPF;
 using System;
 using System.Collections.Generic;
@@ -13,13 +14,14 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace OpenTS2.Content
 {
     /// <summary>
     /// Represents a saveable DBPF asset.
     /// </summary>
-    public abstract class AbstractAsset : ICloneable
+    public abstract class AbstractAsset : ICloneable, IDisposable
     {
         /// <summary>
         /// Global TGI.
@@ -60,6 +62,7 @@ namespace OpenTS2.Content
             }
         }
         bool _compressed = false;
+        public bool Disposed = false;
 
         /// <summary>
         /// Save changes to this asset in memory.
@@ -101,6 +104,31 @@ namespace OpenTS2.Content
         public virtual UnityEngine.Object[] GetUnmanagedResources()
         {
             return new UnityEngine.Object[] { };
+        }
+
+        public Action OnCollection;
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!Disposed)
+            {
+                var key = new CacheKey(TGI, Package);
+                MemoryController.MarkForRemoval(new MemoryController.RemovalInfo(key, GetUnmanagedResources()));
+                Disposed = true;
+            }
+        }
+
+        ~AbstractAsset()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: false);
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }
