@@ -124,7 +124,7 @@ namespace OpenTS2.UI.Layouts
 
             var previousButton = Components[0].GetChildByID(0x1004) as UIButtonComponent;
             var nextButton = Components[0].GetChildByID(0x1005) as UIButtonComponent;
-            var quitButton = Components[0].GetChildByID(0x000000A5) as UIButtonComponent;
+            var quitButton = Components[0].GetChildByID(0xA5) as UIButtonComponent;
             previousButton.OnClick += OnPrevPage;
             nextButton.OnClick += OnNextPage;
             quitButton.OnClick += OnQuit;
