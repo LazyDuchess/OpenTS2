@@ -22,11 +22,17 @@ namespace OpenTS2.UI
             UIElement element = null;
             switch(cls)
             {
+                case "GZWinGen":
+                    element = new UIBMPElement();
+                    break;
                 case "GZWinBMP":
                     element = new UIBMPElement();
                     break;
                 case "GZWinFlatRect":
                     element = new UIFlatRectElement();
+                    break;
+                case "GZWinTextEdit":
+                    element = new UITextElement();
                     break;
                 case "GZWinText":
                     element = new UITextElement();

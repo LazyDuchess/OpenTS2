@@ -26,6 +26,19 @@ namespace OpenTS2.UI
         public RectTransform RectTransformComponent => GetComponent<RectTransform>();
         public UIComponent[] Children => transform.GetComponentsInChildren<UIComponent>(true);
 
+        public Vector2 GetCenter()
+        {
+            var pos = RectTransformComponent.position;
+            var size = RectTransformComponent.sizeDelta;
+            return new Vector2(pos.x + size.x / 2f, pos.y - size.y / 2f);
+        }
+
+        public void SetPositionCentered(Vector2 position)
+        {
+            var size = RectTransformComponent.sizeDelta;
+            RectTransformComponent.position = position - (new Vector2(size.x / 2f, -size.y / 2f));
+        }
+
         public void SetAnchor(AnchorType anchor)
         {
             switch(anchor)

@@ -10,16 +10,16 @@ using UnityEngine;
 
 namespace OpenTS2.UI.Layouts
 {
-    public class Neighborhood : UILayoutInstance
+    public class NeighborhoodHUD : UILayoutInstance
     {
         protected override ResourceKey UILayoutResourceKey => new ResourceKey(0x49000000, 0xA99D8A11, TypeIDs.UI);
 
-        public Neighborhood() : this(MainCanvas)
+        public NeighborhoodHUD() : this(MainCanvas)
         {
 
         }
 
-        public Neighborhood(Transform canvas) : base(canvas)
+        public NeighborhoodHUD(Transform canvas) : base(canvas)
         {
             var root = Components[0];
             root.SetAnchor(UIComponent.AnchorType.Stretch);

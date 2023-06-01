@@ -58,6 +58,21 @@ namespace OpenTS2.UI
                     RawImageComponent.texture = _textures[3];
             }
         }
+
+        private void OnDisable()
+        {
+            if (UIManager.HeldComponent == this)
+                UIManager.HeldComponent = null;
+            _hovering = false;
+        }
+
+        private void OnEnable()
+        {
+            if (UIManager.HeldComponent == this)
+                UIManager.HeldComponent = null;
+            _hovering = false;
+        }
+
         private void OnDestroy()
         {
             if (UIManager.HeldComponent == this)

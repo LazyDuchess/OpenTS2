@@ -5,15 +5,20 @@ using OpenTS2.Content.DBPF;
 using OpenTS2.Files.Formats.DBPF;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace OpenTS2.UI.Layouts
 {
     public class MainMenu : UILayoutInstance
     {
+        private List<Neighborhood> _neighborHoods;
+        private NeighborhoodIcon[] _neighborhoodIcons;
+        private int _currentPage = 0;
         protected override ResourceKey UILayoutResourceKey => new ResourceKey(0x49001017, 0xA99D8A11, TypeIDs.UI);
         
         public MainMenu() : this(MainCanvas)
@@ -77,13 +82,134 @@ namespace OpenTS2.UI.Layouts
             var contentProvider = ContentProvider.Get();
 
             // Assign random images to the Sims.
-            var upperLeftKey = RandomUtils.RandomFromList(upperLeftKeys);
-            var lowerRightKey = RandomUtils.RandomFromList(lowerRightKeys);
+            var keyAmount = Mathf.Min(upperLeftKeys.Count, lowerRightKeys.Count);
+            var simTextureIndex = UnityEngine.Random.Range(0, keyAmount);
+
+            var upperLeftKey = upperLeftKeys[simTextureIndex];
+            var lowerRightKey = lowerRightKeys[simTextureIndex];
 
             upperLeftSim.SetTexture(contentProvider.GetAsset<TextureAsset>(upperLeftKey));
             lowerRightSim.SetTexture(contentProvider.GetAsset<TextureAsset>(lowerRightKey));
             upperLeftSim.Color = Color.white;
             lowerRightSim.Color = Color.white;
+
+            CreateNeighborhoodIcons();
+            UpdateNeighborhoods();
+        }
+
+        void CreateNeighborhoodIcons()
+        {
+            _neighborHoods = NeighborhoodManager.Neighborhoods.Where((neighborhood) => neighborhood.Folder != "Tutorial").ToList();
+
+            var thumbsRectangle = Components[0].GetChildByID(0x00001006);
+            var thumbsCenter = thumbsRectangle.GetCenter();
+
+            var offset = 180f;
+
+            _neighborhoodIcons = new NeighborhoodIcon[3];
+
+            _neighborhoodIcons[0] = new NeighborhoodIcon(thumbsRectangle.transform);
+            _neighborhoodIcons[0].Components[0].SetAnchor(UIComponent.AnchorType.Center);
+            _neighborhoodIcons[0].Components[0].SetPositionCentered(thumbsCenter - new Vector2(offset, 0f));
+
+            _neighborhoodIcons[1] = new NeighborhoodIcon(thumbsRectangle.transform);
+            _neighborhoodIcons[1].Components[0].SetAnchor(UIComponent.AnchorType.Center);
+            _neighborhoodIcons[1].Components[0].SetPositionCentered(thumbsCenter);
+
+            _neighborhoodIcons[2] = new NeighborhoodIcon(thumbsRectangle.transform);
+            _neighborhoodIcons[2].Components[0].SetAnchor(UIComponent.AnchorType.Center);
+            _neighborhoodIcons[2].Components[0].SetPositionCentered(thumbsCenter + new Vector2(offset, 0f));
+
+            var previousButton = Components[0].GetChildByID(0x1004) as UIButtonComponent;
+            var nextButton = Components[0].GetChildByID(0x1005) as UIButtonComponent;
+            previousButton.OnClick += OnPrevPage;
+            nextButton.OnClick += OnNextPage;
+        }
+
+        void OnPrevPage()
+        {
+            _currentPage--;
+            UpdateNeighborhoods();
+        }
+
+        void OnNextPage()
+        {
+            _currentPage++;
+            UpdateNeighborhoods();
+        }
+
+        void UpdateNeighborhoods()
+        {
+            CursorController.Cursor = CursorController.CursorType.Hourglass;
+            var iconAmount = _neighborhoodIcons.Length;
+            var iterationStartsFrom = _currentPage * iconAmount;
+            for(var i=0;i<iconAmount;i++)
+            {
+                var currentI = iterationStartsFrom + i;
+                var component = _neighborhoodIcons[i].Components[0];
+                if (currentI >= _neighborHoods.Count)
+                {
+                    component.gameObject.SetActive(false);
+                    continue;
+                }
+                var neighborhood = _neighborHoods[currentI];
+                component.gameObject.SetActive(true);
+                var thumbnailBMP = component.GetChildByID(0xA1) as UIBMPComponent;
+                var nameText = component.GetChildByID(0xA5);
+                nameText.GetComponent<Text>().text = neighborhood.GetLocalizedName();
+                thumbnailBMP.Color = Color.white;
+                thumbnailBMP.RawImageComponent.texture = neighborhood.Thumbnail;
+                var reiaPlayer = thumbnailBMP.gameObject.GetComponent<ReiaPlayer>();
+                if (reiaPlayer == null)
+                    reiaPlayer = thumbnailBMP.gameObject.AddComponent<ReiaPlayer>();
+                var reiaPath = neighborhood.ReiaPath;
+                reiaPlayer.Stop();
+                FlipTransformForBMP(thumbnailBMP.RectTransformComponent);
+                if (File.Exists(reiaPath))
+                {
+                    FlipTransformForReia(thumbnailBMP.RectTransformComponent);
+                    var reiaStream = File.OpenRead(reiaPath);
+                    reiaPlayer.SetReia(reiaStream, true);
+                    reiaPlayer.Speed = 1f;
+                }
+            }
+            var previousButton = Components[0].GetChildByID(0x1004);
+            var nextButton = Components[0].GetChildByID(0x1005);
+            previousButton.gameObject.SetActive(CanGoPreviousPage());
+            nextButton.gameObject.SetActive(CanGoNextPage());
+            CursorController.Cursor = CursorController.CursorType.Default;
+        }
+
+        void FlipTransformForReia(RectTransform transform)
+        {
+            if (transform.localScale.y == -1f)
+                return;
+            transform.localScale = new Vector3(1f, -1f, 1f);
+            transform.position -= new Vector3(0f, transform.sizeDelta.y, 0f);
+        }
+
+        void FlipTransformForBMP(RectTransform transform)
+        {
+            if (transform.localScale.y == 1f)
+                return;
+            transform.localScale = new Vector3(1f, 1f, 1f);
+            transform.position += new Vector3(0f, transform.sizeDelta.y, 0f);
+        }
+
+        bool CanGoPreviousPage()
+        {
+            if (_currentPage > 0)
+                return true;
+            return false;
+        }
+
+        bool CanGoNextPage()
+        {
+            var iconAmount = _neighborhoodIcons.Length;
+            var pageAmount = Mathf.CeilToInt(_neighborHoods.Count / iconAmount);
+            if (_currentPage >= pageAmount)
+                return false;
+            return true;
         }
     }
 }

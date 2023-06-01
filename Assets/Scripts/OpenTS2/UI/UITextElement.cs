@@ -25,7 +25,10 @@ namespace OpenTS2.UI
                 var captionRes = properties.GetStringSetProperty("captionres");
                 Caption = captionRes.GetLocalizedString();
             }
-            ForeColor = properties.GetColorProperty("forecolor");
+            if (properties.GetProperty("clsid") == "GZWinTextEdit")
+                ForeColor = properties.GetColorProperty("caretcolor");
+            else
+                ForeColor = properties.GetColorProperty("forecolor");
             var align = properties.GetProperty("align");
             if (align != null)
             {

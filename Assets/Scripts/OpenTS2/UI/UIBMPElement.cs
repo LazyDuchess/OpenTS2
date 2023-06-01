@@ -24,6 +24,9 @@ namespace OpenTS2.UI
             base.ParseProperties(properties);
             Image = properties.GetImageKeyProperty("image");
             EdgeImage = properties.GetBoolProperty("edgeimage");
+            // TODO: Is this right?
+            if (properties.GetProperty("clsid") == "GZWinGen")
+                EdgeImage = true;
         }
 
         public override UIComponent Instantiate(Transform parent)

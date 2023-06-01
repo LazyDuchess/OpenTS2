@@ -26,13 +26,25 @@ namespace OpenTS2.UI
             _rawImage = GetComponent<RawImage>();
         }
 
+        public void Stop()
+        {
+            _reia?.Dispose();
+            _reia = null;
+            Speed = 0f;
+        }
+
+        public void SetReia(Stream stream, bool streamed)
+        {
+            _reia = ReiaFile.Read(stream, streamed);
+            _frameCounter = 0f;
+        }
+
         public void SetReia(ResourceKey key, bool stream)
         {
             var contentProvider = ContentProvider.Get();
             var bytes = contentProvider.GetEntry(key).GetBytes();
             var memStream = new MemoryStream(bytes);
-            _reia = ReiaFile.Read(memStream, stream);
-            _frameCounter = 0f;
+            SetReia(memStream, stream);
         }
 
         private void Update()

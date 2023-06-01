@@ -106,8 +106,6 @@ namespace OpenTS2.Content
             return new UnityEngine.Object[] { };
         }
 
-        public Action OnCollection;
-
         protected virtual void Dispose(bool disposing)
         {
             if (!Disposed)
