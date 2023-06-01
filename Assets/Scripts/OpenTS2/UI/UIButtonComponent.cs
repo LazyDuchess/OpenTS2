@@ -18,6 +18,7 @@ namespace OpenTS2.UI
         public Action OnClick;
         public bool GreyedOut = false;
         private bool _hovering = false;
+        private bool _held = false;
         private Texture2D[] _textures;
         public RawImage RawImageComponent => GetComponent<RawImage>();
         public void SetTexture(Texture2D texture)
@@ -30,8 +31,6 @@ namespace OpenTS2.UI
 
         void Update()
         {
-            if (UIManager.HeldComponent == this && GreyedOut)
-                UIManager.HeldComponent = null;
             UpdateTexture();
         }
 
@@ -44,39 +43,25 @@ namespace OpenTS2.UI
             else
             {
                 RawImageComponent.texture = _textures[1];
-                if (UIManager.HeldComponent == this)
-                {
-                    RawImageComponent.texture = _textures[2];
-                    return;
-                }
-                else
-                {
-                    if (UIManager.HeldComponent != null)
-                        return;
-                }
-                if (_hovering)
+                if (_hovering && !UIManager.AnyMouseButtonHeld)
                     RawImageComponent.texture = _textures[3];
+                if (_held)
+                    RawImageComponent.texture = _textures[2];
             }
         }
 
         private void OnDisable()
         {
-            if (UIManager.HeldComponent == this)
-                UIManager.HeldComponent = null;
             _hovering = false;
         }
 
         private void OnEnable()
         {
-            if (UIManager.HeldComponent == this)
-                UIManager.HeldComponent = null;
             _hovering = false;
         }
 
         private void OnDestroy()
         {
-            if (UIManager.HeldComponent == this)
-                UIManager.HeldComponent = null;
             if (_textures == null)
                 return;
             foreach (var texture in _textures)
@@ -98,15 +83,20 @@ namespace OpenTS2.UI
 
         public void OnPointerDown(PointerEventData eventData)
         {
-            UIManager.HeldComponent = this;
+            if (eventData.button != PointerEventData.InputButton.Left && eventData.button != PointerEventData.InputButton.Right)
+                return;
+            _held = true;
         }
 
         public void OnPointerUp(PointerEventData eventData)
         {
-            if (UIManager.HeldComponent == this && _hovering)
+            if (eventData.button != PointerEventData.InputButton.Left && eventData.button != PointerEventData.InputButton.Right)
+                return;
+            if (_held && _hovering)
             {
                 Click();
             }
+            _held = false;
         }
 
         void Click()

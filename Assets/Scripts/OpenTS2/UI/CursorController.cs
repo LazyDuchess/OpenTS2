@@ -97,15 +97,6 @@ namespace OpenTS2.UI {
 #if !UNITY_EDITOR
             SetCursorInternal();
 #endif
-            if (UIManager.HeldComponent != null)
-            {
-                if (!UIManager.HeldComponent.isActiveAndEnabled)
-                    UIManager.HeldComponent = null;
-            }
-            if (!Input.GetMouseButton(0))
-            {
-                UIManager.HeldComponent = null;
-            }
         }
 
     }

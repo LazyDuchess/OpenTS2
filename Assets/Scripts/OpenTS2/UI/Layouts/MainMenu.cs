@@ -104,11 +104,10 @@ namespace OpenTS2.UI.Layouts
             var thumbsRectangle = Components[0].GetChildByID(0x00001006);
             var thumbsCenter = thumbsRectangle.GetCenter();
 
-            var offset = 180f;
-
             _neighborhoodIcons = new NeighborhoodIcon[3];
 
             _neighborhoodIcons[0] = new NeighborhoodIcon(thumbsRectangle.transform);
+            var offset = _neighborhoodIcons[0].Components[0].RectTransformComponent.sizeDelta.x;
             _neighborhoodIcons[0].Components[0].SetAnchor(UIComponent.AnchorType.Center);
             _neighborhoodIcons[0].Components[0].SetPositionCentered(thumbsCenter - new Vector2(offset, 0f));
 

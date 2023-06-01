@@ -10,6 +10,12 @@ namespace OpenTS2.UI
     public static class UIManager
     {
         public static Canvas MainCanvas = null;
-        public static UIComponent HeldComponent = null;
+        public static bool AnyMouseButtonHeld
+        {
+            get
+            {
+                return Input.GetMouseButton(0) || Input.GetMouseButton(1);
+            }
+        }
     }
 }
