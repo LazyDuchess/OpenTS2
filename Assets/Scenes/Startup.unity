@@ -529,13 +529,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 71cec8867c0a85541a6e9755728c38a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Canvas: {fileID: 1755469747}
   FadeOutTime: 0.5
   MusicSource: {fileID: 1882356793}
   InitialLoadScreenBackgroundImage: {fileID: 19247262}
   InitialLoadScreenLogoImage: {fileID: 1334026411}
   InitialLoadScreenReiaPlayer: {fileID: 1690878381}
-  EnableReia: 0
+  EnableReia: 1
   StreamReia: 0
 --- !u!1 &1690878377
 GameObject:
