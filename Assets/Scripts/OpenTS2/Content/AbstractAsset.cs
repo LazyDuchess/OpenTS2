@@ -106,13 +106,15 @@ namespace OpenTS2.Content
             return new UnityEngine.Object[] { };
         }
 
+        public Action OnDispose;
+
         protected virtual void Dispose(bool disposing)
         {
             if (!Disposed)
             {
-                var key = new CacheKey(TGI, Package);
-                MemoryController.MarkForRemoval(new MemoryController.RemovalInfo(key, GetUnmanagedResources()));
                 Disposed = true;
+                OnDispose?.Invoke();
+                MemoryController.MarkForRemoval(GetUnmanagedResources());
             }
         }
 

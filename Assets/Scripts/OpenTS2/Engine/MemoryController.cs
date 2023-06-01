@@ -15,17 +15,8 @@ namespace OpenTS2.Engine
     {
         public static MemoryController Singleton => s_singleton;
         static MemoryController s_singleton = null;
-        public struct RemovalInfo
-        {
-            public UnityEngine.Object[] UnmanagedResources;
-            public CacheKey Key;
-            public RemovalInfo(CacheKey key, UnityEngine.Object[] unmanagedResources)
-            {
-                Key = key;
-                UnmanagedResources = unmanagedResources;
-            }
-        }
-        private static List<RemovalInfo> MarkedForRemoval = new List<RemovalInfo>();
+
+        private static List<UnityEngine.Object[]> MarkedForRemoval = new List<UnityEngine.Object[]>();
 
         private void Awake()
         {
@@ -38,10 +29,10 @@ namespace OpenTS2.Engine
             DontDestroyOnLoad(gameObject);
         }
 
-        public static void MarkForRemoval(RemovalInfo info)
+        public static void MarkForRemoval(UnityEngine.Object[] unmanagedResources)
         {
             lock(MarkedForRemoval)
-                MarkedForRemoval.Add(info);
+                MarkedForRemoval.Add(unmanagedResources);
         }
         private void Update()
         {
@@ -49,14 +40,9 @@ namespace OpenTS2.Engine
             {
                 foreach (var removal in MarkedForRemoval)
                 {
-                    foreach (var unmanagedResource in removal.UnmanagedResources)
+                    foreach (var unmanagedResource in removal)
                     {
                         unmanagedResource.Free();
-                    }
-                    var cache = ContentProvider.Get().Cache;
-                    if (cache.Cache.TryGetValue(removal.Key, out WeakReference _))
-                    {
-                        cache.Cache.Remove(removal.Key);
                     }
                 }
                 MarkedForRemoval.Clear();

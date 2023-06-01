@@ -12,6 +12,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace OpenTS2.Content
 {
@@ -83,7 +84,8 @@ namespace OpenTS2.Content
 
         public void Clear()
         {
-            Cache.Clear();
+            lock(Cache)
+                Cache.Clear();
         }
 
         public void Remove(ResourceKey key, DBPFFile package)
@@ -98,36 +100,44 @@ namespace OpenTS2.Content
 
         public void Remove(CacheKey key)
         {
-            if (Cache.ContainsKey(key))
-                Cache.Remove(key);
+            lock (Cache)
+            {
+                if (Cache.ContainsKey(key))
+                    Cache.Remove(key);
+            }
         }
 
         WeakReference GetOrAddInternal(CacheKey key, Func<CacheKey, AbstractAsset> objectFactory)
         {
-            if (Cache.TryGetValue(key, out WeakReference result))
+            lock (Cache)
             {
-                if (result.Target != null && result.IsAlive && !(result.Target as AbstractAsset).Disposed)
+                if (Cache.TryGetValue(key, out WeakReference result))
                 {
-                    return result;
+                    if (result.Target != null && result.IsAlive && !(result.Target as AbstractAsset).Disposed)
+                    {
+                        return result;
+                    }
+                    else
+                    {
+                        var asset = objectFactory(key);
+                        if (asset == null)
+                            return null;
+                        asset.OnDispose += () => { Remove(key); };
+                        result = new WeakReference(asset);
+                        Cache[key] = result;
+                        return result;
+                    }
                 }
                 else
                 {
                     var asset = objectFactory(key);
                     if (asset == null)
                         return null;
+                    asset.OnDispose += () => { Remove(key); };
                     result = new WeakReference(asset);
                     Cache[key] = result;
                     return result;
                 }
-            }
-            else
-            {
-                var asset = objectFactory(key);
-                if (asset == null)
-                    return null;
-                result = new WeakReference(asset);
-                Cache[key] = result;
-                return result;
             }
         }
 
@@ -180,14 +190,18 @@ namespace OpenTS2.Content
 
         public WeakReference GetWeakReference(CacheKey key)
         {
-            if (Cache.ContainsKey(key))
-                return Cache[key];
-            return null;
+            lock (Cache)
+            {
+                if (Cache.ContainsKey(key))
+                    return Cache[key];
+                return null;
+            }
         }
 
         public void RemoveAllForPackage(DBPFFile package)
         {
-            Cache = Cache.Where(cache => cache.Key.File != package).ToDictionary(x => x.Key, x => x.Value);
+            lock (Cache)
+                Cache = Cache.Where(cache => cache.Key.File != package).ToDictionary(x => x.Key, x => x.Value);
         }
     }
 }
