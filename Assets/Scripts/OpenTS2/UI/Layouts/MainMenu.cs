@@ -106,23 +106,33 @@ namespace OpenTS2.UI.Layouts
 
             _neighborhoodIcons = new NeighborhoodIcon[3];
 
-            _neighborhoodIcons[0] = new NeighborhoodIcon(thumbsRectangle.transform);
+            _neighborhoodIcons[0] = new NeighborhoodIcon(MainCanvas);
             var offset = _neighborhoodIcons[0].Components[0].RectTransformComponent.sizeDelta.x;
             _neighborhoodIcons[0].Components[0].SetAnchor(UIComponent.AnchorType.Center);
             _neighborhoodIcons[0].Components[0].SetPositionCentered(thumbsCenter - new Vector2(offset, 0f));
+            _neighborhoodIcons[0].Components[0].transform.SetSiblingIndex(Components[0].transform.GetSiblingIndex() + 1);
 
-            _neighborhoodIcons[1] = new NeighborhoodIcon(thumbsRectangle.transform);
+            _neighborhoodIcons[1] = new NeighborhoodIcon(MainCanvas);
             _neighborhoodIcons[1].Components[0].SetAnchor(UIComponent.AnchorType.Center);
             _neighborhoodIcons[1].Components[0].SetPositionCentered(thumbsCenter);
+            _neighborhoodIcons[1].Components[0].transform.SetSiblingIndex(Components[0].transform.GetSiblingIndex() + 1);
 
-            _neighborhoodIcons[2] = new NeighborhoodIcon(thumbsRectangle.transform);
+            _neighborhoodIcons[2] = new NeighborhoodIcon(MainCanvas);
             _neighborhoodIcons[2].Components[0].SetAnchor(UIComponent.AnchorType.Center);
             _neighborhoodIcons[2].Components[0].SetPositionCentered(thumbsCenter + new Vector2(offset, 0f));
+            _neighborhoodIcons[2].Components[0].transform.SetSiblingIndex(Components[0].transform.GetSiblingIndex() + 1);
 
             var previousButton = Components[0].GetChildByID(0x1004) as UIButtonComponent;
             var nextButton = Components[0].GetChildByID(0x1005) as UIButtonComponent;
+            var quitButton = Components[0].GetChildByID(0x000000A5) as UIButtonComponent;
             previousButton.OnClick += OnPrevPage;
             nextButton.OnClick += OnNextPage;
+            quitButton.OnClick += OnQuit;
+        }
+
+        void OnQuit()
+        {
+            Application.Quit();
         }
 
         void OnPrevPage()
