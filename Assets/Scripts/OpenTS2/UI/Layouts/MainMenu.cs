@@ -224,8 +224,8 @@ namespace OpenTS2.UI.Layouts
         bool CanGoNextPage()
         {
             var iconAmount = _neighborhoodIcons.Length;
-            var pageAmount = Mathf.CeilToInt(_neighborHoods.Count / iconAmount);
-            if (_currentPage >= pageAmount)
+            var pageAmount = Mathf.CeilToInt((float)_neighborHoods.Count / iconAmount);
+            if (_currentPage >= pageAmount - 1)
                 return false;
             return true;
         }
