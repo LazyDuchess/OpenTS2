@@ -28,6 +28,7 @@ namespace OpenTS2.UI
             else
                 inputField.lineType = InputField.LineType.MultiLineNewline;
             inputField.onEndEdit.AddListener(delegate { component.CheckTextEdited(); });
+            component.gameObject.AddComponent<TextFieldBehaviour>();
             return component;
         }
     }
