@@ -14,6 +14,7 @@ using OpenTS2.Common;
 using OpenTS2.Common.Utils;
 using OpenTS2.Content;
 using OpenTS2.Content.DBPF;
+using UnityEngine;
 
 namespace OpenTS2.Files.Formats.DBPF
 {
@@ -541,7 +542,7 @@ namespace OpenTS2.Files.Formats.DBPF
                     {
                         entryData = DBPFCompression.Compress(entryData);
                         var lastPosition = wStream.Position;
-                        wStream.Position = filePosition + 4;
+                        wStream.Position = entryOffset[i] + 4;
                         writer.Write(entryData.Length);
                         wStream.Position = lastPosition;
                     }
