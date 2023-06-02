@@ -20,6 +20,6 @@ namespace OpenTS2.UI
                 TextComponent.text = value;
             }
         }
-        public Text TextComponent => GetComponent<Text>();
+        public Text TextComponent => transform.GetComponentInChildren<Text>();
     }
 }

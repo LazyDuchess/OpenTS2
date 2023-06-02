@@ -68,12 +68,20 @@ namespace OpenTS2.UI
         public override UIComponent Instantiate(Transform parent)
         {
             var uiComponent = base.Instantiate(parent);
-            var text = uiComponent.gameObject.AddComponent<Text>();
+            var textGameObject = new GameObject("Text");
+            textGameObject.transform.SetParent(uiComponent.transform);
+            var text = textGameObject.AddComponent<Text>();
             text.color = ForeColor;
             text.text = Caption;
             text.font = AssetController.DefaultFont;
             text.fontSize = 14;
             text.alignment = Alignment;
+            var rect = text.GetComponent<RectTransform>();
+            rect.anchorMax = new Vector2(1f, 1f);
+            rect.anchorMin = Vector2.zero;
+
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = new Vector2(1f, 1f);
             return uiComponent;
         }
     }
