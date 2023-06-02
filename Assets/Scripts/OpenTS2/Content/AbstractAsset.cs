@@ -69,21 +69,21 @@ namespace OpenTS2.Content
         /// </summary>
         public void Save()
         {
-            Package.Changes.Set(this);
+            Package?.Changes?.Set(this);
         }
         /// <summary>
         /// Mark this asset as deleted in memory.
         /// </summary>
         public void Delete()
         {
-            Package.Changes.Delete(this.TGI);
+            Package?.Changes?.Delete(this.TGI);
         }
         /// <summary>
         /// Unmark this asset as deleted in memory.
         /// </summary>
         public void Restore()
         {
-            Package.Changes.Restore(this.TGI);
+            Package?.Changes?.Restore(this.TGI);
         }
 
         /// <summary>

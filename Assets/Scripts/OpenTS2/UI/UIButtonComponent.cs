@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using OpenTS2.Content.DBPF;
 
 namespace OpenTS2.UI
 {
@@ -19,13 +20,18 @@ namespace OpenTS2.UI
         public bool GreyedOut = false;
         private bool _hovering = false;
         private bool _held = false;
-        private Texture2D[] _textures;
+        private TextureAsset[] _textures;
         public RawImage RawImageComponent => GetComponent<RawImage>();
-        public void SetTexture(Texture2D texture)
+        public void SetTexture(TextureAsset texture)
         {
             if (texture == null)
                 return;
-            _textures = UIUtils.SplitTextureHorizontalSequence(texture, texture.width / 4);
+            var _textureSequence = UIUtils.SplitTextureHorizontalSequence(texture.Texture, texture.Texture.width / 4);
+            _textures = new TextureAsset[4];
+            for(var i=0;i<4;i++)
+            {
+                _textures[i] = new TextureAsset(_textureSequence[i]);
+            }
             UpdateTexture();
         }
 
@@ -39,36 +45,27 @@ namespace OpenTS2.UI
             if (_textures == null || _textures.Length < 4)
                 return;
             if (GreyedOut)
-                RawImageComponent.texture = _textures[0];
+                RawImageComponent.texture = _textures[0].Texture;
             else
             {
-                RawImageComponent.texture = _textures[1];
+                RawImageComponent.texture = _textures[1].Texture;
                 if (_hovering && !UIManager.AnyMouseButtonHeld)
-                    RawImageComponent.texture = _textures[3];
+                    RawImageComponent.texture = _textures[3].Texture;
                 if (_held)
-                    RawImageComponent.texture = _textures[2];
+                    RawImageComponent.texture = _textures[2].Texture;
             }
         }
 
         private void OnDisable()
         {
             _hovering = false;
+            _held = false;
         }
 
         private void OnEnable()
         {
             _hovering = false;
-        }
-
-        private void OnDestroy()
-        {
-            if (_textures == null)
-                return;
-            foreach (var texture in _textures)
-            {
-                if (texture != null)
-                    texture.Free();
-            }
+            _held = false;
         }
 
         public void OnPointerEnter(PointerEventData eventData)

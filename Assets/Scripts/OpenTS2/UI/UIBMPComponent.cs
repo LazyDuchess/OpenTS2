@@ -39,7 +39,6 @@ namespace OpenTS2.UI
             }
         }
         private TextureAsset _textureReference;
-        public bool OwnTexture = false;
         public RawImage RawImageComponent => GetComponent<RawImage>();
 
         public void SetNativeSize()
@@ -50,14 +49,6 @@ namespace OpenTS2.UI
         {
             _textureReference = asset;
             RawImageComponent.texture = asset.Texture;
-        }
-        private void OnDestroy()
-        {
-            if (OwnTexture)
-            {
-                if (RawImageComponent != null)
-                    (RawImageComponent.texture as Texture2D).Free();
-            }
         }
     }
 }

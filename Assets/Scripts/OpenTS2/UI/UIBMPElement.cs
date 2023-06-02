@@ -41,8 +41,9 @@ namespace OpenTS2.UI
             {
                 if (EdgeImage)
                 {
-                    rawImage.texture = UIUtils.MakeEdgeImage(imageAsset.Texture, (int)Area.width, (int)Area.height);
-                    uiComponent.OwnTexture = true;
+                    var edgeTexture = UIUtils.MakeEdgeImage(imageAsset.Texture, (int)Area.width, (int)Area.height);
+                    var edgeAsset = new TextureAsset(edgeTexture);
+                    uiComponent.SetTexture(edgeAsset);
                 }
                 else
                     uiComponent.SetTexture(imageAsset);

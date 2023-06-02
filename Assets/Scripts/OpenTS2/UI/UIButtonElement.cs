@@ -32,7 +32,7 @@ namespace OpenTS2.UI
             var contentProvider = ContentProvider.Get();
             var imageAsset = contentProvider.GetAsset<TextureAsset>(Image);
             if (imageAsset != null)
-                uiComponent.SetTexture(imageAsset.Texture);
+                uiComponent.SetTexture(imageAsset);
             return uiComponent;
         }
     }
