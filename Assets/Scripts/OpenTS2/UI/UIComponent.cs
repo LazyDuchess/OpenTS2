@@ -82,6 +82,11 @@ namespace OpenTS2.UI
             }
         }
 
+        public T GetChildByID<T>(uint id) where T : UIComponent
+        {
+            return GetChildByID(id) as T;
+        }
+
         public UIComponent GetChildByID(uint id)
         {
             var components = transform.GetComponentsInChildren<UIComponent>(true);

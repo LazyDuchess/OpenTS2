@@ -37,11 +37,10 @@ namespace OpenTS2.UI
         public override UIComponent Instantiate(Transform parent)
         {
             var uiComponent = base.Instantiate(parent);
+            var rawImage = uiComponent.gameObject.AddComponent<RawImage>();
+            rawImage.color = Color.clear;
             if (_style != Styles.nofill)
-            {
-                var rawImage = uiComponent.gameObject.AddComponent<RawImage>();
                 rawImage.color = FillColor;
-            }
             return uiComponent;
         }
     }

@@ -9,6 +9,9 @@ using UnityEngine;
 
 namespace OpenTS2.UI.Layouts
 {
+    /// <summary>
+    /// Represents a physical instance of a UI Layout.
+    /// </summary>
     public abstract class UILayoutInstance
     {
         public UIComponent[] Components;

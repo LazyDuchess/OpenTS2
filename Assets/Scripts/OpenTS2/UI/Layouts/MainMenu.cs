@@ -14,8 +14,13 @@ using UnityEngine.UI;
 
 namespace OpenTS2.UI.Layouts
 {
+    /// <summary>
+    /// Main Menu UI, with neighborhood chooser.
+    /// </summary>
     public class MainMenu : UILayoutInstance
     {
+        private UIComponent _shade;
+        private NeighborhoodPreview _neighborhoodPreview;
         private List<Neighborhood> _neighborHoods;
         private NeighborhoodIcon[] _neighborhoodIcons;
         private int _currentPage = 0;
@@ -37,8 +42,8 @@ namespace OpenTS2.UI.Layouts
             background.SetAnchor(UIComponent.AnchorType.Center);
             background.transform.SetAsFirstSibling();
 
-            var upperLeftSim = root.GetChildByID(0xE1) as UIBMPComponent;
-            var lowerRightSim = root.GetChildByID(0xE3) as UIBMPComponent;
+            var upperLeftSim = root.GetChildByID<UIBMPComponent>(0xE1);
+            var lowerRightSim = root.GetChildByID<UIBMPComponent>(0xE3);
 
             // IDs for the textures for the Sims are stored in a constants table UI element.
             var constantsTable = root.GetChildByID(0x4DC1DCE2);
@@ -95,8 +100,33 @@ namespace OpenTS2.UI.Layouts
 
             CreateNeighborhoodIcons();
             UpdateNeighborhoods();
+
+            // Unparent shade and move it to the top, so that it covers the main menu fully.
+
+            _shade = Components[0].GetChildByID(0x100A);
+            _shade.transform.parent = MainCanvas;
+            _shade.transform.SetAsLastSibling();
+            _shade.SetAnchor(UIComponent.AnchorType.Center);
+
+            // Set up the neighborhood previews.
+
+            _neighborhoodPreview = new NeighborhoodPreview();
+            _neighborhoodPreview.Hide();
+            _neighborhoodPreview.OnShow += Shade;
+            _neighborhoodPreview.OnHide += Unshade;
         }
 
+        void Shade()
+        {
+            _shade.gameObject.SetActive(true);
+        }
+
+        void Unshade()
+        {
+            _shade.gameObject.SetActive(false);
+        }
+
+        // Set up the neighborhood icon grid and controls.
         void CreateNeighborhoodIcons()
         {
             _neighborHoods = NeighborhoodManager.Neighborhoods.Where((neighborhood) => neighborhood.Folder != "Tutorial").ToList();
@@ -106,28 +136,38 @@ namespace OpenTS2.UI.Layouts
 
             _neighborhoodIcons = new NeighborhoodIcon[3];
 
-            _neighborhoodIcons[0] = new NeighborhoodIcon(MainCanvas);
-            var offset = _neighborhoodIcons[0].Components[0].RectTransformComponent.sizeDelta.x;
-            _neighborhoodIcons[0].Components[0].SetAnchor(UIComponent.AnchorType.Center);
-            _neighborhoodIcons[0].Components[0].SetPositionCentered(thumbsCenter - new Vector2(offset, 0f));
-            _neighborhoodIcons[0].Components[0].transform.SetSiblingIndex(Components[0].transform.GetSiblingIndex() + 1);
+            _neighborhoodIcons[1] = CreateNeighborhoodIcon(thumbsCenter);
+            var offset = _neighborhoodIcons[1].Components[0].RectTransformComponent.sizeDelta.x;
+            _neighborhoodIcons[0] = CreateNeighborhoodIcon(thumbsCenter - new Vector2(offset, 0f));
+            _neighborhoodIcons[2] = CreateNeighborhoodIcon(thumbsCenter + new Vector2(offset, 0f));
 
-            _neighborhoodIcons[1] = new NeighborhoodIcon(MainCanvas);
-            _neighborhoodIcons[1].Components[0].SetAnchor(UIComponent.AnchorType.Center);
-            _neighborhoodIcons[1].Components[0].SetPositionCentered(thumbsCenter);
-            _neighborhoodIcons[1].Components[0].transform.SetSiblingIndex(Components[0].transform.GetSiblingIndex() + 1);
-
-            _neighborhoodIcons[2] = new NeighborhoodIcon(MainCanvas);
-            _neighborhoodIcons[2].Components[0].SetAnchor(UIComponent.AnchorType.Center);
-            _neighborhoodIcons[2].Components[0].SetPositionCentered(thumbsCenter + new Vector2(offset, 0f));
-            _neighborhoodIcons[2].Components[0].transform.SetSiblingIndex(Components[0].transform.GetSiblingIndex() + 1);
-
-            var previousButton = Components[0].GetChildByID(0x1004) as UIButtonComponent;
-            var nextButton = Components[0].GetChildByID(0x1005) as UIButtonComponent;
-            var quitButton = Components[0].GetChildByID(0xA5) as UIButtonComponent;
+            var previousButton = Components[0].GetChildByID<UIButtonComponent>(0x1004);
+            var nextButton = Components[0].GetChildByID<UIButtonComponent>(0x1005);
+            var quitButton = Components[0].GetChildByID<UIButtonComponent>(0xA5);
             previousButton.OnClick += OnPrevPage;
             nextButton.OnClick += OnNextPage;
             quitButton.OnClick += OnQuit;
+        }
+
+        // Creates a clickable neighborhood icon, displays preview on click.
+        NeighborhoodIcon CreateNeighborhoodIcon(Vector2 position)
+        {
+            var icon = new NeighborhoodIcon(MainCanvas);
+            var root = icon.Components[0];
+            root.SetAnchor(UIComponent.AnchorType.Center);
+            root.SetPositionCentered(position);
+            root.transform.SetSiblingIndex(Components[0].transform.GetSiblingIndex() + 1);
+            icon.OnClick += OnNeighborhoodIconClick;
+            return icon;
+        }
+
+        // Display a neighborhood preview when an icon is clicked.
+        void OnNeighborhoodIconClick(Neighborhood neighborhood)
+        {
+            if (neighborhood == null)
+                return;
+            _neighborhoodPreview.SetNeighborhood(neighborhood);
+            _neighborhoodPreview.Show();
         }
 
         void OnQuit()
@@ -147,6 +187,7 @@ namespace OpenTS2.UI.Layouts
             UpdateNeighborhoods();
         }
 
+        // Update neighborhood grid with current page, and disable/enable previous/next buttons.
         void UpdateNeighborhoods()
         {
             CursorController.Cursor = CursorController.CursorType.Hourglass;
@@ -163,46 +204,13 @@ namespace OpenTS2.UI.Layouts
                 }
                 var neighborhood = _neighborHoods[currentI];
                 component.gameObject.SetActive(true);
-                var thumbnailBMP = component.GetChildByID(0xA1) as UIBMPComponent;
-                var nameText = component.GetChildByID(0xA5);
-                nameText.GetComponent<Text>().text = neighborhood.GetLocalizedName();
-                thumbnailBMP.Color = Color.white;
-                thumbnailBMP.RawImageComponent.texture = neighborhood.Thumbnail;
-                var reiaPlayer = thumbnailBMP.gameObject.GetComponent<ReiaPlayer>();
-                if (reiaPlayer == null)
-                    reiaPlayer = thumbnailBMP.gameObject.AddComponent<ReiaPlayer>();
-                var reiaPath = neighborhood.ReiaPath;
-                reiaPlayer.Stop();
-                FlipTransformForBMP(thumbnailBMP.RectTransformComponent);
-                if (File.Exists(reiaPath))
-                {
-                    FlipTransformForReia(thumbnailBMP.RectTransformComponent);
-                    var reiaStream = File.OpenRead(reiaPath);
-                    reiaPlayer.SetReia(reiaStream, true);
-                    reiaPlayer.Speed = 1f;
-                }
+                _neighborhoodIcons[i].SetNeighborhood(neighborhood);
             }
             var previousButton = Components[0].GetChildByID(0x1004);
             var nextButton = Components[0].GetChildByID(0x1005);
             previousButton.gameObject.SetActive(CanGoPreviousPage());
             nextButton.gameObject.SetActive(CanGoNextPage());
             CursorController.Cursor = CursorController.CursorType.Default;
-        }
-
-        void FlipTransformForReia(RectTransform transform)
-        {
-            if (transform.localScale.y == -1f)
-                return;
-            transform.localScale = new Vector3(1f, -1f, 1f);
-            transform.position -= new Vector3(0f, transform.sizeDelta.y, 0f);
-        }
-
-        void FlipTransformForBMP(RectTransform transform)
-        {
-            if (transform.localScale.y == 1f)
-                return;
-            transform.localScale = new Vector3(1f, 1f, 1f);
-            transform.position += new Vector3(0f, transform.sizeDelta.y, 0f);
         }
 
         bool CanGoPreviousPage()

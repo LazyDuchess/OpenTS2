@@ -10,6 +10,9 @@ using UnityEngine;
 
 namespace OpenTS2.UI.Layouts
 {
+    /// <summary>
+    /// Neighborhood view HUD.
+    /// </summary>
     public class NeighborhoodHUD : UILayoutInstance
     {
         protected override ResourceKey UILayoutResourceKey => new ResourceKey(0x49000000, 0xA99D8A11, TypeIDs.UI);

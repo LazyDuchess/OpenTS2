@@ -66,6 +66,7 @@ namespace OpenTS2.UI
         {
             _hovering = false;
             _held = false;
+            UpdateTexture();
         }
 
         public void OnPointerEnter(PointerEventData eventData)

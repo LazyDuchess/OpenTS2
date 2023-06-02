@@ -14,6 +14,7 @@ namespace OpenTS2.UI
     /// </summary>
     public class UITextElement : UIElement
     {
+        protected override Type UIComponentType => typeof(UITextComponent);
         public TextAnchor Alignment = TextAnchor.MiddleCenter;
         public Color32 ForeColor = Color.black;
 
