@@ -1,4 +1,5 @@
-﻿using OpenTS2.Common;
+﻿using OpenTS2.Client;
+using OpenTS2.Common;
 using OpenTS2.Content.DBPF;
 using OpenTS2.Files;
 using OpenTS2.Files.Formats.DBPF;
@@ -53,6 +54,30 @@ namespace OpenTS2.Content
             if (_stringSet == null)
                 return "";
             return _stringSet.GetString(1);
+        }
+
+        public void SetName(string name)
+        {
+            if (_stringSet == null)
+                return;
+            var settings = Settings.Get();
+            var targetLanguage = settings.Language;
+            if (!_stringSet.StringData.HasLanguage(targetLanguage))
+                targetLanguage = Languages.USEnglish;
+            _stringSet.StringData.SetString(name, 0, targetLanguage);
+            _stringSet.Save();
+        }
+
+        public void SetDescription(string desc)
+        {
+            if (_stringSet == null)
+                return;
+            var settings = Settings.Get();
+            var targetLanguage = settings.Language;
+            if (!_stringSet.StringData.HasLanguage(targetLanguage))
+                targetLanguage = Languages.USEnglish;
+            _stringSet.StringData.SetString(desc, 1, targetLanguage);
+            _stringSet.Save();
         }
     }
 }

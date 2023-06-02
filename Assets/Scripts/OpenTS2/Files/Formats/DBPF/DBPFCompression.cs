@@ -7,6 +7,7 @@
 using System;
 using System.Collections;
 using System.IO;
+using UnityEngine;
 
 namespace OpenTS2.Files.Formats.DBPF
 {
@@ -217,8 +218,9 @@ namespace OpenTS2.Files.Formats.DBPF
 		/// <returns>the compressed Data (including the header)</returns>
 		public static byte[] Compress(byte[] data)
 		{
+			/*
 			try
-			{
+			{*/
 				//return Comp(data, true);
 				#region Init Variables
 				//contains the latest offset for a combination of two characters
@@ -394,11 +396,12 @@ namespace OpenTS2.Files.Formats.DBPF
 					if (indexlist != null) indexlist.Clear();
 					indexlist = null;
 				}
-			}
+			/*}
+		
 			catch (Exception ex)
 			{
 				throw ex;
-			}
+			}*/
 
 		}
 		#endregion

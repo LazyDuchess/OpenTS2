@@ -55,6 +55,32 @@ namespace OpenTS2.Content.DBPF
                 return "";
             return languageStr[id].Value;
         }
+
+        /// <summary>
+        /// Check if the StringSet is localized to a specific language.
+        /// </summary>
+        /// <param name="language">Language to check for.</param>
+        /// <returns>Whether this StringSet is localized.</returns>
+        public bool HasLanguage(Languages language)
+        {
+            return Strings.ContainsKey(language);
+        }
+
+        /// <summary>
+        /// Replaces an existing string.
+        /// </summary>
+        /// <param name="str">New value.</param>
+        /// <param name="id">Index of string to replace.</param>
+        /// <param name="language">Language of string to replace.</param>
+        public void SetString(string str, int id, Languages language)
+        {
+            if (!HasLanguage(language))
+                return;
+            var strings = Strings[language];
+            if (id >= strings.Count)
+                return;
+            strings[id].Value = str;
+        }
     }
     /// <summary>
     /// Contains game strings. Asset wrapper around the STR file format.

@@ -9,7 +9,7 @@ namespace OpenTS2.UI
 {
     public class UITextComponent : UIComponent
     {
-        public string Text
+        public virtual string Text
         {
             get
             {

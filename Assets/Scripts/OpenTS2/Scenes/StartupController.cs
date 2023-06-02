@@ -25,6 +25,7 @@ namespace OpenTS2.Scenes
         public UIBMPComponent InitialLoadScreenLogoImage;
         public ReiaPlayer InitialLoadScreenReiaPlayer;
         public bool EnableReia = true;
+        public bool LoadObjects = true;
         public bool StreamReia = true;
         private AudioAsset _splashAudio;
         private ResourceKey _initialLoadScreenReiaKey = new ResourceKey(0x8DA3ADE7, 0x499DB772, TypeIDs.UI);
@@ -99,8 +100,11 @@ namespace OpenTS2.Scenes
         private void OnFinishLoading()
         {
             CursorController.Cursor = CursorController.CursorType.Hourglass;
-            var oMgr = ObjectManager.Get();
-            oMgr.Initialize();
+            if (LoadObjects)
+            {
+                var oMgr = ObjectManager.Get();
+                oMgr.Initialize();
+            }
             NeighborhoodManager.Initialize();
             CursorController.Cursor = CursorController.CursorType.Default;
             Debug.Log("All loaded");

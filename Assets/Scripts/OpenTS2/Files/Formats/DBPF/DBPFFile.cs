@@ -515,6 +515,12 @@ namespace OpenTS2.Files.Formats.DBPF
                 writer.Write(element.FileSize);
             }
 
+            lastPos = wStream.Position;
+            var siz = lastPos - indexOff;
+            wStream.Position = indexSize;
+            writer.Write((int)siz);
+            wStream.Position = lastPos;
+
             //Write files
             for (var i = 0; i < entries.Count; i++)
             {
@@ -523,22 +529,26 @@ namespace OpenTS2.Files.Formats.DBPF
                 writer.Write((int)filePosition);
                 wStream.Position = filePosition;
                 var entry = entries[i];
-                var entryData = entry.GetBytes();
-                if (dirAsset != null && dirAsset.GetUncompressedSize(entry.TGI) != 0)
+                if (!(entry is DynamicDBPFEntry))
                 {
-                    entryData = DBPFCompression.Compress(entryData);
-                    var lastPosition = wStream.Position;
-                    wStream.Position = filePosition + 4;
-                    writer.Write(entryData.Length);
-                    wStream.Position = lastPosition;
+                    var rawData = GetRawBytes(entry);
+                    writer.Write(rawData, 0, rawData.Length);
                 }
-                writer.Write(entryData, 0, entryData.Length);
+                else
+                {
+                    var entryData = entry.GetBytes();
+                    if (dirAsset != null && dirAsset.GetUncompressedSize(entry.TGI) != 0)
+                    {
+                        entryData = DBPFCompression.Compress(entryData);
+                        var lastPosition = wStream.Position;
+                        wStream.Position = filePosition + 4;
+                        writer.Write(entryData.Length);
+                        wStream.Position = lastPosition;
+                    }
+                    writer.Write(entryData, 0, entryData.Length);
+                }
             }
-            lastPos = wStream.Position;
-            var siz = lastPos - indexOff;
-            wStream.Position = indexSize;
-            writer.Write((int)siz);
-            wStream.Position = lastPos;
+            
             var buffer = StreamUtils.GetBuffer(wStream);
             writer.Dispose();
             wStream.Dispose();
@@ -595,6 +605,13 @@ namespace OpenTS2.Files.Formats.DBPF
             {
                 return DBPFCompression.Decompress(fileBytes, uncompressedSize);
             }
+            return fileBytes;
+        }
+
+        private byte[] GetRawBytes(DBPFEntry entry)
+        {
+            _reader.Seek(SeekOrigin.Begin, entry.FileOffset);
+            var fileBytes = _reader.ReadBytes((int)entry.FileSize);
             return fileBytes;
         }
 

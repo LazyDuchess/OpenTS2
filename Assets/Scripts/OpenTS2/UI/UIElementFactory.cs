@@ -32,7 +32,7 @@ namespace OpenTS2.UI
                     element = new UIFlatRectElement();
                     break;
                 case "GZWinTextEdit":
-                    element = new UITextElement();
+                    element = new UITextEditElement();
                     break;
                 case "GZWinText":
                     element = new UITextElement();

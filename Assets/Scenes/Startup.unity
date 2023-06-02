@@ -208,7 +208,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 68f59c2b02ecd40468c22f3eb960d4bd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  OwnTexture: 0
 --- !u!1 &322359566
 GameObject:
   m_ObjectHideFlags: 0
@@ -453,7 +452,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 68f59c2b02ecd40468c22f3eb960d4bd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  OwnTexture: 0
 --- !u!1 &1442540124
 GameObject:
   m_ObjectHideFlags: 0
@@ -534,7 +532,8 @@ MonoBehaviour:
   InitialLoadScreenBackgroundImage: {fileID: 19247262}
   InitialLoadScreenLogoImage: {fileID: 1334026411}
   InitialLoadScreenReiaPlayer: {fileID: 1690878381}
-  EnableReia: 1
+  EnableReia: 0
+  LoadObjects: 0
   StreamReia: 0
 --- !u!1 &1690878377
 GameObject:

@@ -172,6 +172,7 @@ namespace OpenTS2.UI.Layouts
 
         void OnQuit()
         {
+            ContentProvider.Get().Changes.SaveChanges();
             Application.Quit();
         }
 

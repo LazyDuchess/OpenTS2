@@ -26,8 +26,11 @@ namespace OpenTS2.UI.Layouts
         }
         public NeighborhoodIcon(Transform parent) : base(parent)
         {
-            var button = Components[0].GetChildByID<UIButtonComponent>(0xA2);
+            var root = Components[0];
+            var button = root.GetChildByID<UIButtonComponent>(0xA2);
+            var nameText = root.GetChildByID<UITextEditComponent>(0xA5);
             button.OnClick += OnButtonClick;
+            nameText.OnTextEdited += OnNameEdited;
         }
 
         void OnButtonClick()
@@ -40,7 +43,7 @@ namespace OpenTS2.UI.Layouts
             _neighborhood = neighborhood;
             var root = Components[0];
             var thumbnailBMP = root.GetChildByID<UIBMPComponent>(0xA1);
-            var nameText = root.GetChildByID<UITextComponent>(0xA5);
+            var nameText = root.GetChildByID<UITextEditComponent>(0xA5);
             nameText.Text = _neighborhood.GetLocalizedName();
             thumbnailBMP.Color = Color.white;
             thumbnailBMP.RawImageComponent.texture = _neighborhood.Thumbnail;
@@ -57,6 +60,13 @@ namespace OpenTS2.UI.Layouts
                 reiaPlayer.SetReia(reiaStream, true);
                 reiaPlayer.Speed = 1f;
             }
+        }
+
+        void OnNameEdited(string newName)
+        {
+            if (_neighborhood == null)
+                return;
+            _neighborhood.SetName(newName);
         }
 
         void FlipTransformForReia(RectTransform transform)
