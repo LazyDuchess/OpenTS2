@@ -532,8 +532,8 @@ MonoBehaviour:
   InitialLoadScreenBackgroundImage: {fileID: 19247262}
   InitialLoadScreenLogoImage: {fileID: 1334026411}
   InitialLoadScreenReiaPlayer: {fileID: 1690878381}
-  EnableReia: 0
-  LoadObjects: 0
+  EnableReia: 1
+  LoadObjects: 1
   StreamReia: 0
 --- !u!1 &1690878377
 GameObject:
