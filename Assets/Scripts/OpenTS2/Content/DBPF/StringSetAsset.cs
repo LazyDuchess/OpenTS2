@@ -112,5 +112,19 @@ namespace OpenTS2.Content.DBPF
         {
             return _stringData.GetString(id, Settings.Get().Language);
         }
+
+        /// <summary>
+        /// Replaces an existing string in the current language. If this StringSet is not localized to the current language, then US English will be replaced.
+        /// </summary>
+        /// <param name="str">New value.</param>
+        /// <param name="id">Index of string to replace.</param>
+        /// <param name="language">Language of string to replace.</param>
+        public void SetString(string str, int id)
+        {
+            var lang = Settings.Get().Language;
+            if (!StringData.HasLanguage(lang))
+                lang = Languages.USEnglish;
+            StringData.SetString(str, id, lang);
+        }
     }
 }

@@ -64,11 +64,7 @@ namespace OpenTS2.Content
         {
             if (_stringSet == null)
                 return;
-            var settings = Settings.Get();
-            var targetLanguage = settings.Language;
-            if (!_stringSet.StringData.HasLanguage(targetLanguage))
-                targetLanguage = Languages.USEnglish;
-            _stringSet.StringData.SetString(name, 0, targetLanguage);
+            _stringSet.SetString(name, 0);
             _stringSet.Save();
         }
 
@@ -76,11 +72,7 @@ namespace OpenTS2.Content
         {
             if (_stringSet == null)
                 return;
-            var settings = Settings.Get();
-            var targetLanguage = settings.Language;
-            if (!_stringSet.StringData.HasLanguage(targetLanguage))
-                targetLanguage = Languages.USEnglish;
-            _stringSet.StringData.SetString(desc, 1, targetLanguage);
+            _stringSet.SetString(desc, 1);
             _stringSet.Save();
         }
     }
