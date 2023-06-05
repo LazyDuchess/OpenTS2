@@ -1,4 +1,6 @@
-﻿using OpenTS2.Files;
+﻿using OpenTS2.Content.DBPF;
+using OpenTS2.Files;
+using OpenTS2.Files.Formats.DBPF;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -16,15 +18,12 @@ namespace OpenTS2.Content
         public static void Initialize()
         {
             _neighborHoods.Clear();
-            var neighborhoodsFolder = Path.Combine(Filesystem.GetUserPath(),"Neighborhoods");
-            var directories = Directory.GetDirectories(neighborhoodsFolder, "*", SearchOption.TopDirectoryOnly);
-            foreach(var directory in directories)
+            var contentProvider = ContentProvider.Get();
+            var allInfos = contentProvider.GetAssetsOfType<NeighborhoodInfoAsset>(TypeIDs.NHOOD_INFO);
+            foreach(var ninfo in allInfos)
             {
-                var neighborhood = Neighborhood.Load(Path.GetFileName(directory));
-                if (neighborhood != null)
-                {
-                    _neighborHoods.Add(neighborhood);
-                }
+                var nhood = new Neighborhood(ninfo);
+                _neighborHoods.Add(nhood);
             }
         }
     }

@@ -43,7 +43,8 @@ namespace OpenTS2.Files.Formats.DBPF
 
             var terrainType = reader.ReadUint32PrefixedString();
             var vertexHeights = FloatArray2D.Deserialize(reader);
-
+            stream.Dispose();
+            reader.Dispose();
             return new NeighborhoodTerrainAsset(width, height, seaLevel, terrainType, vertexHeights);
         }
     }

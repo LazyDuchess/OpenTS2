@@ -129,7 +129,7 @@ namespace OpenTS2.UI.Layouts
         // Set up the neighborhood icon grid and controls.
         void CreateNeighborhoodIcons()
         {
-            _neighborHoods = NeighborhoodManager.Neighborhoods.Where((neighborhood) => neighborhood.Folder != "Tutorial").ToList();
+            _neighborHoods = NeighborhoodManager.Neighborhoods.Where((neighborhood) => neighborhood.Prefix != "Tutorial" && neighborhood.NeighborhoodType == Neighborhood.Type.Main).ToList();
 
             var thumbsRectangle = Components[0].GetChildByID(0x00001006);
             var thumbsCenter = thumbsRectangle.GetCenter();

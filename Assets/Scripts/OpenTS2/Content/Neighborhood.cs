@@ -15,37 +15,41 @@ namespace OpenTS2.Content
 {
     public class Neighborhood
     {
+        public Type NeighborhoodType => _info.NeighborhoodType;
+        public string Prefix => _info.MainPrefix;
+        public string FilePath => _info.Package.FilePath;
+        public uint GroupID => _info.Package.GroupID;
         public Texture2D Thumbnail => _thumbnail;
-        public string Folder => _folder;
-        public string ReiaPath => Path.Combine(Filesystem.GetUserPath(), "Neighborhoods", Folder, $"{Folder}_Neighborhood.reia");
-        private Texture2D _thumbnail;
-        private string _folder;
-        private StringSetAsset _stringSet;
-        public Neighborhood(string folder)
+        public string ReiaPath => Path.ChangeExtension(FilePath, ".reia");
+        public enum Type
         {
-            _folder = folder;
-            var neighborhoodGroup = $"{_folder}_Neighborhood";
-            var stringSetKey = new ResourceKey(1, neighborhoodGroup, TypeIDs.CTSS);
+            Main = 1,
+            Campus,
+            Downtown,
+            Suburb,
+            Village,
+            Lakes,
+            Island
+        }
+        private Texture2D _thumbnail;
+        private StringSetAsset _stringSet;
+        private NeighborhoodInfoAsset _info;
+        public Neighborhood(NeighborhoodInfoAsset infoAsset)
+        {
+            _info = infoAsset;
             var contentProvider = ContentProvider.Get();
+            var stringSetKey = new ResourceKey(1, GroupID, TypeIDs.CTSS);
             _stringSet = contentProvider.GetAsset<StringSetAsset>(stringSetKey);
             _thumbnail = new Texture2D(1, 1);
-            var thumbnailPath = Path.Combine(Filesystem.GetUserPath(), "Neighborhoods", Folder, $"{Folder}_Neighborhood.png");
+            var thumbnailPath = Path.ChangeExtension(FilePath, ".png");
             if (File.Exists(thumbnailPath))
                 _thumbnail.LoadImage(File.ReadAllBytes(thumbnailPath));
-        }
-
-        public static Neighborhood Load(string folder)
-        {
-            var fullPathToPackage = Path.Combine(Filesystem.GetUserPath(), "Neighborhoods", folder, $"{folder}_Neighborhood.package");
-            if (!File.Exists(fullPathToPackage))
-                return null;
-            return new Neighborhood(folder);
         }
 
         public string GetLocalizedName()
         {
             if (_stringSet == null)
-                return Folder;
+                return Prefix;
             return _stringSet.GetString(0);
         }
 
