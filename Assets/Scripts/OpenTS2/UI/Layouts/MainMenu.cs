@@ -126,10 +126,15 @@ namespace OpenTS2.UI.Layouts
             _shade.gameObject.SetActive(false);
         }
 
+        bool ShouldNeighborhoodDisplayInChooser(Neighborhood neighborhood)
+        {
+            return neighborhood.Prefix != "Tutorial" && neighborhood.NeighborhoodType == Neighborhood.Type.Main;
+        }
+
         // Set up the neighborhood icon grid and controls.
         void CreateNeighborhoodIcons()
         {
-            _neighborHoods = NeighborhoodManager.Neighborhoods.Where((neighborhood) => neighborhood.Prefix != "Tutorial" && neighborhood.NeighborhoodType == Neighborhood.Type.Main).ToList();
+            _neighborHoods = NeighborhoodManager.Neighborhoods.Where(ShouldNeighborhoodDisplayInChooser).ToList();
 
             var thumbsRectangle = Components[0].GetChildByID(0x00001006);
             var thumbsCenter = thumbsRectangle.GetCenter();
