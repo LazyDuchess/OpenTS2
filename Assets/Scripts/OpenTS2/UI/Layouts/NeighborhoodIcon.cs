@@ -17,6 +17,8 @@ namespace OpenTS2.UI.Layouts
     /// </summary>
     public class NeighborhoodIcon : UILayoutInstance
     {
+        private const uint ThumbnailBMPID = 0xA1;
+        private const uint NameTextEditID = 0xA5;
         public Action<Neighborhood> OnClick;
         private Neighborhood _neighborhood;
         protected override ResourceKey UILayoutResourceKey => new ResourceKey(0x49001018, 0xA99D8A11, TypeIDs.UI);
@@ -42,8 +44,8 @@ namespace OpenTS2.UI.Layouts
         {
             _neighborhood = neighborhood;
             var root = Components[0];
-            var thumbnailBMP = root.GetChildByID<UIBMPComponent>(0xA1);
-            var nameText = root.GetChildByID<UITextEditComponent>(0xA5);
+            var thumbnailBMP = root.GetChildByID<UIBMPComponent>(ThumbnailBMPID);
+            var nameText = root.GetChildByID<UITextEditComponent>(NameTextEditID);
             nameText.Text = _neighborhood.GetLocalizedName();
             thumbnailBMP.Color = Color.white;
             thumbnailBMP.RawImageComponent.texture = _neighborhood.Thumbnail;

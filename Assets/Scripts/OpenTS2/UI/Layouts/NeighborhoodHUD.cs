@@ -15,6 +15,7 @@ namespace OpenTS2.UI.Layouts
     /// </summary>
     public class NeighborhoodHUD : UILayoutInstance
     {
+        private const uint PuckID = 0x4BE6ED7D;
         protected override ResourceKey UILayoutResourceKey => new ResourceKey(0x49000000, 0xA99D8A11, TypeIDs.UI);
 
         public NeighborhoodHUD() : this(MainCanvas)
@@ -26,7 +27,7 @@ namespace OpenTS2.UI.Layouts
         {
             var root = Components[0];
             root.SetAnchor(UIComponent.AnchorType.Stretch);
-            var puck = root.GetChildByID(0x4BE6ED7D);
+            var puck = root.GetChildByID(PuckID);
             puck.SetAnchor(UIComponent.AnchorType.BottomLeft);
         }
     }

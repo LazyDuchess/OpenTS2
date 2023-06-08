@@ -16,10 +16,14 @@ namespace OpenTS2.UI.Layouts
     /// </summary>
     public class NeighborhoodPreview : UILayoutInstance
     {
-        private Neighborhood _neighborhood;
         public Action OnHide;
         public Action OnShow;
         protected override ResourceKey UILayoutResourceKey => new ResourceKey(0x49001021, 0xA99D8A11, TypeIDs.UI);
+        private const uint CloseButtonID = 0xB3;
+        private const uint DescriptionTextEditID = 0x2002;
+        private const uint ThumbnailBMPID = 0x2009;
+        private const uint NameTextID = 0x2003;
+        private Neighborhood _neighborhood;
 
         public NeighborhoodPreview() : this(MainCanvas)
         {
@@ -30,8 +34,8 @@ namespace OpenTS2.UI.Layouts
         {
             var root = Components[0];
             root.SetAnchor(UIComponent.AnchorType.Center);
-            var closeButton = root.GetChildByID<UIButtonComponent>(0xB3);
-            var description = root.GetChildByID<UITextEditComponent>(0x2002);
+            var closeButton = root.GetChildByID<UIButtonComponent>(CloseButtonID);
+            var description = root.GetChildByID<UITextEditComponent>(DescriptionTextEditID);
             closeButton.OnClick += Hide;
             description.OnTextEdited += OnDescriptionEdited;
         }
@@ -47,9 +51,9 @@ namespace OpenTS2.UI.Layouts
         {
             _neighborhood = neighborhood;
             var root = Components[0];
-            var name = root.GetChildByID<UITextComponent>(0x2003);
-            var description = root.GetChildByID<UITextEditComponent>(0x2002);
-            var thumbnail = root.GetChildByID<UIBMPComponent>(0x2009);
+            var name = root.GetChildByID<UITextComponent>(NameTextID);
+            var description = root.GetChildByID<UITextEditComponent>(DescriptionTextEditID);
+            var thumbnail = root.GetChildByID<UIBMPComponent>(ThumbnailBMPID);
             name.Text = _neighborhood.GetLocalizedName();
             description.Text = _neighborhood.GetLocalizedDescription();
             thumbnail.Texture = _neighborhood.Thumbnail;

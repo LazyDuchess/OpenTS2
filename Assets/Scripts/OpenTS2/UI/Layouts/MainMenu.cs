@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace OpenTS2.UI.Layouts
@@ -19,6 +20,15 @@ namespace OpenTS2.UI.Layouts
     /// </summary>
     public class MainMenu : UILayoutInstance
     {
+        private const uint BackgroundID = 0x0DA36C7D;
+        private const uint UpperLeftSimBMPID = 0xE1;
+        private const uint LowerRightSimBMPID = 0xE3;
+        private const uint ConstantsTableID = 0x4DC1DCE2;
+        private const uint ShadeID = 0x100A;
+        private const uint ThumbsRectangleID = 0x1006;
+        private const uint PreviousButtonID = 0x1004;
+        private const uint NextButtonID = 0x1005;
+        private const uint QuitButtonID = 0xA5;
         private UIComponent _shade;
         private NeighborhoodPreview _neighborhoodPreview;
         private List<Neighborhood> _neighborHoods;
@@ -37,16 +47,16 @@ namespace OpenTS2.UI.Layouts
             root.SetAnchor(UIComponent.AnchorType.Center);
             root.transform.SetAsFirstSibling();
 
-            var background = root.GetChildByID(0x0DA36C7D);
+            var background = root.GetChildByID(BackgroundID);
             background.gameObject.SetActive(true);
             background.SetAnchor(UIComponent.AnchorType.Center);
             background.transform.SetAsFirstSibling();
 
-            var upperLeftSim = root.GetChildByID<UIBMPComponent>(0xE1);
-            var lowerRightSim = root.GetChildByID<UIBMPComponent>(0xE3);
+            var upperLeftSim = root.GetChildByID<UIBMPComponent>(UpperLeftSimBMPID);
+            var lowerRightSim = root.GetChildByID<UIBMPComponent>(LowerRightSimBMPID);
 
             // IDs for the textures for the Sims are stored in a constants table UI element.
-            var constantsTable = root.GetChildByID(0x4DC1DCE2);
+            var constantsTable = root.GetChildByID(ConstantsTableID);
             var constantComponents = constantsTable.Children;
 
             var upperLeftKeys = new List<ResourceKey>();
@@ -103,7 +113,7 @@ namespace OpenTS2.UI.Layouts
 
             // Unparent shade and move it to the top, so that it covers the main menu fully.
 
-            _shade = Components[0].GetChildByID(0x100A);
+            _shade = Components[0].GetChildByID(ShadeID);
             _shade.transform.parent = MainCanvas;
             _shade.transform.SetAsLastSibling();
             _shade.SetAnchor(UIComponent.AnchorType.Center);
@@ -136,7 +146,7 @@ namespace OpenTS2.UI.Layouts
         {
             _neighborHoods = NeighborhoodManager.Neighborhoods.Where(ShouldNeighborhoodDisplayInChooser).ToList();
 
-            var thumbsRectangle = Components[0].GetChildByID(0x00001006);
+            var thumbsRectangle = Components[0].GetChildByID(ThumbsRectangleID);
             var thumbsCenter = thumbsRectangle.GetCenter();
 
             _neighborhoodIcons = new NeighborhoodIcon[3];
@@ -146,9 +156,9 @@ namespace OpenTS2.UI.Layouts
             _neighborhoodIcons[0] = CreateNeighborhoodIcon(thumbsCenter - new Vector2(offset, 0f));
             _neighborhoodIcons[2] = CreateNeighborhoodIcon(thumbsCenter + new Vector2(offset, 0f));
 
-            var previousButton = Components[0].GetChildByID<UIButtonComponent>(0x1004);
-            var nextButton = Components[0].GetChildByID<UIButtonComponent>(0x1005);
-            var quitButton = Components[0].GetChildByID<UIButtonComponent>(0xA5);
+            var previousButton = Components[0].GetChildByID<UIButtonComponent>(PreviousButtonID);
+            var nextButton = Components[0].GetChildByID<UIButtonComponent>(NextButtonID);
+            var quitButton = Components[0].GetChildByID<UIButtonComponent>(QuitButtonID);
             previousButton.OnClick += OnPrevPage;
             nextButton.OnClick += OnNextPage;
             quitButton.OnClick += OnQuit;
@@ -212,8 +222,8 @@ namespace OpenTS2.UI.Layouts
                 component.gameObject.SetActive(true);
                 _neighborhoodIcons[i].SetNeighborhood(neighborhood);
             }
-            var previousButton = Components[0].GetChildByID(0x1004);
-            var nextButton = Components[0].GetChildByID(0x1005);
+            var previousButton = Components[0].GetChildByID(PreviousButtonID);
+            var nextButton = Components[0].GetChildByID(NextButtonID);
             previousButton.gameObject.SetActive(CanGoPreviousPage());
             nextButton.gameObject.SetActive(CanGoNextPage());
             CursorController.Cursor = CursorController.CursorType.Default;

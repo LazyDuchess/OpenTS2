@@ -31,7 +31,7 @@ namespace OpenTS2.UI {
             set
             {
                 _cursor = value;
-                #if !UNITY_EDITOR
+#if !UNITY_EDITOR
                 SetCursorInternal();
 #endif
             }
@@ -90,14 +90,12 @@ namespace OpenTS2.UI {
             if (Application.isFocused)
                 HardwareCursors.SetCurrentCursor((int)Cursor);
         }
-#endif
 
         void Update()
         {
-#if !UNITY_EDITOR
             SetCursorInternal();
-#endif
-        }
 
+        }
+#endif
     }
 }

@@ -8,11 +8,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace OpenTS2.Content
 {
     public static class NeighborhoodManager
     {
+        public static Neighborhood CurrentNeighborhood = null;
         public static List<Neighborhood> Neighborhoods => _neighborHoods;
         static List<Neighborhood> _neighborHoods = new List<Neighborhood>();
         public static void Initialize()
@@ -25,6 +27,12 @@ namespace OpenTS2.Content
                 var nhood = new Neighborhood(ninfo);
                 _neighborHoods.Add(nhood);
             }
+        }
+
+        public static void EnterNeighborhood(Neighborhood neighborhood)
+        {
+            CurrentNeighborhood = neighborhood;
+            SceneManager.LoadScene("Neighborhood");
         }
     }
 }
