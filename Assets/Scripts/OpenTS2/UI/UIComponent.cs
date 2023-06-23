@@ -82,20 +82,32 @@ namespace OpenTS2.UI
             }
         }
 
-        public T GetChildByID<T>(uint id) where T : UIComponent
+        public T GetChildByID<T>(uint id, bool includeInactive = true) where T : UIComponent
         {
-            return GetChildByID(id) as T;
+            var components = GetChildrenByID<T>(id, includeInactive);
+            if (components.Count <= 0)
+                return null;
+            return components[0];
         }
 
-        public UIComponent GetChildByID(uint id)
+        public UIComponent GetChildByID(uint id, bool includeInactive = true)
         {
-            var components = transform.GetComponentsInChildren<UIComponent>(true);
-            foreach(var element in components)
-            {
-                if (element.Element.ID == id)
-                    return element;
-            }
-            return null;
+            var components = GetChildrenByID(id, includeInactive);
+            if (components.Count <= 0)
+                return null;
+            return components[0];
+        }
+
+        public List<T> GetChildrenByID<T>(uint id, bool includeInactive = true) where T : UIComponent
+        {
+            var components = transform.GetComponentsInChildren<T>(includeInactive);
+            return components.Where((component) => component.Element.ID == id).ToList();
+        }
+
+        public List<UIComponent> GetChildrenByID(uint id, bool includeInactive = true)
+        {
+            var components = transform.GetComponentsInChildren<UIComponent>(includeInactive);
+            return components.Where((component) => component.Element.ID == id).ToList();
         }
     }
 }

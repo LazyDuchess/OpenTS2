@@ -15,6 +15,7 @@ namespace OpenTS2.Content
 {
     public class Neighborhood
     {
+        public NeighborhoodTerrainAsset Terrain => ContentProvider.Get().GetAsset<NeighborhoodTerrainAsset>(new ResourceKey(0, GroupID, TypeIDs.NHOOD_TERRAIN));
         public Type NeighborhoodType => _info.NeighborhoodType;
         public string Prefix => _info.MainPrefix;
         public string FilePath => _info.Package.FilePath;

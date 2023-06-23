@@ -15,6 +15,10 @@ namespace OpenTS2.UI.Layouts
     /// </summary>
     public class NeighborhoodHUD : UILayoutInstance
     {
+        private const uint LargeCityNameTextID = 0x3;
+        private const uint MediumCityNameTextID = 0xB3;
+        private const uint SmallCityNameTextID = 0xA3;
+        private const uint PrimaryOptionsID = 0x4BE6ED7E;
         private const uint PuckID = 0x4BE6ED7D;
         protected override ResourceKey UILayoutResourceKey => new ResourceKey(0x49000000, 0xA99D8A11, TypeIDs.UI);
 
@@ -29,6 +33,11 @@ namespace OpenTS2.UI.Layouts
             root.SetAnchor(UIComponent.AnchorType.Stretch);
             var puck = root.GetChildByID(PuckID);
             puck.SetAnchor(UIComponent.AnchorType.BottomLeft);
+
+            var primaryOptions = root.GetChildByID(PrimaryOptionsID, false);
+
+            var largeCityName = primaryOptions.GetChildByID<UITextComponent>(LargeCityNameTextID);
+            largeCityName.Text = NeighborhoodManager.CurrentNeighborhood.GetLocalizedName();
         }
     }
 }

@@ -72,6 +72,14 @@ namespace OpenTS2.Files
             return packageList;
         }
 
+        public static List<string> GetPackagesForNeighborhood(Neighborhood neighborhood)
+        {
+            var neighborhoodFolder = Path.GetDirectoryName(neighborhood.FilePath);
+            var packages = GetPackagesInDirectory(neighborhoodFolder);
+            packages = packages.Where(x => IsNeighborhoodPackage(x)).ToList();
+            return packages;
+        }
+
         static List<string> RemoveNeighborhoodAndCCPackagesFromList(List<string> packages)
         {
             return packages.Where(x => !IsNeighborhoodPackage(x) && !IsDownloadPackage(x)).ToList();

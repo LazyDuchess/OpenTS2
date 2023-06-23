@@ -20,14 +20,12 @@ namespace OpenTS2.Scenes
     public class StartupController : MonoBehaviour
     {
         public float FadeOutTime = 1f;
-        public AudioSource MusicSource;
         public UIBMPComponent InitialLoadScreenBackgroundImage;
         public UIBMPComponent InitialLoadScreenLogoImage;
         public ReiaPlayer InitialLoadScreenReiaPlayer;
         public bool EnableReia = true;
         public bool LoadObjects = true;
         public bool StreamReia = true;
-        private AudioAsset _splashAudio;
         private ResourceKey _initialLoadScreenReiaKey = new ResourceKey(0x8DA3ADE7, 0x499DB772, TypeIDs.UI);
         private ResourceKey _initialLoadScreenBackgroundKey = new ResourceKey(0xCCC9AF80, 0x499DB772, TypeIDs.IMG);
         private ResourceKey _initialLoadScreenLogoKey = new ResourceKey(0x8CBB9323, 0x499DB772, TypeIDs.IMG);
@@ -39,12 +37,7 @@ namespace OpenTS2.Scenes
             var contentProvider = ContentProvider.Get();
             ContentLoading.LoadContentStartup();
             PluginSupport.Initialize();
-            if (MusicSource != null)
-            {
-                _splashAudio = AudioManager.SplashAudio;
-                MusicSource.clip = _splashAudio.Clip;
-                MusicSource.Play();
-            }
+            MusicController.PlayMusic(AudioManager.SplashAudio);
             if (EnableReia)
             {
                 if (InitialLoadScreenReiaPlayer != null)

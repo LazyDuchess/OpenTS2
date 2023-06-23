@@ -19,6 +19,7 @@ namespace OpenTS2.UI.Layouts
         public Action OnHide;
         public Action OnShow;
         protected override ResourceKey UILayoutResourceKey => new ResourceKey(0x49001021, 0xA99D8A11, TypeIDs.UI);
+        private const uint PlayButtonID = 0xB2;
         private const uint CloseButtonID = 0xB3;
         private const uint DescriptionTextEditID = 0x2002;
         private const uint ThumbnailBMPID = 0x2009;
@@ -34,8 +35,10 @@ namespace OpenTS2.UI.Layouts
         {
             var root = Components[0];
             root.SetAnchor(UIComponent.AnchorType.Center);
+            var playButton = root.GetChildByID<UIButtonComponent>(PlayButtonID);
             var closeButton = root.GetChildByID<UIButtonComponent>(CloseButtonID);
             var description = root.GetChildByID<UITextEditComponent>(DescriptionTextEditID);
+            playButton.OnClick += Play;
             closeButton.OnClick += Hide;
             description.OnTextEdited += OnDescriptionEdited;
         }
@@ -58,6 +61,13 @@ namespace OpenTS2.UI.Layouts
             description.Text = _neighborhood.GetLocalizedDescription();
             thumbnail.Texture = _neighborhood.Thumbnail;
             thumbnail.Color = Color.white;
+        }
+
+        void Play()
+        {
+            if (_neighborhood == null)
+                return;
+            NeighborhoodManager.EnterNeighborhood(_neighborhood);
         }
 
         public void Hide()

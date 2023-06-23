@@ -1,6 +1,8 @@
-﻿using OpenTS2.Content.DBPF;
+﻿using OpenTS2.Audio;
+using OpenTS2.Content.DBPF;
 using OpenTS2.Files;
 using OpenTS2.Files.Formats.DBPF;
+using OpenTS2.UI;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -31,8 +33,13 @@ namespace OpenTS2.Content
 
         public static void EnterNeighborhood(Neighborhood neighborhood)
         {
+            CursorController.Cursor = CursorController.CursorType.Hourglass;
+            ContentProvider.Get().Changes.SaveChanges();
+            ContentLoading.LoadNeighborhoodContentSync(neighborhood);
+            MusicController.FadeOutMusic();
             CurrentNeighborhood = neighborhood;
             SceneManager.LoadScene("Neighborhood");
+            CursorController.Cursor = CursorController.CursorType.Default;
         }
     }
 }

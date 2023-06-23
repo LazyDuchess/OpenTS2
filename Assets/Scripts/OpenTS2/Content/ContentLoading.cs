@@ -55,5 +55,23 @@ namespace OpenTS2.Content
                 gamePackages.AddRange(Filesystem.GetStreamedDownloadPackages());
             ContentProvider.Get().AddPackages(gamePackages);
         }
+
+        public static void LoadNeighborhoodContentSync(Neighborhood neighborhood)
+        {
+            var neighborhoodPackages = Filesystem.GetPackagesForNeighborhood(neighborhood);
+            ContentProvider.Get().AddPackages(neighborhoodPackages);
+        }
+
+        public static void UnloadNeighborhoodContentSync()
+        {
+            var contentProvider = ContentProvider.Get();
+            var neighborhoodPackages = Filesystem.GetPackagesForNeighborhood(NeighborhoodManager.CurrentNeighborhood);
+            foreach(var packagePath in neighborhoodPackages)
+            {
+                var package = contentProvider.GetPackageByPath(packagePath);
+                if (package != null)
+                    contentProvider.RemovePackage(package);
+            }
+        }
     }
 }
