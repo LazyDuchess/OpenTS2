@@ -29,6 +29,13 @@ namespace OpenTS2.UI.Layouts
         private const uint PreviousButtonID = 0x1004;
         private const uint NextButtonID = 0x1005;
         private const uint QuitButtonID = 0xA5;
+        private const uint NeighborhoodQuitButtonID = 0xA4;
+        private const uint NeighborhoodCloseButtonID = 0xA3;
+        private const uint OnInitialLoadID = 0x8DC06B6A;
+        private const uint FromNeighborhoodID = 0x3000;
+
+        public Action OnClose;
+
         private UIComponent _shade;
         private NeighborhoodPreview _neighborhoodPreview;
         private List<Neighborhood> _neighborHoods;
@@ -45,7 +52,7 @@ namespace OpenTS2.UI.Layouts
         {
             var root = Components[0];
             root.SetAnchor(UIComponent.AnchorType.Center);
-            root.transform.SetAsFirstSibling();
+            //root.transform.SetAsFirstSibling();
 
             if (!fromNeighborhood)
             {
@@ -53,6 +60,19 @@ namespace OpenTS2.UI.Layouts
                 background.gameObject.SetActive(true);
                 background.SetAnchor(UIComponent.AnchorType.Center);
                 background.transform.SetAsFirstSibling();
+                var quitButton = Components[0].GetChildByID<UIButtonComponent>(QuitButtonID);
+                quitButton.OnClick += OnQuit;
+            }
+            else
+            {
+                var onInitialLoadUI = root.GetChildByID(OnInitialLoadID);
+                var fromNeighborhoodUI = root.GetChildByID(FromNeighborhoodID);
+                onInitialLoadUI.gameObject.SetActive(false);
+                fromNeighborhoodUI.gameObject.SetActive(true);
+                var quitButton = Components[0].GetChildByID<UIButtonComponent>(NeighborhoodQuitButtonID);
+                quitButton.OnClick += OnQuit;
+                var closeButton = Components[0].GetChildByID<UIButtonComponent>(NeighborhoodCloseButtonID);
+                closeButton.OnClick += DoClose;
             }
 
             var upperLeftSim = root.GetChildByID<UIBMPComponent>(UpperLeftSimBMPID);
@@ -161,10 +181,9 @@ namespace OpenTS2.UI.Layouts
 
             var previousButton = Components[0].GetChildByID<UIButtonComponent>(PreviousButtonID);
             var nextButton = Components[0].GetChildByID<UIButtonComponent>(NextButtonID);
-            var quitButton = Components[0].GetChildByID<UIButtonComponent>(QuitButtonID);
+            
             previousButton.OnClick += OnPrevPage;
             nextButton.OnClick += OnNextPage;
-            quitButton.OnClick += OnQuit;
         }
 
         // Creates a clickable neighborhood icon, displays preview on click.
@@ -192,6 +211,18 @@ namespace OpenTS2.UI.Layouts
         {
             ContentProvider.Get().Changes.SaveChanges();
             Application.Quit();
+        }
+
+        void DoClose()
+        {
+            OnClose?.Invoke();
+            UnityEngine.Object.Destroy(_shade.gameObject);
+            UnityEngine.Object.Destroy(_neighborhoodPreview.Components[0].gameObject);
+            foreach(var icon in _neighborhoodIcons)
+            {
+                UnityEngine.Object.Destroy(icon.Components[0].gameObject);
+            }
+            UnityEngine.Object.Destroy(Components[0].gameObject);
         }
 
         void OnPrevPage()

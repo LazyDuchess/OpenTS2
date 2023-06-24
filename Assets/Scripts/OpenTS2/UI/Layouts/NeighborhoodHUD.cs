@@ -51,7 +51,13 @@ namespace OpenTS2.UI.Layouts
             if (_mainMenu != null)
                 return;
             _mainMenu = new MainMenu(true);
+            _mainMenu.OnClose += OnMainMenuClose;
             CursorController.Cursor = CursorController.CursorType.Default;
+        }
+
+        void OnMainMenuClose()
+        {
+            _mainMenu = null;
         }
     }
 }
