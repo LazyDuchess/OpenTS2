@@ -19,8 +19,10 @@ namespace OpenTS2.UI.Layouts
         private const uint MediumCityNameTextID = 0xB3;
         private const uint SmallCityNameTextID = 0xA3;
         private const uint PrimaryOptionsID = 0x4BE6ED7E;
+        private const uint MainMenuID = 0x2;
         private const uint PuckID = 0x4BE6ED7D;
         protected override ResourceKey UILayoutResourceKey => new ResourceKey(0x49000000, 0xA99D8A11, TypeIDs.UI);
+        private MainMenu _mainMenu = null;
 
         public NeighborhoodHUD() : this(MainCanvas)
         {
@@ -36,8 +38,20 @@ namespace OpenTS2.UI.Layouts
 
             var primaryOptions = root.GetChildByID(PrimaryOptionsID, false);
 
+            var mainMenu = root.GetChildByID<UIButtonComponent>(MainMenuID, false);
+            mainMenu.OnClick += OnMainMenu;
+
             var largeCityName = primaryOptions.GetChildByID<UITextComponent>(LargeCityNameTextID);
             largeCityName.Text = NeighborhoodManager.CurrentNeighborhood.GetLocalizedName();
+        }
+
+        void OnMainMenu()
+        {
+            CursorController.Cursor = CursorController.CursorType.Hourglass;
+            if (_mainMenu != null)
+                return;
+            _mainMenu = new MainMenu(true);
+            CursorController.Cursor = CursorController.CursorType.Default;
         }
     }
 }

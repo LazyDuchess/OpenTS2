@@ -35,6 +35,8 @@ namespace OpenTS2.Content
         {
             CursorController.Cursor = CursorController.CursorType.Hourglass;
             ContentProvider.Get().Changes.SaveChanges();
+            if (CurrentNeighborhood != null)
+                ContentLoading.UnloadNeighborhoodContentSync();
             ContentLoading.LoadNeighborhoodContentSync(neighborhood);
             MusicController.FadeOutMusic();
             CurrentNeighborhood = neighborhood;

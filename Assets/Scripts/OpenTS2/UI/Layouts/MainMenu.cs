@@ -36,21 +36,24 @@ namespace OpenTS2.UI.Layouts
         private int _currentPage = 0;
         protected override ResourceKey UILayoutResourceKey => new ResourceKey(0x49001017, 0xA99D8A11, TypeIDs.UI);
         
-        public MainMenu() : this(MainCanvas)
+        public MainMenu(bool fromNeighborhood = false) : this(MainCanvas, fromNeighborhood)
         {
             
         }
 
-        public MainMenu(Transform canvas) : base(canvas)
+        public MainMenu(Transform canvas, bool fromNeighborhood = false) : base(canvas)
         {
             var root = Components[0];
             root.SetAnchor(UIComponent.AnchorType.Center);
             root.transform.SetAsFirstSibling();
 
-            var background = root.GetChildByID(BackgroundID);
-            background.gameObject.SetActive(true);
-            background.SetAnchor(UIComponent.AnchorType.Center);
-            background.transform.SetAsFirstSibling();
+            if (!fromNeighborhood)
+            {
+                var background = root.GetChildByID(BackgroundID);
+                background.gameObject.SetActive(true);
+                background.SetAnchor(UIComponent.AnchorType.Center);
+                background.transform.SetAsFirstSibling();
+            }
 
             var upperLeftSim = root.GetChildByID<UIBMPComponent>(UpperLeftSimBMPID);
             var lowerRightSim = root.GetChildByID<UIBMPComponent>(LowerRightSimBMPID);
