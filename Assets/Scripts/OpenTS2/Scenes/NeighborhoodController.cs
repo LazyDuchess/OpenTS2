@@ -8,20 +8,10 @@ namespace OpenTS2.Scenes
 {
     public class NeighborhoodController : MonoBehaviour
     {
-        public GameObject Terrain;
         // Start is called before the first frame update
         void Start()
         {
             var hud = new NeighborhoodHUD();
-            SetTerrainMesh();
-        }
-
-        void SetTerrainMesh()
-        {
-            var terrainAsset = NeighborhoodManager.CurrentNeighborhood.Terrain;
-            var terrainMesh = terrainAsset.MakeMesh();
-            var meshFilter = Terrain.GetComponent<MeshFilter>();
-            meshFilter.sharedMesh = terrainMesh;
         }
     }
 }
