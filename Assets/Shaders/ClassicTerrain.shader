@@ -36,6 +36,7 @@ Shader "OpenTS2/ClassicTerrain"
             struct v2f
             {
                 float2 uv : TEXCOORD0;
+                float2 matcapUv : TEXCOORD1;
                 UNITY_FOG_COORDS(1)
                 float4 vertex : SV_POSITION;
             };
@@ -64,15 +65,18 @@ Shader "OpenTS2/ClassicTerrain"
                 //o.uv = float2(lightDotRight, lightDot) - float2(v.color.x,v.color.x) + float2(0.4,0.4);
                 //o.uv.x = max(0.2, o.uv.x);
                 //o.uv.y = max(0.2, o.uv.y);
-                o.uv = max(0,((float2(lightDot, lightDot) + float2(lightDotRight, 0.0)) * -(v.color.x - 1)) - _Subtract);
-                o.uv += float2(_Ambient, _Ambient);
+                o.matcapUv = max(0,((float2(lightDot, lightDot) + float2(lightDotRight, 0.0)) * -(v.color.x - 1)) - _Subtract);
+                o.matcapUv += float2(_Ambient, _Ambient);
+                o.uv = float2(v.vertex.x, v.vertex.z) * float2(_MainTex_ST.x, _MainTex_ST.y);
+                o.uv += float2(_MainTex_ST.z, _MainTex_ST.w);
                 return o;
             }
 
             fixed4 frag (v2f i) : SV_Target
             {
                 // sample the texture
-                fixed4 col = tex2D(_MatCap, i.uv);
+                fixed4 col = tex2D(_MainTex, i.uv) * tex2D(_MatCap, i.matcapUv)
+                //fixed4 col = ;
             //col.z = 0;
             //col.x = i.uv.x;
             //col.y = i.uv.y;

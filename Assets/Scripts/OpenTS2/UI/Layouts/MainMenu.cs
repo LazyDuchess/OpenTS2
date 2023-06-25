@@ -57,79 +57,93 @@ namespace OpenTS2.UI.Layouts
             if (!fromNeighborhood)
             {
                 var background = root.GetChildByID(BackgroundID);
-                background.gameObject.SetActive(true);
-                background.SetAnchor(UIComponent.AnchorType.Center);
-                background.transform.SetAsFirstSibling();
+                if (background != null)
+                {
+                    background.gameObject.SetActive(true);
+                    background.SetAnchor(UIComponent.AnchorType.Center);
+                    background.transform.SetAsFirstSibling();
+                }
                 var quitButton = Components[0].GetChildByID<UIButtonComponent>(QuitButtonID);
-                quitButton.OnClick += OnQuit;
+                if (quitButton != null)
+                {
+                    quitButton.OnClick += OnQuit;
+                }
             }
             else
             {
                 var onInitialLoadUI = root.GetChildByID(OnInitialLoadID);
                 var fromNeighborhoodUI = root.GetChildByID(FromNeighborhoodID);
-                onInitialLoadUI.gameObject.SetActive(false);
-                fromNeighborhoodUI.gameObject.SetActive(true);
+                if (onInitialLoadUI != null)
+                    onInitialLoadUI.gameObject.SetActive(false);
+                if (fromNeighborhoodUI != null)
+                    fromNeighborhoodUI.gameObject.SetActive(true);
                 var quitButton = Components[0].GetChildByID<UIButtonComponent>(NeighborhoodQuitButtonID);
-                quitButton.OnClick += OnQuit;
+                if (quitButton != null)
+                    quitButton.OnClick += OnQuit;
                 var closeButton = Components[0].GetChildByID<UIButtonComponent>(NeighborhoodCloseButtonID);
-                closeButton.OnClick += DoClose;
+                if (closeButton != null)
+                    closeButton.OnClick += DoClose;
             }
 
             var upperLeftSim = root.GetChildByID<UIBMPComponent>(UpperLeftSimBMPID);
             var lowerRightSim = root.GetChildByID<UIBMPComponent>(LowerRightSimBMPID);
 
-            // IDs for the textures for the Sims are stored in a constants table UI element.
-            var constantsTable = root.GetChildByID(ConstantsTableID);
-            var constantComponents = constantsTable.Children;
-
-            var upperLeftKeys = new List<ResourceKey>();
-            var lowerRightKeys = new List<ResourceKey>();
-
-            // Read the constants inside the constants table.
-            foreach(var uiComponent in constantComponents)
+            if (upperLeftSim != null && lowerRightSim != null)
             {
-                var constant = UIUtils.GetConstant(uiComponent.Element.Caption);
-                var isUpperLeft = false;
-                var valid = false;
-                switch(constant.Key)
+
+                // IDs for the textures for the Sims are stored in a constants table UI element.
+                var constantsTable = root.GetChildByID(ConstantsTableID);
+                var constantComponents = constantsTable.Children;
+
+                var upperLeftKeys = new List<ResourceKey>();
+                var lowerRightKeys = new List<ResourceKey>();
+
+                // Read the constants inside the constants table.
+                foreach (var uiComponent in constantComponents)
                 {
-                    case "kUpperLeft":
-                        isUpperLeft = true;
-                        valid = true;
-                        break;
-                    case "kLowerRight":
-                        isUpperLeft = false;
-                        valid = true;
-                        break;
-                }
-                if (!string.IsNullOrWhiteSpace(constant.Value) && valid)
-                {
-                    var stringlist = UIUtils.GetCharSeparatedList(constant.Value, ';');
-                    foreach(var str in stringlist)
+                    var constant = UIUtils.GetConstant(uiComponent.Element.Caption);
+                    var isUpperLeft = false;
+                    var valid = false;
+                    switch (constant.Key)
                     {
-                        var instanceID = Convert.ToUInt32(str, 16);
-                        var key = new ResourceKey(instanceID, 0x499DB772, TypeIDs.IMG);
-                        if (isUpperLeft)
-                            upperLeftKeys.Add(key);
-                        else
-                            lowerRightKeys.Add(key);
+                        case "kUpperLeft":
+                            isUpperLeft = true;
+                            valid = true;
+                            break;
+                        case "kLowerRight":
+                            isUpperLeft = false;
+                            valid = true;
+                            break;
+                    }
+                    if (!string.IsNullOrWhiteSpace(constant.Value) && valid)
+                    {
+                        var stringlist = UIUtils.GetCharSeparatedList(constant.Value, ';');
+                        foreach (var str in stringlist)
+                        {
+                            var instanceID = Convert.ToUInt32(str, 16);
+                            var key = new ResourceKey(instanceID, 0x499DB772, TypeIDs.IMG);
+                            if (isUpperLeft)
+                                upperLeftKeys.Add(key);
+                            else
+                                lowerRightKeys.Add(key);
+                        }
                     }
                 }
+
+                var contentProvider = ContentProvider.Get();
+
+                // Assign random images to the Sims.
+                var keyAmount = Mathf.Min(upperLeftKeys.Count, lowerRightKeys.Count);
+                var simTextureIndex = UnityEngine.Random.Range(0, keyAmount);
+
+                var upperLeftKey = upperLeftKeys[simTextureIndex];
+                var lowerRightKey = lowerRightKeys[simTextureIndex];
+
+                upperLeftSim.SetTexture(contentProvider.GetAsset<TextureAsset>(upperLeftKey));
+                lowerRightSim.SetTexture(contentProvider.GetAsset<TextureAsset>(lowerRightKey));
+                upperLeftSim.Color = Color.white;
+                lowerRightSim.Color = Color.white;
             }
-
-            var contentProvider = ContentProvider.Get();
-
-            // Assign random images to the Sims.
-            var keyAmount = Mathf.Min(upperLeftKeys.Count, lowerRightKeys.Count);
-            var simTextureIndex = UnityEngine.Random.Range(0, keyAmount);
-
-            var upperLeftKey = upperLeftKeys[simTextureIndex];
-            var lowerRightKey = lowerRightKeys[simTextureIndex];
-
-            upperLeftSim.SetTexture(contentProvider.GetAsset<TextureAsset>(upperLeftKey));
-            lowerRightSim.SetTexture(contentProvider.GetAsset<TextureAsset>(lowerRightKey));
-            upperLeftSim.Color = Color.white;
-            lowerRightSim.Color = Color.white;
 
             CreateNeighborhoodIcons();
             UpdateNeighborhoods();

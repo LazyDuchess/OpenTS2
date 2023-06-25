@@ -1,6 +1,7 @@
 using OpenTS2.Common;
 using OpenTS2.Content;
 using OpenTS2.Content.DBPF;
+using OpenTS2.Content.DBPF.Scenegraph;
 using OpenTS2.Engine;
 using OpenTS2.Files.Formats.DBPF;
 using System.Collections;
@@ -20,8 +21,11 @@ namespace OpenTS2.Scenes
         public Transform Sun;
         public bool Reload = false;
         private static ResourceKey DayTimeMatCapKey = new ResourceKey(0x0BE702EF, 0x8BA01057, TypeIDs.IMG);
+        private static ResourceKey TemperateWetKey = new ResourceKey(0xFFFB3AC6, 0x4B3FEBD4, 0x1C0532FA, TypeIDs.SCENEGRAPH_TXTR);
+        //private static ResourceKey TemperateWetKey = new ResourceKey(0xFF354609, 0x1A9C59CC, 0x1C0532FA, TypeIDs.SCENEGRAPH_TXTR);
         private Material _terrainMaterial;
         private TextureAsset _matcapAsset;
+        private ScenegraphTextureAsset _temperateWetTextureAsset;
         // Start is called before the first frame update
         void Start()
         {
@@ -29,10 +33,12 @@ namespace OpenTS2.Scenes
             _terrainMaterial = meshRenderer.material;
             _terrainMaterial.SetVector("_LightVector", Sun.forward);
             _matcapAsset = ContentProvider.Get().GetAsset<TextureAsset>(DayTimeMatCapKey);
+            _temperateWetTextureAsset = ContentProvider.Get().GetAsset<ScenegraphTextureAsset>(TemperateWetKey);
             if (_matcapAsset != null)
             {
                 _matcapAsset.Texture.wrapMode = TextureWrapMode.Clamp;
                 _terrainMaterial.SetTexture("_MatCap", _matcapAsset.Texture);
+                _terrainMaterial.mainTexture = _temperateWetTextureAsset.GetSelectedImageAsUnityTexture(ContentProvider.Get());
             }
             SetTerrainMesh();
         }

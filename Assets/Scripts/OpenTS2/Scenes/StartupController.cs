@@ -101,8 +101,15 @@ namespace OpenTS2.Scenes
             NeighborhoodManager.Initialize();
             CursorController.Cursor = CursorController.CursorType.Default;
             Debug.Log("All loaded");
-            var mainMenu = new MainMenu();
             FadeOutLoading();
+            try
+            {
+                var mainMenu = new MainMenu();
+            }
+            catch(Exception e)
+            {
+                Debug.Log(e.ToString());
+            }
         }
 
         void FadeOutLoading()

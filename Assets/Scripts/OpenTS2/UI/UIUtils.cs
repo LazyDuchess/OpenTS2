@@ -70,7 +70,7 @@ namespace OpenTS2.UI
             var centerRight = vSequences2[1];
             var bottomRight = vSequences2[2];
 
-            var finalEdgeImage = new Texture2D(width, height, texture.format, texture.mipmapCount, false);
+            var finalEdgeImage = new Texture2D(width, height, texture.format, 1, false);
             finalEdgeImage.name = texture.name;
             finalEdgeImage.filterMode = texture.filterMode;
 
@@ -156,7 +156,7 @@ namespace OpenTS2.UI
             {
                 var currentY = i * size;
                 var pixels = texture.GetPixels(0, currentY, texture.width, size);
-                var newTexture = new Texture2D(texture.width, size, texture.format, texture.mipmapCount, false);
+                var newTexture = new Texture2D(texture.width, size, texture.format, 1, false);
                 newTexture.SetPixels(0, 0, texture.width, size, pixels);
                 newTexture.Apply();
                 newTexture.name = texture.name;
@@ -173,7 +173,7 @@ namespace OpenTS2.UI
             {
                 var currentX = i * size;
                 var pixels = texture.GetPixels(currentX, 0, size, texture.height);
-                var newTexture = new Texture2D(size, texture.height, texture.format, texture.mipmapCount, false);
+                var newTexture = new Texture2D(size, texture.height, texture.format, 1, false);
                 newTexture.SetPixels(0,0,size,texture.height, pixels);
                 newTexture.Apply();
                 newTexture.name = texture.name;

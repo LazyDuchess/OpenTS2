@@ -370,7 +370,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   RayDistance: 2000
   RayBias: 1
-  BlurOffset: 0
+  BlurOffset: 8
   Sun: {fileID: 138079091}
   Reload: 0
 --- !u!1 &1015291787

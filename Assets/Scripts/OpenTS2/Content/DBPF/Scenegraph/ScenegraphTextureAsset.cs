@@ -18,6 +18,13 @@ namespace OpenTS2.Content.DBPF.Scenegraph
 
         private Texture2D _texture;
 
+        public override UnityEngine.Object[] GetUnmanagedResources()
+        {
+            if (_texture == null)
+                return new UnityEngine.Object[] { };
+            return new UnityEngine.Object[] { _texture };
+        }
+
         // TODO: Maybe we should just use `ContentProvider.Get` and compute this eagerly instead of having a
         //       ContentProvider passed in here. That way we could also drop having to store the full ImageDataBlock
         //       and just have the more compact Texture2D.
@@ -69,7 +76,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                 width /= 2;
                 height /= 2;
             }
-
+            texture.Apply();
             return texture;
         }
 
