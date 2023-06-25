@@ -50,6 +50,7 @@ namespace OpenTS2.UI.Layouts
             CursorController.Cursor = CursorController.CursorType.Hourglass;
             if (_mainMenu != null)
                 return;
+            Components[0].gameObject.SetActive(false);
             _mainMenu = new MainMenu(true);
             _mainMenu.OnClose += OnMainMenuClose;
             CursorController.Cursor = CursorController.CursorType.Default;
@@ -57,6 +58,7 @@ namespace OpenTS2.UI.Layouts
 
         void OnMainMenuClose()
         {
+            Components[0].gameObject.SetActive(true);
             _mainMenu = null;
         }
     }

@@ -1,4 +1,8 @@
+using OpenTS2.Common;
 using OpenTS2.Content;
+using OpenTS2.Content.DBPF;
+using OpenTS2.Engine;
+using OpenTS2.Files.Formats.DBPF;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,6 +11,7 @@ namespace OpenTS2.Scenes
 {
     [RequireComponent(typeof(MeshFilter))]
     [RequireComponent(typeof(MeshCollider))]
+    [RequireComponent(typeof(MeshRenderer))]
     public class NeighborhoodTerrain : MonoBehaviour
     {
         public float RayDistance = 2000f;
@@ -14,16 +19,35 @@ namespace OpenTS2.Scenes
         public float BlurOffset = 10f;
         public Transform Sun;
         public bool Reload = false;
+        private static ResourceKey DayTimeMatCapKey = new ResourceKey(0x0BE702EF, 0x8BA01057, TypeIDs.IMG);
+        private Material _terrainMaterial;
+        private TextureAsset _matcapAsset;
         // Start is called before the first frame update
         void Start()
         {
+            var meshRenderer = GetComponent<MeshRenderer>();
+            _terrainMaterial = meshRenderer.material;
+            _terrainMaterial.SetVector("_LightVector", Sun.forward);
+            _matcapAsset = ContentProvider.Get().GetAsset<TextureAsset>(DayTimeMatCapKey);
+            if (_matcapAsset != null)
+            {
+                _matcapAsset.Texture.wrapMode = TextureWrapMode.Clamp;
+                _terrainMaterial.SetTexture("_MatCap", _matcapAsset.Texture);
+            }
             SetTerrainMesh();
+        }
+
+        private void OnDestroy()
+        {
+            if (_terrainMaterial != null)
+                _terrainMaterial.Free();
         }
 
         private void Update()
         {
             if (Reload)
             {
+                _terrainMaterial.SetVector("_LightVector", Sun.forward);
                 var meshFilter = GetComponent<MeshFilter>();
                 MakeVertexColors(meshFilter.sharedMesh);
                 Reload = false;

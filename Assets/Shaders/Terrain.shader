@@ -19,6 +19,7 @@ Shader "OpenTS2/Terrain" {
               half NdotL = max(0,dot(s.Normal, lightDir));
               half4 c;
               atten -= s.Shadow;
+              atten = max(atten, 0.0);
               float3 shading = _LightColor0.rgb * (NdotL * atten);
               c.rgb = s.Albedo * shading;
               

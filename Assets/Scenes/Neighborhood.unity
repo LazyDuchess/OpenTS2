@@ -20,7 +20,7 @@ RenderSettings:
   m_FogDensity: 0.01
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
-  m_AmbientSkyColor: {r: 0.57818615, g: 0.6051374, b: 0.6698113, a: 1}
+  m_AmbientSkyColor: {r: 0.50980395, g: 0.50980395, b: 0.5647059, a: 1}
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
   m_AmbientIntensity: 1
@@ -151,7 +151,7 @@ Light:
   serializedVersion: 10
   m_Type: 1
   m_Shape: 0
-  m_Color: {r: 1, g: 0.94902664, b: 0.740566, a: 1}
+  m_Color: {r: 0.9433962, g: 0.8287357, b: 0.50284797, a: 1}
   m_Intensity: 0.7
   m_Range: 10
   m_SpotAngle: 30
@@ -209,13 +209,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 138079089}
-  m_LocalRotation: {x: -0.272682, y: 0.01046926, z: -0.28817546, w: -0.9178725}
-  m_LocalPosition: {x: 0, y: 3, z: 0}
+  m_LocalRotation: {x: 0.27918786, y: -0.3048527, z: 0.10756134, w: 0.90418446}
+  m_LocalPosition: {x: 664.5133, y: 363.00726, z: 489.0098}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 30.438, y: 9.206, z: 397.37}
+  m_LocalEulerAnglesHint: {x: 34.782, y: -36.733, z: 1.695}
 --- !u!1 &609160697
 GameObject:
   m_ObjectHideFlags: 0
@@ -369,8 +369,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   RayDistance: 2000
-  RayBias: 8
-  BlurOffset: 10
+  RayBias: 1
+  BlurOffset: 0
   Sun: {fileID: 138079091}
   Reload: 0
 --- !u!1 &1015291787
@@ -619,7 +619,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.3207547, g: 0.3207547, b: 0.3207547, a: 0}
+  m_BackGroundColor: {r: 0.40784314, g: 0.8392157, b: 1, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
