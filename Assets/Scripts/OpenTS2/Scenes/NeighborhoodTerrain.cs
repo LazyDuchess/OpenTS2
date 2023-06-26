@@ -20,25 +20,31 @@ namespace OpenTS2.Scenes
         public float BlurOffset = 10f;
         public Transform Sun;
         public bool Reload = false;
+        public bool Realtime = false;
         private static ResourceKey DayTimeMatCapKey = new ResourceKey(0x0BE702EF, 0x8BA01057, TypeIDs.IMG);
         private static ResourceKey TemperateWetKey = new ResourceKey(0xFFFB3AC6, 0x4B3FEBD4, 0x1C0532FA, TypeIDs.SCENEGRAPH_TXTR);
+        private static ResourceKey CliffKey = new ResourceKey(0xFFF56CAE, 0x6E80B6A1, 0x1C0532FA, TypeIDs.SCENEGRAPH_TXTR);
         //private static ResourceKey TemperateWetKey = new ResourceKey(0xFF354609, 0x1A9C59CC, 0x1C0532FA, TypeIDs.SCENEGRAPH_TXTR);
         private Material _terrainMaterial;
         private TextureAsset _matcapAsset;
         private ScenegraphTextureAsset _temperateWetTextureAsset;
+        private ScenegraphTextureAsset _cliffTextureAsset;
         // Start is called before the first frame update
         void Start()
         {
+            var contentProvider = ContentProvider.Get();
             var meshRenderer = GetComponent<MeshRenderer>();
             _terrainMaterial = meshRenderer.material;
             _terrainMaterial.SetVector("_LightVector", Sun.forward);
-            _matcapAsset = ContentProvider.Get().GetAsset<TextureAsset>(DayTimeMatCapKey);
-            _temperateWetTextureAsset = ContentProvider.Get().GetAsset<ScenegraphTextureAsset>(TemperateWetKey);
+            _matcapAsset = contentProvider.GetAsset<TextureAsset>(DayTimeMatCapKey);
+            _temperateWetTextureAsset = contentProvider.GetAsset<ScenegraphTextureAsset>(TemperateWetKey);
+            _cliffTextureAsset = contentProvider.GetAsset<ScenegraphTextureAsset>(CliffKey);
             if (_matcapAsset != null)
             {
                 _matcapAsset.Texture.wrapMode = TextureWrapMode.Clamp;
                 _terrainMaterial.SetTexture("_MatCap", _matcapAsset.Texture);
-                _terrainMaterial.mainTexture = _temperateWetTextureAsset.GetSelectedImageAsUnityTexture(ContentProvider.Get());
+                _terrainMaterial.SetTexture("_CliffTex", _cliffTextureAsset.GetSelectedImageAsUnityTexture(contentProvider));
+                _terrainMaterial.mainTexture = _temperateWetTextureAsset.GetSelectedImageAsUnityTexture(contentProvider);
             }
             SetTerrainMesh();
         }
@@ -51,7 +57,7 @@ namespace OpenTS2.Scenes
 
         private void Update()
         {
-            if (Reload)
+            if (Reload || Realtime)
             {
                 _terrainMaterial.SetVector("_LightVector", Sun.forward);
                 var meshFilter = GetComponent<MeshFilter>();

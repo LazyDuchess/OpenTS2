@@ -1,11 +1,10 @@
 // Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
 
-Shader "OpenTS2/ClassicTerrain"
+Shader "OpenTS2/ClassicTerrainScreen"
 {
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
-        _CliffTex("Cliff Texture", 2D) = "white" {}
         _MatCap("MatCap", 2D) = "white" {}
         _LightVector("Light Vector", Vector) = (.33, .33, -.33, 0)
         _Ambient("Ambient", float) = 0
@@ -41,12 +40,10 @@ Shader "OpenTS2/ClassicTerrain"
                 UNITY_FOG_COORDS(1)
                 float4 vertex : SV_POSITION;
                 float4 color : COLOR;
-                float cliff : TEXCOORD2;
             };
 
             sampler2D _MainTex;
             sampler2D _MatCap;
-            sampler2D _CliffTex;
             float4 _MainTex_ST;
             float4 _LightVector;
             float _Subtract;
@@ -56,6 +53,11 @@ Shader "OpenTS2/ClassicTerrain"
             {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
+                o.vertex.xyz = float4(v.vertex.x-128*5, v.vertex.z -128*5, 0, 800);
+                float vertX = o.vertex.x;
+                o.vertex.x = o.vertex.y;
+                o.vertex.y = vertX;
+                o.vertex.w = 128*5;
                 //o.vertex = float4(v.vertex.x/128, v.vertex.z/128, 0, 0);
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
                 UNITY_TRANSFER_FOG(o,o.vertex);
@@ -75,17 +77,13 @@ Shader "OpenTS2/ClassicTerrain"
                 o.uv = float2(v.vertex.x, v.vertex.z) * float2(_MainTex_ST.x, _MainTex_ST.y);
                 o.uv += float2(_MainTex_ST.x, _MainTex_ST.y);
                 o.color = v.color;
-                o.cliff = max(0,min(1,pow(-(dot(worldNormal, float3(0.0, 1.0, 0.0)) - 1), 2) * 3));
                 return o;
             }
 
             fixed4 frag(v2f i) : SV_Target
             {
                 // sample the texture
-                fixed4 col = tex2D(_MainTex, i.uv);
-            fixed4 cliffCol = tex2D(_CliffTex, i.uv);
-            col = lerp(col, cliffCol, i.cliff);
-            col *= tex2D(_MatCap, i.matcapUv);
+                fixed4 col = tex2D(_MainTex, i.uv) * tex2D(_MatCap, i.matcapUv);
                 //fixed4 col = ;
             //col.z = 0;
             //col.x = i.uv.x;
