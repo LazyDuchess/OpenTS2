@@ -5,6 +5,8 @@ Shader "OpenTS2/ClassicTerrain"
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
+        _Variation1("Variation 1", 2D) = "white" {}
+        _Variation2("Variation 2", 2D) = "white" {}
         _CliffTex("Cliff Texture", 2D) = "white" {}
         _MatCap("MatCap", 2D) = "white" {}
         _LightVector("Light Vector", Vector) = (.33, .33, -.33, 0)
@@ -45,6 +47,8 @@ Shader "OpenTS2/ClassicTerrain"
             };
 
             sampler2D _MainTex;
+            sampler2D _Variation1;
+            sampler2D _Variation2;
             sampler2D _MatCap;
             sampler2D _CliffTex;
             float4 _MainTex_ST;
@@ -83,9 +87,15 @@ Shader "OpenTS2/ClassicTerrain"
             {
                 // sample the texture
                 fixed4 col = tex2D(_MainTex, i.uv);
+            if (i.color.g >= 0.999999)
+                col = tex2D(_Variation1, i.uv);
+            if (i.color.b >= 0.999999)
+                col = tex2D(_Variation2, i.uv);
             fixed4 cliffCol = tex2D(_CliffTex, i.uv);
             col = lerp(col, cliffCol, i.cliff);
             col *= tex2D(_MatCap, i.matcapUv);
+            
+            //col = i.color;
                 //fixed4 col = ;
             //col.z = 0;
             //col.x = i.uv.x;
