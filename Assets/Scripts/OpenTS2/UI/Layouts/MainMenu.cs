@@ -161,6 +161,7 @@ namespace OpenTS2.UI.Layouts
             _neighborhoodPreview.Hide();
             _neighborhoodPreview.OnShow += Shade;
             _neighborhoodPreview.OnHide += Unshade;
+            _neighborhoodPreview.OnTryEnterActiveNeighborhood += DoClose;
         }
 
         void Shade()

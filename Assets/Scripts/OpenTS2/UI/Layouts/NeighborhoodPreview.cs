@@ -16,6 +16,7 @@ namespace OpenTS2.UI.Layouts
     /// </summary>
     public class NeighborhoodPreview : UILayoutInstance
     {
+        public Action OnTryEnterActiveNeighborhood;
         public Action OnHide;
         public Action OnShow;
         protected override ResourceKey UILayoutResourceKey => new ResourceKey(0x49001021, 0xA99D8A11, TypeIDs.UI);
@@ -67,6 +68,12 @@ namespace OpenTS2.UI.Layouts
         {
             if (_neighborhood == null)
                 return;
+            if (NeighborhoodManager.CurrentNeighborhood == _neighborhood)
+            {
+                Hide();
+                OnTryEnterActiveNeighborhood?.Invoke();
+                return;
+            }
             NeighborhoodManager.EnterNeighborhood(_neighborhood);
         }
 
