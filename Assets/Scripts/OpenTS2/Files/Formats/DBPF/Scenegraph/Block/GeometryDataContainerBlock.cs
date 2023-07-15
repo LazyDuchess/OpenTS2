@@ -1,4 +1,6 @@
-﻿using OpenTS2.Files.Formats.DBPF.Scenegraph.Block.GeometryData;
+﻿using System.Collections.Generic;
+using System.Linq;
+using OpenTS2.Files.Formats.DBPF.Scenegraph.Block.GeometryData;
 using OpenTS2.Files.Formats.DBPF.Types;
 using OpenTS2.Files.Utils;
 using UnityEngine;
@@ -11,6 +13,26 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
     public struct MeshGeometry
     {
         public Vector3[] Vertices;
+        public ushort[] Faces;
+    }
+
+    /// <summary>
+    /// "Linkages" on the wiki. This ties together a bunch of `GeometryElement`s together as a single component.
+    /// Primitives, known as "groups" on the wiki index into these components.
+    /// </summary>
+    public struct MeshComponent
+    {
+        public ushort[] GeometryElementIndices;
+    }
+
+    /// <summary>
+    /// Called "groups" on the wiki. These are named parts of the model that may be independent of one another such
+    /// as the bedding vs the frame of a bed model.
+    /// </summary>
+    public struct MeshPrimitive
+    {
+        public string Name;
+        public uint ComponentIndex;
         public ushort[] Faces;
     }
 
@@ -27,6 +49,9 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
         /// </summary>
         public GeometryElement[] Elements { get; }
 
+        public MeshComponent[] Components { get; }
+        public MeshPrimitive[] Primitives { get; }
+
         /// <summary>
         /// Static bounding mesh for the whole model. Only used when there are no joints/bones.
         /// </summary>
@@ -39,8 +64,15 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
 
         public GeometryDataContainerBlock(PersistTypeInfo blockTypeInfo,
             ScenegraphResource resource, GeometryElement[] elements,
+            MeshComponent[] components, MeshPrimitive[] primitives,
             MeshGeometry staticBounds, MeshGeometry[] bonesBounds) : base(blockTypeInfo)
-            => (Resource, Elements, StaticBounds, BonesBounds) = (resource, elements, staticBounds, bonesBounds);
+            => (Resource, Elements, Components, Primitives, StaticBounds, BonesBounds) = (resource, elements,
+                components, primitives, staticBounds, bonesBounds);
+
+        public List<GeometryElement> GetGeometryElementsForPrimitive(MeshPrimitive primitive)
+        {
+            return Components[primitive.ComponentIndex].GeometryElementIndices.Select(elementIndex => Elements[elementIndex]).ToList();
+        }
     }
 
     public class GeometryDataContainerBlockReader : IScenegraphDataBlockReader<GeometryDataContainerBlock>
@@ -50,15 +82,13 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             var resource = ScenegraphResource.Deserialize(reader);
             var elements = ReadElementsSection(reader, blockTypeInfo);
 
-            // Read but ignore the data in the mesh components section for now.
-            ReadMeshComponentsSection(reader, blockTypeInfo);
-            // Read but ignore the data in the primitives section for now.
-            ReadPrimitivesSection(reader, blockTypeInfo);
+            var components = ReadMeshComponentsSection(reader, blockTypeInfo);
+            var primitives = ReadPrimitivesSection(reader, blockTypeInfo);
 
-            var geometry = ReadStaticBoundSection(reader, blockTypeInfo);
+            var staticBound = ReadStaticBoundSection(reader, blockTypeInfo);
             var bones = ReadBonesSection(reader, blockTypeInfo);
 
-            return new GeometryDataContainerBlock(blockTypeInfo, resource, elements, geometry, bones);
+            return new GeometryDataContainerBlock(blockTypeInfo, resource, elements, components, primitives, staticBound, bones);
         }
 
         private static ushort[] ReadIndices(IoBuffer reader, uint version)
@@ -103,9 +133,12 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             return elements;
         }
 
-        private static void ReadMeshComponentsSection(IoBuffer reader, PersistTypeInfo blockTypeInfo)
+        // These are called mesh components in the game and linkages on the wiki. They tie together sets of elements
+        // from the geometry elements.
+        private static MeshComponent[] ReadMeshComponentsSection(IoBuffer reader, PersistTypeInfo blockTypeInfo)
         {
             var numberOfComponents = reader.ReadUInt32();
+            var components = new MeshComponent[numberOfComponents];
             Debug.Log($"numberOfMeshComponents: {numberOfComponents}");
             for (var i = 0; i < numberOfComponents; i++)
             {
@@ -118,30 +151,42 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                 var positionClassIndices = ReadIndices(reader, blockTypeInfo.Version);
                 var surfaceClassIndices = ReadIndices(reader, blockTypeInfo.Version);
                 var materialClassIndices = ReadIndices(reader, blockTypeInfo.Version);
+
+                components[i] = new MeshComponent { GeometryElementIndices = eltArrayIndices };
             }
+
+            return components;
         }
 
-        private static void ReadPrimitivesSection(IoBuffer reader, PersistTypeInfo blockTypeInfo)
+        private static MeshPrimitive[] ReadPrimitivesSection(IoBuffer reader, PersistTypeInfo blockTypeInfo)
         {
             var numberOfPrimitives = reader.ReadUInt32();
+            var primitives = new MeshPrimitive[numberOfPrimitives];
+
             Debug.Log($"numberOfPrimitives: {numberOfPrimitives}");
             for (var i = 0; i < numberOfPrimitives; i++)
             {
                 reader.ReadUInt32();
-                reader.ReadUInt32();
+                var componentIndex = reader.ReadUInt32();
 
                 var primitiveName = reader.ReadVariableLengthPascalString();
                 Debug.Log($"primitive name: {primitiveName}");
 
-                ReadIndices(reader, blockTypeInfo.Version);
+                var faces = ReadIndices(reader, blockTypeInfo.Version);
 
                 // marked as opacity amount in simswiki
                 reader.ReadInt32();
 
-                if (blockTypeInfo.Version <= 1) continue;
+                if (blockTypeInfo.Version > 1)
+                {
+                    ReadIndices(reader, blockTypeInfo.Version);
+                }
 
-                ReadIndices(reader, blockTypeInfo.Version);
+                primitives[i] = new MeshPrimitive
+                    { Name = primitiveName, ComponentIndex = componentIndex, Faces = faces };
             }
+
+            return primitives;
         }
 
         private static MeshGeometry ReadGeometry(IoBuffer reader, uint version)

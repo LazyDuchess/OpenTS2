@@ -25,5 +25,13 @@
             // close approximation :)
             Assert.That(modelAsset.StaticBoundMesh.vertexCount, Is.EqualTo(3241));
             Assert.That(modelAsset.StaticBoundMesh.triangles.Length / 3, Is.EqualTo(6320));
+
+            // Make sure there's one primitive called `teapot`
+            Assert.That(modelAsset.Primitives.Count, Is.EqualTo(1));
+            Assert.That(modelAsset.Primitives.ContainsKey("teapot"), Is.True);
+
+            var teapotPrimitive = modelAsset.Primitives["teapot"];
+            Assert.That(teapotPrimitive.vertexCount, Is.EqualTo(13248));
+            Assert.That(teapotPrimitive.triangles.Length / 3, Is.EqualTo(6320));
         }
     }

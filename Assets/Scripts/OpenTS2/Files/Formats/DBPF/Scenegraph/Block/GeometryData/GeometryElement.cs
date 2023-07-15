@@ -53,6 +53,12 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block.GeometryData
         public const uint Vertices = 0x5b830781;
         public const uint Tangents = 0x89d92ba0;
         public const uint UVMap = 0xbb8307ab;
+
+        /// <summary>
+        /// The wiki claims this is a "UV Coordinate Delta" but the game seems to have three sets of these elements and
+        /// they're called `color`. Each element seems to be an `unsigned long` with a packed ARGB color value.
+        /// </summary>
+        public const uint Color = 0xdb830795;
     }
 
     /// <summary>
@@ -72,6 +78,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block.GeometryData
                 GeometryElementIds.Vertices => new VertexElement(elementData),
                 GeometryElementIds.Tangents => new TangentElement(elementData),
                 GeometryElementIds.UVMap => new UVMapElement(elementData),
+                GeometryElementIds.Color => new ColorElement(elementData),
                 _ => throw new ArgumentException($"Unknown geometry element id {elementId:X}")
             };
         }
@@ -86,13 +93,11 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block.GeometryData
 
         protected Vec3Element(byte[] elementData)
         {
-            int numElements = elementData.Length / (3 * sizeof(float));
+            var numElements = elementData.Length / (3 * sizeof(float));
             Data = new Vector3[numElements];
 
-            Debug.Log($"elementData length: {elementData.Length}, numElements: {numElements}");
-
-            IoBuffer buffer = IoBuffer.FromBytes(elementData);
-            for (int i = 0; i < numElements; i++)
+            var buffer = IoBuffer.FromBytes(elementData);
+            for (var i = 0; i < numElements; i++)
             {
                 Data[i] = Vector3Serializer.Deserialize(buffer);
             }
@@ -108,13 +113,33 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block.GeometryData
 
         protected Vec2Element(byte[] elementData)
         {
-            int numElements = elementData.Length / (2 * sizeof(float));
+            var numElements = elementData.Length / (2 * sizeof(float));
             Data = new Vector2[numElements];
 
-            IoBuffer buffer = IoBuffer.FromBytes(elementData);
-            for (int i = 0; i < numElements; i++)
+            var buffer = IoBuffer.FromBytes(elementData);
+            for (var i = 0; i < numElements; i++)
             {
                 Data[i] = Vector2Serializer.Deserialize(buffer);
+            }
+        }
+    }
+
+    /// <summary>
+    /// A GeometryElement consisting of unsigned 32-bit values.
+    /// </summary>
+    public abstract class UnsignedInt32Element : GeometryElement
+    {
+        public uint[] Data { get; }
+
+        protected UnsignedInt32Element(byte[] elementData)
+        {
+            var numElements = elementData.Length / sizeof(uint);
+            Data = new uint[numElements];
+
+            var buffer = IoBuffer.FromBytes(elementData);
+            for (var i = 0; i < numElements; i++)
+            {
+                Data[i] = buffer.ReadUInt32();
             }
         }
     }
@@ -143,6 +168,13 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block.GeometryData
     public class UVMapElement : Vec2Element
     {
         public UVMapElement(byte[] elementData) : base(elementData)
+        {
+        }
+    }
+
+    public class ColorElement : UnsignedInt32Element
+    {
+        public ColorElement(byte[] elementData) : base(elementData)
         {
         }
     }
