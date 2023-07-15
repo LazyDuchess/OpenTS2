@@ -13,6 +13,7 @@ public class ScenegraphGMDCTest : MonoBehaviour
     
     public string PackageToLoad = "TestAssets/Scenegraph/teapot_model.package";
     public string ModelName = "teapot_tslocator_gmdc";
+    public string PrimitiveToShow = "teapot";
     
     private void Start()
     {
@@ -24,7 +25,15 @@ public class ScenegraphGMDCTest : MonoBehaviour
             new ResourceKey(ModelName, 0x1C0532FA, TypeIDs.SCENEGRAPH_GMDC));
         
         Debug.Log($"scenegraphModel: {scenegraphModel.GlobalTGI}");
+        Debug.Log($"primitives: {string.Join(" ", scenegraphModel.Primitives.Keys)}");
 
-        GetComponent<MeshFilter>().mesh = scenegraphModel.StaticBoundMesh;
+        if (scenegraphModel.Primitives.ContainsKey(PrimitiveToShow))
+        {
+            GetComponent<MeshFilter>().mesh = scenegraphModel.Primitives[PrimitiveToShow];
+        }
+        else
+        {
+            GetComponent<MeshFilter>().mesh = scenegraphModel.StaticBoundMesh;
+        }
     }
 }
