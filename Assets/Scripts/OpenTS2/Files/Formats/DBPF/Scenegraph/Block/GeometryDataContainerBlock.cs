@@ -1,4 +1,5 @@
-﻿using OpenTS2.Files.Formats.DBPF.Types;
+﻿using OpenTS2.Files.Formats.DBPF.Scenegraph.Block.GeometryData;
+using OpenTS2.Files.Formats.DBPF.Types;
 using OpenTS2.Files.Utils;
 using UnityEngine;
 
@@ -20,18 +21,26 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
         public override string BlockName => BLOCK_NAME;
 
         public ScenegraphResource Resource { get; }
+
+        /// <summary>
+        /// The elements contain the bulk of the data about the model such as the normal maps, vertices, uv maps etc.
+        /// </summary>
+        public GeometryElement[] Elements { get; }
+
         /// <summary>
         /// Static bounding mesh for the whole model. Only used when there are no joints/bones.
         /// </summary>
         public MeshGeometry StaticBounds { get; }
+
         /// <summary>
         /// Bounding meshes for the different bones of the model.
         /// </summary>
         public MeshGeometry[] BonesBounds { get; }
 
-        public GeometryDataContainerBlock(PersistTypeInfo blockTypeInfo, ScenegraphResource resource,
+        public GeometryDataContainerBlock(PersistTypeInfo blockTypeInfo,
+            ScenegraphResource resource, GeometryElement[] elements,
             MeshGeometry staticBounds, MeshGeometry[] bonesBounds) : base(blockTypeInfo)
-            => (Resource, StaticBounds, BonesBounds) = (resource, staticBounds, bonesBounds);
+            => (Resource, Elements, StaticBounds, BonesBounds) = (resource, elements, staticBounds, bonesBounds);
     }
 
     public class GeometryDataContainerBlockReader : IScenegraphDataBlockReader<GeometryDataContainerBlock>
@@ -39,20 +48,17 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
         public GeometryDataContainerBlock Deserialize(IoBuffer reader, PersistTypeInfo blockTypeInfo)
         {
             var resource = ScenegraphResource.Deserialize(reader);
-
-            // Read but ignore the data in the elements section for now.
-            ReadElementsSection(reader, blockTypeInfo);
+            var elements = ReadElementsSection(reader, blockTypeInfo);
 
             // Read but ignore the data in the mesh components section for now.
             ReadMeshComponentsSection(reader, blockTypeInfo);
-
             // Read but ignore the data in the primitives section for now.
             ReadPrimitivesSection(reader, blockTypeInfo);
 
             var geometry = ReadStaticBoundSection(reader, blockTypeInfo);
             var bones = ReadBonesSection(reader, blockTypeInfo);
 
-            return new GeometryDataContainerBlock(blockTypeInfo, resource, geometry, bones);
+            return new GeometryDataContainerBlock(blockTypeInfo, resource, elements, geometry, bones);
         }
 
         private static ushort[] ReadIndices(IoBuffer reader, uint version)
@@ -70,13 +76,15 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             return indicesArray;
         }
 
-        private static void ReadElementsSection(IoBuffer reader, PersistTypeInfo blockTypeInfo)
+        private static GeometryElement[] ReadElementsSection(IoBuffer reader, PersistTypeInfo blockTypeInfo)
         {
             var numberOfElements = reader.ReadUInt32();
+            var elements = new GeometryElement[numberOfElements];
+
             for (var i = 0; i < numberOfElements; i++)
             {
                 reader.ReadUInt32();
-                reader.ReadUInt32();
+                var elementId = reader.ReadUInt32();
                 reader.ReadUInt32();
                 reader.ReadUInt32();
                 reader.ReadUInt32();
@@ -84,10 +92,15 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                 // This data gets interpreted differently depending
                 // on the type of the element.
                 var size = reader.ReadUInt32();
-                reader.ReadBytes(size);
+                var data = reader.ReadBytes(size);
 
                 var indicesArray = ReadIndices(reader, blockTypeInfo.Version);
+
+                // TODO: for now this is just based on the element id and data, we might need to start parsing the rest.
+                elements[i] = GeometryElement.ReadElement(elementId, data);
             }
+
+            return elements;
         }
 
         private static void ReadMeshComponentsSection(IoBuffer reader, PersistTypeInfo blockTypeInfo)
@@ -185,6 +198,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             {
                 bones[i] = ReadGeometry(reader, blockTypeInfo.Version);
             }
+
             return bones;
         }
     }
