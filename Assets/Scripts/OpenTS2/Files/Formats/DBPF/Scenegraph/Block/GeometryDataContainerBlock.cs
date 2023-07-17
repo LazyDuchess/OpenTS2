@@ -163,23 +163,24 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             var numberOfPrimitives = reader.ReadUInt32();
             var primitives = new MeshPrimitive[numberOfPrimitives];
 
-            Debug.Log($"numberOfPrimitives: {numberOfPrimitives}");
             for (var i = 0; i < numberOfPrimitives; i++)
             {
-                reader.ReadUInt32();
+                var primitiveType = reader.ReadUInt32();
                 var componentIndex = reader.ReadUInt32();
 
                 var primitiveName = reader.ReadVariableLengthPascalString();
-                Debug.Log($"primitive name: {primitiveName}");
 
                 var faces = ReadIndices(reader, blockTypeInfo.Version);
 
-                // marked as opacity amount in simswiki
+                // TODO: this is actually the draw order for transparent objects. Lower values here mean the object
+                // should be drawn first. This is used for example in hot tubs where the shadow is drawn first, then
+                // the water, then the foam.
+                //   marked as opacity amount in simswiki
                 reader.ReadInt32();
 
                 if (blockTypeInfo.Version > 1)
                 {
-                    ReadIndices(reader, blockTypeInfo.Version);
+                    var remappedBoneIndices = ReadIndices(reader, blockTypeInfo.Version);
                 }
 
                 primitives[i] = new MeshPrimitive
