@@ -5,6 +5,11 @@ using UnityEngine;
 
 namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
 {
+    public enum MaterialType
+    {
+        StandardMaterial
+    }
+
     public class MaterialDefinitionBlock : ScenegraphDataBlock
     {
         public const uint TYPE_ID = 0x49596978;
@@ -12,6 +17,16 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
         public override string BlockName => BLOCK_NAME;
 
         public ScenegraphResource Resource { get; }
+
+        /// <summary>
+        /// The human-friendly name of the material.
+        /// </summary>
+        public string MaterialName { get; }
+
+        /// <summary>
+        /// The type of the material.
+        /// </summary>
+        public MaterialType Type { get; }
 
         /// <summary>
         /// A dictionary mapping material properties such as "reflectivity" -> "0.5" and
@@ -25,8 +40,10 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
         public string[] TextureNames { get; }
 
         public MaterialDefinitionBlock(PersistTypeInfo blockTypeInfo, ScenegraphResource resource,
+            string materialName, MaterialType type,
             Dictionary<string, string> materialProperties, string[] textureNames) : base(blockTypeInfo)
-            => (Resource, MaterialProperties, TextureNames) = (resource, materialProperties, textureNames);
+            => (Resource, MaterialName, Type, MaterialProperties, TextureNames) =
+                (resource, materialName, type, materialProperties, textureNames);
     }
 
     public class MaterialDefinitionBlockReader : IScenegraphDataBlockReader<MaterialDefinitionBlock>
@@ -39,7 +56,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
 
             var resource = ScenegraphResource.Deserialize(reader);
             var materialName = reader.ReadVariableLengthPascalString();
-            var definitionName = reader.ReadVariableLengthPascalString();
+            var definitionType = reader.ReadVariableLengthPascalString();
 
             var numberOfProperties = reader.ReadInt32();
             var properties = new Dictionary<string, string>(numberOfProperties);
@@ -55,7 +72,17 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                 textures[i] = reader.ReadVariableLengthPascalString();
             }
 
-            return new MaterialDefinitionBlock(blockTypeInfo, resource, properties, textures);
+            return new MaterialDefinitionBlock(blockTypeInfo, resource, materialName,
+                GetTypeFromTypeName(definitionType), properties, textures);
+        }
+
+        private static MaterialType GetTypeFromTypeName(string materialType)
+        {
+            return materialType switch
+            {
+                "StandardMaterial" => MaterialType.StandardMaterial,
+                _ => throw new ArgumentException($"Unknown material type: {materialType}")
+            };
         }
     }
 }

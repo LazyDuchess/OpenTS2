@@ -46,7 +46,7 @@ namespace OpenTS2.Files.Formats.DBPF
         /// </summary>
         public const uint Local = 0xFFFFFFFF;
         public const uint DIR = 0xE86B1EEF;
-        public const uint Scenegraph = 0x1C050000;
+        public const uint Scenegraph = 0x1C0532FA;
         public const uint Pop = 0xFF23C3BF;
     }
 }
