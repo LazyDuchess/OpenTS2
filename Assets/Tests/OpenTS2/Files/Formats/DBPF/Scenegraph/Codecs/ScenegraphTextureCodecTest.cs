@@ -84,4 +84,24 @@ public class ScenegraphTextureCodecTest
         // Check that the last mip is a LIFO reference.
         Assert.That(imageBlock.SubImages[0].MipMap[8], Is.InstanceOf<LifoReferenceMip>());
     }
+
+    [Test]
+    public void TestLoadsTextureThatSqueezesToOnePixel()
+    {
+        // This test is for an edge case of resolutions like 32x16 with 6 mip levels. If we naively go down the path
+        // of dividing the shorter side by 2 for each mip level we end up with:
+        //
+        // mip level:  6 -> 5 -> 4 -> 3 -> 2 -> 1
+        // pixels:    16 -> 8 -> 4 -> 2 -> 1 -> 0
+        //
+        // but we can't have a 1x0 resolution texture, so gotta make sure we clamp that lower value to at least 1
+        // pixel :)
+        var textureAsset =
+            ContentProvider.Get().GetAsset<ScenegraphTextureAsset>(new ResourceKey("small_non_square_txtr", 0x1C0532FA,
+                TypeIDs.SCENEGRAPH_TXTR));
+
+        // Check that the smallest mip is a 1x1 image.
+        var texture = textureAsset.GetSelectedImageAsUnityTexture(ContentProvider.Get());
+        Assert.That(texture.GetPixels32(5).Length, Is.EqualTo(1));
+    }
 }

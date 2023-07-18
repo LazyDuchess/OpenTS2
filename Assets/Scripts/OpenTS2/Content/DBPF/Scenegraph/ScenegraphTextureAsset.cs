@@ -73,8 +73,9 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                 texture.SetPixelData(pixelData, currentMipLevel);
 
                 currentMipLevel++;
-                width /= 2;
-                height /= 2;
+                // Make sure the width and height are always at least 1-pixel.
+                width = Math.Max(width / 2, 1);
+                height = Math.Max(height / 2, 1);
             }
             texture.Apply();
             return texture;
