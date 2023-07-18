@@ -26,13 +26,30 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             return defaultValue;
         }
 
+        // Stores the cached Material
+        private Material _material;
+
+        public override UnityEngine.Object[] GetUnmanagedResources()
+        {
+            if (_material == null)
+                return new UnityEngine.Object[] { };
+            return new UnityEngine.Object[] { _material };
+        }
+
         public Material GetAsUnityMaterial()
         {
-            return MaterialDefinition.Type switch
+            if (_material != null)
+            {
+                return _material;
+            }
+
+            var material = MaterialDefinition.Type switch
             {
                 MaterialType.StandardMaterial => GetStandardMaterial(),
                 _ => throw new ArgumentOutOfRangeException()
             };
+            _material = material;
+            return material;
         }
 
         private static readonly int AlphaCutOff = Shader.PropertyToID("_AlphaCutOff");
