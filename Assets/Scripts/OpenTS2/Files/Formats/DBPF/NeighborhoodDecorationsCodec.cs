@@ -47,8 +47,9 @@ namespace OpenTS2.Files.Formats.DBPF
         private static FloraDecoration[] ReadFlora(IoBuffer reader)
         {
             var version = reader.ReadUInt16();
-            // Versions above this are read differently but don't seem to exist in practice.
-            Debug.Assert(version >= 6);
+            // Versions above this are read differently (e.g they don't have individual objectVersion fields inside)
+            // but don't seem to exist in practice.
+            Debug.Assert(version > 7);
 
             var count = reader.ReadUInt32();
             var flora = new FloraDecoration[count];
@@ -57,21 +58,14 @@ namespace OpenTS2.Files.Formats.DBPF
             {
                 var position = ReadDecorationPosition(reader);
                 var objectVersion = reader.ReadByte();
+                // Same as above, there is code to handle versions below this in the game but these don't seem to exist
+                // and don't even have a rotation or GUID.
+                Debug.Assert(objectVersion > 7);
 
-                var rotation = 0.0f;
-                if (objectVersion >= 7)
-                {
-                    rotation = reader.ReadFloat();
-                }
-
+                var rotation = reader.ReadFloat();
                 position.Rotation = rotation;
 
-                uint objectId = 0;
-                if (objectVersion > 7)
-                {
-                    objectId = reader.ReadUInt32();
-                }
-
+                var objectId = reader.ReadUInt32();
                 flora[i] = new FloraDecoration(position, objectId);
             }
 

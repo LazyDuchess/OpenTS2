@@ -26,6 +26,7 @@ namespace OpenTS2.Files.Formats.DBPF
         public const uint NHOOD_INFO = 0xAC8A7A2E;
         // Called neighborhood "occupants" in game.
         public const uint NHOOD_DECORATIONS = 0xABD0DC63;
+        public const uint NHOOD_OBJECT = 0x6D619378;
         public const uint SCENEGRAPH_GMDC = Scenegraph.Block.GeometryDataContainerBlock.TYPE_ID;
         public const uint STR = 0x53545223;
         public const uint IMG = 0x856DDBAC;
