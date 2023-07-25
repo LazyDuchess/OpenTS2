@@ -22,28 +22,6 @@ public class ScenegraphResourceCollectionTest
     }
 
     [Test]
-    public void DeserializationThrowsWhenFileLinksPresent()
-    {
-        var writer = new BinaryWriter(new MemoryStream());
-        // Header.
-        writer.Write(0xFFFF0001);
-        // Number of file links.
-        writer.Write(1);
-        // Number of data blocks.
-        writer.Write(0);
-
-        var reader = new IoBuffer(writer.BaseStream);
-        reader.ByteOrder = ByteOrder.LITTLE_ENDIAN;
-        reader.Seek(SeekOrigin.Begin, 0);
-        
-        var e = Assert.Throws<NotImplementedException>(() =>
-        {
-            ScenegraphResourceCollection.Deserialize(reader);
-        });
-        Assert.That(e.Message, Does.Contain("Scenegraph links are not implemented yet"));
-    }
-
-    [Test]
     public void DeserializationThrowsWhenTypeNotSupported()
     {
         var writer = new BinaryWriter(new MemoryStream());

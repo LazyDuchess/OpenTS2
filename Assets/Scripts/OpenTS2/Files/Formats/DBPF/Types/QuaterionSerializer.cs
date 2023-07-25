@@ -1,5 +1,5 @@
-﻿using System.Numerics;
-using OpenTS2.Files.Utils;
+﻿using OpenTS2.Files.Utils;
+using UnityEngine;
 
 namespace OpenTS2.Files.Formats.DBPF.Types
 {
