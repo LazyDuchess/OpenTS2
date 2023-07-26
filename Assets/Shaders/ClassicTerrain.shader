@@ -87,9 +87,9 @@ Shader "OpenTS2/ClassicTerrain"
             {
                 // sample the texture
                 fixed4 col = tex2D(_MainTex, i.uv);
-            if (i.color.g >= 0.999999)
+            if (i.color.g >= 0.99)
                 col = tex2D(_Variation1, i.uv);
-            if (i.color.b >= 0.999999)
+            if (i.color.b >= 0.99)
                 col = tex2D(_Variation2, i.uv);
             fixed4 cliffCol = tex2D(_CliffTex, i.uv);
             col = lerp(col, cliffCol, i.cliff);
