@@ -144,9 +144,9 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                 var inputBlockDataIndex = i * 16;
 
                 // DXT3 stores 16 4-bit alpha values starting at `i`.
-                for (var j = 0; j < 4; j++)
+                for (var j = 0; j < Math.Min(4, width); j++)
                 {
-                    for (var k = 0; k < 4; k++)
+                    for (var k = 0; k < Math.Min(4, height); k++)
                     {
                         var pixelIndex = (j * 4) + k;
                         // Get the lower 4-bits if we're at pixels 0, 2, 4 etc or the higher 4-bits for even pixels.

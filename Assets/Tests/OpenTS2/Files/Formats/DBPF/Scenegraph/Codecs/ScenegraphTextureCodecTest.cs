@@ -104,4 +104,16 @@ public class ScenegraphTextureCodecTest
         var texture = textureAsset.GetSelectedImageAsUnityTexture(ContentProvider.Get());
         Assert.That(texture.GetPixels32(5).Length, Is.EqualTo(1));
     }
+
+    [Test]
+    public void TestLoadsSixteenBySixtyFourDxt3Texture()
+    {
+        // DXT3 blocks are 4x4 but in this situation we end up with a width of 2 and height of 8. Make sure our block
+        // iteration loop can handle that.
+        var textureAsset = ContentProvider.Get().GetAsset<ScenegraphTextureAsset>(new ResourceKey("neighborhood-stopsign_txtr", 0x1C0532FA,
+            TypeIDs.SCENEGRAPH_TXTR));
+
+        var texture = textureAsset.GetSelectedImageAsUnityTexture(ContentProvider.Get());
+        Assert.That(texture.GetPixels32(6).Length, Is.EqualTo(1));
+    }
 }
