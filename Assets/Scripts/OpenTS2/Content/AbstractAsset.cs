@@ -101,9 +101,9 @@ namespace OpenTS2.Content
             return clone;
         }
 
-        public virtual UnityEngine.Object[] GetUnmanagedResources()
+        public virtual void FreeUnmanagedResources()
         {
-            return new UnityEngine.Object[] { };
+            
         }
 
         public Action OnDispose;
@@ -114,7 +114,7 @@ namespace OpenTS2.Content
             {
                 Disposed = true;
                 OnDispose?.Invoke();
-                MemoryController.MarkForRemoval(GetUnmanagedResources());
+                MemoryController.MarkForRemoval(FreeUnmanagedResources);
             }
         }
 

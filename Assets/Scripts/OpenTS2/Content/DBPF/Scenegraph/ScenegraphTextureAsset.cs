@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using OpenTS2.Common;
+using OpenTS2.Engine;
 using OpenTS2.Files.Formats.DBPF;
 using OpenTS2.Files.Formats.DBPF.Scenegraph.Block;
 using UnityEngine;
@@ -18,11 +19,11 @@ namespace OpenTS2.Content.DBPF.Scenegraph
 
         private Texture2D _texture;
 
-        public override UnityEngine.Object[] GetUnmanagedResources()
+        public override void FreeUnmanagedResources()
         {
             if (_texture == null)
-                return new UnityEngine.Object[] { };
-            return new UnityEngine.Object[] { _texture };
+                return;
+            _texture.Free();
         }
 
         // TODO: Maybe we should just use `ContentProvider.Get` and compute this eagerly instead of having a

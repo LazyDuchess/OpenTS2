@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using OpenTS2.Common;
+using OpenTS2.Engine;
 using OpenTS2.Files.Formats.DBPF;
 using OpenTS2.Files.Formats.DBPF.Scenegraph.Block;
 using UnityEngine;
@@ -31,11 +32,11 @@ namespace OpenTS2.Content.DBPF.Scenegraph
         // Stores the cached Material
         private Material _material;
 
-        public override UnityEngine.Object[] GetUnmanagedResources()
+        public override void FreeUnmanagedResources()
         {
             if (_material == null)
-                return new UnityEngine.Object[] { };
-            return new UnityEngine.Object[] { _material };
+                return;
+            _material.Free();
         }
 
         public Material GetAsUnityMaterial()

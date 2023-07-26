@@ -1,4 +1,5 @@
-﻿using OpenTS2.Files.Formats.DBPF.Scenegraph;
+﻿using OpenTS2.Components;
+using OpenTS2.Files.Formats.DBPF.Scenegraph;
 using OpenTS2.Files.Formats.DBPF.Scenegraph.Block;
 using UnityEngine;
 
@@ -28,9 +29,9 @@ namespace OpenTS2.Content.DBPF.Scenegraph
 
             Debug.Log($"materials: {string.Join(", ", shape.Materials.Keys)}");
 
-            var gameObject = new GameObject(resourceName, typeof(MeshFilter), typeof(MeshRenderer), typeof(ScenegraphShapeComponent));
+            var gameObject = new GameObject(resourceName, typeof(MeshFilter), typeof(MeshRenderer), typeof(AssetReferenceComponent));
             // Keeps a strong reference to the Shape asset.
-            gameObject.GetComponent<ScenegraphShapeComponent>().Shape = shape;
+            gameObject.GetComponent<AssetReferenceComponent>().AddReference(shape);
             // Render out each model.
             foreach (var model in shape.Models)
             {

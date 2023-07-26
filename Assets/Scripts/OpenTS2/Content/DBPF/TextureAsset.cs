@@ -4,6 +4,7 @@
  * http://mozilla.org/MPL/2.0/. 
  */
 
+using OpenTS2.Engine;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,9 +24,11 @@ namespace OpenTS2.Content.DBPF
             _texture2D = texture2D;
         }
 
-        public override UnityEngine.Object[] GetUnmanagedResources()
+        public override void FreeUnmanagedResources()
         {
-            return new UnityEngine.Object[] { _texture2D };
+            if (_texture2D == null)
+                return;
+            _texture2D.Free();
         }
         Texture2D _texture2D;
         public Texture2D Texture => _texture2D;
