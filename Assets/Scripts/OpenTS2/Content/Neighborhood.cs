@@ -15,7 +15,7 @@ namespace OpenTS2.Content
 {
     public class Neighborhood
     {
-        public NeighborhoodDecorationsAsset Deocrations => ContentProvider.Get()
+        public NeighborhoodDecorationsAsset Decorations => ContentProvider.Get()
             .GetAsset<NeighborhoodDecorationsAsset>(new ResourceKey(0, GroupID, TypeIDs.NHOOD_DECORATIONS));
         public NeighborhoodTerrainAsset Terrain => ContentProvider.Get().GetAsset<NeighborhoodTerrainAsset>(new ResourceKey(0, GroupID, TypeIDs.NHOOD_TERRAIN));
         public Type NeighborhoodType => _info.NeighborhoodType;

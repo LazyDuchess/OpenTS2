@@ -14,7 +14,7 @@ namespace OpenTS2.Scenes
         void Start()
         {
             var contentProvider = ContentProvider.Get();
-            var decorations = NeighborhoodManager.CurrentNeighborhood.Deocrations;
+            var decorations = NeighborhoodManager.CurrentNeighborhood.Decorations;
 
             foreach (var flora in decorations.FloraDecorations)
             {
@@ -28,7 +28,7 @@ namespace OpenTS2.Scenes
 
                 var decorationObject = model.CreateGameObjectForShape();
                 decorationObject.transform.position = flora.Position.Position;
-                decorationObject.transform.Rotate(0, 0, flora.Rotation);
+                decorationObject.transform.Rotate(0, 0, -flora.Rotation);
             }
 
             foreach (var prop in decorations.PropDecorations)
@@ -43,7 +43,7 @@ namespace OpenTS2.Scenes
 
                 var decorationObject = model.CreateGameObjectForShape();
                 decorationObject.transform.position = prop.Position.Position;
-                decorationObject.transform.Rotate(0, 0, prop.Rotation);
+                decorationObject.transform.Rotate(0, 0, -prop.Rotation);
             }
         }
     }
