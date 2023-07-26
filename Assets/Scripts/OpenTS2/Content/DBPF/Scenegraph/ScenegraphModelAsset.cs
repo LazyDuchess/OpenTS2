@@ -78,5 +78,16 @@ namespace OpenTS2.Content.DBPF.Scenegraph
 
             return mesh;
         }
+
+        public override UnityEngine.Object[] GetUnmanagedResources()
+        {
+            var unmanagedList = new List<UnityEngine.Object>();
+            foreach(var prim in Primitives)
+            {
+                unmanagedList.Add(prim.Value);
+            }
+            unmanagedList.Add(StaticBoundMesh);
+            return unmanagedList.ToArray();
+        }
     }
 }

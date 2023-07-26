@@ -10,6 +10,8 @@ namespace OpenTS2.Content.DBPF.Scenegraph
 {
     public class ScenegraphMaterialDefinitionAsset : AbstractAsset
     {
+        private List<ScenegraphTextureAsset> _textures = new List<ScenegraphTextureAsset>();
+
         public MaterialDefinitionBlock MaterialDefinition { get; }
 
         public ScenegraphMaterialDefinitionAsset(MaterialDefinitionBlock material) => (MaterialDefinition) = (material);
@@ -31,9 +33,9 @@ namespace OpenTS2.Content.DBPF.Scenegraph
 
         public override UnityEngine.Object[] GetUnmanagedResources()
         {
-            //if (_material == null)
+            if (_material == null)
                 return new UnityEngine.Object[] { };
-            //return new UnityEngine.Object[] { _material };
+            return new UnityEngine.Object[] { _material };
         }
 
         public Material GetAsUnityMaterial()
@@ -88,6 +90,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                         var texture = ContentProvider.Get().GetAsset<ScenegraphTextureAsset>(
                             new ResourceKey(textureName + "_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR)
                         );
+                        _textures.Add(texture);
                         material.mainTexture = texture.GetSelectedImageAsUnityTexture(ContentProvider.Get());
                         break;
                     case "stdMatAlphaMultiplier":

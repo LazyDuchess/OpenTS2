@@ -25,8 +25,8 @@ public class NeighborhoodDecorationsCodecTest
         Assert.That(firstTree.ObjectId, Is.EqualTo(0x18));
 
         Assert.That(firstTree.Position.Position.x, Is.EqualTo(395.625).Within(0.05));
-        Assert.That(firstTree.Position.Position.y, Is.EqualTo(535.725).Within(0.05));
-        Assert.That(firstTree.Position.Position.z, Is.EqualTo(357.551).Within(0.05));
+        Assert.That(firstTree.Position.Position.z, Is.EqualTo(535.725).Within(0.05));
+        Assert.That(firstTree.Position.Position.y, Is.EqualTo(357.551).Within(0.05));
         Assert.That(firstTree.Position.Rotation, Is.EqualTo(0));
 
         Assert.That(firstTree.Position.BoundingBoxMin.x, Is.EqualTo(392.56).Within(0.05));
