@@ -31,9 +31,9 @@ namespace OpenTS2.Content.DBPF.Scenegraph
 
         public override UnityEngine.Object[] GetUnmanagedResources()
         {
-            if (_material == null)
+            //if (_material == null)
                 return new UnityEngine.Object[] { };
-            return new UnityEngine.Object[] { _material };
+            //return new UnityEngine.Object[] { _material };
         }
 
         public Material GetAsUnityMaterial()

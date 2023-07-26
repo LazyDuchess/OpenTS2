@@ -62,16 +62,6 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                 var materialKey = new ResourceKey($"{materialPair.Value}_txmt", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXMT);
                 var material = ContentProvider.Get().GetAsset<ScenegraphMaterialDefinitionAsset>(materialKey);
                 materials[materialPair.Key] = material;
-
-                /*
-                foreach (var model in models)
-                {
-                    if (!model.Primitives.TryGetValue(materialPair.Key, out var mesh))
-                    {
-                        continue;
-                    }
-                }
-                */
             }
         }
     }

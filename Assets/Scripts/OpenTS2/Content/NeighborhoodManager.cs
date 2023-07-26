@@ -16,6 +16,8 @@ namespace OpenTS2.Content
 {
     public static class NeighborhoodManager
     {
+        public static Dictionary<uint, string> NeighborhoodObjects = new Dictionary<uint, string>();
+
         public static Neighborhood CurrentNeighborhood = null;
         public static List<Neighborhood> Neighborhoods => _neighborHoods;
         static List<Neighborhood> _neighborHoods = new List<Neighborhood>();
@@ -28,6 +30,13 @@ namespace OpenTS2.Content
             {
                 var nhood = new Neighborhood(ninfo);
                 _neighborHoods.Add(nhood);
+            }
+
+            // Create a mapping of GUID -> cres files for neighborhood objects.
+            var hoodObjects = contentProvider.GetAssetsOfType<NeighborhoodObjectAsset>(TypeIDs.NHOOD_OBJECT);
+            foreach (var objectAsset in hoodObjects)
+            {
+                NeighborhoodObjects[objectAsset.Guid] = objectAsset.ModelName;
             }
         }
 

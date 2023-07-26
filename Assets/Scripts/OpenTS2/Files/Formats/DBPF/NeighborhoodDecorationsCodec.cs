@@ -29,7 +29,11 @@ namespace OpenTS2.Files.Formats.DBPF
         {
             var removeBoundingYValues = reader.ReadByte() < 2;
 
-            var pos = Vector3Serializer.Deserialize(reader);
+            // Can't use Vector3Serializer because this is stored in the order y, x, z for some reason.
+            var y = reader.ReadFloat();
+            var x = reader.ReadFloat();
+            var z = reader.ReadFloat();
+            var pos = new Vector3(y, z, x);
             var boundingBoxMin = Vector2Serializer.Deserialize(reader);
             var boundingBoxMax = Vector2Serializer.Deserialize(reader);
             var position = new DecorationPosition

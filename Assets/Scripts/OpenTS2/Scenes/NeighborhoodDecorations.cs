@@ -1,0 +1,33 @@
+using System.Collections;
+using System.Collections.Generic;
+using OpenTS2.Common;
+using OpenTS2.Content;
+using OpenTS2.Content.DBPF.Scenegraph;
+using OpenTS2.Files.Formats.DBPF;
+using UnityEngine;
+
+namespace OpenTS2.Scenes
+{
+    public class NeighborhoodDecorations : MonoBehaviour
+    {
+        void Start()
+        {
+            var contentProvider = ContentProvider.Get();
+            var decorations = NeighborhoodManager.CurrentNeighborhood.Deocrations;
+
+            foreach (var flora in decorations.FloraDecorations)
+            {
+                if (!NeighborhoodManager.NeighborhoodObjects.TryGetValue(flora.ObjectId, out var resourceName))
+                {
+                    continue;
+                }
+                var model = contentProvider.GetAsset<ScenegraphResourceAsset>(new ResourceKey(resourceName,
+                    GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_CRES));
+
+                var decorationObject = model.CreateGameObjectForShape();
+                var decorationPosition = flora.Position;
+                decorationObject.transform.position = decorationPosition.Position;
+            }
+        }
+    }
+}

@@ -26,6 +26,8 @@ namespace OpenTS2.Content.DBPF.Scenegraph
 
             shape.LoadModelsAndMaterials();
 
+            Debug.Log($"materials: {string.Join(", ", shape.Materials.Keys)}");
+
             var gameObject = new GameObject(resourceName, typeof(MeshFilter), typeof(MeshRenderer));
             // Render out each model.
             foreach (var model in shape.Models)
@@ -33,7 +35,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                 foreach (var primitive in model.Primitives)
                 {
                     // Create an object for the primitive and parent it to the root game object.
-                    var primitiveObject = new GameObject(resourceName + primitive.Key, typeof(MeshFilter), typeof(MeshRenderer))
+                    var primitiveObject = new GameObject($"{resourceName}_{primitive.Key}", typeof(MeshFilter), typeof(MeshRenderer))
                         {
                             transform =
                             {
@@ -46,6 +48,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                     primitiveObject.GetComponent<MeshFilter>().mesh = primitive.Value;
                     if (shape.Materials.TryGetValue(primitive.Key, out var material))
                     {
+                        Debug.Log("[x] Setting material to primitive");
                         primitiveObject.GetComponent<MeshRenderer>().material = material.GetAsUnityMaterial();
                     }
                 }
