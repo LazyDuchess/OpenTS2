@@ -14,7 +14,7 @@ public class NeighborhoodDecorationsCodecTest
     }
 
     [Test]
-    public void TestSuccessfullyLoadsFirstTree()
+    public void TestSuccessfullyLoadsDecorations()
     {
         var decorationsAsset = ContentProvider.Get()
             .GetAssetsOfType<NeighborhoodDecorationsAsset>(TypeIDs.NHOOD_DECORATIONS).Single();
@@ -27,12 +27,21 @@ public class NeighborhoodDecorationsCodecTest
         Assert.That(firstTree.Position.Position.x, Is.EqualTo(395.625).Within(0.05));
         Assert.That(firstTree.Position.Position.z, Is.EqualTo(535.725).Within(0.05));
         Assert.That(firstTree.Position.Position.y, Is.EqualTo(357.551).Within(0.05));
-        Assert.That(firstTree.Position.Rotation, Is.EqualTo(0));
+        Assert.That(firstTree.Rotation, Is.EqualTo(0));
 
         Assert.That(firstTree.Position.BoundingBoxMin.x, Is.EqualTo(392.56).Within(0.05));
         Assert.That(firstTree.Position.BoundingBoxMin.y, Is.EqualTo(535.052).Within(0.05));
 
         Assert.That(firstTree.Position.BoundingBoxMax.x, Is.EqualTo(399.706).Within(0.05));
         Assert.That(firstTree.Position.BoundingBoxMax.y, Is.EqualTo(538.4807).Within(0.05));
+
+
+        Assert.That(decorationsAsset.RoadDecorations.Length, Is.EqualTo(306));
+
+        // TODO: add a test case for these.
+        Assert.That(decorationsAsset.RoadWithModelDecorations.Length, Is.EqualTo(0));
+
+
+        Assert.That(decorationsAsset.PropDecorations.Length, Is.EqualTo(47));
     }
 }

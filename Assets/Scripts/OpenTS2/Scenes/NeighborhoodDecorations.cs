@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using OpenTS2.Common;
@@ -21,12 +22,28 @@ namespace OpenTS2.Scenes
                 {
                     continue;
                 }
+
                 var model = contentProvider.GetAsset<ScenegraphResourceAsset>(new ResourceKey(resourceName,
                     GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_CRES));
 
                 var decorationObject = model.CreateGameObjectForShape();
-                var decorationPosition = flora.Position;
-                decorationObject.transform.position = decorationPosition.Position;
+                decorationObject.transform.position = flora.Position.Position;
+                decorationObject.transform.Rotate(0, 0, flora.Rotation);
+            }
+
+            foreach (var prop in decorations.PropDecorations)
+            {
+                if (!NeighborhoodManager.NeighborhoodObjects.TryGetValue(prop.PropId, out var resourceName))
+                {
+                    continue;
+                }
+
+                var model = contentProvider.GetAsset<ScenegraphResourceAsset>(new ResourceKey(resourceName,
+                    GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_CRES));
+
+                var decorationObject = model.CreateGameObjectForShape();
+                decorationObject.transform.position = prop.Position.Position;
+                decorationObject.transform.Rotate(0, 0, prop.Rotation);
             }
         }
     }
