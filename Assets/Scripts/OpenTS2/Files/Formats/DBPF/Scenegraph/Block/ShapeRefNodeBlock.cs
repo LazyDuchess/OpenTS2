@@ -110,48 +110,21 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
     /// </summary>
     public class BoundedNode
     {
-        public TransformNode Transform { get; }
+        public TransformNodeBlock Transform { get; }
 
-        public BoundedNode(TransformNode transform) => (Transform) = (transform);
+        public BoundedNode(TransformNodeBlock transform) => (Transform) = (transform);
 
         public static BoundedNode Deserialize(IoBuffer reader)
         {
             var typeInfo = PersistTypeInfo.Deserialize(reader);
             Debug.Assert(typeInfo.Name == "cBoundedNode");
 
-            var transform = TransformNode.Deserialize(reader);
+            var transform = TransformNodeBlockReader.DeserializeWithoutTypeInfo(reader);
 
             // ignored boolean, always written as 0.
             var ignoredBool = reader.ReadByte();
 
             return new BoundedNode(transform);
-        }
-    }
-
-    /// <summary>
-    /// cTransformNode, contains transformation and rotation data for a node.
-    /// </summary>
-    public class TransformNode
-    {
-        public CompositionTreeNodeBlock CompositionTree { get; }
-        public Vector3 Transform { get; }
-        public Quaternion Rotation { get; }
-        public uint BoneId { get; }
-
-        public TransformNode(CompositionTreeNodeBlock tree, Vector3 transform, Quaternion rotation, uint boneId) =>
-            (CompositionTree, Transform, Rotation, BoneId) = (tree, transform, rotation, boneId);
-
-        public static TransformNode Deserialize(IoBuffer reader)
-        {
-            var typeInfo = PersistTypeInfo.Deserialize(reader);
-            Debug.Assert(typeInfo.Name == "cTransformNode");
-
-            var compositionTree = CompositionTreeNodeBlock.Deserialize(reader);
-
-            var transform = Vector3Serializer.Deserialize(reader);
-            var rotation = QuaterionSerialzier.Deserialize(reader);
-            var boneId = reader.ReadUInt32();
-            return new TransformNode(compositionTree, transform, rotation, boneId);
         }
     }
 }
