@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using OpenTS2.Common;
 using OpenTS2.Files.Formats.DBPF.Scenegraph.Block;
 using OpenTS2.Files.Utils;
@@ -26,6 +27,15 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph
         private ScenegraphResourceCollection()
         {
             Blocks = new List<ScenegraphDataBlock>();
+        }
+
+        /// <summary>
+        /// Returns the ScenegraphDataBlock inside this resource collection that has type T. Throws an exception if
+        /// there isn't any block of type T or if there are multiple.
+        /// </summary>
+        public T GetBlockOfType<T>() where T : ScenegraphDataBlock
+        {
+            return (T)Blocks.Single(block => block is T);
         }
         
         /// <summary>

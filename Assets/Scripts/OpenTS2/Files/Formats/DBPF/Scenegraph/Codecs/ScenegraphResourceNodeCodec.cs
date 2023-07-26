@@ -16,7 +16,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Codecs
             var reader = IoBuffer.FromStream(stream, ByteOrder.LITTLE_ENDIAN);
 
             var resource = ScenegraphResourceCollection.Deserialize(reader);
-            return new ScenegraphResourceAsset();
+            return new ScenegraphResourceAsset(resource);
         }
     }
 }

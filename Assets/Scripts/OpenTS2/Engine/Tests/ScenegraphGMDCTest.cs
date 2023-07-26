@@ -15,27 +15,12 @@ public class ScenegraphGMDCTest : MonoBehaviour
         contentProvider.AddPackages(
             Filesystem.GetPackagesInDirectory(Filesystem.GetDataPathForProduct(ProductFlags.BaseGame) + "/Res/Sims3D"));
 
-        var scenegraphModel = contentProvider.GetAsset<ScenegraphModelAsset>(
-            new ResourceKey("ufoCrash_tslocator_gmdc", 0x1C0532FA, TypeIDs.SCENEGRAPH_GMDC));
+        var resource = contentProvider.GetAsset<ScenegraphResourceAsset>(
+            new ResourceKey("ufoCrash_cres", 0x1C0532FA, TypeIDs.SCENEGRAPH_CRES));
 
-        Debug.Log($"scenegraphModel: {scenegraphModel.GlobalTGI}");
-        Debug.Log($"primitives: {string.Join(" ", scenegraphModel.Primitives.Keys)}");
-
-        RenderPrimitive(scenegraphModel, "ufocrash_body", "ufocrash_body_txmt");
-        RenderPrimitive(scenegraphModel, "ufocrash_cabin", "ufocrash_cabin_txmt");
-        RenderPrimitive(scenegraphModel, "neighborhood_roundshadow", "neighborhood_roundshadow_txmt");
+        Debug.Log($"scenegraphModel: {resource.GlobalTGI}");
+        var gameObject = resource.CreateGameObjectForShape();
+        Debug.Log($"gameObject: {gameObject}");
     }
 
-    private void RenderPrimitive(ScenegraphModelAsset modelAsset, string primitive, string materialDefinition)
-    {
-        var rendered = new GameObject(primitive, typeof(MeshFilter), typeof(MeshRenderer));
-        rendered.transform.Rotate(-90, 0, 0);
-
-        rendered.GetComponent<MeshFilter>().mesh = modelAsset.Primitives[primitive];
-
-        var material = ContentProvider.Get()
-            .GetAsset<ScenegraphMaterialDefinitionAsset>(new ResourceKey(materialDefinition, GroupIDs.Scenegraph,
-                TypeIDs.SCENEGRAPH_TXMT));
-        rendered.GetComponent<MeshRenderer>().material = material.GetAsUnityMaterial();
-    }
 }

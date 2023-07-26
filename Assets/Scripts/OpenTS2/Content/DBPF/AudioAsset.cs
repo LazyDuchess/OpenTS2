@@ -1,4 +1,5 @@
-﻿using OpenTS2.Engine.Audio;
+﻿using OpenTS2.Engine;
+using OpenTS2.Engine.Audio;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,9 +19,11 @@ namespace OpenTS2.Content.DBPF
             AudioData = data;
             _clip = WAV.ToAudioClip(AudioData, GlobalTGI.ToString());
         }
-        public override UnityEngine.Object[] GetUnmanagedResources()
+        public override void FreeUnmanagedResources()
         {
-            return new UnityEngine.Object[] { _clip };
+            if (_clip == null)
+                return;
+            _clip.Free();
         }
     }
 }

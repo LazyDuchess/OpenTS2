@@ -1,4 +1,5 @@
-﻿using OpenTS2.Files.Utils;
+﻿using System;
+using OpenTS2.Files.Utils;
 using UnityEngine;
 
 namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
@@ -12,9 +13,10 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
         public const string BLOCK_NAME = "cResourceNode";
         public override string BlockName => BLOCK_NAME;
 
-        public ResourceNodeBlock(PersistTypeInfo blockTypeInfo) : base(blockTypeInfo)
-        {
-        }
+        public ScenegraphResource Resource { get; }
+
+        public ResourceNodeBlock(PersistTypeInfo blockTypeInfo, ScenegraphResource resource) : base(blockTypeInfo) =>
+            (Resource) = (resource);
     }
 
     public class ResourceNodeBlockReader : IScenegraphDataBlockReader<ResourceNodeBlock>
@@ -23,20 +25,23 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
         {
             var hasTreeNode = reader.ReadByte() != 0;
 
+            ScenegraphResource resource;
             if (hasTreeNode)
             {
-                var resource = ScenegraphResource.Deserialize(reader);
+                resource = ScenegraphResource.Deserialize(reader);
                 var compositionTree = CompositionTreeNodeBlock.Deserialize(reader);
             }
             else
             {
+                // TODO: we store ScenegraphResource above, figure out what to do when it's not available.
+                throw new NotImplementedException("cResourceNode without composition tree not supported");
                 var graph = ObjectGraphNodeBlock.Deserialize(reader);
             }
 
             var reference = ObjectReference.Deserialize(reader);
             var skinType = reader.ReadUInt32();
 
-            return new ResourceNodeBlock(blockTypeInfo);
+            return new ResourceNodeBlock(blockTypeInfo, resource);
         }
     }
 }

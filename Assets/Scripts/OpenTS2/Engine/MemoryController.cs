@@ -16,7 +16,7 @@ namespace OpenTS2.Engine
         public static MemoryController Singleton => s_singleton;
         static MemoryController s_singleton = null;
 
-        private static List<UnityEngine.Object[]> MarkedForRemoval = new List<UnityEngine.Object[]>();
+        private static Action MarkedForRemoval;
 
         private void Awake()
         {
@@ -29,23 +29,19 @@ namespace OpenTS2.Engine
             DontDestroyOnLoad(gameObject);
         }
 
-        public static void MarkForRemoval(UnityEngine.Object[] unmanagedResources)
+        public static void MarkForRemoval(Action action)
         {
-            lock(MarkedForRemoval)
-                MarkedForRemoval.Add(unmanagedResources);
+            lock (MarkedForRemoval)
+                MarkedForRemoval += action;
         }
         private void Update()
         {
+            if (MarkedForRemoval == null)
+                return;
             lock (MarkedForRemoval)
             {
-                foreach (var removal in MarkedForRemoval)
-                {
-                    foreach (var unmanagedResource in removal)
-                    {
-                        unmanagedResource.Free();
-                    }
-                }
-                MarkedForRemoval.Clear();
+                MarkedForRemoval.Invoke();
+                MarkedForRemoval = null;
             }
         }
     }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using OpenTS2.Common;
+using OpenTS2.Engine;
 using OpenTS2.Files.Formats.DBPF;
 using OpenTS2.Files.Formats.DBPF.Scenegraph.Block;
 using UnityEngine;
@@ -10,6 +11,8 @@ namespace OpenTS2.Content.DBPF.Scenegraph
 {
     public class ScenegraphMaterialDefinitionAsset : AbstractAsset
     {
+        private List<ScenegraphTextureAsset> _textures = new List<ScenegraphTextureAsset>();
+
         public MaterialDefinitionBlock MaterialDefinition { get; }
 
         public ScenegraphMaterialDefinitionAsset(MaterialDefinitionBlock material) => (MaterialDefinition) = (material);
@@ -29,11 +32,11 @@ namespace OpenTS2.Content.DBPF.Scenegraph
         // Stores the cached Material
         private Material _material;
 
-        public override UnityEngine.Object[] GetUnmanagedResources()
+        public override void FreeUnmanagedResources()
         {
             if (_material == null)
-                return new UnityEngine.Object[] { };
-            return new UnityEngine.Object[] { _material };
+                return;
+            _material.Free();
         }
 
         public Material GetAsUnityMaterial()
@@ -88,6 +91,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                         var texture = ContentProvider.Get().GetAsset<ScenegraphTextureAsset>(
                             new ResourceKey(textureName + "_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR)
                         );
+                        _textures.Add(texture);
                         material.mainTexture = texture.GetSelectedImageAsUnityTexture(ContentProvider.Get());
                         break;
                     case "stdMatAlphaMultiplier":

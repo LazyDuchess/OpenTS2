@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using OpenTS2.Engine;
 using OpenTS2.Files.Formats.DBPF.Scenegraph.Block;
 using OpenTS2.Files.Formats.DBPF.Scenegraph.Block.GeometryData;
 using UnityEngine;
@@ -77,6 +78,15 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             }
 
             return mesh;
+        }
+
+        public override void FreeUnmanagedResources()
+        {
+            foreach(var prim in Primitives)
+            {
+                prim.Value.Free();
+            }
+            StaticBoundMesh.Free();
         }
     }
 }
