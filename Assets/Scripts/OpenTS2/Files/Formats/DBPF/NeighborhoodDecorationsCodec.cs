@@ -138,7 +138,7 @@ namespace OpenTS2.Files.Formats.DBPF
                 var road = ReadRoad(reader);
                 var objectVersion = reader.ReadByte();
 
-                var positionOffset = Vector2Serializer.Deserialize(reader);
+                var positionOffset = Vector3Serializer.Deserialize(reader);
                 var modelOrientation = QuaterionSerialzier.Deserialize(reader);
                 // unknown
                 var unknown = Vector3Serializer.Deserialize(reader);
