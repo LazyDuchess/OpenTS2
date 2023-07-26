@@ -21,11 +21,17 @@ namespace OpenTS2.Files.Formats.DBPF
 
             // Flora occupants first.
             var flora = ReadFlora(reader);
+            // then roads.
+            var roads = ReadRoads(reader);
+            // then roads with models.
+            var roadsWithModels = ReadRoadsWithModels(reader);
+            // and finally prop decorations.
+            var props = ReadProps(reader);
 
-            return new NeighborhoodDecorationsAsset(flora);
+            return new NeighborhoodDecorationsAsset(flora, roads, roadsWithModels, props);
         }
 
-        private static DecorationPosition ReadDecorationPosition(IoBuffer reader)
+        private static DecorationPosition ReadDecorationPositionWithoutRotation(IoBuffer reader)
         {
             var removeBoundingYValues = reader.ReadByte() < 2;
 
@@ -60,20 +66,116 @@ namespace OpenTS2.Files.Formats.DBPF
 
             for (var i = 0; i < count; i++)
             {
-                var position = ReadDecorationPosition(reader);
+                var position = ReadDecorationPositionWithoutRotation(reader);
                 var objectVersion = reader.ReadByte();
                 // Same as above, there is code to handle versions below this in the game but these don't seem to exist
                 // and don't even have a rotation or GUID.
                 Debug.Assert(objectVersion > 7);
 
                 var rotation = reader.ReadFloat();
-                position.Rotation = rotation;
 
                 var objectId = reader.ReadUInt32();
-                flora[i] = new FloraDecoration(position, objectId);
+                flora[i] = new FloraDecoration(position, rotation, objectId);
             }
 
             return flora;
+        }
+
+        private static RoadDecoration ReadRoad(IoBuffer reader)
+        {
+            var position = ReadDecorationPositionWithoutRotation(reader);
+            var objectVersion = reader.ReadByte();
+            Debug.Assert(objectVersion >= 3);
+
+            for (var j = 0; j < 4; j++)
+            {
+                // Unknown
+                Vector3Serializer.Deserialize(reader);
+                // Unknown
+                Vector2Serializer.Deserialize(reader);
+            }
+
+            var pieceId = reader.ReadUInt32();
+            var underTextureId = reader.ReadUInt32();
+
+            var flags = reader.ReadByte();
+            var connectionFlag = reader.ReadByte();
+
+            var numberOfAddons = reader.ReadUInt32();
+            for (var j = 0; j < numberOfAddons; j++)
+            {
+                reader.ReadUInt32();
+                // Unknown
+                Vector3Serializer.Deserialize(reader);
+                // Unknown
+                Vector2Serializer.Deserialize(reader);
+            }
+
+            return new RoadDecoration(position);
+        }
+
+        private static RoadDecoration[] ReadRoads(IoBuffer reader)
+        {
+            var version = reader.ReadUInt16();
+            Debug.Assert(version > 2);
+
+            var roads = new RoadDecoration[reader.ReadUInt32()];
+            for (var i = 0; i < roads.Length; i++)
+            {
+                roads[i] = ReadRoad(reader);
+            }
+            return roads;
+        }
+
+        private static RoadWithModelDecoration[] ReadRoadsWithModels(IoBuffer reader)
+        {
+            var version = reader.ReadUInt16();
+            Debug.Assert(version > 2);
+
+            var roadsWithModels = new RoadWithModelDecoration[reader.ReadUInt32()];
+            for (var i = 0; i < roadsWithModels.Length; i++)
+            {
+                var road = ReadRoad(reader);
+                var objectVersion = reader.ReadByte();
+
+                var positionOffset = Vector2Serializer.Deserialize(reader);
+                var modelOrientation = QuaterionSerialzier.Deserialize(reader);
+                // unknown
+                var unknown = Vector3Serializer.Deserialize(reader);
+
+                if (objectVersion < 2)
+                {
+                    positionOffset.x *= 1.25f;
+                    positionOffset.y *= 1.25f;
+                    unknown.x *= 1.25f;
+                    unknown.y *= 1.25f;
+                }
+
+                roadsWithModels[i] = new RoadWithModelDecoration(road);
+            }
+
+            return roadsWithModels;
+        }
+
+        private static PropDecoration[] ReadProps(IoBuffer reader)
+        {
+            var version = reader.ReadUInt16();
+            Debug.Assert(version >= 7);
+
+            var propDecorations = new PropDecoration[reader.ReadUInt32()];
+            for (var i = 0; i < propDecorations.Length; i++)
+            {
+                var position = ReadDecorationPositionWithoutRotation(reader);
+                var objectVersion = reader.ReadByte();
+                Debug.Assert(objectVersion > 7);
+
+                var propId = reader.ReadUInt32();
+                var rotation = reader.ReadFloat();
+
+                propDecorations[i] = new PropDecoration(position, rotation, propId);
+            }
+
+            return propDecorations;
         }
     }
 }
