@@ -15,9 +15,18 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
         public const string BLOCK_NAME = "cShapeRefNode";
         public override string BlockName => BLOCK_NAME;
 
-        public ShapeRefNodeBlock(PersistTypeInfo blockTypeInfo) : base(blockTypeInfo)
-        {
-        }
+        public ObjectReference[] Shapes { get; }
+        public RenderableNode Renderable { get; }
+
+        public float[] MorphChannelWeights { get; }
+        public string[] MorphChannelNames { get; }
+        public uint ShapeColor { get; }
+
+        public ShapeRefNodeBlock(PersistTypeInfo blockTypeInfo, ObjectReference[] shapes, RenderableNode renderable,
+            float[] morphChannelWeights,
+            string[] morphChannelNames, uint shapeColor) : base(blockTypeInfo) =>
+            (Shapes, Renderable, MorphChannelWeights, MorphChannelNames, ShapeColor) =
+            (shapes, renderable, morphChannelWeights, morphChannelNames, shapeColor);
     }
 
     public class ShapeRefNodeBlockReader : IScenegraphDataBlockReader<ShapeRefNodeBlock>
@@ -53,7 +62,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
 
             var shapeColor = reader.ReadUInt32();
 
-            return new ShapeRefNodeBlock(blockTypeInfo);
+            return new ShapeRefNodeBlock(blockTypeInfo, shapes, renderable, morphChannelWeights, morphChannelNames, shapeColor);
         }
     }
 
@@ -66,8 +75,13 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
     public class RenderableNode
     {
         public BoundedNode Bounded { get; }
+        public string[] RenderGroups { get; }
+        public uint RenderGroupId { get; }
+        public bool AddToDisplayList { get; }
 
-        public RenderableNode(BoundedNode bounded) => (Bounded) = (bounded);
+        public RenderableNode(BoundedNode bounded, string[] renderGroups, uint renderGroupId, bool addToDisplayList) =>
+            (Bounded, RenderGroups, RenderGroupId, AddToDisplayList) =
+            (bounded, renderGroups, renderGroupId, addToDisplayList);
 
         public static RenderableNode Deserialize(IoBuffer reader)
         {
@@ -87,7 +101,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             // kAddToDisplayListMaskBit
             var addToDisplayList = reader.ReadByte() != 0;
 
-            return new RenderableNode(bounded);
+            return new RenderableNode(bounded, renderGroups, renderGroupId, addToDisplayList);
         }
     }
 

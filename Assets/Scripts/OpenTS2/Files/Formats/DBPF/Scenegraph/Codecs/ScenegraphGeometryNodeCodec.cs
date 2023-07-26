@@ -15,9 +15,13 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Codecs
             var stream = new MemoryStream(bytes);
             var reader = IoBuffer.FromStream(stream, ByteOrder.LITTLE_ENDIAN);
 
-            var geometryBlock =
-                ScenegraphResourceCollection.DeserializeSingletonScenegraphBlock<GeometryNodeBlock>(reader);
-            return new ScenegraphGeometryNodeAsset();
+            var scenegraphCollection = ScenegraphResourceCollection.Deserialize(reader);
+            var geometryBlock = scenegraphCollection.GetBlockOfType<GeometryNodeBlock>();
+
+            // Look up the GMDC that this GMND points to.
+            var gmdcKey = scenegraphCollection.FileLinks[geometryBlock.GeometryDataReference.Index];
+
+            return new ScenegraphGeometryNodeAsset(gmdcKey);
         }
     }
 }

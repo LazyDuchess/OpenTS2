@@ -19,5 +19,8 @@ public class ScenegraphGeometryNodeCodecTest
         var geometryNodeAsset = ContentProvider.Get()
             .GetAsset<ScenegraphGeometryNodeAsset>(new ResourceKey("teapot_tslocator_gmnd", 0x1C0532FA,
                 TypeIDs.SCENEGRAPH_GMND));
+
+        var realKey = new ResourceKey("teapot_tslocator_gmdc", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_GMDC);
+        Assert.That(geometryNodeAsset.GeometryDataContainerKey, Is.EqualTo(realKey));
     }
 }
