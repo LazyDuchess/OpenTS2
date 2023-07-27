@@ -39,8 +39,7 @@ namespace OpenTS2.Scenes
 
                 // TODO: this is a temporary hack to fix bridge orientation, there's something weird going on with one
                 // of our axes that we need to do this...
-                var eulerRotation = bridge.ModelOrientation.eulerAngles;
-                bridgeObject.transform.Rotate(eulerRotation.x, eulerRotation.y, -eulerRotation.z);
+                bridgeObject.transform.rotation *= new Quaternion(bridge.ModelOrientation.x, -bridge.ModelOrientation.y, -bridge.ModelOrientation.z, bridge.ModelOrientation.w);
 
                 // Parent to this component.
                 bridgeObject.transform.parent = transform;
