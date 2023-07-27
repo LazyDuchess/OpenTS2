@@ -45,9 +45,11 @@ Shader "OpenTS2/ClassicTerrain"
                 float4 vertex : SV_POSITION;
                 float4 color : COLOR;
                 float cliff : TEXCOORD2;
+                float2 shadowUv : TEXCOORD3;
             };
 
             sampler2D _MainTex;
+            sampler2D _ShadowMap;
             sampler2D _Variation1;
             sampler2D _Variation2;
             sampler2D _MatCap;
@@ -75,12 +77,13 @@ Shader "OpenTS2/ClassicTerrain"
                 //o.uv = float2(lightDotRight, lightDot) - float2(v.color.x,v.color.x) + float2(0.4,0.4);
                 //o.uv.x = max(0.2, o.uv.x);
                 //o.uv.y = max(0.2, o.uv.y);
-                o.matcapUv = max(0,((float2(lightDot, lightDot) + float2(lightDotRight, 0.0)) * -(v.color.x - 1)) - _Subtract);
+                o.matcapUv = max(0,((float2(lightDot, lightDot) + float2(lightDotRight, 0.0))) - _Subtract);
                 o.matcapUv += float2(_Ambient, _Ambient);
                 o.uv = float2(v.vertex.x, v.vertex.z) * float2(_MainTex_ST.x, _MainTex_ST.y);
                 o.uv += float2(_MainTex_ST.x, _MainTex_ST.y);
                 o.color = v.color;
                 o.cliff = max(0,min(1,pow(-(dot(worldNormal, float3(0.0, 1.0, 0.0)) - 1), 2) * 3));
+                o.shadowUv = float2(v.vertex.x, v.vertex.z) / (128 * 10);
                 return o;
             }
 
@@ -88,11 +91,15 @@ Shader "OpenTS2/ClassicTerrain"
             {
                 // sample the texture
                 fixed4 col = tex2D(_MainTex, i.uv);
-            if (i.color.g >= 0.99)
+            if (i.color.r >= 0.99)
                 col = tex2D(_Variation1, i.uv);
-            if (i.color.b >= 0.99)
+            if (i.color.g >= 0.99)
                 col = tex2D(_Variation2, i.uv);
             fixed4 cliffCol = tex2D(_CliffTex, i.uv);
+
+            fixed4 shadowMapCol = tex2D(_ShadowMap, i.shadowUv);
+            i.matcapUv *= shadowMapCol.r;
+
             col = lerp(col, cliffCol, i.cliff);
             col *= tex2D(_MatCap, i.matcapUv);
             

@@ -16,12 +16,7 @@ namespace OpenTS2.Scenes
     [RequireComponent(typeof(MeshRenderer))]
     public class NeighborhoodTerrain : MonoBehaviour
     {
-        public float RayDistance = 2000f;
-        public float RayBias = 1f;
-        public float BlurOffset = 10f;
         public Transform Sun;
-        public bool Reload = false;
-        public bool Realtime = false;
         private static ResourceKey DayTimeMatCapKey = new ResourceKey(0x0BE702EF, 0x8BA01057, TypeIDs.IMG);
         private static ResourceKey TemperateWetKey = new ResourceKey(0xFFFB3AC6, 0x4B3FEBD4, 0x1C0532FA, TypeIDs.SCENEGRAPH_TXTR);
         private static ResourceKey TemperateWet2Key = new ResourceKey(0xFFCDD1FB, 0x5017E6AC, 0x1C0532FA, TypeIDs.SCENEGRAPH_TXTR);
@@ -61,17 +56,6 @@ namespace OpenTS2.Scenes
                 _terrainMaterial.Free();
         }
 
-        private void Update()
-        {
-            if (Reload || Realtime)
-            {
-                _terrainMaterial.SetVector("_LightVector", Sun.forward);
-                var meshFilter = GetComponent<MeshFilter>();
-                MakeVertexColors(meshFilter.sharedMesh);
-                Reload = false;
-            }
-        }
-
         void SetTerrainMesh()
         {
             var terrainAsset = NeighborhoodManager.CurrentNeighborhood.Terrain;
@@ -85,7 +69,6 @@ namespace OpenTS2.Scenes
             var vars1 = GetVariationRectangles(terrainAsset.Width, terrainAsset.Height);
             var vars2 = GetVariationRectangles(terrainAsset.Width, terrainAsset.Height);
             
-            MakeVertexColors(terrainMesh);
             MakeVariationVertexColors(terrainMesh, vars1, vars2);
             LightmapManager.RenderShadowMap();
             meshRenderer.material.SetTexture("_ShadowMap", LightmapManager.ShadowMap);
@@ -130,7 +113,7 @@ namespace OpenTS2.Scenes
                 {
                     if (vertex.x >= rect.x && vertex.z >= rect.y && vertex.x <= rect.width && vertex.z <= rect.height)
                     {
-                        color.g = 1f;
+                        color.r = 1f;
                         break;
                     }
                 }
@@ -138,40 +121,10 @@ namespace OpenTS2.Scenes
                 {
                     if (vertex.x >= rect.x && vertex.z >= rect.y && vertex.x <= rect.width && vertex.z <= rect.height)
                     {
-                        color.b = 1f;
+                        color.g = 1f;
                         break;
                     }
                 }
-                colors[i] = color;
-            }
-            terrainMesh.colors = colors;
-        }
-
-        void MakeVertexColors(Mesh terrainMesh)
-        {
-            var vertices = terrainMesh.vertices;
-            var normals = terrainMesh.normals;
-            var colors = terrainMesh.colors;
-            for(var i=0;i<vertices.Length;i++)
-            {
-                var vertex = vertices[i];
-                var normal = normals[i];
-                var color = colors[i];
-                var shadowAccumulator = 0f;
-                for (var j=-1;j<2;j++)
-                {
-                    for(var n=-1;n<2;n++)
-                    {
-                        var offX = BlurOffset * j;
-                        var offZ = BlurOffset * n;
-                        var rayTarget = vertex + (normal * RayBias) + offX * Vector3.right + offZ * Vector3.forward;
-                        var ray = new Ray(rayTarget, -Sun.forward);
-                        if (Physics.Raycast(ray, RayDistance))
-                            shadowAccumulator += 1f;
-                    }
-                }
-                shadowAccumulator /= 9f;
-                color.r = shadowAccumulator;
                 colors[i] = color;
             }
             terrainMesh.colors = colors;
