@@ -33,11 +33,15 @@ namespace OpenTS2.Scenes
                 // RenderRoad(bridge.Road)
                 var model = ContentProvider.Get().GetAsset<ScenegraphResourceAsset>(new ResourceKey(bridge.ResourceName,
                     GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_CRES));
-                Debug.Log($"I'm rendering {bridge.ResourceName}");
 
                 var bridgeObject = model.CreateGameObjectForShape();
                 bridgeObject.transform.position = (bridge.Road.Position.Position + bridge.PositionOffset);
-                bridgeObject.transform.rotation *= bridge.ModelOrientation;
+
+                // TODO: this is a temporary hack to fix bridge orientation, there's something weird going on with one
+                // of our axes that we need to do this...
+                var eulerRotation = bridge.ModelOrientation.eulerAngles;
+                bridgeObject.transform.Rotate(eulerRotation.x, eulerRotation.y, -eulerRotation.z);
+
                 // Parent to this component.
                 bridgeObject.transform.parent = transform;
             }
