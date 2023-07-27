@@ -43,7 +43,6 @@ namespace OpenTS2.Content
 
         public static void EnterNeighborhood(Neighborhood neighborhood)
         {
-            LightmapManager.Reset();
             CursorController.Cursor = CursorController.CursorType.Hourglass;
             ContentProvider.Get().Changes.SaveChanges();
             if (CurrentNeighborhood != null)

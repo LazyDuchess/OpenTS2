@@ -21,27 +21,21 @@ namespace OpenTS2.Rendering
         private static int s_resolution = 128;
 
         /// <summary>
-        /// Call to delete all current lightmap textures.
+        /// Renders lightmapping for the current neighborhood.
         /// </summary>
-        public static void Reset()
+        public static void RenderShadowMap()
         {
             if (s_heightMap != null)
             {
                 s_heightMap.Free();
                 s_heightMap = null;
-            }    
+            }
             if (s_shadowMap != null)
             {
                 s_shadowMap.Free();
                 s_shadowMap = null;
             }
-        }
 
-        /// <summary>
-        /// Renders lightmapping for the current neighborhood.
-        /// </summary>
-        public static void RenderShadowMap()
-        {
             var terrain = GameObject.FindObjectOfType<NeighborhoodTerrain>();
             var meshFilter = terrain.GetComponent<MeshFilter>();
             var sun = terrain.Sun;
