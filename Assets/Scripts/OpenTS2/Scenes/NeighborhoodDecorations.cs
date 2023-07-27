@@ -37,10 +37,9 @@ namespace OpenTS2.Scenes
                 var bridgeObject = model.CreateGameObjectForShape();
                 bridgeObject.transform.position = (bridge.Road.Position.Position + bridge.PositionOffset);
 
-                // TODO: this is a temporary hack to fix bridge orientation, there's something weird going on with one
-                // of our axes that we need to do this...
-                var eulerRotation = bridge.ModelOrientation.eulerAngles;
-                bridgeObject.transform.Rotate(eulerRotation.x, eulerRotation.y, -eulerRotation.z);
+                // TODO: put this in a helper MonoBehavior or something.
+                var simsRotation = bridgeObject.transform.Find("simsRotations");
+                simsRotation.localRotation = bridge.ModelOrientation;
 
                 // Parent to this component.
                 bridgeObject.transform.parent = transform;
@@ -62,7 +61,11 @@ namespace OpenTS2.Scenes
 
                 var decorationObject = model.CreateGameObjectForShape();
                 decorationObject.transform.position = decoration.Position.Position;
-                decorationObject.transform.Rotate(0, 0, -decoration.Rotation);
+
+                // TODO: put this in a helper MonoBehavior or something.
+                var simsRotation = decorationObject.transform.Find("simsRotations");
+                simsRotation.Rotate(0, 0, decoration.Rotation);
+
                 // Parent to this component.
                 decorationObject.transform.parent = transform;
             }

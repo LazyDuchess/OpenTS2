@@ -26,10 +26,20 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             var shape = ContentProvider.Get().GetAsset<ScenegraphShapeAsset>(shapeKey);
 
             shape.LoadModelsAndMaterials();
-            
-            var gameObject = new GameObject(resourceName, typeof(MeshFilter), typeof(MeshRenderer), typeof(AssetReferenceComponent));
+
+            var gameObject = new GameObject(resourceName, typeof(AssetReferenceComponent));
+
+            // Apply a transformation to convert from the sims coordinate space to unity.
+            gameObject.transform.Rotate(-90, 0, 0);
+            gameObject.transform.localScale = new Vector3(1, -1, 1);
+
             // Keeps a strong reference to the Shape asset.
             gameObject.GetComponent<AssetReferenceComponent>().AddReference(shape);
+
+            // This is the component that holds rotations from sims space. All rotations from the game such as applying
+            // quaternions and angles should be performed on it or components under it.
+            var simsRotation = new GameObject("simsRotations");
+
             // Render out each model.
             foreach (var model in shape.Models)
             {
@@ -40,7 +50,6 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                         {
                             transform =
                             {
-                                parent = gameObject.transform,
                                 rotation = shapeTransform.Rotation,
                                 position = shapeTransform.Transform
                             }
@@ -51,13 +60,12 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                     {
                         primitiveObject.GetComponent<MeshRenderer>().material = material.GetAsUnityMaterial();
                     }
+
+                    primitiveObject.transform.SetParent(simsRotation.transform);
                 }
             }
-            // TODO: Models in the game use a different up-axis, adjusting for that here right now. See if there's a
-            // better spot.
-            gameObject.transform.Rotate(-90, 0, 0);
-            gameObject.transform.localScale = new Vector3(1, -1, 1);
 
+            simsRotation.transform.SetParent(gameObject.transform, worldPositionStays:false);
             return gameObject;
         }
     }
