@@ -4,6 +4,7 @@ using OpenTS2.Content.DBPF;
 using OpenTS2.Content.DBPF.Scenegraph;
 using OpenTS2.Engine;
 using OpenTS2.Files.Formats.DBPF;
+using OpenTS2.Rendering;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -77,6 +78,7 @@ namespace OpenTS2.Scenes
             var terrainMesh = terrainAsset.MakeMesh();
             var meshFilter = GetComponent<MeshFilter>();
             var meshCollider = GetComponent<MeshCollider>();
+            var meshRenderer = GetComponent<MeshRenderer>();
             meshFilter.sharedMesh = terrainMesh;
             meshCollider.sharedMesh = terrainMesh;
             InitializeVertexColors(terrainMesh);
@@ -85,6 +87,8 @@ namespace OpenTS2.Scenes
             
             MakeVertexColors(terrainMesh);
             MakeVariationVertexColors(terrainMesh, vars1, vars2);
+            LightmapManager.RenderShadowMap();
+            meshRenderer.material.SetTexture("_ShadowMap", LightmapManager.ShadowMap);
         }
 
         List<Rect> GetVariationRectangles(int width, int height)

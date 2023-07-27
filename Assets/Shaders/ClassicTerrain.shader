@@ -5,6 +5,7 @@ Shader "OpenTS2/ClassicTerrain"
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
+        _ShadowMap("Texture", 2D) = "white" {}
         _Variation1("Variation 1", 2D) = "white" {}
         _Variation2("Variation 2", 2D) = "white" {}
         _CliffTex("Cliff Texture", 2D) = "white" {}
