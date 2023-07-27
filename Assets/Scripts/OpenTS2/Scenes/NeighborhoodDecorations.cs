@@ -19,11 +19,31 @@ namespace OpenTS2.Scenes
 
             // Render trees.
             RenderDecorationWithModels(decorations.FloraDecorations);
+            // Render bridges.
+            RenderBridges(decorations.BridgeDecorations);
             // Render props.
             RenderDecorationWithModels(decorations.PropDecorations);
         }
 
-        private static void RenderDecorationWithModels(IEnumerable<DecorationWithObjectId> decorations)
+        private void RenderBridges(IEnumerable<BridgeDecoration> bridges)
+        {
+            foreach (var bridge in bridges)
+            {
+                // Render the road
+                // RenderRoad(bridge.Road)
+                var model = ContentProvider.Get().GetAsset<ScenegraphResourceAsset>(new ResourceKey(bridge.ResourceName,
+                    GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_CRES));
+                Debug.Log($"I'm rendering {bridge.ResourceName}");
+
+                var bridgeObject = model.CreateGameObjectForShape();
+                bridgeObject.transform.position = (bridge.Road.Position.Position + bridge.PositionOffset);
+                bridgeObject.transform.rotation *= bridge.ModelOrientation;
+                // Parent to this component.
+                bridgeObject.transform.parent = transform;
+            }
+        }
+
+        private void RenderDecorationWithModels(IEnumerable<DecorationWithObjectId> decorations)
         {
             foreach (var decoration in decorations)
             {
@@ -39,6 +59,8 @@ namespace OpenTS2.Scenes
                 var decorationObject = model.CreateGameObjectForShape();
                 decorationObject.transform.position = decoration.Position.Position;
                 decorationObject.transform.Rotate(0, 0, -decoration.Rotation);
+                // Parent to this component.
+                decorationObject.transform.parent = transform;
             }
         }
     }

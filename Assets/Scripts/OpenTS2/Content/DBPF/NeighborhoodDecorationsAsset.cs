@@ -53,13 +53,16 @@ namespace OpenTS2.Content.DBPF
     {
         public DecorationPosition Position { get; }
 
-        public RoadDecoration(DecorationPosition position) => (Position) = (position);
+        public uint PieceId { get; }
+
+        public RoadDecoration(DecorationPosition position, uint pieceId) => (Position, PieceId) = (position, pieceId);
     }
 
     /// <summary>
     /// This is called RoadOccupantWithModel in game but in practice it's only used for bridges!
     ///
-    /// It uses the format string "%04x-bridge" with pieceId as the model name.
+    /// It literally uses the format string "%04x-bridge" with pieceId as the model name. Maybe a holdover from
+    /// simcity where it could be used for tunnels and stuff?
     /// </summary>
     public class BridgeDecoration
     {
@@ -67,7 +70,14 @@ namespace OpenTS2.Content.DBPF
         /// The road portion of the bridge.
         /// </summary>
         public RoadDecoration Road;
-        public BridgeDecoration(RoadDecoration road) => (Road) = (road);
+
+        public Vector3 PositionOffset;
+        public Quaternion ModelOrientation;
+
+        public BridgeDecoration(RoadDecoration road, Vector3 positionOffset, Quaternion modelOrientation) =>
+            (Road, PositionOffset, ModelOrientation) = (road, positionOffset, modelOrientation);
+
+        public string ResourceName => $"{(Road.PieceId >> 0x10):x4}-bridge_cres";
     }
 
     public class PropDecoration : DecorationWithObjectId

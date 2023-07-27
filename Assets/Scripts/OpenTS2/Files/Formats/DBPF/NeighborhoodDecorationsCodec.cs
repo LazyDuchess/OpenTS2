@@ -111,7 +111,7 @@ namespace OpenTS2.Files.Formats.DBPF
                 Vector2Serializer.Deserialize(reader);
             }
 
-            return new RoadDecoration(position);
+            return new RoadDecoration(position, pieceId);
         }
 
         private static RoadDecoration[] ReadRoads(IoBuffer reader)
@@ -151,7 +151,7 @@ namespace OpenTS2.Files.Formats.DBPF
                     unknown.y *= 1.25f;
                 }
 
-                bridges[i] = new BridgeDecoration(road);
+                bridges[i] = new BridgeDecoration(road, positionOffset, modelOrientation);
             }
 
             return bridges;
