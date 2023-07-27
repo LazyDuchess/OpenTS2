@@ -2,9 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using OpenTS2.Scenes;
+using OpenTS2.Engine;
 
 namespace OpenTS2.Rendering
 {
+    /// <summary>
+    /// Generates Neighborhood shadows.
+    /// </summary>
     public static class LightmapManager
     {
         public static RenderTexture ShadowMap => s_shadowMap;
@@ -15,6 +19,27 @@ namespace OpenTS2.Rendering
         private static Shader s_shadowMapShader = Shader.Find("OpenTS2/HeightMapShadows");
         private static Material s_shadowMapMaterial = new Material(s_shadowMapShader);
         private static int s_resolution = 128;
+
+        /// <summary>
+        /// Call to delete all current lightmap textures.
+        /// </summary>
+        public static void Reset()
+        {
+            if (s_heightMap != null)
+            {
+                s_heightMap.Free();
+                s_heightMap = null;
+            }    
+            if (s_shadowMap != null)
+            {
+                s_shadowMap.Free();
+                s_shadowMap = null;
+            }
+        }
+
+        /// <summary>
+        /// Renders lightmapping for the current neighborhood.
+        /// </summary>
         public static void RenderShadowMap()
         {
             var terrain = GameObject.FindObjectOfType<NeighborhoodTerrain>();

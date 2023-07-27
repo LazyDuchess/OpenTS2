@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using OpenTS2.Rendering;
 
 namespace OpenTS2.Content
 {
@@ -42,6 +43,7 @@ namespace OpenTS2.Content
 
         public static void EnterNeighborhood(Neighborhood neighborhood)
         {
+            LightmapManager.Reset();
             CursorController.Cursor = CursorController.CursorType.Hourglass;
             ContentProvider.Get().Changes.SaveChanges();
             if (CurrentNeighborhood != null)
