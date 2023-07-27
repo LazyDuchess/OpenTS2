@@ -6,6 +6,8 @@ Shader "OpenTS2/StandardMaterial/AlphaCutOut"
         _AlphaMultiplier ("Alpha Multiplier", Range(0.0, 1.0)) = 1.0
 
         _AlphaCutOff ("AlphaCutOff", Float) = 1.0
+
+        _SeaLevel("Sea Level", float) = -100.0
     }
     SubShader
     {

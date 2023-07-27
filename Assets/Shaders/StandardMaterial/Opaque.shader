@@ -4,6 +4,7 @@ Shader "OpenTS2/StandardMaterial/Opaque"
     {
         [NoScaleOffset] _MainTex ("Texture", 2D) = "white" {}
         _AlphaMultiplier ("Alpha Multiplier", Range(0.0, 1.0)) = 1.0
+        _SeaLevel("Sea Level", float) = -100.0
     }
     SubShader
     {

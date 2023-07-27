@@ -15,6 +15,7 @@ Shader "OpenTS2/ClassicTerrain"
         _LightVector("Light Vector", Vector) = (.33, .33, -.33, 0)
         _Ambient("Ambient", float) = 0
         _Subtract("Subtract", float) = 0
+            _SeaLevel("Sea Level", float) = 0
     }
     SubShader
     {
@@ -48,6 +49,7 @@ Shader "OpenTS2/ClassicTerrain"
                 float4 color : COLOR;
                 float cliff : TEXCOORD2;
                 float2 shadowUv : TEXCOORD3;
+                float height : TEXCOORD4;
             };
 
             sampler2D _MainTex;
@@ -62,6 +64,7 @@ Shader "OpenTS2/ClassicTerrain"
             float4 _LightVector;
             float _Subtract;
             float _Ambient;
+            float _SeaLevel;
 
             v2f vert (appdata v)
             {
@@ -88,6 +91,8 @@ Shader "OpenTS2/ClassicTerrain"
                 o.color = v.color;
                 o.cliff = max(0,min(1,pow(-(dot(worldNormal, float3(0.0, 1.0, 0.0)) - 1), 2) * 3));
                 o.shadowUv = float2(v.vertex.x, v.vertex.z) / (128 * 10);
+                o.height = v.vertex.y;
+                
                 return o;
             }
 
@@ -112,6 +117,13 @@ Shader "OpenTS2/ClassicTerrain"
             col = lerp(col, cliffCol, i.cliff);
             col *= tex2D(_MatCap, i.matcapUv);
             
+            fixed4 seaColor = fixed4(0, 0, 0, 1);
+
+            float seaAmount = pow(max(0,-(i.height - _SeaLevel)) * 0.02, 0.4);
+            seaAmount = min(1, seaAmount);
+
+            col = lerp(col, seaColor, seaAmount);
+
             //col = i.color;
                 //fixed4 col = ;
             //col.z = 0;

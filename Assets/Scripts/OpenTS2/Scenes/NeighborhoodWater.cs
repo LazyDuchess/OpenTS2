@@ -12,7 +12,13 @@ namespace OpenTS2.Scenes
     {
         private void Start()
         {
+            
             transform.position += NeighborhoodManager.CurrentNeighborhood.Terrain.SeaLevel * Vector3.up;
+            if (CameraReflection.Instance != null)
+            {
+                var meshRenderer = GetComponent<MeshRenderer>();
+                meshRenderer.material.SetTexture("_Reflection", CameraReflection.Instance.ReflectionTexture);
+            }
         }
     }
 }

@@ -742,6 +742,7 @@ GameObject:
   - component: {fileID: 1642340382}
   - component: {fileID: 1642340381}
   - component: {fileID: 1642340384}
+  - component: {fileID: 1642340385}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -831,3 +832,20 @@ MonoBehaviour:
   ZoomSpeed: 75
   Speed: 200
   Sensitivity: 5
+--- !u!114 &1642340385
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1642340380}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 76a6aa02c55585444bc259d6cb31e99a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ReflectionSkyColor: {r: 0.36196154, g: 0.48599383, b: 0.9245283, a: 0}
+  reflectionCamera: {fileID: 0}
+  ReflectionTexture: {fileID: 0}
+  m_ClipPlaneOffset: 0.07
+  ReflectionSurface: {fileID: 779771439}

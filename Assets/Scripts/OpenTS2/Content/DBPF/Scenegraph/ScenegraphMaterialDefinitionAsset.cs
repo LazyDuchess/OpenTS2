@@ -57,6 +57,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
 
         private static readonly int AlphaCutOff = Shader.PropertyToID("_AlphaCutOff");
         private static readonly int AlphaMultiplier = Shader.PropertyToID("_AlphaMultiplier");
+        private static readonly int SeaLevel = Shader.PropertyToID("_SeaLevel");
 
         private Material GetStandardMaterial()
         {
@@ -99,6 +100,8 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                         break;
                 }
             }
+
+            material.SetFloat(SeaLevel, NeighborhoodManager.CurrentNeighborhood.Terrain.SeaLevel);
 
             return material;
         }
