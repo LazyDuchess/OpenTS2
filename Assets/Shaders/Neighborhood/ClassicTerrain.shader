@@ -92,7 +92,8 @@ Shader "OpenTS2/ClassicTerrain"
                 o.cliff = max(0,min(1,pow(-(dot(worldNormal, float3(0.0, 1.0, 0.0)) - 1), 2) * 3));
                 o.shadowUv = float2(v.vertex.x, v.vertex.z) / (128 * 10);
                 o.height = v.vertex.y;
-                
+                if (v.vertex.y <= _SeaLevel)
+                    o.color.b = 1;
                 return o;
             }
 
@@ -109,7 +110,7 @@ Shader "OpenTS2/ClassicTerrain"
             fixed4 shadowMapCol = tex2D(_ShadowMap, i.shadowUv);
             i.matcapUv *= shadowMapCol.r;
 
-            float shoreAmount = min(1,tex2D(_ShoreMask, i.shadowUv) * 1.1);
+            float shoreAmount = min(1,tex2D(_ShoreMask, i.shadowUv) * 1.1 + i.color.b);
 
             fixed4 shoreCol = tex2D(_Shore, i.uv);
 

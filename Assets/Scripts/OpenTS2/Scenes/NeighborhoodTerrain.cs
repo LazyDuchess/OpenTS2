@@ -75,7 +75,7 @@ namespace OpenTS2.Scenes
             var vars1 = GetVariationRectangles(terrainAsset.Width, terrainAsset.Height);
             var vars2 = GetVariationRectangles(terrainAsset.Width, terrainAsset.Height);
             
-            MakeVariationVertexColors(terrainMesh, vars1, vars2);
+            MakeVertexColors(terrainMesh, vars1, vars2);
             LightmapManager.RenderShadowMap();
             meshRenderer.material.SetTexture("_ShadowMap", LightmapManager.ShadowMap);
             meshRenderer.material.SetTexture("_ShoreMask", LightmapManager.ShoreMap);
@@ -108,8 +108,9 @@ namespace OpenTS2.Scenes
             terrainMesh.colors = cols;
         }
 
-        void MakeVariationVertexColors(Mesh terrainMesh, List<Rect> variations1, List<Rect> variations2)
+        void MakeVertexColors(Mesh terrainMesh, List<Rect> variations1, List<Rect> variations2)
         {
+            var seaLevel = NeighborhoodManager.CurrentNeighborhood.Terrain.SeaLevel;
             var vertices = terrainMesh.vertices;
             var colors = terrainMesh.colors;
             for(var i=0;i<vertices.Length;i++)
