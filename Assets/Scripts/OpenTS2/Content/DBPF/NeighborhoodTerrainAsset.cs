@@ -10,12 +10,13 @@ namespace OpenTS2.Content.DBPF
         public int Width { get; }
         public int Height { get; }
         public float SeaLevel { get; }
-        public string TerrainType { get; }
+        public string TerrainTypeName { get; }
+        public TerrainType TerrainType => TerrainManager.GetTerrainType(TerrainTypeName);
         public FloatArray2D VertexHeights { get; }
 
         public NeighborhoodTerrainAsset(int width, int height, float seaLevel, string terrainType,
             FloatArray2D vertexHeights) =>
-            (Width, Height, SeaLevel, TerrainType, VertexHeights) =
+            (Width, Height, SeaLevel, TerrainTypeName, VertexHeights) =
             (width, height, seaLevel, terrainType, vertexHeights);
 
         public Mesh MakeMesh()

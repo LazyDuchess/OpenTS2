@@ -8,25 +8,20 @@ using OpenTS2.Rendering;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using OpenTS2.Components;
 
 namespace OpenTS2.Scenes
 {
     [RequireComponent(typeof(MeshFilter))]
     [RequireComponent(typeof(MeshCollider))]
     [RequireComponent(typeof(MeshRenderer))]
-    public class NeighborhoodTerrain : MonoBehaviour
+    public class NeighborhoodTerrain : AssetReferenceComponent
     {
         public Transform Sun;
         private static ResourceKey DayTimeMatCapKey = new ResourceKey(0x0BE702EF, 0x8BA01057, TypeIDs.IMG);
-        private static ResourceKey TemperateWetKey = new ResourceKey(0xFFFB3AC6, 0x4B3FEBD4, 0x1C0532FA, TypeIDs.SCENEGRAPH_TXTR);
-        private static ResourceKey TemperateWet2Key = new ResourceKey(0xFFCDD1FB, 0x5017E6AC, 0x1C0532FA, TypeIDs.SCENEGRAPH_TXTR);
         private static ResourceKey CliffKey = new ResourceKey(0xFFF56CAE, 0x6E80B6A1, 0x1C0532FA, TypeIDs.SCENEGRAPH_TXTR);
         //private static ResourceKey TemperateWetKey = new ResourceKey(0xFF354609, 0x1A9C59CC, 0x1C0532FA, TypeIDs.SCENEGRAPH_TXTR);
         private Material _terrainMaterial;
-        private TextureAsset _matcapAsset;
-        private ScenegraphTextureAsset _temperateWetTextureAsset;
-        private ScenegraphTextureAsset _temperateWet2TextureAsset;
-        private ScenegraphTextureAsset _cliffTextureAsset;
         // Start is called before the first frame update
         void Start()
         {
@@ -34,19 +29,24 @@ namespace OpenTS2.Scenes
             var meshRenderer = GetComponent<MeshRenderer>();
             _terrainMaterial = meshRenderer.material;
             _terrainMaterial.SetVector("_LightVector", Sun.forward);
-            _matcapAsset = contentProvider.GetAsset<TextureAsset>(DayTimeMatCapKey);
-            _temperateWetTextureAsset = contentProvider.GetAsset<ScenegraphTextureAsset>(TemperateWetKey);
-            _temperateWet2TextureAsset = contentProvider.GetAsset<ScenegraphTextureAsset>(TemperateWet2Key);
-            _cliffTextureAsset = contentProvider.GetAsset<ScenegraphTextureAsset>(CliffKey);
-            if (_matcapAsset != null)
+
+            var terrainType = NeighborhoodManager.CurrentNeighborhood.Terrain.TerrainType;
+
+            var matCap = contentProvider.GetAsset<TextureAsset>(DayTimeMatCapKey);
+            var smooth = contentProvider.GetAsset<ScenegraphTextureAsset>(terrainType.Texture);
+            var variation1 = contentProvider.GetAsset<ScenegraphTextureAsset>(terrainType.Texture1);
+            var variation2 = contentProvider.GetAsset<ScenegraphTextureAsset>(terrainType.Texture2);
+            var cliff = contentProvider.GetAsset<ScenegraphTextureAsset>(CliffKey);
+            AddReference(matCap, smooth, variation1, variation2, cliff);
+            if (matCap != null)
             {
-                _matcapAsset.Texture.wrapMode = TextureWrapMode.Clamp;
-                _terrainMaterial.SetTexture("_MatCap", _matcapAsset.Texture);
-                _terrainMaterial.SetTexture("_Variation1", _temperateWet2TextureAsset.GetSelectedImageAsUnityTexture(contentProvider));
-                _terrainMaterial.SetTexture("_Variation2", _temperateWet2TextureAsset.GetSelectedImageAsUnityTexture(contentProvider));
-                _terrainMaterial.SetTexture("_CliffTex", _cliffTextureAsset.GetSelectedImageAsUnityTexture(contentProvider));
-                _terrainMaterial.mainTexture = _temperateWetTextureAsset.GetSelectedImageAsUnityTexture(contentProvider);
+                matCap.Texture.wrapMode = TextureWrapMode.Clamp;
+                _terrainMaterial.SetTexture("_MatCap", matCap.Texture);
             }
+            _terrainMaterial.mainTexture = smooth.GetSelectedImageAsUnityTexture(contentProvider);
+            _terrainMaterial.SetTexture("_Variation1", variation1.GetSelectedImageAsUnityTexture(contentProvider));
+            _terrainMaterial.SetTexture("_Variation2", variation2.GetSelectedImageAsUnityTexture(contentProvider));
+            _terrainMaterial.SetTexture("_CliffTex", cliff.GetSelectedImageAsUnityTexture(contentProvider));
             SetTerrainMesh();
         }
 
