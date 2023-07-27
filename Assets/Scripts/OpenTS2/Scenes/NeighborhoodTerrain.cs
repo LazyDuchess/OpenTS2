@@ -18,8 +18,9 @@ namespace OpenTS2.Scenes
     public class NeighborhoodTerrain : AssetReferenceComponent
     {
         public Transform Sun;
-        private static ResourceKey DayTimeMatCapKey = new ResourceKey(0x0BE702EF, 0x8BA01057, TypeIDs.IMG);
-        private static ResourceKey CliffKey = new ResourceKey(0xFFF56CAE, 0x6E80B6A1, 0x1C0532FA, TypeIDs.SCENEGRAPH_TXTR);
+        private static ResourceKey s_matCapKey = new ResourceKey(0x0BE702EF, 0x8BA01057, TypeIDs.IMG);
+        private static ResourceKey s_cliffKey = new ResourceKey(0xFFF56CAE, 0x6E80B6A1, 0x1C0532FA, TypeIDs.SCENEGRAPH_TXTR);
+        private static ResourceKey s_shoreKey = new ResourceKey("neighborhood-terrain-moisture-9_txtr", 0x1C0532FA, TypeIDs.SCENEGRAPH_TXTR);
         //private static ResourceKey TemperateWetKey = new ResourceKey(0xFF354609, 0x1A9C59CC, 0x1C0532FA, TypeIDs.SCENEGRAPH_TXTR);
         private Material _terrainMaterial;
         // Start is called before the first frame update
@@ -32,12 +33,13 @@ namespace OpenTS2.Scenes
 
             var terrainType = NeighborhoodManager.CurrentNeighborhood.Terrain.TerrainType;
 
-            var matCap = contentProvider.GetAsset<TextureAsset>(DayTimeMatCapKey);
+            var matCap = contentProvider.GetAsset<TextureAsset>(s_matCapKey);
             var smooth = contentProvider.GetAsset<ScenegraphTextureAsset>(terrainType.Texture);
             var variation1 = contentProvider.GetAsset<ScenegraphTextureAsset>(terrainType.Texture1);
             var variation2 = contentProvider.GetAsset<ScenegraphTextureAsset>(terrainType.Texture2);
-            var cliff = contentProvider.GetAsset<ScenegraphTextureAsset>(CliffKey);
-            AddReference(matCap, smooth, variation1, variation2, cliff);
+            var cliff = contentProvider.GetAsset<ScenegraphTextureAsset>(s_cliffKey);
+            var shore = contentProvider.GetAsset<ScenegraphTextureAsset>(s_shoreKey);
+            AddReference(matCap, smooth, variation1, variation2, cliff, shore);
             if (matCap != null)
             {
                 matCap.Texture.wrapMode = TextureWrapMode.Clamp;
@@ -47,6 +49,7 @@ namespace OpenTS2.Scenes
             _terrainMaterial.SetTexture("_Variation1", variation1.GetSelectedImageAsUnityTexture(contentProvider));
             _terrainMaterial.SetTexture("_Variation2", variation2.GetSelectedImageAsUnityTexture(contentProvider));
             _terrainMaterial.SetTexture("_CliffTex", cliff.GetSelectedImageAsUnityTexture(contentProvider));
+            _terrainMaterial.SetTexture("_Shore", shore.GetSelectedImageAsUnityTexture(contentProvider));
             SetTerrainMesh();
         }
 
@@ -72,6 +75,7 @@ namespace OpenTS2.Scenes
             MakeVariationVertexColors(terrainMesh, vars1, vars2);
             LightmapManager.RenderShadowMap();
             meshRenderer.material.SetTexture("_ShadowMap", LightmapManager.ShadowMap);
+            meshRenderer.material.SetTexture("_ShoreMask", LightmapManager.ShoreMap);
         }
 
         List<Rect> GetVariationRectangles(int width, int height)

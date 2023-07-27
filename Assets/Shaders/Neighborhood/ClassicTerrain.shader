@@ -5,7 +5,9 @@ Shader "OpenTS2/ClassicTerrain"
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
-        _ShadowMap("Texture", 2D) = "white" {}
+        _Shore("Shore Texture", 2D) = "white" {}
+        _ShoreMask("Shore Mask", 2D) = "black" {}
+        _ShadowMap("Shadow Map", 2D) = "white" {}
         _Variation1("Variation 1", 2D) = "white" {}
         _Variation2("Variation 2", 2D) = "white" {}
         _CliffTex("Cliff Texture", 2D) = "white" {}
@@ -49,11 +51,13 @@ Shader "OpenTS2/ClassicTerrain"
             };
 
             sampler2D _MainTex;
+            sampler2D _Shore;
             sampler2D _ShadowMap;
             sampler2D _Variation1;
             sampler2D _Variation2;
             sampler2D _MatCap;
             sampler2D _CliffTex;
+            sampler2D _ShoreMask;
             float4 _MainTex_ST;
             float4 _LightVector;
             float _Subtract;
@@ -100,6 +104,11 @@ Shader "OpenTS2/ClassicTerrain"
             fixed4 shadowMapCol = tex2D(_ShadowMap, i.shadowUv);
             i.matcapUv *= shadowMapCol.r;
 
+            float shoreAmount = tex2D(_ShoreMask, i.shadowUv);
+
+            fixed4 shoreCol = tex2D(_Shore, i.uv);
+
+            col = lerp(col, shoreCol, shoreAmount);
             col = lerp(col, cliffCol, i.cliff);
             col *= tex2D(_MatCap, i.matcapUv);
             
