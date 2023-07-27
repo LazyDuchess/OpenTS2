@@ -24,11 +24,11 @@ namespace OpenTS2.Files.Formats.DBPF
             // then roads.
             var roads = ReadRoads(reader);
             // then roads with models.
-            var roadsWithModels = ReadRoadsWithModels(reader);
+            var bridges = ReadBridges(reader);
             // and finally prop decorations.
             var props = ReadProps(reader);
 
-            return new NeighborhoodDecorationsAsset(flora, roads, roadsWithModels, props);
+            return new NeighborhoodDecorationsAsset(flora, roads, bridges, props);
         }
 
         private static DecorationPosition ReadDecorationPositionWithoutRotation(IoBuffer reader)
@@ -111,7 +111,7 @@ namespace OpenTS2.Files.Formats.DBPF
                 Vector2Serializer.Deserialize(reader);
             }
 
-            return new RoadDecoration(position);
+            return new RoadDecoration(position, pieceId);
         }
 
         private static RoadDecoration[] ReadRoads(IoBuffer reader)
@@ -127,13 +127,13 @@ namespace OpenTS2.Files.Formats.DBPF
             return roads;
         }
 
-        private static RoadWithModelDecoration[] ReadRoadsWithModels(IoBuffer reader)
+        private static BridgeDecoration[] ReadBridges(IoBuffer reader)
         {
             var version = reader.ReadUInt16();
             Debug.Assert(version > 2);
 
-            var roadsWithModels = new RoadWithModelDecoration[reader.ReadUInt32()];
-            for (var i = 0; i < roadsWithModels.Length; i++)
+            var bridges = new BridgeDecoration[reader.ReadUInt32()];
+            for (var i = 0; i < bridges.Length; i++)
             {
                 var road = ReadRoad(reader);
                 var objectVersion = reader.ReadByte();
@@ -151,10 +151,10 @@ namespace OpenTS2.Files.Formats.DBPF
                     unknown.y *= 1.25f;
                 }
 
-                roadsWithModels[i] = new RoadWithModelDecoration(road);
+                bridges[i] = new BridgeDecoration(road, positionOffset, modelOrientation);
             }
 
-            return roadsWithModels;
+            return bridges;
         }
 
         private static PropDecoration[] ReadProps(IoBuffer reader)

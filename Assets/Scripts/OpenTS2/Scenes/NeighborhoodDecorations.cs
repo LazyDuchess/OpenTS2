@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using OpenTS2.Common;
 using OpenTS2.Content;
+using OpenTS2.Content.DBPF;
 using OpenTS2.Content.DBPF.Scenegraph;
 using OpenTS2.Files.Formats.DBPF;
 using UnityEngine;
@@ -16,34 +17,50 @@ namespace OpenTS2.Scenes
             var contentProvider = ContentProvider.Get();
             var decorations = NeighborhoodManager.CurrentNeighborhood.Decorations;
 
-            foreach (var flora in decorations.FloraDecorations)
+            // Render trees.
+            RenderDecorationWithModels(decorations.FloraDecorations);
+            // Render bridges.
+            RenderBridges(decorations.BridgeDecorations);
+            // Render props.
+            RenderDecorationWithModels(decorations.PropDecorations);
+        }
+
+        private void RenderBridges(IEnumerable<BridgeDecoration> bridges)
+        {
+            foreach (var bridge in bridges)
             {
-                if (!NeighborhoodManager.NeighborhoodObjects.TryGetValue(flora.ObjectId, out var resourceName))
-                {
-                    continue;
-                }
-
-                var model = contentProvider.GetAsset<ScenegraphResourceAsset>(new ResourceKey(resourceName,
+                // Render the road
+                // RenderRoad(bridge.Road)
+                var model = ContentProvider.Get().GetAsset<ScenegraphResourceAsset>(new ResourceKey(bridge.ResourceName,
                     GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_CRES));
+                Debug.Log($"I'm rendering {bridge.ResourceName}");
 
-                var decorationObject = model.CreateGameObjectForShape();
-                decorationObject.transform.position = flora.Position.Position;
-                decorationObject.transform.Rotate(0, 0, -flora.Rotation);
+                var bridgeObject = model.CreateGameObjectForShape();
+                bridgeObject.transform.position = (bridge.Road.Position.Position + bridge.PositionOffset);
+                bridgeObject.transform.rotation *= bridge.ModelOrientation;
+                // Parent to this component.
+                bridgeObject.transform.parent = transform;
             }
+        }
 
-            foreach (var prop in decorations.PropDecorations)
+        private void RenderDecorationWithModels(IEnumerable<DecorationWithObjectId> decorations)
+        {
+            foreach (var decoration in decorations)
             {
-                if (!NeighborhoodManager.NeighborhoodObjects.TryGetValue(prop.PropId, out var resourceName))
+                if (!NeighborhoodManager.NeighborhoodObjects.TryGetValue(decoration.ObjectId, out var resourceName))
                 {
-                    continue;
+                    Debug.Log($"Can't find model for decoration with guid 0x{decoration.ObjectId:X}");
+                    return;
                 }
 
-                var model = contentProvider.GetAsset<ScenegraphResourceAsset>(new ResourceKey(resourceName,
+                var model = ContentProvider.Get().GetAsset<ScenegraphResourceAsset>(new ResourceKey(resourceName,
                     GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_CRES));
 
                 var decorationObject = model.CreateGameObjectForShape();
-                decorationObject.transform.position = prop.Position.Position;
-                decorationObject.transform.Rotate(0, 0, -prop.Rotation);
+                decorationObject.transform.position = decoration.Position.Position;
+                decorationObject.transform.Rotate(0, 0, -decoration.Rotation);
+                // Parent to this component.
+                decorationObject.transform.parent = transform;
             }
         }
     }

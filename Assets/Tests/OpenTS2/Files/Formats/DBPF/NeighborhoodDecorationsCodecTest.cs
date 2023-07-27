@@ -3,6 +3,7 @@ using NUnit.Framework;
 using OpenTS2.Content;
 using OpenTS2.Content.DBPF;
 using OpenTS2.Files.Formats.DBPF;
+using UnityEngine;
 
 public class NeighborhoodDecorationsCodecTest
 {
@@ -39,7 +40,9 @@ public class NeighborhoodDecorationsCodecTest
         Assert.That(decorationsAsset.RoadDecorations.Length, Is.EqualTo(367));
 
 
-        Assert.That(decorationsAsset.RoadWithModelDecorations.Length, Is.EqualTo(10));
+        Assert.That(decorationsAsset.BridgeDecorations.Length, Is.EqualTo(10));
+        var firstBridge = decorationsAsset.BridgeDecorations[0];
+        Assert.That(firstBridge.ResourceName, Is.EqualTo("0ac3-bridge_cres"));
 
 
         Assert.That(decorationsAsset.PropDecorations.Length, Is.EqualTo(102));

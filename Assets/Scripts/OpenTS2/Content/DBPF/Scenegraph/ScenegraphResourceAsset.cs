@@ -26,9 +26,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             var shape = ContentProvider.Get().GetAsset<ScenegraphShapeAsset>(shapeKey);
 
             shape.LoadModelsAndMaterials();
-
-            Debug.Log($"materials: {string.Join(", ", shape.Materials.Keys)}");
-
+            
             var gameObject = new GameObject(resourceName, typeof(MeshFilter), typeof(MeshRenderer), typeof(AssetReferenceComponent));
             // Keeps a strong reference to the Shape asset.
             gameObject.GetComponent<AssetReferenceComponent>().AddReference(shape);
@@ -51,7 +49,6 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                     primitiveObject.GetComponent<MeshFilter>().mesh = primitive.Value;
                     if (shape.Materials.TryGetValue(primitive.Key, out var material))
                     {
-                        Debug.Log("[x] Setting material to primitive");
                         primitiveObject.GetComponent<MeshRenderer>().material = material.GetAsUnityMaterial();
                     }
                 }
