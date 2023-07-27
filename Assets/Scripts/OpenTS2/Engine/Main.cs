@@ -25,6 +25,7 @@ namespace OpenTS2.Engine
             var epManager = new EPManager();
             var contentProvider = new ContentProvider();
             var objectManager = new ObjectManager(contentProvider);
+            TerrainManager.Initialize();
             Filesystem.Initialize(new JSONPathProvider(), epManager);
             CodecAttribute.Initialize();
             //Initialize the game assembly, do all reflection things.
