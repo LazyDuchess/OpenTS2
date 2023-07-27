@@ -39,7 +39,7 @@ public class NeighborhoodDecorationsCodecTest
         Assert.That(decorationsAsset.RoadDecorations.Length, Is.EqualTo(367));
 
 
-        Assert.That(decorationsAsset.RoadWithModelDecorations.Length, Is.EqualTo(10));
+        Assert.That(decorationsAsset.BridgeDecorations.Length, Is.EqualTo(10));
 
 
         Assert.That(decorationsAsset.PropDecorations.Length, Is.EqualTo(102));

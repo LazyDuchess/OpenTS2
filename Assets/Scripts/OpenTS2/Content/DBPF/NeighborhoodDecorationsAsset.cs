@@ -12,12 +12,12 @@ namespace OpenTS2.Content.DBPF
     {
         public FloraDecoration[] FloraDecorations { get; }
         public RoadDecoration[] RoadDecorations { get; }
-        public RoadWithModelDecoration[] RoadWithModelDecorations { get; }
+        public BridgeDecoration[] BridgeDecorations { get; }
         public PropDecoration[] PropDecorations { get; }
 
         public NeighborhoodDecorationsAsset(FloraDecoration[] flora, RoadDecoration[] roads,
-            RoadWithModelDecoration[] roadsWithModels, PropDecoration[] props) =>
-            (FloraDecorations, RoadDecorations, RoadWithModelDecorations, PropDecorations) =
+            BridgeDecoration[] roadsWithModels, PropDecoration[] props) =>
+            (FloraDecorations, RoadDecorations, BridgeDecorations, PropDecorations) =
             (flora, roads, roadsWithModels, props);
     }
 
@@ -28,15 +28,25 @@ namespace OpenTS2.Content.DBPF
         public Vector2 BoundingBoxMax;
     }
 
-    public class FloraDecoration
+    /// <summary>
+    /// Decoration object that has a guid to map to a model, position and rotation.
+    /// </summary>
+    public class DecorationWithObjectId
     {
         public DecorationPosition Position { get; }
-        public float Rotation;
-
+        public float Rotation { get; }
         public uint ObjectId { get; }
 
-        public FloraDecoration(DecorationPosition position, float rotation, uint objectId) =>
+        public DecorationWithObjectId(DecorationPosition position, float rotation, uint objectId) =>
             (Position, Rotation, ObjectId) = (position, rotation, objectId);
+    }
+
+    public class FloraDecoration : DecorationWithObjectId
+    {
+        public FloraDecoration(DecorationPosition position, float rotation, uint objectId) : base(position, rotation,
+            objectId)
+        {
+        }
     }
 
     public class RoadDecoration
@@ -47,23 +57,24 @@ namespace OpenTS2.Content.DBPF
     }
 
     /// <summary>
-    /// Used for bridges and tunnels mostly.
+    /// This is called RoadOccupantWithModel in game but in practice it's only used for bridges!
+    ///
+    /// It uses the format string "%04x-bridge" with pieceId as the model name.
     /// </summary>
-    public class RoadWithModelDecoration
+    public class BridgeDecoration
     {
+        /// <summary>
+        /// The road portion of the bridge.
+        /// </summary>
         public RoadDecoration Road;
-        public RoadWithModelDecoration(RoadDecoration road) => (Road) = (road);
+        public BridgeDecoration(RoadDecoration road) => (Road) = (road);
     }
 
-    public class PropDecoration
+    public class PropDecoration : DecorationWithObjectId
     {
-        public DecorationPosition Position { get; }
-
-        public float Rotation;
-
-        public uint PropId { get; }
-
-        public PropDecoration(DecorationPosition position, float rotation, uint propId) =>
-            (Position, Rotation, PropId) = (position, rotation, propId);
+        public PropDecoration(DecorationPosition position, float rotation, uint propId) : base(position, rotation,
+            propId)
+        {
+        }
     }
 }
