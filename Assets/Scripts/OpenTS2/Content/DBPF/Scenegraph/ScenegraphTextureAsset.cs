@@ -59,7 +59,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                     case LifoReferenceMip lifoReferenceMip:
                     {
                         var lifoAsset = provider.GetAsset<ScenegraphMipLevelInfoAsset>(
-                            new ResourceKey(lifoReferenceMip.LifoName, 0x1C0532FA, TypeIDs.SCENEGRAPH_LIFO));
+                            new ResourceKey(lifoReferenceMip.LifoName, GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_LIFO));
                         mipData = lifoAsset.MipData;
                         break;
                     }

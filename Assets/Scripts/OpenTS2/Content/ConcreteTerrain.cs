@@ -13,8 +13,8 @@ namespace OpenTS2.Content
     {
         public override string Name => "Concrete";
 
-        public override ResourceKey Texture => new ResourceKey("concrete-smooth_txtr", 0x1C0532FA, TypeIDs.SCENEGRAPH_TXTR);
+        public override ResourceKey Texture => new ResourceKey("concrete-smooth_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR);
 
-        public override ResourceKey Roughness => new ResourceKey("dirt-grey_txtr", 0x1C0532FA, TypeIDs.SCENEGRAPH_TXTR);
+        public override ResourceKey Roughness => new ResourceKey("dirt-grey_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR);
     }
 }

@@ -17,10 +17,10 @@ namespace OpenTS2.Content
     {
         public override string Name => "Desert";
 
-        public override ResourceKey Texture => new ResourceKey("desert-smooth_txtr", 0x1C0532FA, TypeIDs.SCENEGRAPH_TXTR);
-        public override ResourceKey Texture1 => new ResourceKey("desert-medium_txtr", 0x1C0532FA, TypeIDs.SCENEGRAPH_TXTR);
+        public override ResourceKey Texture => new ResourceKey("desert-smooth_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR);
+        public override ResourceKey Texture1 => new ResourceKey("desert-medium_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR);
 
-        public override ResourceKey Roughness => new ResourceKey("desert-rough_txtr", 0x1C0532FA, TypeIDs.SCENEGRAPH_TXTR);
-        public override ResourceKey Roughness1 => new ResourceKey("desert-rough-red_txtr", 0x1C0532FA, TypeIDs.SCENEGRAPH_TXTR);
+        public override ResourceKey Roughness => new ResourceKey("desert-rough_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR);
+        public override ResourceKey Roughness1 => new ResourceKey("desert-rough-red_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR);
     }
 }
