@@ -23,8 +23,8 @@ namespace OpenTS2.Rendering
         private static RenderTexture s_shoreMap;
         private static Shader s_shoreMapShader = Shader.Find("OpenTS2/ShoreMask");
         private static Material s_shoreMapMaterial = new Material(s_shoreMapShader);
-        private static int s_shadowMapResolution = 128;
-        private static int s_heightMapResolution = 128;
+        private static int s_shadowMapResolution = 256;
+        private static int s_heightMapResolution = 256;
         private static int s_shoreResolution = 128;
 
         /// <summary>

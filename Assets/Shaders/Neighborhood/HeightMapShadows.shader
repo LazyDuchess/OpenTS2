@@ -67,7 +67,7 @@ Shader "OpenTS2/HeightMapShadows"
                 {
                     // sample the texture
                     //fixed4 col = tex2D(_MainTex, i.uv);
-                float shade = getShade(i.uv, 0.01, 1.0);
+                float shade = getShade(i.uv, 0.002, 1.0);
                 fixed4 col = fixed4(shade, shade, shade, 1);
                 // apply fog
                 UNITY_APPLY_FOG(i.fogCoord, col);

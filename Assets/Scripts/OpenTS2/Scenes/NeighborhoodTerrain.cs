@@ -24,10 +24,12 @@ namespace OpenTS2.Scenes
         private static ResourceKey s_shoreKey = new ResourceKey("neighborhood-terrain-moisture-9_txtr", 0x1C0532FA, TypeIDs.SCENEGRAPH_TXTR);
         //private static ResourceKey TemperateWetKey = new ResourceKey(0xFF354609, 0x1A9C59CC, 0x1C0532FA, TypeIDs.SCENEGRAPH_TXTR);
         private Material _terrainMaterial;
+        private MeshFilter _meshFilter;
         // Start is called before the first frame update
         void Awake()
         {
             Instance = this;
+            _meshFilter = GetComponent<MeshFilter>();
             var contentProvider = ContentProvider.Get();
             var meshRenderer = GetComponent<MeshRenderer>();
             _terrainMaterial = meshRenderer.material;
@@ -66,10 +68,9 @@ namespace OpenTS2.Scenes
         {
             var terrainAsset = NeighborhoodManager.CurrentNeighborhood.Terrain;
             var terrainMesh = terrainAsset.MakeMesh();
-            var meshFilter = GetComponent<MeshFilter>();
             var meshCollider = GetComponent<MeshCollider>();
             var meshRenderer = GetComponent<MeshRenderer>();
-            meshFilter.sharedMesh = terrainMesh;
+            _meshFilter.sharedMesh = terrainMesh;
             meshCollider.sharedMesh = terrainMesh;
             InitializeVertexColors(terrainMesh);
             var vars1 = GetVariationRectangles(terrainAsset.Width, terrainAsset.Height);

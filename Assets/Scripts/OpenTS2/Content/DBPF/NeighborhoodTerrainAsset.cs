@@ -12,11 +12,13 @@ namespace OpenTS2.Content.DBPF
         public float SeaLevel { get; }
         public string TerrainTypeName { get; }
         public TerrainType TerrainType => TerrainManager.GetTerrainType(TerrainTypeName);
-        public FloatArray2D VertexHeights { get; }
+        public FloatArray2D VertexHeights => _vertexHeights;
+
+        private FloatArray2D _vertexHeights;
 
         public NeighborhoodTerrainAsset(int width, int height, float seaLevel, string terrainType,
             FloatArray2D vertexHeights) =>
-            (Width, Height, SeaLevel, TerrainTypeName, VertexHeights) =
+            (Width, Height, SeaLevel, TerrainTypeName, _vertexHeights) =
             (width, height, seaLevel, terrainType, vertexHeights);
 
         public Mesh MakeMesh()
@@ -56,6 +58,21 @@ namespace OpenTS2.Content.DBPF
             terrainMesh.SetIndices(terrainIndices, MeshTopology.Triangles, 0);
             terrainMesh.RecalculateNormals();
             return terrainMesh;
+        }
+
+        public void FromMesh(Mesh terrainMesh)
+        {
+            var floatArr = new float[Width, Height];
+            var vertices = terrainMesh.vertices;
+            foreach(var vert in vertices)
+            {
+                var vertW = (int)(vert.x / 10f);
+                var vertH = (int)(vert.z / 10f);
+                if (vertW >= Width || vertH >= Height)
+                    continue;
+                floatArr[vertW, vertH] = vert.y;
+            }
+            _vertexHeights = new FloatArray2D(floatArr);
         }
 
         public void ApplyToTerrain(Terrain terrain)

@@ -244,13 +244,13 @@ namespace OpenTS2.Files.Formats.DBPF
 				try
 				{
 					//begin main Compression Loop			
-					while (index < data.Length - 3)
+					while (index < data.Length - 6)
 					{
 						#region get all Compression Candidates (list of offsets for all occurances of the current 3 bytes)
 						do
 						{
 							index++;
-							if (index >= data.Length - 2)
+							if (index >= data.Length - 5)
 							{
 								end = true;
 								break;
@@ -297,7 +297,6 @@ namespace OpenTS2.Files.Formats.DBPF
 						if (offsetcopycount < 3) offsetcopycount = 0;
 						else if ((offsetcopycount < 4) && (copyoffset > 0x400)) offsetcopycount = 0;
 						else if ((offsetcopycount < 5) && (copyoffset > 0x4000)) offsetcopycount = 0;
-
 
 						//this is offset-compressable? so do the compression
 						if (offsetcopycount > 0)

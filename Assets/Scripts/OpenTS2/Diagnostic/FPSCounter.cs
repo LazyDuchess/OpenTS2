@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace OpenTS2.Engine.Diagnostic
+namespace OpenTS2.Diagnostic
 {
     [RequireComponent(typeof(Text))]
     public class FPSCounter : MonoBehaviour

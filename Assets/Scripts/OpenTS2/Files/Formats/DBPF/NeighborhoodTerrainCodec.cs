@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 using OpenTS2.Common;
+using OpenTS2.Common.Utils;
 using OpenTS2.Content;
 using OpenTS2.Content.DBPF;
 using OpenTS2.Files.Formats.DBPF.Types;
@@ -47,6 +49,26 @@ namespace OpenTS2.Files.Formats.DBPF
             stream.Dispose();
             reader.Dispose();
             return new NeighborhoodTerrainAsset(width, height, seaLevel, terrainType, vertexHeights);
+        }
+
+        public override byte[] Serialize(AbstractAsset asset)
+        {
+            var terrainAsset = asset as NeighborhoodTerrainAsset;
+            var stream = new MemoryStream(0);
+            var writer = new BinaryWriter(stream);
+            writer.Write(TypeIDs.NHOOD_TERRAIN);
+            writer.Write(4);
+            writer.Write(terrainAsset.Width);
+            writer.Write(terrainAsset.Height);
+            writer.Write(terrainAsset.SeaLevel);
+            var terrainType = terrainAsset.TerrainType.Name;
+            writer.Write(terrainType.Length);
+            writer.Write(Encoding.UTF8.GetBytes(terrainType));
+            writer.Write(terrainAsset.VertexHeights.Serialize());
+            var buffer = StreamUtils.GetBuffer(stream);
+            stream.Dispose();
+            writer.Dispose();
+            return buffer;
         }
     }
 }
