@@ -20,7 +20,7 @@ void surf (Input IN, inout SurfaceOutput o)
     float seaAmount = pow(max(0, -(IN.worldPos.y - _SeaLevel)) * 0.02, 0.4);
     seaAmount = min(1, seaAmount);
     fixed4 seaColor = fixed4(0, 0, 0, 1);
-    c = lerp(c, seaColor, seaAmount);
+    c.rgb = lerp(c, seaColor, seaAmount).rgb;
 
     o.Albedo = c.rgb;
     o.Alpha = c.a;
