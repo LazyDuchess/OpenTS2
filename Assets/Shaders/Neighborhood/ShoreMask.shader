@@ -55,7 +55,7 @@ Shader "OpenTS2/ShoreMask"
                     if (currentHeight <= _SeaLevel)
                         return 1;
                     currentHeight -= _SeaLevel;
-                    float currentStepSize = stepSize - (currentHeight * 0.1);
+                    float currentStepSize = max(0,stepSize - (currentHeight * 0.2));
                     for (float i = -steps; i <= steps; i += 1)
                     {
                         for (float n = -steps; n <= steps; n += 1)

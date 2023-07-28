@@ -21,7 +21,7 @@ namespace OpenTS2.Scenes
         public Transform Sun;
         private static ResourceKey s_matCapKey = new ResourceKey(0x0BE702EF, 0x8BA01057, TypeIDs.IMG);
         private static ResourceKey s_cliffKey = new ResourceKey(0xFFF56CAE, 0x6E80B6A1, 0x1C0532FA, TypeIDs.SCENEGRAPH_TXTR);
-        private static ResourceKey s_shoreKey = new ResourceKey("neighborhood-terrain-moisture-9_txtr", 0x1C0532FA, TypeIDs.SCENEGRAPH_TXTR);
+        private static ResourceKey s_shoreKey = new ResourceKey("nh-test-beach_txtr", 0x1C0532FA, TypeIDs.SCENEGRAPH_TXTR);
         //private static ResourceKey TemperateWetKey = new ResourceKey(0xFF354609, 0x1A9C59CC, 0x1C0532FA, TypeIDs.SCENEGRAPH_TXTR);
         private Material _terrainMaterial;
         private MeshFilter _meshFilter;

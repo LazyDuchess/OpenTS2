@@ -130,6 +130,7 @@ namespace OpenTS2.Diagnostic
                 }
                 terrainMesh.vertices = vertices;
                 LightmapManager.RenderShadowMap();
+                terrainMesh.RecalculateBounds();
                 if (UpdateNormalsRealtime)
                     terrainMesh.RecalculateNormals();
                 if (UpdateColliderRealtime)

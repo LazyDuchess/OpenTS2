@@ -25,7 +25,7 @@ namespace OpenTS2.Rendering
         private static Material s_shoreMapMaterial = new Material(s_shoreMapShader);
         private static int s_shadowMapResolution = 256;
         private static int s_heightMapResolution = 256;
-        private static int s_shoreResolution = 128;
+        private static int s_shoreResolution = 64;
 
         /// <summary>
         /// Renders lightmapping for the current neighborhood.

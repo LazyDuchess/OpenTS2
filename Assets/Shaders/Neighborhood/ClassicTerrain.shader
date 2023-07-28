@@ -109,8 +109,8 @@ Shader "OpenTS2/ClassicTerrain"
 
             fixed4 shadowMapCol = tex2D(_ShadowMap, i.shadowUv);
             i.matcapUv *= shadowMapCol.r;
-
-            float shoreAmount = min(1,tex2D(_ShoreMask, i.shadowUv) * 1.1 + i.color.b);
+            float shoreAmount = tex2D(_ShoreMask, i.shadowUv);
+            shoreAmount = min(1,shoreAmount + i.color.b);
 
             fixed4 shoreCol = tex2D(_Shore, i.uv);
 
