@@ -227,7 +227,7 @@ namespace OpenTS2.Files.Formats.DBPF
 				ArrayList[] cmpmap = new ArrayList[0x1000000];
 
 				//will contain the compressed Data
-				byte[] cdata = new byte[data.Length * 2];
+				byte[] cdata = new byte[data.Length];
 
 				//init some vars
 				int writeindex = 0;
