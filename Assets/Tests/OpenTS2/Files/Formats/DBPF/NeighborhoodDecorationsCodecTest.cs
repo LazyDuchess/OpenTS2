@@ -38,6 +38,12 @@ public class NeighborhoodDecorationsCodecTest
 
 
         Assert.That(decorationsAsset.RoadDecorations.Length, Is.EqualTo(367));
+        var firstRoad = decorationsAsset.RoadDecorations[0];
+        Assert.That(firstRoad.PieceId, Is.EqualTo(0x4b00));
+        Assert.That(firstRoad.UnderTextureId, Is.EqualTo(0));
+        Assert.That(firstRoad.Flags, Is.EqualTo(0x01));
+        Assert.That(firstRoad.ConnectionFlag, Is.EqualTo(0x0A));
+        Assert.That(firstRoad.TextureName, Is.EqualTo("new_roads_00004b04_txtr"));
 
 
         Assert.That(decorationsAsset.BridgeDecorations.Length, Is.EqualTo(10));

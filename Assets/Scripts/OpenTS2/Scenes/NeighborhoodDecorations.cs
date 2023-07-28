@@ -14,15 +14,53 @@ namespace OpenTS2.Scenes
     {
         void Start()
         {
-            var contentProvider = ContentProvider.Get();
             var decorations = NeighborhoodManager.CurrentNeighborhood.Decorations;
 
             // Render trees.
             RenderDecorationWithModels(decorations.FloraDecorations);
+            // Render roads.
+            foreach (var road in decorations.RoadDecorations)
+            {
+                RenderRoad(road);
+            }
             // Render bridges.
             RenderBridges(decorations.BridgeDecorations);
             // Render props.
             RenderDecorationWithModels(decorations.PropDecorations);
+        }
+
+        private void RenderRoad(RoadDecoration road)
+        {
+            var roadObject = new GameObject("road", typeof(MeshFilter), typeof(MeshRenderer))
+            {
+                transform =
+                {
+                    // Parent to this component.
+                    parent = transform
+                }
+            };
+
+            var roadMesh = new Mesh();
+            roadMesh.SetVertices(road.RoadCorners);
+            roadMesh.SetTriangles(new []{/* face1 */ 0, 1, 2, /* face2 */  1, 2, 3, /* face3 */ 0, 2, 3}, 0);
+            roadMesh.RecalculateNormals();
+            roadObject.GetComponent<MeshFilter>().mesh = roadMesh;
+
+            var texture = ContentProvider.Get().GetAsset<ScenegraphTextureAsset>(new ResourceKey(road.TextureName,
+                GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR));
+
+            if (texture == null)
+            {
+                Debug.LogWarning($"Failed to find texture for road: {road.TextureName}");
+                return;
+            }
+
+            // TODO: rotate the material appropriately as per road direction.
+            var material = new Material(Shader.Find("OpenTS2/StandardMaterial/Opaque"))
+            {
+                mainTexture = texture.GetSelectedImageAsUnityTexture(ContentProvider.Get())
+            };
+            roadObject.GetComponent<MeshRenderer>().material = material;
         }
 
         private void RenderBridges(IEnumerable<BridgeDecoration> bridges)

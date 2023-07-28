@@ -49,13 +49,27 @@ namespace OpenTS2.Content.DBPF
         }
     }
 
+    /// <summary>
+    /// neighborhood-roads-%s-%08x
+    /// neighborhood-roads-%08x
+    /// </summary>
     public class RoadDecoration
     {
         public DecorationPosition Position { get; }
 
-        public uint PieceId { get; }
+        public Vector3[] RoadCorners { get; }
 
-        public RoadDecoration(DecorationPosition position, uint pieceId) => (Position, PieceId) = (position, pieceId);
+        public uint PieceId { get; }
+        public uint UnderTextureId { get; }
+        public byte Flags { get; }
+        public byte ConnectionFlag { get; }
+
+        public RoadDecoration(DecorationPosition position, Vector3[] roadCorners, uint pieceId, uint underTextureId, byte flags, byte connectionFlag) =>
+            (Position, RoadCorners, PieceId, UnderTextureId, Flags, ConnectionFlag) = (position, roadCorners, pieceId, underTextureId, flags, connectionFlag);
+
+        // TODO: this probably isn't exactly right. Don't hard code new_raods in here and check if OR with 0x4 is
+        // correct.
+        public string TextureName => $"new_roads_{(PieceId | 0x04):x8}_txtr";
     }
 
     /// <summary>
