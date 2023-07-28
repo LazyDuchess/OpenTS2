@@ -87,10 +87,13 @@ namespace OpenTS2.Files.Formats.DBPF
             var objectVersion = reader.ReadByte();
             Debug.Assert(objectVersion >= 3);
 
-            for (var j = 0; j < 4; j++)
+            var corners = new Vector3[4];
+            for (var i = 0; i < 4; i++)
             {
-                // Unknown
-                Vector3Serializer.Deserialize(reader);
+                var y = reader.ReadFloat();
+                var x = reader.ReadFloat();
+                var z = reader.ReadFloat();
+                corners[i] = new Vector3(y, z, x);
                 // Unknown
                 Vector2Serializer.Deserialize(reader);
             }
@@ -102,7 +105,7 @@ namespace OpenTS2.Files.Formats.DBPF
             var connectionFlag = reader.ReadByte();
 
             var numberOfAddons = reader.ReadUInt32();
-            for (var j = 0; j < numberOfAddons; j++)
+            for (var i = 0; i < numberOfAddons; i++)
             {
                 reader.ReadUInt32();
                 // Unknown
@@ -111,7 +114,7 @@ namespace OpenTS2.Files.Formats.DBPF
                 Vector2Serializer.Deserialize(reader);
             }
 
-            return new RoadDecoration(position, pieceId);
+            return new RoadDecoration(position, corners, pieceId, underTextureId, flags, connectionFlag);
         }
 
         private static RoadDecoration[] ReadRoads(IoBuffer reader)
