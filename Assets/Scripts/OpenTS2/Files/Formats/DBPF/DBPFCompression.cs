@@ -227,7 +227,7 @@ namespace OpenTS2.Files.Formats.DBPF
 				ArrayList[] cmpmap = new ArrayList[0x1000000];
 
 				//will contain the compressed Data
-				byte[] cdata = new byte[data.Length];
+				byte[] cdata = new byte[data.Length * 2];
 
 				//init some vars
 				int writeindex = 0;
@@ -244,13 +244,13 @@ namespace OpenTS2.Files.Formats.DBPF
 				try
 				{
 					//begin main Compression Loop			
-					while (index < data.Length - 6)
+					while (index < data.Length - 3)
 					{
 						#region get all Compression Candidates (list of offsets for all occurances of the current 3 bytes)
 						do
 						{
 							index++;
-							if (index >= data.Length - 5)
+							if (index >= data.Length - 2)
 							{
 								end = true;
 								break;
@@ -298,8 +298,8 @@ namespace OpenTS2.Files.Formats.DBPF
 						else if ((offsetcopycount < 4) && (copyoffset > 0x400)) offsetcopycount = 0;
 						else if ((offsetcopycount < 5) && (copyoffset > 0x4000)) offsetcopycount = 0;
 
-						//this is offset-compressable? so do the compression
-						if (offsetcopycount > 0)
+					//this is offset-compressable? so do the compression
+					if (offsetcopycount > 0)
 						{
 							//plaincopy
 							while ((index - lastreadindex) > 3)
@@ -381,8 +381,8 @@ namespace OpenTS2.Files.Formats.DBPF
 					for (int i = 0; i < 3; i++) retdata[i + 6] = sz[2 - i];
 
 					for (int i = 0; i < writeindex; i++) retdata[i + 9] = cdata[i];
-					#endregion
-					return retdata;
+				#endregion
+				return retdata;
 				}
 				finally
 				{
@@ -395,6 +395,7 @@ namespace OpenTS2.Files.Formats.DBPF
 					if (indexlist != null) indexlist.Clear();
 					indexlist = null;
 				}
+			
 			/*}
 		
 			catch (Exception ex)
