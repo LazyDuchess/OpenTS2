@@ -62,14 +62,12 @@ namespace OpenTS2.Content.DBPF
 
         public void FromMesh(Mesh terrainMesh)
         {
-            var floatArr = new float[Width, Height];
+            var floatArr = new float[Width+1, Height+1];
             var vertices = terrainMesh.vertices;
             foreach(var vert in vertices)
             {
                 var vertW = (int)(vert.x / 10f);
                 var vertH = (int)(vert.z / 10f);
-                if (vertW >= Width || vertH >= Height)
-                    continue;
                 floatArr[vertW, vertH] = vert.y;
             }
             _vertexHeights = new FloatArray2D(floatArr);
