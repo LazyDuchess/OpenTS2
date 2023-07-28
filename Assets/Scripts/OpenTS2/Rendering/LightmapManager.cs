@@ -39,14 +39,14 @@ namespace OpenTS2.Rendering
             var neighborhood = NeighborhoodManager.CurrentNeighborhood;
 
             if (s_heightMap == null)
-                s_heightMap = new RenderTexture(s_heightMapResolution, s_heightMapResolution, 16, RenderTextureFormat.R8);
+                s_heightMap = new RenderTexture(s_heightMapResolution, s_heightMapResolution, 16, RenderTextureFormat.R16);
             RenderTexture.active = s_heightMap;
             s_heightMapMaterial.SetPass(0);
             Graphics.DrawMeshNow(mesh, Vector3.zero, Quaternion.identity);
             RenderTexture.active = null;
 
             if (s_shadowMap == null)
-                s_shadowMap = new RenderTexture(s_shadowMapResolution, s_shadowMapResolution, 16, RenderTextureFormat.R8);
+                s_shadowMap = new RenderTexture(s_shadowMapResolution, s_shadowMapResolution, 16, RenderTextureFormat.R16);
             RenderTexture.active = s_shadowMap;
             s_shadowMapMaterial.mainTexture = s_heightMap;
             s_shadowMapMaterial.SetVector("_LightVector", sun.forward);
@@ -54,7 +54,7 @@ namespace OpenTS2.Rendering
             RenderTexture.active = null;
 
             if (s_shoreMap == null)
-                s_shoreMap = new RenderTexture(s_shoreResolution, s_shoreResolution, 16, RenderTextureFormat.R8);
+                s_shoreMap = new RenderTexture(s_shoreResolution, s_shoreResolution, 16, RenderTextureFormat.R16);
             RenderTexture.active = s_shoreMap;
             s_shoreMapMaterial.mainTexture = s_heightMap;
             s_shoreMapMaterial.SetFloat("_SeaLevel", neighborhood.Terrain.SeaLevel / 1000);

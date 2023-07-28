@@ -14,6 +14,7 @@ namespace OpenTS2.Diagnostic
     {
         public float BrushSize = 20f;
         public float BrushForce = 5f;
+        public float SmoothForce = 0.1f;
         public bool UpdateColliderRealtime = false;
         public bool UpdateNormalsRealtime = false;
         bool _usingTool = false;
@@ -36,6 +37,15 @@ namespace OpenTS2.Diagnostic
                 {
                     _usingTool = true;
                     DoRaise(-BrushForce);
+                    return;
+                }
+            }
+            if (Input.GetKey(KeyCode.F2))
+            {
+                if (Input.GetKey(KeyCode.Mouse0))
+                {
+                    _usingTool = true;
+                    DoSmooth(SmoothForce);
                     return;
                 }
             }
@@ -63,6 +73,41 @@ namespace OpenTS2.Diagnostic
             }
         }
 
+        void DoSmooth(float force)
+        {
+            var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            if (Physics.Raycast(ray, out RaycastHit hitInfo, 2000f, _terrainLayerMask))
+            {
+                var terrain = hitInfo.collider.GetComponent<NeighborhoodTerrain>();
+                if (terrain == null)
+                    return;
+                var terrainMesh = terrain.GetComponent<MeshFilter>().sharedMesh;
+                var vertices = terrainMesh.vertices;
+                for (var i = 0; i < vertices.Length; i++)
+                {
+                    var hit = hitInfo.point;
+                    var smoothTarget = hit.y;
+                    //hit.y = vertices[i].y;
+                    var dist = Vector3.Distance(vertices[i], hit);
+                    dist /= BrushSize;
+                    dist = Mathf.Min(1, dist);
+                    dist = -(dist * dist) + 1;
+
+                    var smoothDelta = smoothTarget - vertices[i].y;
+
+                    vertices[i].y += smoothDelta * force * dist;
+                }
+                terrainMesh.vertices = vertices;
+                LightmapManager.RenderShadowMap();
+                if (UpdateNormalsRealtime)
+                    terrainMesh.RecalculateNormals();
+                if (UpdateColliderRealtime)
+                {
+                    (hitInfo.collider as MeshCollider).sharedMesh = terrainMesh;
+                }
+            }
+        }
+
         void DoRaise(float force)
         {
             var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -75,9 +120,12 @@ namespace OpenTS2.Diagnostic
                 var vertices = terrainMesh.vertices;
                 for(var i=0;i<vertices.Length;i++)
                 {
-                    var dist = Vector3.Distance(vertices[i], hitInfo.point);
-                    dist = (-Mathf.Min(0f, dist - BrushSize))/BrushSize;
-                    dist *= dist;
+                    var hit = hitInfo.point;
+                    hit.y = vertices[i].y;
+                    var dist = Vector3.Distance(vertices[i], hit);
+                    dist /= BrushSize;
+                    dist = Mathf.Min(1, dist);
+                    dist = -(dist * dist) + 1;
                     vertices[i].y += force * dist;
                 }
                 terrainMesh.vertices = vertices;

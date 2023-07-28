@@ -847,7 +847,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2eff8bcd6fb795946b0eb83411331f30, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BrushSize: 40
-  BrushForce: 5
-  UpdateColliderRealtime: 1
+  BrushSize: 60
+  BrushForce: 2
+  SmoothForce: 0.02
+  UpdateColliderRealtime: 0
   UpdateNormalsRealtime: 1
