@@ -20,10 +20,12 @@ namespace OpenTS2.Content
         public NeighborhoodTerrainAsset Terrain => ContentProvider.Get().GetAsset<NeighborhoodTerrainAsset>(new ResourceKey(0, GroupID, TypeIDs.NHOOD_TERRAIN));
         public Type NeighborhoodType => _info.NeighborhoodType;
         public string Prefix => _info.MainPrefix;
-        public string FilePath => _info.Package.FilePath;
+        public string PackageFilePath => _info.Package.FilePath;
+        public string FolderPath => Directory.GetParent(PackageFilePath).FullName;
         public uint GroupID => _info.Package.GroupID;
         public Texture2D Thumbnail => _thumbnail;
-        public string ReiaPath => Path.ChangeExtension(FilePath, ".reia");
+        public string ReiaPath => Path.ChangeExtension(PackageFilePath, ".reia");
+        public List<Lot> Lots { get; } = new List<Lot>();
         public enum Type
         {
             Main = 1,
@@ -44,9 +46,15 @@ namespace OpenTS2.Content
             var stringSetKey = new ResourceKey(1, GroupID, TypeIDs.CTSS);
             _stringSet = contentProvider.GetAsset<StringSetAsset>(stringSetKey);
             _thumbnail = new Texture2D(1, 1);
-            var thumbnailPath = Path.ChangeExtension(FilePath, ".png");
+            var thumbnailPath = Path.ChangeExtension(PackageFilePath, ".png");
             if (File.Exists(thumbnailPath))
                 _thumbnail.LoadImage(File.ReadAllBytes(thumbnailPath));
+
+            // Get all the lots in this neighborhood's folder.
+            foreach (var lotPackage in Filesystem.GetPackagesInDirectory(Path.Combine(FolderPath, "Lots")))
+            {
+                Lots.Add(new Lot(lotPackage));
+            }
         }
 
         public string GetLocalizedName()

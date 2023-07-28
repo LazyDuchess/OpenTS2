@@ -27,6 +27,14 @@ namespace OpenTS2.Scenes
             RenderBridges(decorations.BridgeDecorations);
             // Render props.
             RenderDecorationWithModels(decorations.PropDecorations);
+
+            // Render lot imposters.
+            foreach (var lot in NeighborhoodManager.CurrentNeighborhood.Lots)
+            {
+                var model = lot.GetLotImposterResource();
+                Debug.Log($"lot imposter resource: {model}");
+                break;
+            }
         }
 
         private void RenderRoad(RoadDecoration road)

@@ -74,7 +74,7 @@ namespace OpenTS2.Files
 
         public static List<string> GetPackagesForNeighborhood(Neighborhood neighborhood)
         {
-            var neighborhoodFolder = Path.GetDirectoryName(neighborhood.FilePath);
+            var neighborhoodFolder = Path.GetDirectoryName(neighborhood.PackageFilePath);
             var packages = GetPackagesInDirectory(neighborhoodFolder);
             packages = packages.Where(x => IsNeighborhoodPackage(x)).ToList();
             return packages;
