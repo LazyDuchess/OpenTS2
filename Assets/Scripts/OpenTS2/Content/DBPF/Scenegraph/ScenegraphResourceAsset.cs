@@ -1,4 +1,7 @@
-﻿using OpenTS2.Components;
+﻿using System.Linq;
+using OpenTS2.Common;
+using OpenTS2.Components;
+using OpenTS2.Files.Formats.DBPF;
 using OpenTS2.Files.Formats.DBPF.Scenegraph;
 using OpenTS2.Files.Formats.DBPF.Scenegraph.Block;
 using UnityEngine;
@@ -13,16 +16,24 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             (ResourceCollection) = (resourceCollection);
 
 
+        /// <summary>
+        /// Creates a unity game object rendering this scenegraph resource.
+        /// </summary>
         public GameObject CreateGameObjectForShape()
         {
-            var resourceNode = ResourceCollection.GetBlockOfType<ResourceNodeBlock>();
-            var resourceName = resourceNode.Resource.ResourceName;
+            var firstResourceNode = ResourceCollection.Blocks.OfType<ResourceNodeBlock>().First();
+            var resourceName = firstResourceNode.ResourceName;
 
             var shapeRef = ResourceCollection.GetBlockOfType<ShapeRefNodeBlock>();
             var shapeTransform = shapeRef.Renderable.Bounded.Transform;
 
             // TODO: handle multiple shapes here.
             var shapeKey = ResourceCollection.FileLinks[shapeRef.Shapes[0].Index];
+            if (shapeKey.GroupID == GroupIDs.Local)
+            {
+                // Use our groupId if the reference has a local group id.
+                shapeKey = shapeKey.WithGroupID(GlobalTGI.GroupID);
+            }
             var shape = ContentProvider.Get().GetAsset<ScenegraphShapeAsset>(shapeKey);
 
             shape.LoadModelsAndMaterials();

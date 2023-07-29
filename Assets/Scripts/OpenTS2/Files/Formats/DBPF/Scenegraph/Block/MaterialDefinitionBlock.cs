@@ -81,6 +81,13 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             return materialType switch
             {
                 "StandardMaterial" => MaterialType.StandardMaterial,
+
+                // TODO: these are temporarily just standard material, see if we need a separate shader for imposters.
+                "ImposterTerrainMaterial" => MaterialType.StandardMaterial,
+                "ImposterRoofMaterial" => MaterialType.StandardMaterial,
+                "ImposterDualPackedSliceMaterial" => MaterialType.StandardMaterial,
+                "ImposterWallMaterial" => MaterialType.StandardMaterial,
+
                 _ => throw new ArgumentException($"Unknown material type: {materialType}")
             };
         }

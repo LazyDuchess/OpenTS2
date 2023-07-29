@@ -32,7 +32,8 @@ namespace OpenTS2.Scenes
             foreach (var lot in NeighborhoodManager.CurrentNeighborhood.Lots)
             {
                 var model = lot.GetLotImposterResource();
-                Debug.Log($"lot imposter resource: {model}");
+                Debug.Log($"lot imposter resource: {model.ResourceCollection}");
+                model.CreateGameObjectForShape();
                 break;
             }
         }

@@ -37,7 +37,14 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph
         {
             return (T)Blocks.Single(block => block is T);
         }
-        
+
+        public override string ToString()
+        {
+            return "ScenegraphResourceCollection\n" +
+                   "FileLinks: " + string.Join("\n  ", FileLinks) + "\n" +
+                   "Blocks: " + string.Join("\n  ", Blocks);
+        }
+
         /// <summary>
         /// Deserializes a ScenegraphResourceCollection containing only a single data block of type T.
         /// </summary>
