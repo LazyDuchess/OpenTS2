@@ -113,17 +113,17 @@ namespace OpenTS2.Content.DBPF.Scenegraph
         {
             // TODO: For now these just use the standard shader, see if we need something different.
             var shader = Shader.Find("OpenTS2/StandardMaterial/AlphaCutOut");
-            var material = new Material(shader);
 
-            Debug.Log("imposter material: " + MaterialDefinition);
             string textureName;
             if (MaterialDefinition.MaterialName.Contains("terrainmaterial"))
             {
                 textureName = "terrain_txtr";
+                shader = Shader.Find("OpenTS2/StandardMaterial/AlphaBlended");
             }
             else if (MaterialDefinition.MaterialName.Contains("roof"))
             {
                 textureName = "roofs_txtr";
+                // TODO: roofs need a special shader, they UV map based on just their x and y coordinates on the lot.
             }
             else if (MaterialDefinition.MaterialName.Contains("wall"))
             {
@@ -138,11 +138,14 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                 throw new NotImplementedException($"Unknown imposter material: {MaterialDefinition.MaterialName}");
             }
 
+            var material = new Material(shader);
+
             var texture = ContentProvider.Get().GetAsset<ScenegraphTextureAsset>(
                 new ResourceKey(textureName, GlobalTGI.GroupID, TypeIDs.SCENEGRAPH_TXTR)
             );
             _textures.Add(texture);
             material.mainTexture = texture.GetSelectedImageAsUnityTexture(ContentProvider.Get());
+            material.SetFloat(AlphaCutOff, 0.5f);
 
             return material;
         }
