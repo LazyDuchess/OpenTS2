@@ -28,6 +28,7 @@ namespace OpenTS2.Rendering.Materials
             );
             definition.Textures.Add(texture);
             material.mainTexture = texture.GetSelectedImageAsUnityTexture(ContentProvider.Get());
+            material.mainTexture.filterMode = FilterMode.Point;
             material.SetFloat(AlphaCutOff, 0.5f);
 
             return material;
