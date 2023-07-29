@@ -52,6 +52,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             {
                 var resourceKey = ResourceKey.ScenegraphResourceKey(meshes[i], GlobalTGI.GroupID, TypeIDs.SCENEGRAPH_GMND);
                 var geometryNode = ContentProvider.Get().GetAsset<ScenegraphGeometryNodeAsset>(resourceKey);
+                Debug.Assert(geometryNode != null, $"Got null geometry for mesh: {meshes[i]}, key: {resourceKey}");
                 _models[i] = geometryNode.GetModelAsset(GlobalTGI.GroupID);
             }
 
