@@ -23,6 +23,21 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
     public struct MeshComponent
     {
         public ushort[] GeometryElementIndices;
+
+        /// <summary>
+        /// If non-zero length, defines which indices in the mesh's vertex map to use for this component.
+        /// </summary>
+        public ushort[] VertexAliases;
+
+        /// <summary>
+        /// If non-zero length, defines which indices in the normal map to use for this component.
+        /// </summary>
+        public ushort[] NormalMapAliases;
+
+        /// <summary>
+        /// If non-zero length, defines which indices in the uv map to use for this component.
+        /// </summary>
+        public ushort[] UVMapAliases;
     }
 
     /// <summary>
@@ -69,9 +84,14 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             => (Resource, Elements, Components, Primitives, StaticBounds, BonesBounds) = (resource, elements,
                 components, primitives, staticBounds, bonesBounds);
 
-        public List<GeometryElement> GetGeometryElementsForPrimitive(MeshPrimitive primitive)
+        public MeshComponent GetMeshComponentForPrimitive(MeshPrimitive primitive)
         {
-            return Components[primitive.ComponentIndex].GeometryElementIndices.Select(elementIndex => Elements[elementIndex]).ToList();
+            return Components[primitive.ComponentIndex];
+        }
+
+        public List<GeometryElement> GetGeometryElementsForMeshComponent(MeshComponent component)
+        {
+            return component.GeometryElementIndices.Select(elementIndex => Elements[elementIndex]).ToList();
         }
     }
 
@@ -88,7 +108,8 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             var staticBound = ReadStaticBoundSection(reader, blockTypeInfo);
             var bones = ReadBonesSection(reader, blockTypeInfo);
 
-            return new GeometryDataContainerBlock(blockTypeInfo, resource, elements, components, primitives, staticBound, bones);
+            return new GeometryDataContainerBlock(blockTypeInfo, resource, elements, components, primitives,
+                staticBound, bones);
         }
 
         private static ushort[] ReadIndices(IoBuffer reader, uint version)
@@ -139,20 +160,25 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
         {
             var numberOfComponents = reader.ReadUInt32();
             var components = new MeshComponent[numberOfComponents];
-            Debug.Log($"numberOfMeshComponents: {numberOfComponents}");
             for (var i = 0; i < numberOfComponents; i++)
             {
                 var eltArrayIndices = ReadIndices(reader, blockTypeInfo.Version);
 
                 var numVertices = reader.ReadUInt32();
-                // marked as number of active elements in simswiki
-                reader.ReadUInt32();
+                // marked as number of active elements in simswiki, in practice will probably always match the
+                // number of element array indexes we have.
+                var numEltArrayIndices = reader.ReadUInt32();
+                Debug.Assert(numEltArrayIndices == eltArrayIndices.Length);
 
-                var positionClassIndices = ReadIndices(reader, blockTypeInfo.Version);
-                var surfaceClassIndices = ReadIndices(reader, blockTypeInfo.Version);
-                var materialClassIndices = ReadIndices(reader, blockTypeInfo.Version);
+                var vertexIndicesAliases = ReadIndices(reader, blockTypeInfo.Version);
+                var normalIndicesAliases = ReadIndices(reader, blockTypeInfo.Version);
+                var uvMapIndicesAliases = ReadIndices(reader, blockTypeInfo.Version);
 
-                components[i] = new MeshComponent { GeometryElementIndices = eltArrayIndices };
+                components[i] = new MeshComponent
+                {
+                    GeometryElementIndices = eltArrayIndices, VertexAliases = vertexIndicesAliases,
+                    NormalMapAliases = normalIndicesAliases, UVMapAliases = uvMapIndicesAliases
+                };
             }
 
             return components;

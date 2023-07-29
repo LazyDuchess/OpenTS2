@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using OpenTS2.Files.Utils;
 using UnityEngine;
 
@@ -7,7 +8,8 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
 {
     public enum MaterialType
     {
-        StandardMaterial
+        StandardMaterial,
+        ImposterMaterial,
     }
 
     public class MaterialDefinitionBlock : ScenegraphDataBlock
@@ -44,6 +46,15 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             Dictionary<string, string> materialProperties, string[] textureNames) : base(blockTypeInfo)
             => (Resource, MaterialName, Type, MaterialProperties, TextureNames) =
                 (resource, materialName, type, materialProperties, textureNames);
+
+        public override string ToString()
+        {
+            return base.ToString() + $"  Resource={Resource} MaterialName={MaterialName}\n" +
+                   "TextureNames=\n" +
+                   string.Join("\n  ", TextureNames) +
+                   "MaterialProperties=\n" +
+                   string.Join("\n  ", MaterialProperties.Select(kvp => $"{kvp.Key}: {kvp.Value}"));
+        }
     }
 
     public class MaterialDefinitionBlockReader : IScenegraphDataBlockReader<MaterialDefinitionBlock>
@@ -82,11 +93,10 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             {
                 "StandardMaterial" => MaterialType.StandardMaterial,
 
-                // TODO: these are temporarily just standard material, see if we need a separate shader for imposters.
-                "ImposterTerrainMaterial" => MaterialType.StandardMaterial,
-                "ImposterRoofMaterial" => MaterialType.StandardMaterial,
-                "ImposterDualPackedSliceMaterial" => MaterialType.StandardMaterial,
-                "ImposterWallMaterial" => MaterialType.StandardMaterial,
+                "ImposterTerrainMaterial" => MaterialType.ImposterMaterial,
+                "ImposterRoofMaterial" => MaterialType.ImposterMaterial,
+                "ImposterDualPackedSliceMaterial" => MaterialType.ImposterMaterial,
+                "ImposterWallMaterial" => MaterialType.ImposterMaterial,
 
                 _ => throw new ArgumentException($"Unknown material type: {materialType}")
             };
