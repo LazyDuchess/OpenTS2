@@ -3,6 +3,7 @@ using OpenTS2.Client;
 using OpenTS2.Content;
 using OpenTS2.Files;
 using OpenTS2.Files.Formats.DBPF;
+using OpenTS2.Rendering;
 using UnityEngine;
 
 namespace OpenTS2.Engine
@@ -26,6 +27,7 @@ namespace OpenTS2.Engine
             var contentProvider = new ContentProvider();
             var objectManager = new ObjectManager(contentProvider);
             TerrainManager.Initialize();
+            MaterialManager.Initialize();
             Filesystem.Initialize(new JSONPathProvider(), epManager);
             CodecAttribute.Initialize();
             //Initialize the game assembly, do all reflection things.

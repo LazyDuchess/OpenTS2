@@ -6,12 +6,6 @@ using UnityEngine;
 
 namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
 {
-    public enum MaterialType
-    {
-        StandardMaterial,
-        ImposterMaterial,
-    }
-
     public class MaterialDefinitionBlock : ScenegraphDataBlock
     {
         public const uint TYPE_ID = 0x49596978;
@@ -28,7 +22,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
         /// <summary>
         /// The type of the material.
         /// </summary>
-        public MaterialType Type { get; }
+        public string Type { get; }
 
         /// <summary>
         /// A dictionary mapping material properties such as "reflectivity" -> "0.5" and
@@ -42,7 +36,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
         public string[] TextureNames { get; }
 
         public MaterialDefinitionBlock(PersistTypeInfo blockTypeInfo, ScenegraphResource resource,
-            string materialName, MaterialType type,
+            string materialName, string type,
             Dictionary<string, string> materialProperties, string[] textureNames) : base(blockTypeInfo)
             => (Resource, MaterialName, Type, MaterialProperties, TextureNames) =
                 (resource, materialName, type, materialProperties, textureNames);
@@ -84,22 +78,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             }
 
             return new MaterialDefinitionBlock(blockTypeInfo, resource, materialName,
-                GetTypeFromTypeName(definitionType), properties, textures);
-        }
-
-        private static MaterialType GetTypeFromTypeName(string materialType)
-        {
-            return materialType switch
-            {
-                "StandardMaterial" => MaterialType.StandardMaterial,
-
-                "ImposterTerrainMaterial" => MaterialType.ImposterMaterial,
-                "ImposterRoofMaterial" => MaterialType.ImposterMaterial,
-                "ImposterDualPackedSliceMaterial" => MaterialType.ImposterMaterial,
-                "ImposterWallMaterial" => MaterialType.ImposterMaterial,
-
-                _ => throw new ArgumentException($"Unknown material type: {materialType}")
-            };
+                definitionType, properties, textures);
         }
     }
 }

@@ -22,7 +22,7 @@ public class ScenegraphMaterialDefinitionCodecTest
                 TypeIDs.SCENEGRAPH_TXMT));
 
         Assert.That(materialAsset.MaterialDefinition.MaterialName, Is.EqualTo("ufocrash_cabin"));
-        Assert.That(materialAsset.MaterialDefinition.Type, Is.EqualTo(MaterialType.StandardMaterial));
+        Assert.That(materialAsset.MaterialDefinition.Type, Is.EqualTo("StandardMaterial"));
 
         Assert.That(materialAsset.MaterialDefinition.MaterialProperties.Count, Is.GreaterThan(0));
 
