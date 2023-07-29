@@ -58,7 +58,9 @@ namespace OpenTS2.Content
         {
             get
             {
-                return true;
+                // TODO - Compression code is borked atm, throws on terrain asset, so for now we disable this.
+                return false;
+                //return true;
             }
         }
         bool _compressed = false;

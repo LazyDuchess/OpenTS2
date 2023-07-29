@@ -66,7 +66,7 @@ namespace OpenTS2.Diagnostic
                             collider.sharedMesh = meshFilter.sharedMesh;
                         var terrainAsset = NeighborhoodManager.CurrentNeighborhood.Terrain;
                         terrainAsset.FromMesh(meshFilter.sharedMesh);
-                        terrainAsset.Compressed = false;
+                        terrainAsset.Compressed = true;
                         terrainAsset.Save();
                     }
                 }
