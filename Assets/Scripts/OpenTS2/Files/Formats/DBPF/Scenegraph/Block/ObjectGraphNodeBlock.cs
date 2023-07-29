@@ -39,7 +39,6 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             if (typeInfo.Version >= 4)
             {
                 tagString = reader.ReadVariableLengthPascalString();
-                Debug.Log($"  tagString: {tagString}");
             }
 
             return new ObjectGraphNodeBlock(typeInfo, extensions, tagString);

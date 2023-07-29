@@ -17,7 +17,6 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             for (var i = 0; i < numberOfReferences; i++)
             {
                 var reference = ObjectReference.Deserialize(reader);
-                Debug.Log($"cCompositionTreeNode -- reference: {reference.Index}");
             }
 
             return new CompositionTreeNodeBlock();
