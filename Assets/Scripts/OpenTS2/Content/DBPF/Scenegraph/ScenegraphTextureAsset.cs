@@ -109,7 +109,8 @@ namespace OpenTS2.Content.DBPF.Scenegraph
         {
             var unityFormat = format switch
             {
-                ScenegraphTextureFormat.RGBA32 => TextureFormat.RGBA32,
+                ScenegraphTextureFormat.RGBA32 => TextureFormat.BGRA32,
+                // TODO: this might be wrong as the game uses BRGA for 32-bit textures.
                 ScenegraphTextureFormat.RGB24 => TextureFormat.RGB24,
                 ScenegraphTextureFormat.Alpha8 => TextureFormat.Alpha8,
                 ScenegraphTextureFormat.DXT1 => TextureFormat.DXT1,
@@ -118,6 +119,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                 ScenegraphTextureFormat.Luminance8 => TextureFormat.R8,
                 ScenegraphTextureFormat.Luminance16 => TextureFormat.R16,
                 ScenegraphTextureFormat.DXT5 => TextureFormat.DXT5,
+                // TODO: this might be wrong as the game uses BRGA for 32-bit textures.
                 ScenegraphTextureFormat.RGB24_repeat => TextureFormat.RGB24,
                 _ => throw new ArgumentOutOfRangeException(nameof(format), format, null)
             };

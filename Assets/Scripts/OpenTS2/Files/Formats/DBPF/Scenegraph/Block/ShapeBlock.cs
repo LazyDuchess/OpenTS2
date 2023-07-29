@@ -40,6 +40,13 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
         public ShapeBlock(PersistTypeInfo blockTypeInfo, ScenegraphResource resource, int[] lodLevels,
             Dictionary<uint, IList<string>> meshesPerLod, Dictionary<string, string> materials) : base(blockTypeInfo) =>
             (Resource, LodLevels, MeshesPerLod, Materials) = (resource, lodLevels, meshesPerLod, materials);
+
+        public override string ToString()
+        {
+            return base.ToString() + " " + Resource.ResourceName + "\n"
+                + $"  LodLevels=[{string.Join(", ", LodLevels)}]\n"
+                + $"  MeshesPerLod={MeshesPerLod}";
+        }
     }
 
     public class ShapeBlockReader : IScenegraphDataBlockReader<ShapeBlock>

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using OpenTS2.Common;
 using OpenTS2.Content;
 using OpenTS2.Content.DBPF;
@@ -27,6 +28,18 @@ namespace OpenTS2.Scenes
             RenderBridges(decorations.BridgeDecorations);
             // Render props.
             RenderDecorationWithModels(decorations.PropDecorations);
+
+            // Render lot imposters.
+            foreach (var lot in NeighborhoodManager.CurrentNeighborhood.Lots)
+            {
+                if (!lot.LotPackage.ToLower().Contains("lot3"))
+                {
+                    continue;
+                }
+                var model = lot.GetLotImposterResource();
+                Debug.Log($"lot imposter resource: {model.ResourceCollection}");
+                model.CreateGameObjectForShape();
+            }
         }
 
         private void RenderRoad(RoadDecoration road)

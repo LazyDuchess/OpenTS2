@@ -15,8 +15,13 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
 
         public ObjectReference[] Extensions;
 
-        private ObjectGraphNodeBlock(PersistTypeInfo typeInfo, ObjectReference[] extensions) =>
-            (_typeInfo, Extensions) = (typeInfo, extensions);
+        /// <summary>
+        /// A tag on the graph, usually represents the name of the object represented by this graph.
+        /// </summary>
+        public string Tag { get; }
+
+        private ObjectGraphNodeBlock(PersistTypeInfo typeInfo, ObjectReference[] extensions, string tag) =>
+            (_typeInfo, Extensions, Tag) = (typeInfo, extensions, tag);
 
         public static ObjectGraphNodeBlock Deserialize(IoBuffer reader)
         {
@@ -30,13 +35,13 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                 extensions[i] = ObjectReference.Deserialize(reader);
             }
 
+            var tagString = "";
             if (typeInfo.Version >= 4)
             {
-                var tagString = reader.ReadVariableLengthPascalString();
-                Debug.Log($"  tagString: {tagString}");
+                tagString = reader.ReadVariableLengthPascalString();
             }
 
-            return new ObjectGraphNodeBlock(typeInfo, extensions);
+            return new ObjectGraphNodeBlock(typeInfo, extensions, tagString);
         }
     }
 }

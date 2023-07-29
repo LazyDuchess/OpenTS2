@@ -13,10 +13,15 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
         public const string BLOCK_NAME = "cResourceNode";
         public override string BlockName => BLOCK_NAME;
 
-        public ScenegraphResource Resource { get; }
+        public string ResourceName { get; }
 
-        public ResourceNodeBlock(PersistTypeInfo blockTypeInfo, ScenegraphResource resource) : base(blockTypeInfo) =>
-            (Resource) = (resource);
+        public ResourceNodeBlock(PersistTypeInfo blockTypeInfo, string resourceName) : base(blockTypeInfo) =>
+            (ResourceName) = (resourceName);
+
+        public override string ToString()
+        {
+            return $"{base.ToString()}  ResourceName={ResourceName}";
+        }
     }
 
     public class ResourceNodeBlockReader : IScenegraphDataBlockReader<ResourceNodeBlock>
@@ -25,23 +30,24 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
         {
             var hasTreeNode = reader.ReadByte() != 0;
 
-            ScenegraphResource resource;
+            string resourceName;
             if (hasTreeNode)
             {
-                resource = ScenegraphResource.Deserialize(reader);
+                var resource = ScenegraphResource.Deserialize(reader);
                 var compositionTree = CompositionTreeNodeBlock.Deserialize(reader);
+
+                resourceName = resource.ResourceName;
             }
             else
             {
-                // TODO: we store ScenegraphResource above, figure out what to do when it's not available.
-                throw new NotImplementedException("cResourceNode without composition tree not supported");
                 var graph = ObjectGraphNodeBlock.Deserialize(reader);
+                resourceName = graph.Tag;
             }
 
             var reference = ObjectReference.Deserialize(reader);
             var skinType = reader.ReadUInt32();
 
-            return new ResourceNodeBlock(blockTypeInfo, resource);
+            return new ResourceNodeBlock(blockTypeInfo, resourceName);
         }
     }
 }

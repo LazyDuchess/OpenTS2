@@ -22,6 +22,12 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph
         /// </summary>
         public PersistTypeInfo BlockTypeInfo { get; }
         protected ScenegraphDataBlock(PersistTypeInfo blockTypeInfo) => (BlockTypeInfo) = (blockTypeInfo);
+
+
+        public override string ToString()
+        {
+            return $"{BlockTypeInfo.Name} v={BlockTypeInfo.Version}";
+        }
     }
 
     /// <summary>

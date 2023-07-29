@@ -35,6 +35,15 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             }
         }
 
+        public override void FreeUnmanagedResources()
+        {
+            foreach(var prim in Primitives)
+            {
+                prim.Value.Free();
+            }
+            StaticBoundMesh.Free();
+        }
+
         private Mesh InitializeMeshFromPrimitive(GeometryDataContainerBlock geometryBlock, MeshPrimitive primitive)
         {
             var mesh = new Mesh
@@ -42,10 +51,11 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                 name = geometryBlock.Resource.ResourceName + "_" + primitive.Name
             };
 
-            var elements = geometryBlock.GetGeometryElementsForPrimitive(primitive);
+            var meshComponent = geometryBlock.GetMeshComponentForPrimitive(primitive);
+            var elements = geometryBlock.GetGeometryElementsForMeshComponent(meshComponent);
             var vertices = elements.OfType<VertexElement>().Single();
 
-            mesh.SetVertices(vertices.Data);
+            mesh.SetVertices(GetVerticesForMeshComponent(vertices, meshComponent));
             mesh.SetTriangles(primitive.Faces, 0);
 
             foreach (var geometryElement in elements)
@@ -56,7 +66,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                         // Handled before this loop.
                         break;
                     case NormalElement normals:
-                        mesh.SetNormals(normals.Data);
+                        mesh.SetNormals(GetNormalMapForMeshComponent(normals, meshComponent));
                         break;
                     case TangentElement tangentsElement:
                         // Unity wants Vec4s for the tangents with the last component used to flip the binormal.
@@ -69,7 +79,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                         mesh.SetTangents(tangents);
                         break;
                     case UVMapElement uvMap:
-                        mesh.SetUVs(0, uvMap.Data);
+                        mesh.SetUVs(0, GetUVMapForMeshComponent(uvMap, meshComponent));
                         break;
                     default:
                         Debug.LogWarning($"Unknown geometry element type: {geometryElement.GetType()}");
@@ -80,13 +90,53 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             return mesh;
         }
 
-        public override void FreeUnmanagedResources()
+        /// <summary>
+        /// Gets the vertices for a particular mesh component, optionally resolving vertex aliases if the component has
+        /// them set.
+        /// </summary>
+        private static Vector3[] GetVerticesForMeshComponent(VertexElement vertices, MeshComponent component)
         {
-            foreach(var prim in Primitives)
+            if (component.VertexAliases.Length == 0)
+                return vertices.Data;
+            // This component has aliased vertices, meaning it only uses a subset of the full vertices available.
+            var usedVertices = new Vector3[component.VertexAliases.Length];
+            Debug.Assert(component.VertexAliases.Length < ushort.MaxValue);
+            for (ushort i = 0; i < component.VertexAliases.Length; i++)
             {
-                prim.Value.Free();
+                usedVertices[i] = vertices.Data[component.VertexAliases[i]];
             }
-            StaticBoundMesh.Free();
+            return usedVertices;
         }
+
+        /// <summary>
+        /// Same as `GetVerticesForMeshComponent` except for normal maps.
+        /// </summary>
+        private static Vector3[] GetNormalMapForMeshComponent(NormalElement normals, MeshComponent component)
+        {
+            if (component.NormalMapAliases.Length == 0)
+                return normals.Data;
+            var usedNormalMap = new Vector3[component.NormalMapAliases.Length];
+            for (var i = 0; i < component.NormalMapAliases.Length; i++)
+            {
+                usedNormalMap[i] = normals.Data[component.NormalMapAliases[i]];
+            }
+            return usedNormalMap;
+        }
+
+        /// <summary>
+        /// Same as `GetVerticesForMeshComponent` except for UV maps.
+        /// </summary>
+        private static Vector2[] GetUVMapForMeshComponent(UVMapElement uvMap, MeshComponent component)
+        {
+            if (component.UVMapAliases.Length == 0)
+                return uvMap.Data;
+            var usedUVMap = new Vector2[component.UVMapAliases.Length];
+            for (var i = 0; i < component.UVMapAliases.Length; i++)
+            {
+                usedUVMap[i] = uvMap.Data[component.UVMapAliases[i]];
+            }
+            return usedUVMap;
+        }
+
     }
 }

@@ -166,6 +166,23 @@ namespace OpenTS2.Common
             this._typeID = typeID;
         }
 
+        /// <summary>
+        /// Creates a ResourceKey for scenegraph file names such as:
+        /// "N002_Lot3!imposter_shpe"
+        ///
+        /// These are handled a little more specially than just usual file names. They can encode group ids in the
+        /// file name as well as have custom prefixes.
+        /// </summary>
+        public static ResourceKey ScenegraphResourceKey(string filename, uint groupID, uint typeID)
+        {
+            if (filename.Contains('!'))
+            {
+                filename = filename.Substring(filename.LastIndexOf('!') + 1);
+            }
+
+            return new ResourceKey(filename, groupID, typeID);
+        }
+
         public override int GetHashCode()
         {
             unchecked // Overflow is fine, just wrap

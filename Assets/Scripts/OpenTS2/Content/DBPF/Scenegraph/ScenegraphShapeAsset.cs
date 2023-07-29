@@ -15,25 +15,25 @@ namespace OpenTS2.Content.DBPF.Scenegraph
         public ScenegraphShapeAsset(ShapeBlock shapeBlock) => (ShapeBlock) = shapeBlock;
 
 
-        private ScenegraphModelAsset[] models;
+        private ScenegraphModelAsset[] _models;
         public ScenegraphModelAsset[] Models
         {
             get
             {
-                if (models == null)
+                if (_models == null)
                     throw new InvalidOperationException("Models not loaded, call LoadModelsAndMaterials first");
-                return models;
+                return _models;
             }
         }
 
-        private Dictionary<string, ScenegraphMaterialDefinitionAsset> materials;
+        private Dictionary<string, ScenegraphMaterialDefinitionAsset> _materials;
         public Dictionary<string, ScenegraphMaterialDefinitionAsset> Materials
         {
             get
             {
-                if (materials == null)
+                if (_materials == null)
                     throw new InvalidOperationException("Materials not loaded, call LoadModelsAndMaterials first");
-                return materials;
+                return _materials;
             }
         }
 
@@ -47,21 +47,22 @@ namespace OpenTS2.Content.DBPF.Scenegraph
         {
             // For now we just retrieve the highest LoD geometry.
             var meshes = ShapeBlock.MeshesPerLod[0];
-            models = new ScenegraphModelAsset[meshes.Count];
+            _models = new ScenegraphModelAsset[meshes.Count];
             for (var i = 0; i < meshes.Count; i++)
             {
-                var resourceKey = new ResourceKey(meshes[0], GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_GMND);
+                var resourceKey = ResourceKey.ScenegraphResourceKey(meshes[i], GlobalTGI.GroupID, TypeIDs.SCENEGRAPH_GMND);
                 var geometryNode = ContentProvider.Get().GetAsset<ScenegraphGeometryNodeAsset>(resourceKey);
-                models[i] = geometryNode.GetModelAsset();
+                Debug.Assert(geometryNode != null, $"Got null geometry for mesh: {meshes[i]}, key: {resourceKey}");
+                _models[i] = geometryNode.GetModelAsset(GlobalTGI.GroupID);
             }
 
             // Load each material requested by the shape.
-            materials = new Dictionary<string, ScenegraphMaterialDefinitionAsset>();
+            _materials = new Dictionary<string, ScenegraphMaterialDefinitionAsset>();
             foreach (var materialPair in ShapeBlock.Materials)
             {
-                var materialKey = new ResourceKey($"{materialPair.Value}_txmt", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXMT);
+                var materialKey = ResourceKey.ScenegraphResourceKey($"{materialPair.Value}_txmt", GlobalTGI.GroupID, TypeIDs.SCENEGRAPH_TXMT);
                 var material = ContentProvider.Get().GetAsset<ScenegraphMaterialDefinitionAsset>(materialKey);
-                materials[materialPair.Key] = material;
+                _materials[materialPair.Key] = material;
             }
         }
     }

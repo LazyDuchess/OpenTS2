@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
 using OpenTS2.Common;
 using OpenTS2.Engine;
 using OpenTS2.Files.Formats.DBPF;
@@ -49,6 +51,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             var material = MaterialDefinition.Type switch
             {
                 MaterialType.StandardMaterial => GetStandardMaterial(),
+                MaterialType.ImposterMaterial => GetImposterMaterial(),
                 _ => throw new ArgumentOutOfRangeException()
             };
             _material = material;
@@ -90,7 +93,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                     case "stdMatBaseTextureName":
                         var textureName = property.Value;
                         var texture = ContentProvider.Get().GetAsset<ScenegraphTextureAsset>(
-                            new ResourceKey(textureName + "_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR)
+                            new ResourceKey(textureName + "_txtr", GlobalTGI.GroupID, TypeIDs.SCENEGRAPH_TXTR)
                         );
                         _textures.Add(texture);
                         material.mainTexture = texture.GetSelectedImageAsUnityTexture(ContentProvider.Get());
@@ -102,6 +105,47 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             }
 
             material.SetFloat(SeaLevel, NeighborhoodManager.CurrentNeighborhood.Terrain.SeaLevel);
+
+            return material;
+        }
+
+        private Material GetImposterMaterial()
+        {
+            // TODO: For now these just use the standard shader, see if we need something different.
+            var shader = Shader.Find("OpenTS2/StandardMaterial/AlphaCutOut");
+
+            string textureName;
+            if (MaterialDefinition.MaterialName.Contains("terrainmaterial"))
+            {
+                textureName = "terrain_txtr";
+                shader = Shader.Find("OpenTS2/StandardMaterial/AlphaBlended");
+            }
+            else if (MaterialDefinition.MaterialName.Contains("roof"))
+            {
+                textureName = "roofs_txtr";
+                // TODO: roofs need a special shader, they UV map based on just their x and y coordinates on the lot.
+            }
+            else if (MaterialDefinition.MaterialName.Contains("wall"))
+            {
+                textureName = $"walls_{GetProperty("page")}_txtr";
+            }
+            else if (MaterialDefinition.MaterialName.Contains("slicepage"))
+            {
+                textureName = $"slices_{GetProperty("page")}_txtr";
+            }
+            else
+            {
+                throw new NotImplementedException($"Unknown imposter material: {MaterialDefinition.MaterialName}");
+            }
+
+            var material = new Material(shader);
+
+            var texture = ContentProvider.Get().GetAsset<ScenegraphTextureAsset>(
+                new ResourceKey(textureName, GlobalTGI.GroupID, TypeIDs.SCENEGRAPH_TXTR)
+            );
+            _textures.Add(texture);
+            material.mainTexture = texture.GetSelectedImageAsUnityTexture(ContentProvider.Get());
+            material.SetFloat(AlphaCutOff, 0.5f);
 
             return material;
         }

@@ -29,7 +29,6 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
         {
             var graphNode = ObjectGraphNodeBlock.Deserialize(reader);
             var resource = ScenegraphResource.Deserialize(reader);
-            Debug.Log($"resource: {resource}, version: {blockTypeInfo.Version}");
 
             if (blockTypeInfo.Version > 6)
             {
@@ -64,7 +63,6 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
 
             // Read an object reference to the actual geometry data.
             var geometryDataRef = ObjectReference.Deserialize(reader);
-            Debug.Log($"Object reference idx: {geometryDataRef.Index}");
 
             return new GeometryNodeBlock(blockTypeInfo, resource, geometryDataRef);
         }
