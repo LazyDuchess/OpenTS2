@@ -87,8 +87,12 @@ namespace OpenTS2.Scenes
                 mainTexture = texture.GetSelectedImageAsUnityTexture(ContentProvider.Get())
             };
 
+            // Add the material for cleanup.
             _roadMaterials.Add(material);
+
+            // Store a reference to the road texture so it doesn't get collected while we use it.
             AddReference(texture);
+
             roadObject.GetComponent<MeshRenderer>().material = material;
         }
 
