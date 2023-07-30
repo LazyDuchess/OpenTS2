@@ -13,8 +13,10 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
 
         public ObjectReference[] References { get; }
 
-        public CompositionTreeNodeBlock(PersistTypeInfo typeInfo, ObjectReference[] references) =>
-            (TypeInfo, References) = (typeInfo, references);
+        public ObjectGraphNodeBlock Graph { get; }
+
+        public CompositionTreeNodeBlock(PersistTypeInfo typeInfo, ObjectReference[] references, ObjectGraphNodeBlock graph) =>
+            (TypeInfo, References, Graph) = (typeInfo, references, graph);
 
         public static CompositionTreeNodeBlock Deserialize(IoBuffer reader)
         {
@@ -27,7 +29,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                 references[i] = ObjectReference.Deserialize(reader);
             }
 
-            return new CompositionTreeNodeBlock(typeInfo, references);
+            return new CompositionTreeNodeBlock(typeInfo, references, graph);
         }
 
         public override string ToString()
