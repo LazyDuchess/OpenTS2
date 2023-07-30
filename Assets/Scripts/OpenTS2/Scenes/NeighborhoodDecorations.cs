@@ -69,6 +69,8 @@ namespace OpenTS2.Scenes
             var roadMesh = new Mesh();
             roadMesh.SetVertices(road.RoadCorners);
             roadMesh.SetTriangles(new []{/* face1 */ 0, 1, 2, /* face2 */  1, 2, 3, /* face3 */ 0, 2, 3}, 0);
+            // Towards -X
+            roadMesh.SetUVs(0, new[] { new Vector2(1,1), new Vector2(1, 0), new Vector2(0, 0), new Vector2(0, 1) });
             roadMesh.RecalculateNormals();
             roadObject.GetComponent<MeshFilter>().mesh = roadMesh;
 
@@ -82,7 +84,7 @@ namespace OpenTS2.Scenes
             }
 
             // TODO: rotate the material appropriately as per road direction.
-            var material = new Material(Shader.Find("OpenTS2/StandardMaterial/Opaque"))
+            var material = new Material(Shader.Find("OpenTS2/Road"))
             {
                 mainTexture = texture.GetSelectedImageAsUnityTexture(ContentProvider.Get())
             };
