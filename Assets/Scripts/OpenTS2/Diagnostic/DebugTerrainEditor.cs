@@ -121,7 +121,6 @@ namespace OpenTS2.Diagnostic
                 for(var i=0;i<vertices.Length;i++)
                 {
                     var hit = hitInfo.point;
-                    hit.y = vertices[i].y;
                     var dist = Vector3.Distance(vertices[i], hit);
                     dist /= BrushSize;
                     dist = Mathf.Min(1, dist);
