@@ -50,10 +50,16 @@ namespace OpenTS2.Content
             if (File.Exists(thumbnailPath))
                 _thumbnail.LoadImage(File.ReadAllBytes(thumbnailPath));
 
-            // Get all the lots in this neighborhood's folder.
-            foreach (var lotPackage in Filesystem.GetPackagesInDirectory(Path.Combine(FolderPath, "Lots")))
+            foreach (var entry in _info.Package.Entries)
             {
-                Lots.Add(new Lot(lotPackage));
+                if (entry.TGI.TypeID != TypeIDs.LOT_INFO)
+                {
+                    continue;
+                }
+
+                var lotAsset = entry.GetAsset<LotInfoAsset>();
+                var lotPackage = Path.Combine(FolderPath, "Lots", $"{Prefix}_Lot{lotAsset.LotId}.package");
+                Lots.Add(new Lot(lotAsset, lotPackage));
             }
         }
 

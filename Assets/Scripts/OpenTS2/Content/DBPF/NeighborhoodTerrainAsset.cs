@@ -7,6 +7,8 @@ namespace OpenTS2.Content.DBPF
 {
     public class NeighborhoodTerrainAsset : AbstractAsset
     {
+        public const float TerrainGridSize = 10f;
+
         public int Width { get; }
         public int Height { get; }
         public float SeaLevel { get; }
@@ -33,7 +35,7 @@ namespace OpenTS2.Content.DBPF
                 for(var j=0;j<height;j++)
                 {
                     // 10 is the actual size of a cell in the neighborhood terrain grid. This translates to lot sizes such as a 10x10 in-game lot being a single cell.
-                    var vertexPosition = new Vector3(i * 10f, VertexHeights.values[i, j], j * 10f);
+                    var vertexPosition = new Vector3(i * TerrainGridSize, VertexHeights.values[i, j], j * TerrainGridSize);
                     terrainVertices.Add(vertexPosition);
                 }
             }
