@@ -7,7 +7,6 @@ Shader "OpenTS2/ClassicTerrain"
         _MainTex ("Texture", 2D) = "white" {}
         _Shore("Shore Texture", 2D) = "white" {}
         _ShoreMask("Shore Mask", 2D) = "black" {}
-        _ShadowMap("Shadow Map", 2D) = "white" {}
         _Variation1("Variation 1", 2D) = "white" {}
         _Variation2("Variation 2", 2D) = "white" {}
         _CliffTex("Cliff Texture", 2D) = "white" {}
@@ -15,7 +14,10 @@ Shader "OpenTS2/ClassicTerrain"
         _LightVector("Light Vector", Vector) = (.33, .33, -.33, 0)
         _Ambient("Ambient", float) = 0
         _Subtract("Subtract", float) = 0
-            _SeaLevel("Sea Level", float) = 0
+        _SeaLevel("Sea Level", float) = 0
+        _TerrainWidth("Terrain Width", float) = 128
+        _TerrainHeight("Terrain Height", float) = 128
+        _ShadowMap("Shadow Map", 2D) = "white" {}
     }
     SubShader
     {
@@ -30,7 +32,9 @@ Shader "OpenTS2/ClassicTerrain"
             // make fog work
             #pragma multi_compile_fog
 
+            #include "Assets/Shaders/opents2_common.cginc"
             #include "UnityCG.cginc"
+            
 
             struct appdata
             {
@@ -54,7 +58,6 @@ Shader "OpenTS2/ClassicTerrain"
 
             sampler2D _MainTex;
             sampler2D _Shore;
-            sampler2D _ShadowMap;
             sampler2D _Variation1;
             sampler2D _Variation2;
             sampler2D _MatCap;
@@ -90,7 +93,7 @@ Shader "OpenTS2/ClassicTerrain"
                 o.uv += float2(_MainTex_ST.x, _MainTex_ST.y);
                 o.color = v.color;
                 o.cliff = max(0,min(1,pow(-(dot(worldNormal, float3(0.0, 1.0, 0.0)) - 1), 2) * 3));
-                o.shadowUv = float2(v.vertex.x, v.vertex.z) / (128 * 10);
+                o.shadowUv = getNeighborhoodUV(v.vertex);
                 o.height = v.vertex.y;
                 if (v.vertex.y <= _SeaLevel)
                     o.color.b = 1;

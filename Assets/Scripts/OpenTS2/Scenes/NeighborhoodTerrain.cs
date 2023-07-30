@@ -35,7 +35,8 @@ namespace OpenTS2.Scenes
             _terrainMaterial = meshRenderer.material;
             _terrainMaterial.SetVector("_LightVector", Sun.forward);
 
-            var terrainType = NeighborhoodManager.CurrentNeighborhood.Terrain.TerrainType;
+            var terrain = NeighborhoodManager.CurrentNeighborhood.Terrain;
+            var terrainType = terrain.TerrainType;
 
             var matCap = contentProvider.GetAsset<TextureAsset>(s_matCapKey);
             var smooth = contentProvider.GetAsset<ScenegraphTextureAsset>(terrainType.Texture);
@@ -54,7 +55,7 @@ namespace OpenTS2.Scenes
             _terrainMaterial.SetTexture("_Variation2", variation2.GetSelectedImageAsUnityTexture(contentProvider));
             _terrainMaterial.SetTexture("_CliffTex", cliff.GetSelectedImageAsUnityTexture(contentProvider));
             _terrainMaterial.SetTexture("_Shore", shore.GetSelectedImageAsUnityTexture(contentProvider));
-            _terrainMaterial.SetFloat("_SeaLevel", NeighborhoodManager.CurrentNeighborhood.Terrain.SeaLevel);
+            _terrainMaterial.SetFloat("_SeaLevel", terrain.SeaLevel);
             SetTerrainMesh();
         }
 
@@ -78,8 +79,8 @@ namespace OpenTS2.Scenes
             
             MakeVertexColors(terrainMesh, vars1, vars2);
             LightmapManager.RenderShadowMap();
-            meshRenderer.material.SetTexture("_ShadowMap", LightmapManager.ShadowMap);
             meshRenderer.material.SetTexture("_ShoreMask", LightmapManager.ShoreMap);
+            MaterialUtils.SendCommonParameters(_terrainMaterial);
         }
 
         List<Rect> GetVariationRectangles(int width, int height)

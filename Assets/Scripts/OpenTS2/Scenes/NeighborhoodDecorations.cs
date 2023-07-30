@@ -10,6 +10,7 @@ using OpenTS2.Files.Formats.DBPF;
 using UnityEngine;
 using OpenTS2.Components;
 using OpenTS2.Engine;
+using OpenTS2.Rendering;
 
 namespace OpenTS2.Scenes
 {
@@ -68,7 +69,7 @@ namespace OpenTS2.Scenes
 
             var roadMesh = new Mesh();
             roadMesh.SetVertices(road.RoadCorners);
-            roadMesh.SetTriangles(new []{/* face1 */ 0, 1, 2, /* face2 */  1, 2, 3, /* face3 */ 0, 2, 3}, 0);
+            roadMesh.SetTriangles(new[] {/* face1 */ 1, 2, 3, /* face2 */ 1, 3, 0 }, 0);
 
             var connectionFlag = road.ConnectionFlag;
             var uvs = GetUVsForConnectionFlags(connectionFlag);
@@ -86,11 +87,12 @@ namespace OpenTS2.Scenes
                 return;
             }
 
-            // TODO: rotate the material appropriately as per road direction.
             var material = new Material(Shader.Find("OpenTS2/Road"))
             {
                 mainTexture = texture.GetSelectedImageAsUnityTexture(ContentProvider.Get())
             };
+
+            MaterialUtils.SendCommonParameters(material);
 
             // Add the material for cleanup.
             _roadMaterials.Add(material);
