@@ -44,7 +44,10 @@ namespace OpenTS2.Scenes
             var variation2 = contentProvider.GetAsset<ScenegraphTextureAsset>(terrainType.Texture2);
             var cliff = contentProvider.GetAsset<ScenegraphTextureAsset>(s_cliffKey);
             var shore = contentProvider.GetAsset<ScenegraphTextureAsset>(s_shoreKey);
-            AddReference(matCap, smooth, variation1, variation2, cliff, shore);
+            var roughness = contentProvider.GetAsset<ScenegraphTextureAsset>(terrainType.Roughness);
+            var roughness1 = contentProvider.GetAsset<ScenegraphTextureAsset>(terrainType.Roughness1);
+            var roughness2 = contentProvider.GetAsset<ScenegraphTextureAsset>(terrainType.Roughness2);
+            AddReference(matCap, smooth, variation1, variation2, cliff, shore, roughness1, roughness2);
             if (matCap != null)
             {
                 matCap.Texture.wrapMode = TextureWrapMode.Clamp;
@@ -56,6 +59,9 @@ namespace OpenTS2.Scenes
             _terrainMaterial.SetTexture("_CliffTex", cliff.GetSelectedImageAsUnityTexture(contentProvider));
             _terrainMaterial.SetTexture("_Shore", shore.GetSelectedImageAsUnityTexture(contentProvider));
             _terrainMaterial.SetFloat("_SeaLevel", terrain.SeaLevel);
+            _terrainMaterial.SetTexture("_Roughness", roughness.GetSelectedImageAsUnityTexture(contentProvider));
+            _terrainMaterial.SetTexture("_Roughness1", roughness1.GetSelectedImageAsUnityTexture(contentProvider));
+            _terrainMaterial.SetTexture("_Roughness2", roughness2.GetSelectedImageAsUnityTexture(contentProvider));
             SetTerrainMesh();
         }
 
@@ -78,9 +84,30 @@ namespace OpenTS2.Scenes
             var vars2 = GetVariationRectangles(terrainAsset.Width, terrainAsset.Height);
             
             MakeVertexColors(terrainMesh, vars1, vars2);
+            MakeRoughness(terrainMesh);
             LightmapManager.RenderShadowMap();
             meshRenderer.material.SetTexture("_ShoreMask", LightmapManager.ShoreMap);
             MaterialUtils.SendCommonParameters(_terrainMaterial);
+        }
+
+        public void UpdateRoughness()
+        {
+            var terrainMesh = _meshFilter.sharedMesh;
+            if (terrainMesh == null)
+                return;
+            ClearRoughness(terrainMesh);
+            MakeRoughness(terrainMesh);
+        }
+
+        void ClearRoughness(Mesh terrainMesh)
+        {
+            var vertices = terrainMesh.vertices;
+            var colors = terrainMesh.colors;
+            for (var i = 0; i < vertices.Length; i++)
+            {
+                colors[i].b = 0f;
+            }
+            terrainMesh.colors = colors;
         }
 
         List<Rect> GetVariationRectangles(int width, int height)
@@ -110,9 +137,51 @@ namespace OpenTS2.Scenes
             terrainMesh.colors = cols;
         }
 
+        void MakeRoughness(Mesh terrainMesh)
+        {
+            var maxRoadDistance = 80f;
+            var minRoadDistance = 40f;
+            var vertices = terrainMesh.vertices;
+            var colors = terrainMesh.colors;
+            var roads = NeighborhoodManager.CurrentNeighborhood.Decorations.RoadDecorations;
+            for (var i = 0; i < vertices.Length; i++)
+            {
+                var vertex = vertices[i];
+                var color = colors[i];
+                var closestRoadSet = false;
+                var closestRoadDistance = 0f;
+                foreach (var road in roads)
+                {
+                    var pos = road.Position.Position;
+                    pos.y = vertex.y;
+                    var dist = Vector3.Distance(vertex, pos);
+                    if (!closestRoadSet)
+                    {
+                        closestRoadSet = true;
+                        closestRoadDistance = dist;
+                    }
+                    else
+                    {
+                        if (dist < closestRoadDistance)
+                        {
+                            closestRoadDistance = dist;
+                        }
+                    }
+                }
+                if (!closestRoadSet)
+                    color.b = 1f;
+                else
+                {
+                    var amount = Mathf.Clamp((closestRoadDistance - minRoadDistance) / maxRoadDistance, 0f, 1f);
+                    color.b = amount;
+                }
+                colors[i] = color;
+            }
+            terrainMesh.colors = colors;
+        }
+
         void MakeVertexColors(Mesh terrainMesh, List<Rect> variations1, List<Rect> variations2)
         {
-            var seaLevel = NeighborhoodManager.CurrentNeighborhood.Terrain.SeaLevel;
             var vertices = terrainMesh.vertices;
             var colors = terrainMesh.colors;
             for(var i=0;i<vertices.Length;i++)
