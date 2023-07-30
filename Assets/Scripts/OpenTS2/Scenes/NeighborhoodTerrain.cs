@@ -58,7 +58,6 @@ namespace OpenTS2.Scenes
             _terrainMaterial.SetTexture("_Variation2", variation2.GetSelectedImageAsUnityTexture(contentProvider));
             _terrainMaterial.SetTexture("_CliffTex", cliff.GetSelectedImageAsUnityTexture(contentProvider));
             _terrainMaterial.SetTexture("_Shore", shore.GetSelectedImageAsUnityTexture(contentProvider));
-            _terrainMaterial.SetFloat("_SeaLevel", terrain.SeaLevel);
             _terrainMaterial.SetTexture("_Roughness", roughness.GetSelectedImageAsUnityTexture(contentProvider));
             _terrainMaterial.SetTexture("_Roughness1", roughness1.GetSelectedImageAsUnityTexture(contentProvider));
             _terrainMaterial.SetTexture("_Roughness2", roughness2.GetSelectedImageAsUnityTexture(contentProvider));

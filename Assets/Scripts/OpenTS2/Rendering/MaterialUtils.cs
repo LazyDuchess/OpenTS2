@@ -13,6 +13,7 @@ namespace OpenTS2.Rendering
         private static int s_shadowMap = Shader.PropertyToID("_ShadowMap");
         private static int s_terrainWidth = Shader.PropertyToID("_TerrainWidth");
         private static int s_terrainHeight = Shader.PropertyToID("_TerrainHeight");
+        private static int s_seaLevel = Shader.PropertyToID("_SeaLevel");
         public static void SendCommonParameters(Material material)
         {
             var ngbh = NeighborhoodManager.CurrentNeighborhood;
@@ -21,6 +22,7 @@ namespace OpenTS2.Rendering
                 material.SetTexture(s_shadowMap, LightmapManager.ShadowMap);
                 material.SetFloat(s_terrainWidth, ngbh.Terrain.Width);
                 material.SetFloat(s_terrainHeight, ngbh.Terrain.Height);
+                material.SetFloat(s_seaLevel, ngbh.Terrain.SeaLevel);
             }
         }
     }
