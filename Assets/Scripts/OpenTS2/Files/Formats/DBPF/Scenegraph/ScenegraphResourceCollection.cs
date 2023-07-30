@@ -40,9 +40,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph
 
         public override string ToString()
         {
-            return "ScenegraphResourceCollection\n" +
-                   "FileLinks: " + string.Join("\n  ", FileLinks) + "\n" +
-                   "Blocks: " + string.Join("\n  ", Blocks);
+            return ScenegraphJsonDumper.DumpCollection(this);
         }
 
         /// <summary>
