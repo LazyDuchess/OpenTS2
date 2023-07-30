@@ -69,8 +69,11 @@ namespace OpenTS2.Scenes
             var roadMesh = new Mesh();
             roadMesh.SetVertices(road.RoadCorners);
             roadMesh.SetTriangles(new []{/* face1 */ 0, 1, 2, /* face2 */  1, 2, 3, /* face3 */ 0, 2, 3}, 0);
-            // Towards -X
-            roadMesh.SetUVs(0, new[] { new Vector2(1,1), new Vector2(1, 0), new Vector2(0, 0), new Vector2(0, 1) });
+
+            var connectionFlag = road.ConnectionFlag;
+            var uvs = GetUVsForConnectionFlags(connectionFlag);
+
+            roadMesh.SetUVs(0, uvs);
             roadMesh.RecalculateNormals();
             roadObject.GetComponent<MeshFilter>().mesh = roadMesh;
 
@@ -96,6 +99,69 @@ namespace OpenTS2.Scenes
             AddReference(texture);
 
             roadObject.GetComponent<MeshRenderer>().material = material;
+        }
+
+        // Returns rotated UVs for a road piece with the given connection flags.
+        Vector2[] GetUVsForConnectionFlags(byte connectionFlags)
+        {
+            var connectionAmount = GetAmountOfConnections(connectionFlags);
+
+            // Connection flag 8 - Connected to piece at -Z
+            var uvs = new[] { new Vector2(1, 1), new Vector2(1, 0), new Vector2(0, 0), new Vector2(0, 1) };
+
+            // Connection Flag 1 - Connected to piece at -X
+            if ((connectionFlags & 1) == 1)
+                uvs = new[] { new Vector2(0, 1), new Vector2(1, 1), new Vector2(1, 0), new Vector2(0, 0) };
+
+            if (connectionAmount == 1) // Road end
+            {
+                // Connection Flag 4 - Connected to piece at +X
+                if (connectionFlags == 4)
+                    uvs = new[] { new Vector2(1, 0), new Vector2(0, 0), new Vector2(0, 1), new Vector2(1, 1) };
+                // Connection flag 2 - Connected to piece at +Z
+                else if (connectionFlags == 2)
+                    uvs = new[] { new Vector2(0, 0), new Vector2(0, 1), new Vector2(1, 1), new Vector2(1, 0) };
+            }
+            else if (connectionAmount == 2) // Road turn
+            {
+                // Connected to pieces at -Z and +X
+                if (connectionFlags == 12)
+                    uvs = new[] { new Vector2(1, 0), new Vector2(0, 0), new Vector2(0, 1), new Vector2(1, 1) };
+                // Connected to pieces at -X and -Z
+                else if (connectionFlags == 9)
+                    uvs = new[] { new Vector2(1, 1), new Vector2(1, 0), new Vector2(0, 0), new Vector2(0, 1) };
+                // Connected to pieces at +Z and +X
+                else if (connectionFlags == 6)
+                    uvs = new[] { new Vector2(0, 0), new Vector2(0, 1), new Vector2(1, 1), new Vector2(1, 0) };
+            }
+            else if (connectionAmount == 3) // T Junction
+            {
+                // Going across X, intersecting piece coming from -Z
+                if (connectionFlags == 13)
+                    uvs = new[] { new Vector2(1, 0), new Vector2(0, 0), new Vector2(0, 1), new Vector2(1, 1) };
+                // Going across Z, intersecting piece coming from -X
+                else if (connectionFlags == 11)
+                    uvs = new[] { new Vector2(1, 1), new Vector2(1, 0), new Vector2(0, 0), new Vector2(0, 1) };
+                // Going across Z, intersecting piece coming from +X
+                else if (connectionFlags == 14)
+                    uvs = new[] { new Vector2(0, 0), new Vector2(0, 1), new Vector2(1, 1), new Vector2(1, 0) };
+            }
+
+            return uvs;
+
+            int GetAmountOfConnections(byte connectionFlags)
+            {
+                var amount = 0;
+                if ((connectionFlags & 1) == 1)
+                    amount++;
+                if ((connectionFlags & 2) == 2)
+                    amount++;
+                if ((connectionFlags & 4) == 4)
+                    amount++;
+                if ((connectionFlags & 8) == 8)
+                    amount++;
+                return amount;
+            }
         }
 
         private void RenderBridges(IEnumerable<BridgeDecoration> bridges)
