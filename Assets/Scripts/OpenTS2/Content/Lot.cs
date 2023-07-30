@@ -14,6 +14,8 @@ namespace OpenTS2.Content
     /// </summary>
     public class Lot
     {
+        public const float MaxLotSize = 64f;
+
         private LotInfoAsset _lotInfo;
 
         /// <summary>

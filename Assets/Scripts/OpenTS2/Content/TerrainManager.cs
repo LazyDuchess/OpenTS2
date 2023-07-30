@@ -26,7 +26,7 @@ namespace OpenTS2.Content
         public static TerrainType GetTerrainType(string key)
         {
             if (!s_terrainTypes.TryGetValue(key, out TerrainType result))
-                return s_terrainTypes["Temperate"];
+                throw new KeyNotFoundException($"Can't find terrain type {key}");
             return result;
         }
     }

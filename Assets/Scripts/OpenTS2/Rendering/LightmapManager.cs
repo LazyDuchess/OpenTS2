@@ -12,6 +12,7 @@ namespace OpenTS2.Rendering
     /// </summary>
     public static class LightmapManager
     {
+        public const float HeightDivision = 1000f;
         public static RenderTexture ShadowMap => s_shadowMap;
         public static RenderTexture ShoreMap => s_shoreMap;
         private static RenderTexture s_heightMap;
@@ -42,6 +43,9 @@ namespace OpenTS2.Rendering
                 s_heightMap = new RenderTexture(s_heightMapResolution, s_heightMapResolution, 16, RenderTextureFormat.R16);
             RenderTexture.active = s_heightMap;
             s_heightMapMaterial.SetPass(0);
+            s_heightMapMaterial.SetFloat("_HeightDivision", HeightDivision);
+            s_heightMapMaterial.SetFloat("_Width", neighborhood.Terrain.Width);
+            s_heightMapMaterial.SetFloat("_Height", neighborhood.Terrain.Height);
             Graphics.DrawMeshNow(mesh, Vector3.zero, Quaternion.identity);
             RenderTexture.active = null;
 
@@ -57,7 +61,7 @@ namespace OpenTS2.Rendering
                 s_shoreMap = new RenderTexture(s_shoreResolution, s_shoreResolution, 16, RenderTextureFormat.R16);
             RenderTexture.active = s_shoreMap;
             s_shoreMapMaterial.mainTexture = s_heightMap;
-            s_shoreMapMaterial.SetFloat("_SeaLevel", neighborhood.Terrain.SeaLevel / 1000);
+            s_shoreMapMaterial.SetFloat("_SeaLevel", neighborhood.Terrain.SeaLevel / HeightDivision);
             Graphics.Blit(s_heightMap, s_shoreMapMaterial);
             RenderTexture.active = null;
         }

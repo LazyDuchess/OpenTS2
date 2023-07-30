@@ -16,11 +16,12 @@ namespace OpenTS2.Rendering.Materials
         public override string Name => "ImposterDualPackedSliceMaterial";
 
         private static readonly int AlphaCutOff = Shader.PropertyToID("_AlphaCutOff");
+        private static readonly int Pull = Shader.PropertyToID("_Pull");
 
         public override Material Parse(ScenegraphMaterialDefinitionAsset definition)
         {
             var textureName = $"slices_{definition.GetProperty("page")}_txtr";
-            var shader = Shader.Find("OpenTS2/UnlitCutOut");
+            var shader = Shader.Find("OpenTS2/LotImposterCutOut");
             var material = new Material(shader);
 
             var texture = ContentProvider.Get().GetAsset<ScenegraphTextureAsset>(
@@ -30,6 +31,7 @@ namespace OpenTS2.Rendering.Materials
             material.mainTexture = texture.GetSelectedImageAsUnityTexture(ContentProvider.Get());
             material.mainTexture.filterMode = FilterMode.Point;
             material.SetFloat(AlphaCutOff, 0.5f);
+            material.SetFloat(Pull, MaterialManager.ImposterPull);
             return material;
         }
     }

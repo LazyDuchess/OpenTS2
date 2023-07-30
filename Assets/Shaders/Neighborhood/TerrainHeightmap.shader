@@ -3,6 +3,9 @@ Shader "OpenTS2/TerrainHeightmap"
     Properties
     {
         _MainTex("Texture", 2D) = "white" {}
+        _HeightDivision("Height Division", float) = 1000.0
+        _Width("Terrain Width", float) = 128.0
+        _Height("Terrain Height", float) = 128.0
     }
         SubShader
     {
@@ -35,12 +38,18 @@ Shader "OpenTS2/TerrainHeightmap"
 
         sampler2D _MainTex;
         float4 _MainTex_ST;
+        float _HeightDivision;
+        float _Width;
+        float _Height;
 
         v2f vert(appdata v)
         {
             v2f o;
-            o.height = v.vertex.y / 1000;
-            o.vertex = float4(v.vertex.x - 128 * 5, -(v.vertex.z - 128 * 5) + 1, 0, 128 * 5);
+            o.height = v.vertex.y / _HeightDivision;
+            float xPos = (v.vertex.x / _Width * 0.2) - 1;
+            float yPos = -((v.vertex.z / _Height * 0.2) - 1);
+            float wPos = 1.0;
+            o.vertex = float4(xPos, yPos, 0, wPos);
             o.uv = TRANSFORM_TEX(v.uv, _MainTex);
             UNITY_TRANSFER_FOG(o,o.vertex);
             return o;

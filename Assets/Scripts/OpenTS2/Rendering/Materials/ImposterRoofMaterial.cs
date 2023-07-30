@@ -15,6 +15,9 @@ namespace OpenTS2.Rendering.Materials
     {
         public override string Name => "ImposterRoofMaterial";
 
+        private static readonly int Pull = Shader.PropertyToID("_Pull");
+        private static readonly int Size = Shader.PropertyToID("_Size");
+
         public override Material Parse(ScenegraphMaterialDefinitionAsset definition)
         {
             var textureName = "roofs_txtr";
@@ -26,6 +29,8 @@ namespace OpenTS2.Rendering.Materials
             );
             definition.Textures.Add(texture);
             material.mainTexture = texture.GetSelectedImageAsUnityTexture(ContentProvider.Get());
+            material.SetFloat(Pull, MaterialManager.ImposterPull);
+            material.SetFloat(Size, Lot.MaxLotSize);
             return material;
         }
     }

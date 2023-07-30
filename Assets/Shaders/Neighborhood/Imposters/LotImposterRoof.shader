@@ -3,6 +3,8 @@ Shader "OpenTS2/LotImposterRoof"
     Properties
     {
         _MainTex("Texture", 2D) = "white" {}
+        _Pull("Pull to Camera", float) = 0.0
+        _Size("Texture Size", float) = 64.0
     }
         SubShader
     {
@@ -11,6 +13,7 @@ Shader "OpenTS2/LotImposterRoof"
 
         Pass
         {
+            Offset -1, -1
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
@@ -18,6 +21,7 @@ Shader "OpenTS2/LotImposterRoof"
             #pragma multi_compile_fog
 
             #include "UnityCG.cginc"
+            #include "imposter_shared.cginc"
 
             struct appdata
             {
@@ -34,12 +38,15 @@ Shader "OpenTS2/LotImposterRoof"
 
             sampler2D _MainTex;
             float4 _MainTex_ST;
+            float _Pull;
+            float _Size;
 
             v2f vert(appdata v)
             {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
-                o.uv = float2(v.vertex.x/64, -v.vertex.y/64);
+                o.uv = float2(v.vertex.x/_Size, -v.vertex.y/_Size);
+                PULL_UP(_Pull);
                 UNITY_TRANSFER_FOG(o,o.vertex);
                 return o;
             }

@@ -9,8 +9,15 @@ using UnityEngine;
 
 namespace OpenTS2.Rendering
 {
+    /// <summary>
+    /// Manages parsing material definitions.
+    /// </summary>
     public static class MaterialManager
     {
+        /// <summary>
+        /// How much lot imposters will be "pulled" up towards the camera to avoid clipping issues.
+        /// </summary>
+        public const float ImposterPull = 0.025f;
         private static Dictionary<string, AbstractMaterial> s_materials = new Dictionary<string, AbstractMaterial>();
         public static void Initialize()
         {
@@ -24,7 +31,7 @@ namespace OpenTS2.Rendering
         public static Material Parse(ScenegraphMaterialDefinitionAsset definition)
         {
             if (!s_materials.TryGetValue(definition.MaterialDefinition.Type, out AbstractMaterial material))
-                material = s_materials["StandardMaterial"];
+                throw new KeyNotFoundException($"Can't find material type {definition.MaterialDefinition.Type}");
             return material.Parse(definition);
         }
 
