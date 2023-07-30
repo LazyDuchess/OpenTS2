@@ -29,7 +29,7 @@ public class LotInfoCodecTest
         Assert.That(lotInfoAsset.LocationX, Is.EqualTo(54));
         Assert.That(lotInfoAsset.LocationY, Is.EqualTo(71));
         Assert.That(lotInfoAsset.NeighborhoodToLotHeightOffset, Is.EqualTo(365.43).Within(0.01));
-        Assert.That(lotInfoAsset.FrontEdge, Is.EqualTo(3));
+        Assert.That(lotInfoAsset.FrontEdge, Is.EqualTo(0));
     }
 
     [Test]
@@ -46,6 +46,6 @@ public class LotInfoCodecTest
         Assert.That(lotInfoAsset.LocationX, Is.EqualTo(41));
         Assert.That(lotInfoAsset.LocationY, Is.EqualTo(76));
         Assert.That(lotInfoAsset.NeighborhoodToLotHeightOffset, Is.EqualTo(318.75).Within(0.01));
-        Assert.That(lotInfoAsset.FrontEdge, Is.EqualTo(0));
+        Assert.That(lotInfoAsset.FrontEdge, Is.EqualTo(3));
     }
 }
