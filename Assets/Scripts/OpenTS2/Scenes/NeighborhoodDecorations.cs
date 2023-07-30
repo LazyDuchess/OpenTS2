@@ -8,11 +8,14 @@ using OpenTS2.Content.DBPF;
 using OpenTS2.Content.DBPF.Scenegraph;
 using OpenTS2.Files.Formats.DBPF;
 using UnityEngine;
+using OpenTS2.Components;
+using OpenTS2.Engine;
 
 namespace OpenTS2.Scenes
 {
-    public class NeighborhoodDecorations : MonoBehaviour
+    public class NeighborhoodDecorations : AssetReferenceComponent
     {
+        private List<Material> _roadMaterials = new List<Material>();
         void Start()
         {
             var decorations = NeighborhoodManager.CurrentNeighborhood.Decorations;
@@ -40,6 +43,15 @@ namespace OpenTS2.Scenes
                 {
                     // Some lots don't have imposters available, that's fine.
                 }
+            }
+        }
+
+        // Clean up the road materials we created. Textures should get garbage collected.
+        private void OnDestroy()
+        {
+            foreach(var mat in _roadMaterials)
+            {
+                mat.Free();
             }
         }
 
@@ -74,6 +86,9 @@ namespace OpenTS2.Scenes
             {
                 mainTexture = texture.GetSelectedImageAsUnityTexture(ContentProvider.Get())
             };
+
+            _roadMaterials.Add(material);
+            AddReference(texture);
             roadObject.GetComponent<MeshRenderer>().material = material;
         }
 
