@@ -20,7 +20,7 @@ namespace OpenTS2.Rendering.Materials
         public override Material Parse(ScenegraphMaterialDefinitionAsset definition)
         {
             var textureName = $"walls_{definition.GetProperty("page")}_txtr";
-            var shader = Shader.Find("OpenTS2/StandardMaterial/AlphaCutOut");
+            var shader = Shader.Find("OpenTS2/UnlitCutOut");
             var material = new Material(shader);
 
             var texture = ContentProvider.Get().GetAsset<ScenegraphTextureAsset>(
@@ -30,7 +30,6 @@ namespace OpenTS2.Rendering.Materials
             material.mainTexture = texture.GetSelectedImageAsUnityTexture(ContentProvider.Get());
             material.mainTexture.filterMode = FilterMode.Point;
             material.SetFloat(AlphaCutOff, 0.5f);
-
             return material;
         }
     }

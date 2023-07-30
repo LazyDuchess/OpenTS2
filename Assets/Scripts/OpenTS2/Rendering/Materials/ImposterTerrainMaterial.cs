@@ -15,12 +15,10 @@ namespace OpenTS2.Rendering.Materials
     {
         public override string Name => "ImposterTerrainMaterial";
 
-        private static readonly int AlphaCutOff = Shader.PropertyToID("_AlphaCutOff");
-
         public override Material Parse(ScenegraphMaterialDefinitionAsset definition)
         {
             var textureName = "terrain_txtr";
-            var shader = Shader.Find("OpenTS2/StandardMaterial/AlphaBlended");
+            var shader = Shader.Find("OpenTS2/UnlitBlend");
             var material = new Material(shader);
 
             var texture = ContentProvider.Get().GetAsset<ScenegraphTextureAsset>(
@@ -28,8 +26,6 @@ namespace OpenTS2.Rendering.Materials
             );
             definition.Textures.Add(texture);
             material.mainTexture = texture.GetSelectedImageAsUnityTexture(ContentProvider.Get());
-            material.SetFloat(AlphaCutOff, 0.5f);
-
             return material;
         }
     }

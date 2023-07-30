@@ -26,7 +26,6 @@ namespace OpenTS2.Rendering.Materials
             );
             definition.Textures.Add(texture);
             material.mainTexture = texture.GetSelectedImageAsUnityTexture(ContentProvider.Get());
-
             return material;
         }
     }
