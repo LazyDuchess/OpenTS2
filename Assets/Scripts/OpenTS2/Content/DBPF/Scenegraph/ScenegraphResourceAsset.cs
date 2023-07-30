@@ -32,7 +32,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             simsTransform.transform.localScale = new Vector3(1, -1, 1);
 
             gameObject.transform.SetParent(simsTransform.transform, worldPositionStays:false);
-            return gameObject;
+            return simsTransform;
         }
 
         /// <summary>
