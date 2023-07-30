@@ -32,13 +32,14 @@ namespace OpenTS2.Scenes
             // Render lot imposters.
             foreach (var lot in NeighborhoodManager.CurrentNeighborhood.Lots)
             {
-                if (!lot.LotPackage.ToLower().Contains("lot3"))
+                try
                 {
-                    continue;
+                    lot.CreateLotImposter();
                 }
-                var model = lot.GetLotImposterResource();
-                Debug.Log($"lot imposter resource: {model.ResourceCollection}");
-                model.CreateGameObjectForShape();
+                catch (KeyNotFoundException)
+                {
+                    // Some lots don't have imposters available, that's fine.
+                }
             }
         }
 

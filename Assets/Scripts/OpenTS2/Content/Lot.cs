@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using OpenTS2.Common;
+using OpenTS2.Content.DBPF;
 using OpenTS2.Content.DBPF.Scenegraph;
 using OpenTS2.Files.Formats.DBPF;
 using UnityEngine;
@@ -10,30 +14,43 @@ namespace OpenTS2.Content
     /// </summary>
     public class Lot
     {
+        private LotInfoAsset _lotInfo;
+
         /// <summary>
         /// Path to lot file like ".../Neighborhoods/G001/Lots/G001_Lot3.package"
         /// </summary>
-        public string LotPackage { get; }
+        public string LotPackagePath { get; }
 
-        public Lot(string lotPackage)
+        private DBPFFile Package => ContentProvider.Get().GetPackageByPath(LotPackagePath);
+
+        public Lot(LotInfoAsset lotInfo, string lotPackage)
         {
-            LotPackage = lotPackage;
+            _lotInfo = lotInfo;
+            LotPackagePath = lotPackage;
+        }
+
+        private ScenegraphResourceAsset GetLotImposter()
+        {
+            return Package.GetAssetByTGI<ScenegraphResourceAsset>(ResourceKey.ScenegraphResourceKey("imposter_cres", GroupIDs.Local, TypeIDs.SCENEGRAPH_CRES));
         }
 
         /// <summary>
-        /// Gets the scenegraph resource that represents this lot's imposter shown on the neighborhood view.
+        /// Renders a gameobject that represents this lot's imposter shown on the neighborhood view.
         /// </summary>
-        public ScenegraphResourceAsset GetLotImposterResource()
+        public GameObject CreateLotImposter()
         {
-            var package = ContentProvider.Get().GetPackageByPath(LotPackage);
-            foreach (var packageEntry in package.Entries)
+            var imposter = GetLotImposter();
+            if (imposter == null)
             {
-                if (packageEntry.TGI.TypeID == TypeIDs.SCENEGRAPH_CRES)
-                {
-                    return packageEntry.GetAsset<ScenegraphResourceAsset>();
-                }
+                throw new KeyNotFoundException("Lot does not have imposter");
             }
-            throw new ArgumentException("Lot does not have imposter resource");
+            var gameObject = imposter.CreateGameObjectForShape();
+            gameObject.transform.position = new Vector3(
+                _lotInfo.LocationX * NeighborhoodTerrainAsset.TerrainGridSize,
+                _lotInfo.NeighborhoodToLotHeightOffset,
+                _lotInfo.LocationY * NeighborhoodTerrainAsset.TerrainGridSize);
+
+            return gameObject;
         }
     }
 }
