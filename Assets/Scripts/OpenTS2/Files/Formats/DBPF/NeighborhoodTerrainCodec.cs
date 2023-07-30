@@ -44,7 +44,6 @@ namespace OpenTS2.Files.Formats.DBPF
 
 
             var terrainType = reader.ReadUint32PrefixedString();
-            Debug.Log($"Terrain Type is {terrainType}");
             var vertexHeights = FloatArray2D.Deserialize(reader);
             stream.Dispose();
             reader.Dispose();
