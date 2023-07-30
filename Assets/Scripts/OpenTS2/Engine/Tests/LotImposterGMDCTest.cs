@@ -24,6 +24,6 @@ public class LotImposterGMDCTest : MonoBehaviour
 
         var lotImposterResource = contentProvider.GetAssetsOfType<ScenegraphResourceAsset>(TypeIDs.SCENEGRAPH_CRES)[0];
 
-        var gameObject = lotImposterResource.CreateGameObjectForShape();
+        var gameObject = lotImposterResource.CreateRootGameObject();
     }
 }

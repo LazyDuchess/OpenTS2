@@ -34,7 +34,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
 
         public override string ToString()
         {
-            return $"Type={TypeInfo} References=[{string.Join(", ", References)}]";
+            return $"Type={TypeInfo} References=[{string.Join(", ", References.GetEnumerator())}]";
         }
     }
 }

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using OpenTS2.Common;
+using OpenTS2.Content;
+using OpenTS2.Content.DBPF.Scenegraph;
 using OpenTS2.Files.Formats.DBPF.Scenegraph.Block;
 using OpenTS2.Files.Utils;
 using UnityEngine;
