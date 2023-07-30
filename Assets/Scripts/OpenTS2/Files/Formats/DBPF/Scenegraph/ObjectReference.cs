@@ -3,26 +3,47 @@
 namespace OpenTS2.Files.Formats.DBPF.Scenegraph
 {
     /// <summary>
-    /// A reference to a scenegraph object in the FileLinks of a ScenegraphResourceCollection.
+    /// A reference to a scenegraph object. This could be stored locally in the scenegraph resource collection or
+    /// have an external reference through the FileLinks of a ScenegraphResourceCollection.
     /// </summary>
-    public struct ObjectReference
+    public abstract class ObjectReference
     {
-        public int Index;
-
         public static ObjectReference Deserialize(IoBuffer reader)
         {
             var referenceMissing = reader.ReadByte() == 0;
             if (referenceMissing)
             {
-                return new ObjectReference() { Index = -1 };
+                return new NullReference();
             }
 
-            // This internally changes the reference between cIGZPersistSerializableReferent when the value is 0 or
-            // cIGZPersistResource2 when the value is anything else. We don't care about that yet but we might in the
-            // future.
-            var referenceType = reader.ReadByte();
+            var isInternal = reader.ReadByte() == 0;
             var index = reader.ReadInt32();
-            return new ObjectReference() { Index = index };
+            if (isInternal)
+            {
+                return new InternalReference(index);
+            }
+            return new ExternalReference(index);
         }
+    }
+
+    /// <summary>
+    /// Not sure if this is null or represents a reference from the current class.
+    /// </summary>
+    public class NullReference : ObjectReference
+    {
+    }
+
+    public class InternalReference : ObjectReference
+    {
+        public int BlockIndex;
+
+        public InternalReference(int blockIndex) => (BlockIndex) = (blockIndex);
+    }
+
+    public class ExternalReference : ObjectReference
+    {
+        public int FileLinksIndex;
+
+        public ExternalReference(int fileLinksIndex) => (FileLinksIndex) = (fileLinksIndex);
     }
 }

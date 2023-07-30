@@ -4,6 +4,7 @@ using OpenTS2.Content;
 using OpenTS2.Content.DBPF.Scenegraph;
 using OpenTS2.Files.Formats.DBPF.Scenegraph.Block;
 using OpenTS2.Files.Utils;
+using UnityEngine;
 
 namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Codecs
 {
@@ -19,7 +20,9 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Codecs
             var geometryBlock = scenegraphCollection.GetBlockOfType<GeometryNodeBlock>();
 
             // Look up the GMDC that this GMND points to.
-            var gmdcKey = scenegraphCollection.FileLinks[geometryBlock.GeometryDataReference.Index];
+            Debug.Assert(geometryBlock.GeometryDataReference is ExternalReference);
+            var gmdcRef = (ExternalReference)geometryBlock.GeometryDataReference;
+            var gmdcKey = scenegraphCollection.FileLinks[gmdcRef.FileLinksIndex];
 
             return new ScenegraphGeometryNodeAsset(gmdcKey);
         }

@@ -175,11 +175,11 @@ namespace OpenTS2.Scenes
                 var model = ContentProvider.Get().GetAsset<ScenegraphResourceAsset>(new ResourceKey(bridge.ResourceName,
                     GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_CRES));
 
-                var bridgeObject = model.CreateGameObjectForShape();
+                var bridgeObject = model.CreateRootGameObject();
                 bridgeObject.transform.position = (bridge.Road.Position.Position + bridge.PositionOffset);
 
                 // TODO: put this in a helper MonoBehavior or something.
-                var simsRotation = bridgeObject.transform.Find("simsRotations");
+                var simsRotation = bridgeObject.transform.GetChild(0);
                 simsRotation.localRotation = bridge.ModelOrientation;
 
                 // Parent to this component.
@@ -200,11 +200,11 @@ namespace OpenTS2.Scenes
                 var model = ContentProvider.Get().GetAsset<ScenegraphResourceAsset>(new ResourceKey(resourceName,
                     GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_CRES));
 
-                var decorationObject = model.CreateGameObjectForShape();
+                var decorationObject = model.CreateRootGameObject();
                 decorationObject.transform.position = decoration.Position.Position;
 
                 // TODO: put this in a helper MonoBehavior or something.
-                var simsRotation = decorationObject.transform.Find("simsRotations");
+                var simsRotation = decorationObject.transform.GetChild(0);
                 simsRotation.Rotate(0, 0, decoration.Rotation);
 
                 // Parent to this component.

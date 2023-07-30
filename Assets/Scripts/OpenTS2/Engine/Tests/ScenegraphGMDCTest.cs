@@ -19,7 +19,7 @@ public class ScenegraphGMDCTest : MonoBehaviour
             new ResourceKey("ufoCrash_cres", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_CRES));
 
         Debug.Log($"scenegraphModel: {resource.GlobalTGI}");
-        var gameObject = resource.CreateGameObjectForShape();
+        var gameObject = resource.CreateRootGameObject();
         Debug.Log($"gameObject: {gameObject}");
     }
 
