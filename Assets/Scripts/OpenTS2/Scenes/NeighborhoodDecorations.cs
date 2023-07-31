@@ -38,13 +38,15 @@ namespace OpenTS2.Scenes
             {
                 try
                 {
-                    lot.CreateLotImposter();
+                    var imposter = lot.CreateLotImposter();
                 }
                 catch (KeyNotFoundException)
                 {
                     // Some lots don't have imposters available, that's fine.
                 }
             }
+
+            var batchedDeco = Batching.Batch(gameObject);
         }
 
         // Clean up the road materials we created. Textures should get garbage collected.
