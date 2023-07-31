@@ -150,6 +150,13 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             {
                 foreach (var primitive in model.Primitives)
                 {
+                    // If this group is not listed in the SHPE, we don't render it.
+                    if (!shape.Materials.TryGetValue(primitive.Key, out var material))
+                    {
+                        continue;
+
+                    }
+
                     // Create an object for the primitive and parent it to the root game object.
                     var primitiveObject = new GameObject(primitive.Key, typeof(MeshFilter), typeof(MeshRenderer))
                     {
@@ -161,10 +168,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                     };
 
                     primitiveObject.GetComponent<MeshFilter>().mesh = primitive.Value;
-                    if (shape.Materials.TryGetValue(primitive.Key, out var material))
-                    {
-                        primitiveObject.GetComponent<MeshRenderer>().material = material.GetAsUnityMaterial();
-                    }
+                    primitiveObject.GetComponent<MeshRenderer>().material = material.GetAsUnityMaterial();
 
                     primitiveObject.transform.SetParent(parent.transform, worldPositionStays:false);
                 }
