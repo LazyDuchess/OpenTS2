@@ -3,7 +3,6 @@ Shader "OpenTS2/LotImposterBlend"
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
-        _Pull("Pull to Camera", float) = 0.0
     }
     SubShader
     {
@@ -22,7 +21,6 @@ Shader "OpenTS2/LotImposterBlend"
             #pragma multi_compile_fog
 
             #include "UnityCG.cginc"
-            #include "imposter_shared.cginc"
 
             struct appdata
             {
@@ -39,13 +37,11 @@ Shader "OpenTS2/LotImposterBlend"
 
             sampler2D _MainTex;
             float4 _MainTex_ST;
-            float _Pull;
 
             v2f vert (appdata v)
             {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
-                PULL_UP(_Pull);
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
                 UNITY_TRANSFER_FOG(o,o.vertex);
                 return o;

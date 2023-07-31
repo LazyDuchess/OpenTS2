@@ -69,7 +69,9 @@ namespace OpenTS2.Scenes
 
             var roadMesh = new Mesh();
             roadMesh.SetVertices(road.RoadCorners);
-            roadMesh.SetTriangles(new[] {/* face1 */ 1, 2, 3, /* face2 */ 1, 3, 0 }, 0);
+            // Flip triangulation
+            // roadMesh.SetTriangles(new[] {/* face1 */ 1, 2, 3, /* face2 */ 1, 3, 0 }, 0);
+            roadMesh.SetTriangles(new[] {/* face1 */ 0, 2, 3, /* face2 */ 2, 0, 1 }, 0);
 
             var connectionFlag = road.ConnectionFlag;
             var uvs = GetUVsForConnectionFlags(connectionFlag);
@@ -92,7 +94,7 @@ namespace OpenTS2.Scenes
                 mainTexture = texture.GetSelectedImageAsUnityTexture(ContentProvider.Get())
             };
 
-            MaterialUtils.SendCommonParameters(material);
+            MaterialUtils.SetNeighborhoodParameters(material);
 
             // Add the material for cleanup.
             _roadMaterials.Add(material);

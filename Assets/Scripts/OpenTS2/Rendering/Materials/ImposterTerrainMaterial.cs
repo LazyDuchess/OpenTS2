@@ -15,8 +15,6 @@ namespace OpenTS2.Rendering.Materials
     {
         public override string Name => "ImposterTerrainMaterial";
 
-        private static readonly int Pull = Shader.PropertyToID("_Pull");
-
         public override Material Parse(ScenegraphMaterialDefinitionAsset definition)
         {
             var textureName = "terrain_txtr";
@@ -28,7 +26,6 @@ namespace OpenTS2.Rendering.Materials
             );
             definition.Textures.Add(texture);
             material.mainTexture = texture.GetSelectedImageAsUnityTexture(ContentProvider.Get());
-            material.SetFloat(Pull, MaterialManager.ImposterPull);
             return material;
         }
     }

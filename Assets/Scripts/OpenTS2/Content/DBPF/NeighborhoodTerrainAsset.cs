@@ -50,10 +50,16 @@ namespace OpenTS2.Content.DBPF
             {
                 for (int j = 0; j <  height; j++, ti += 6, vi++)
                 {
+                    // Flip triangulation
+                    /*
                     terrainIndices[ti] = vi + height + 2;
                     terrainIndices[ti + 3] = terrainIndices[ti + 2] = vi + 1;
                     terrainIndices[ti + 4] = terrainIndices[ti + 1] = vi + height + 1;
-                    terrainIndices[ti + 5] = vi;
+                    terrainIndices[ti + 5] = vi;*/
+                    terrainIndices[ti] = vi + 1;
+                    terrainIndices[ti + 4] = terrainIndices[ti + 1] = vi + height + 2;
+                    terrainIndices[ti + 3] = terrainIndices[ti + 2] = vi;
+                    terrainIndices[ti + 5] = vi + height + 1;
                 }
             }
 

@@ -16,7 +16,6 @@ namespace OpenTS2.Rendering.Materials
         public override string Name => "ImposterWallMaterial";
 
         private static readonly int AlphaCutOff = Shader.PropertyToID("_AlphaCutOff");
-        private static readonly int Pull = Shader.PropertyToID("_Pull");
 
         public override Material Parse(ScenegraphMaterialDefinitionAsset definition)
         {
@@ -31,7 +30,6 @@ namespace OpenTS2.Rendering.Materials
             material.mainTexture = texture.GetSelectedImageAsUnityTexture(ContentProvider.Get());
             material.mainTexture.filterMode = FilterMode.Point;
             material.SetFloat(AlphaCutOff, 0.5f);
-            material.SetFloat(Pull, MaterialManager.ImposterPull);
             return material;
         }
     }

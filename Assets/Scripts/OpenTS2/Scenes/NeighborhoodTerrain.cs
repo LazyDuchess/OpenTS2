@@ -86,7 +86,7 @@ namespace OpenTS2.Scenes
             MakeRoughness(terrainMesh);
             LightmapManager.RenderShadowMap();
             meshRenderer.material.SetTexture("_ShoreMask", LightmapManager.ShoreMap);
-            MaterialUtils.SendCommonParameters(_terrainMaterial);
+            MaterialUtils.SetNeighborhoodParameters(_terrainMaterial);
         }
 
         public void UpdateRoughness()

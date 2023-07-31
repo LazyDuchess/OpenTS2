@@ -14,7 +14,11 @@ namespace OpenTS2.Rendering
         private static int s_terrainWidth = Shader.PropertyToID("_TerrainWidth");
         private static int s_terrainHeight = Shader.PropertyToID("_TerrainHeight");
         private static int s_seaLevel = Shader.PropertyToID("_SeaLevel");
-        public static void SendCommonParameters(Material material)
+
+        /// <summary>
+        /// Send neighborhood lightmap textures and information to a shader.
+        /// </summary>
+        public static void SetNeighborhoodParameters(Material material)
         {
             var ngbh = NeighborhoodManager.CurrentNeighborhood;
             if (ngbh != null)
