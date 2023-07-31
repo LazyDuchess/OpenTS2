@@ -167,8 +167,8 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                         }
                     };
 
-                    primitiveObject.GetComponent<MeshFilter>().mesh = primitive.Value;
-                    primitiveObject.GetComponent<MeshRenderer>().material = material.GetAsUnityMaterial();
+                    primitiveObject.GetComponent<MeshFilter>().sharedMesh = primitive.Value;
+                    primitiveObject.GetComponent<MeshRenderer>().sharedMaterial = material.GetAsUnityMaterial();
 
                     primitiveObject.transform.SetParent(parent.transform, worldPositionStays:false);
                 }

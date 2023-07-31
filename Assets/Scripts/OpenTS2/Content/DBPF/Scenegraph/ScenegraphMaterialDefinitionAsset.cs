@@ -48,10 +48,8 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             {
                 return _material;
             }
-
-            var material = MaterialManager.Parse(this);
-            _material = material;
-            return material;
+            _material = MaterialManager.Parse(this);
+            return _material;
         }
     }
 }

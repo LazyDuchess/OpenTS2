@@ -10,26 +10,32 @@ namespace OpenTS2.Rendering
         struct BatchCandidate
         {
             public Mesh Mesh;
-            public Matrix4x4 Transform;
+            public Transform Transform;
             public int SubMesh;
-            public BatchCandidate(Mesh mesh, Matrix4x4 transform, int submesh)
+            public BatchCandidate(Mesh mesh, Transform transform, int submesh)
             {
                 Mesh = mesh;
                 Transform = transform;
                 SubMesh = submesh;
             }
         }
-        public static GameObject Batch(GameObject gameObject)
+
+        /// <summary>
+        /// Merge meshes sharing the same materials into fewer optimized meshes with all transforms applied.
+        /// </summary>
+        /// <param name="parent">Parent transform that contains all meshes.</param>
+        /// <param name="flipFaces">Whether to flip faces. Set this to true if the meshes are using TS2's coordinate system.</param>
+        /// <returns>Parent GameObject containing all batched meshes.</returns>
+        public static GameObject Batch(Transform parent, bool flipFaces = false)
         {
-            return null;
             var candidatesByMaterial = new Dictionary<Material, List<BatchCandidate>>();
-            var renderers = gameObject.GetComponentsInChildren<MeshRenderer>();
+            var renderers = parent.GetComponentsInChildren<MeshRenderer>();
             foreach (var element in renderers)
             {
                 var filter = element.GetComponent<MeshFilter>();
                 if (filter == null)
                     continue;
-                var materials = element.materials;
+                var materials = element.sharedMaterials;
                 for (var i = 0; i < materials.Length; i++)
                 {
                     var mat = materials[i];
@@ -40,16 +46,15 @@ namespace OpenTS2.Rendering
                         candidates = new List<BatchCandidate>();
                         candidatesByMaterial[mat] = candidates;
                     }
-                    candidates.Add(new BatchCandidate(filter.sharedMesh, filter.transform.localToWorldMatrix, i));
+                    candidates.Add(new BatchCandidate(filter.sharedMesh, filter.transform, i));
                 }
             }
-            //var filteredMaterials = candidatesByMaterial.Where((x) => x.Value.Count > 1).ToDictionary(x => x.Key, x => x.Value);
             var filteredMaterials = candidatesByMaterial;
-            var materialToMesh = new Dictionary<Material, Mesh>();
             var finalGameObject = new GameObject("Batched Objects");
             foreach (var material in filteredMaterials)
             {
                 var mesh = new Mesh();
+                mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
                 var batchCandidates = material.Value;
                 var currentIndex = 0;
                 var verts = new List<Vector3>();
@@ -57,7 +62,9 @@ namespace OpenTS2.Rendering
                 var tris = new List<int>();
                 var uvs = new List<Vector2>();
 
-                var candidateGameObject = new GameObject($"Batch: {material.Key.name}");
+                var candidateGameObject = new GameObject($"Batch: {material.Key.name}", typeof(BatchedComponent));
+                var batchedComponent = candidateGameObject.GetComponent<BatchedComponent>();
+                batchedComponent.BatchedMesh = mesh;
                 candidateGameObject.transform.SetParent(finalGameObject.transform);
                 var renderer = candidateGameObject.AddComponent<MeshRenderer>();
                 var filter = candidateGameObject.AddComponent<MeshFilter>();
@@ -75,12 +82,18 @@ namespace OpenTS2.Rendering
                     candidate.Mesh.GetUVs(0, uv);
                     for (var i = 0; i < vertices.Count; i++)
                     {
-                        vertices[i] = candidate.Transform * vertices[i];
+                        vertices[i] = candidate.Transform.TransformPoint(vertices[i]);
+                    }
+                    for(var i=0;i<normals.Count;i++)
+                    {
+                        normals[i] = candidate.Transform.TransformDirection(normals[i]);
                     }
                     for (var i = 0; i < triangles.Length; i++)
                     {
                         triangles[i] += currentIndex;
                     }
+                    if (flipFaces)
+                        triangles = triangles.Reverse().ToArray();
                     currentIndex += vertices.Count;
                     verts.AddRange(vertices);
                     norms.AddRange(normals);
@@ -91,6 +104,8 @@ namespace OpenTS2.Rendering
                 mesh.SetNormals(norms);
                 mesh.SetTriangles(tris, 0);
                 mesh.SetUVs(0, uvs);
+                mesh.RecalculateBounds();
+                mesh.Optimize();
             }
             return finalGameObject;
         }

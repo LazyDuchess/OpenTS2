@@ -17,8 +17,19 @@ namespace OpenTS2.Scenes
     public class NeighborhoodDecorations : AssetReferenceComponent
     {
         private List<Material> _roadMaterials = new List<Material>();
+        private Transform _decorationsParent;
+        private Transform _roadsParent;
+        private Transform _lotsParent;
         void Start()
         {
+            _decorationsParent = new GameObject("Decorations").transform;
+            _roadsParent = new GameObject("Roads").transform;
+            _lotsParent = new GameObject("Lots").transform;
+
+            _decorationsParent.SetParent(transform);
+            _roadsParent.SetParent(transform);
+            _lotsParent.SetParent(transform);
+
             var decorations = NeighborhoodManager.CurrentNeighborhood.Decorations;
 
             // Render trees.
@@ -39,14 +50,17 @@ namespace OpenTS2.Scenes
                 try
                 {
                     var imposter = lot.CreateLotImposter();
+                    imposter.transform.SetParent(_lotsParent);
                 }
                 catch (KeyNotFoundException)
                 {
                     // Some lots don't have imposters available, that's fine.
                 }
             }
-
-            var batchedDeco = Batching.Batch(gameObject);
+            var batchedDeco = Batching.Batch(_decorationsParent, flipFaces: true);
+            var batchedRoads = Batching.Batch(_roadsParent, flipFaces: false);
+            _decorationsParent.gameObject.SetActive(false);
+            _roadsParent.gameObject.SetActive(false);
         }
 
         // Clean up the road materials we created. Textures should get garbage collected.
@@ -65,7 +79,7 @@ namespace OpenTS2.Scenes
                 transform =
                 {
                     // Parent to this component.
-                    parent = transform
+                    parent = _roadsParent
                 }
             };
 
@@ -104,7 +118,7 @@ namespace OpenTS2.Scenes
             // Store a reference to the road texture so it doesn't get collected while we use it.
             AddReference(texture);
 
-            roadObject.GetComponent<MeshRenderer>().material = material;
+            roadObject.GetComponent<MeshRenderer>().sharedMaterial = material;
         }
 
         // Returns rotated UVs for a road piece with the given connection flags.
@@ -187,7 +201,7 @@ namespace OpenTS2.Scenes
                 simsRotation.localRotation = bridge.ModelOrientation;
 
                 // Parent to this component.
-                bridgeObject.transform.parent = transform;
+                bridgeObject.transform.parent = _decorationsParent;
             }
         }
 
@@ -212,7 +226,7 @@ namespace OpenTS2.Scenes
                 simsRotation.Rotate(0, 0, decoration.Rotation);
 
                 // Parent to this component.
-                decorationObject.transform.parent = transform;
+                decorationObject.transform.parent = _decorationsParent;
             }
         }
     }
