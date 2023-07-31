@@ -5,6 +5,8 @@ sampler2D _MainTex;
 float _SeaLevel;
 float _AlphaMultiplier;
 
+float4 _DiffuseCoefficient;
+
 struct Input
 {
     float2 uv_MainTex;
@@ -13,7 +15,8 @@ struct Input
 
 void surf (Input IN, inout SurfaceOutput o)
 {
-    fixed4 c = tex2D (_MainTex, IN.uv_MainTex);
+    fixed4 c = _DiffuseCoefficient;
+    c *= tex2D (_MainTex, IN.uv_MainTex);
 
     c.a *= _AlphaMultiplier;
 

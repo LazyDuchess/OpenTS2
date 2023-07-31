@@ -18,6 +18,7 @@ namespace OpenTS2.Rendering.Materials
         private static readonly int AlphaCutOff = Shader.PropertyToID("_AlphaCutOff");
         private static readonly int AlphaMultiplier = Shader.PropertyToID("_AlphaMultiplier");
         private static readonly int SeaLevel = Shader.PropertyToID("_SeaLevel");
+        private static readonly int DiffuseCoefficient = Shader.PropertyToID("_DiffuseCoefficient");
 
         public override Material Parse(ScenegraphMaterialDefinitionAsset definition)
         {
@@ -57,6 +58,10 @@ namespace OpenTS2.Rendering.Materials
                         break;
                     case "stdMatAlphaMultiplier":
                         material.SetFloat(AlphaMultiplier, float.Parse(property.Value));
+                        break;
+                    case "stdMatDiffCoef":
+                        var coefficients = property.Value.Split(',').Select(float.Parse).ToArray();
+                        material.SetColor(DiffuseCoefficient, new Color(coefficients[0], coefficients[1], coefficients[2]));
                         break;
                 }
             }
