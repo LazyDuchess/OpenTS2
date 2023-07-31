@@ -75,7 +75,9 @@ namespace OpenTS2.Files.Formats.DBPF
 
             // TODO: there's more stuff after this
 
-            return new LotInfoAsset(lotId, lotName, lotDescription, creationWidth, creationDepth, locationX, locationY, neighborhoodToLotHeightOffset, creationFrontEdge, currentFrontEdge);
+            return new LotInfoAsset(lotId, flags, lotType, lotName, lotDescription,
+                creationWidth, creationDepth, roadsAlongEdges, locationX, locationY, neighborhoodToLotHeightOffset,
+                creationFrontEdge, currentFrontEdge);
         }
     }
 }

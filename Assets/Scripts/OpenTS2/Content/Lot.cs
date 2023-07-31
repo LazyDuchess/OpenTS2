@@ -57,22 +57,31 @@ namespace OpenTS2.Content
 
             // We have to create a GameObject right at the center of the lot so we can pivot our rotation around the
             // center instead of at the corner.
-            var rotationObject = new GameObject("imposter_rotation")
+            Debug.Log($"{_lotInfo.LotName}, creationFront: {_lotInfo.CreationFrontEdge}, frontEdge: {_lotInfo.FrontEdge}, Width: {_lotInfo.Width}, Depth: {_lotInfo.Depth}, Flags: {_lotInfo.Flags:X}, Edges: {_lotInfo.RoadsAlongEdges:X}, Type: {_lotInfo.LotType:X}");
+            var rotationObject = new GameObject("imposter_rotation_" + _lotInfo.LotName)
             {
                 transform =
                 {
                     position = gameObject.transform.position
                 }
             };
-            // TODO: this isn't quite right, for some lots this doesn't end up at dead center, look into why.
+            var lotCenter = _lotInfo.GetLotCenter();
             rotationObject.transform.position +=
-                new Vector3(_lotInfo.Width * NeighborhoodTerrainAsset.TerrainGridSize / 2.0f, 0,
-                    _lotInfo.Depth * NeighborhoodTerrainAsset.TerrainGridSize / 2.0f);
+                new Vector3(lotCenter.Item1 * NeighborhoodTerrainAsset.TerrainGridSize,
+                    0,
+                    lotCenter.Item2 * NeighborhoodTerrainAsset.TerrainGridSize);
             gameObject.transform.SetParent(rotationObject.transform);
 
-            // Rotate based on the whether the frontEdge has changed from creation time.
+            // Rotate based on the whether the frontEdge has changed from the lot's creation time.
             var rotation = (_lotInfo.CreationFrontEdge - _lotInfo.FrontEdge) * -90;
             rotationObject.transform.Rotate(0, rotation, 0);
+
+            // For debugging...
+            var positionRef = new GameObject("imposter_debug_position_" + _lotInfo.LotName);
+            positionRef.transform.position = new Vector3(
+                _lotInfo.LocationX * NeighborhoodTerrainAsset.TerrainGridSize,
+                _lotInfo.NeighborhoodToLotHeightOffset,
+                _lotInfo.LocationY * NeighborhoodTerrainAsset.TerrainGridSize);
 
             return gameObject;
         }
