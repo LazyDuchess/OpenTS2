@@ -19,7 +19,7 @@ Shader "OpenTS2/LotImposterBlend"
         {
             ZWrite Off
             Offset -1, -1
-            Blend SrcAlpha OneMinusSrcAlpha
+            Blend One OneMinusSrcAlpha
             //ZWrite Off
             CGPROGRAM
             #pragma vertex vert
