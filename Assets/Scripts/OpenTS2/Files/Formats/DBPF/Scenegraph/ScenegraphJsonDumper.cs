@@ -1,5 +1,7 @@
 ﻿using System;
+#if UNITY_EDITOR
 using Unity.Plastic.Newtonsoft.Json;
+#endif
 using UnityEngine;
 
 namespace OpenTS2.Files.Formats.DBPF.Scenegraph
@@ -11,11 +13,16 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph
     {
         public static string DumpCollection(ScenegraphResourceCollection resourceCollection)
         {
+#if UNITY_EDITOR
             return JsonConvert.SerializeObject(resourceCollection, Formatting.None, new Vector3Converter(),
                 new QuaternionConverter());
+#else
+            return "";
+#endif
         }
     }
 
+#if UNITY_EDITOR
     internal class Vector3Converter : JsonConverter<Vector3>
     {
         public override void WriteJson(JsonWriter writer, Vector3 value, JsonSerializer serializer)
@@ -43,4 +50,5 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph
             throw new NotImplementedException();
         }
     }
+#endif
 }
