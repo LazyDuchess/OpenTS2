@@ -9,7 +9,11 @@ Shader "OpenTS2/LotImposterRoof"
     {
         Tags { "RenderType" = "Opaque" }
         LOD 100
-
+            Stencil {
+                Ref 0
+                Comp Always
+                Pass Replace
+            }
         Pass
         {
             CGPROGRAM

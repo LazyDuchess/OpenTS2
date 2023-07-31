@@ -9,6 +9,12 @@ Shader "OpenTS2/LotImposterBlend"
         Tags { "RenderType" = "Transparent" "Queue" = "Transparent"  }
         LOD 100
 
+        // Render on top of the hood terrain, behind everything else
+        Stencil {
+            Ref 1
+            Comp Equal
+        }
+
         Pass
         {
             ZWrite Off
@@ -43,6 +49,7 @@ Shader "OpenTS2/LotImposterBlend"
             {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
+                o.vertex.z *= 1.2;
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
                 UNITY_TRANSFER_FOG(o,o.vertex);
                 return o;

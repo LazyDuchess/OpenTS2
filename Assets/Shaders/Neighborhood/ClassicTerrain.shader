@@ -27,6 +27,12 @@ Shader "OpenTS2/ClassicTerrain"
         Tags { "RenderType"="Opaque" }
         LOD 100
 
+        Stencil {
+                Ref 1
+                Comp Always
+                Pass Replace
+            }
+
         Pass
         {
             CGPROGRAM
@@ -37,7 +43,6 @@ Shader "OpenTS2/ClassicTerrain"
 
             #include "Assets/Shaders/opents2_common.cginc"
             #include "UnityCG.cginc"
-            
 
             struct appdata
             {

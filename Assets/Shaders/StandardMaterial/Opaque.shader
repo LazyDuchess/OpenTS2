@@ -13,7 +13,11 @@ Shader "OpenTS2/StandardMaterial/Opaque"
     SubShader
     {
         Tags { "RenderType"="Opaque" "Queue"="Geometry" }
-
+        Stencil {
+                Ref 0
+                Comp Always
+                Pass Replace
+            }
         CGPROGRAM
         #pragma surface surf Lambert fullforwardshadows
 

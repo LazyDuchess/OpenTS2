@@ -16,7 +16,11 @@ Shader "OpenTS2/StandardMaterial/AlphaCutOut"
     SubShader
     {
         Tags { "RenderType"="AlphaTest" "Queue"="AlphaTest" }
-
+        Stencil {
+                Ref 0
+                Comp Always
+                Pass Replace
+            }
         CGPROGRAM
         #pragma surface surf Lambert fullforwardshadows alphatest:_AlphaCutOff
 
