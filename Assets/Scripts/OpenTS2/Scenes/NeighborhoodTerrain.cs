@@ -136,6 +136,7 @@ namespace OpenTS2.Scenes
             terrainMesh.colors = cols;
         }
 
+        // TODO: Optimize, maybe multithread.
         void MakeRoughness(Mesh terrainMesh)
         {
             var maxRoadDistance = 80f;

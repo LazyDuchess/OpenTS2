@@ -28,6 +28,7 @@ namespace OpenTS2.Rendering
         /// <returns>Parent GameObject containing all batched meshes.</returns>
         public static GameObject Batch(Transform parent, bool flipFaces = false)
         {
+            // TODO - Maybe make this function multithreaded.
             var candidatesByMaterial = new Dictionary<Material, List<BatchCandidate>>();
             var renderers = parent.GetComponentsInChildren<MeshRenderer>();
             foreach (var element in renderers)

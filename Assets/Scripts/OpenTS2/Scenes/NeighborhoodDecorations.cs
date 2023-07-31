@@ -16,7 +16,7 @@ namespace OpenTS2.Scenes
 {
     public class NeighborhoodDecorations : AssetReferenceComponent
     {
-        private List<Material> _roadMaterials = new List<Material>();
+        private Dictionary<string, Material> _roadMaterialLookup = new Dictionary<string, Material>();
         private Transform _decorationsParent;
         private Transform _roadsParent;
         private Transform _lotsParent;
@@ -57,8 +57,10 @@ namespace OpenTS2.Scenes
                     // Some lots don't have imposters available, that's fine.
                 }
             }
+
             var batchedDeco = Batching.Batch(_decorationsParent, flipFaces: true);
             var batchedRoads = Batching.Batch(_roadsParent, flipFaces: false);
+
             _decorationsParent.gameObject.SetActive(false);
             _roadsParent.gameObject.SetActive(false);
         }
@@ -66,9 +68,9 @@ namespace OpenTS2.Scenes
         // Clean up the road materials we created. Textures should get garbage collected.
         private void OnDestroy()
         {
-            foreach(var mat in _roadMaterials)
+            foreach(var mat in _roadMaterialLookup)
             {
-                mat.Free();
+                mat.Value.Free();
             }
         }
 
@@ -96,29 +98,31 @@ namespace OpenTS2.Scenes
             roadMesh.RecalculateNormals();
             roadObject.GetComponent<MeshFilter>().mesh = roadMesh;
 
-            var texture = ContentProvider.Get().GetAsset<ScenegraphTextureAsset>(new ResourceKey(road.TextureName,
+            if (!_roadMaterialLookup.TryGetValue(road.TextureName, out Material roadMaterial))
+            {
+                var texture = ContentProvider.Get().GetAsset<ScenegraphTextureAsset>(new ResourceKey(road.TextureName,
                 GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR));
 
-            if (texture == null)
-            {
-                Debug.LogWarning($"Failed to find texture for road: {road.TextureName}");
-                return;
+                if (texture == null)
+                {
+                    Debug.LogWarning($"Failed to find texture for road: {road.TextureName}");
+                    return;
+                }
+
+                roadMaterial = new Material(Shader.Find("OpenTS2/Road"))
+                {
+                    mainTexture = texture.GetSelectedImageAsUnityTexture(ContentProvider.Get())
+                };
+
+                MaterialUtils.SetNeighborhoodParameters(roadMaterial);
+
+                _roadMaterialLookup[road.TextureName] = roadMaterial;
+
+                // Store a reference to the road texture so it doesn't get collected while we use it.
+                AddReference(texture);
             }
 
-            var material = new Material(Shader.Find("OpenTS2/Road"))
-            {
-                mainTexture = texture.GetSelectedImageAsUnityTexture(ContentProvider.Get())
-            };
-
-            MaterialUtils.SetNeighborhoodParameters(material);
-
-            // Add the material for cleanup.
-            _roadMaterials.Add(material);
-
-            // Store a reference to the road texture so it doesn't get collected while we use it.
-            AddReference(texture);
-
-            roadObject.GetComponent<MeshRenderer>().sharedMaterial = material;
+            roadObject.GetComponent<MeshRenderer>().sharedMaterial = roadMaterial;
         }
 
         // Returns rotated UVs for a road piece with the given connection flags.
