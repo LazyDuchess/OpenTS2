@@ -4,16 +4,16 @@ Shader "OpenTS2/Road"
     {
         _Color ("Color", Color) = (1,1,1,1)
         _MainTex ("Albedo (RGB)", 2D) = "white" {}
-        _AlphaCutOff("AlphaCutOff", Float) = 0.5
         _TerrainWidth("Terrain Width", float) = 128
         _TerrainHeight("Terrain Height", float) = 128
         _ShadowMap("Terrain Shadow Map", 2D) = "white" {}
     }
     SubShader
     {
-        Tags { "RenderType"="Opaque" }
+        Tags { "Queue"="Transparent" "RenderType"="Transparent" }
         LOD 200
-
+        ZWrite Off
+        Blend SrcAlpha OneMinusSrcAlpha
         CGPROGRAM
         // Physically based Standard lighting model, and enable shadows on all light types
         #pragma surface surf CustomLambert fullforwardshadows alphatest:_AlphaCutOff

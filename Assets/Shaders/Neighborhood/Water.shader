@@ -11,6 +11,7 @@ Shader "OpenTS2/Water"
     }
     SubShader
     {
+        ZWrite Off
         Tags {"Queue" = "Transparent" "RenderType" = "Transparent" }
         LOD 200
 

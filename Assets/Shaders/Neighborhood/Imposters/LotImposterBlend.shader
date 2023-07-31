@@ -11,6 +11,7 @@ Shader "OpenTS2/LotImposterBlend"
 
         Pass
         {
+            ZWrite Off
             Offset -1, -1
             Blend SrcAlpha OneMinusSrcAlpha
             //ZWrite Off

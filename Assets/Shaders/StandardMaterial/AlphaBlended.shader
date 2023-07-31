@@ -9,6 +9,7 @@ Shader "OpenTS2/StandardMaterial/AlphaBlended"
     }
     SubShader
     {
+        ZWrite Off
         Tags { "RenderType"="Transparent" "Queue"="Transparent" }
 
         CGPROGRAM
