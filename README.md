@@ -3,6 +3,8 @@ OpenTS2 is an Open-Source Reimplementation of The Sims 2, using the Unity game e
 
 ## Progress
 Currently a basic main menu with a neighborhood chooser is implemented. Neighborhood info can be previewed and a basic neighborhood view can be accessed.
+![image](https://github.com/LazyDuchess/OpenTS2/assets/42678262/7ec4b21f-8987-41e6-b780-cca694698354)
+
 
 ## Acknowledgements
 * [InvertedTomato.CRC](https://github.com/invertedtomato/crc)
