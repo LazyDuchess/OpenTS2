@@ -101,6 +101,14 @@ namespace OpenTS2.Rendering
             return false;
         }
 
+        // If there's anything we don't want getting batched, add it here.
+        static bool CanBatch(MeshRenderer renderer, MeshFilter filter)
+        {
+            if (!CanBatchShader(renderer.sharedMaterial.shader))
+                return false;
+            return true;
+        }
+
         /// <summary>
         /// Merge meshes sharing the same materials into fewer optimized meshes with all transforms applied.
         /// </summary>
@@ -126,7 +134,7 @@ namespace OpenTS2.Rendering
                     continue;
                 var mesh = filter.sharedMesh;
                 var material = renderer.sharedMaterial;
-                if (!CanBatchShader(material.shader))
+                if (!CanBatch(renderer, filter))
                     continue;
                 var candidate = new BatchCandidate(material, mesh, renderer, filter.transform);
                 if (!candidatesByMaterial.TryGetValue(material, out List<BatchCandidate> candidates))
