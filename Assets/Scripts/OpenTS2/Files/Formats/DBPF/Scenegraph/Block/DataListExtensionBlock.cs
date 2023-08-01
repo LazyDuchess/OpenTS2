@@ -14,9 +14,24 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
         public const string BLOCK_NAME = "cDataListExtension";
         public override string BlockName => BLOCK_NAME;
 
-        public DataListExtensionBlock(PersistTypeInfo blockTypeInfo) : base(blockTypeInfo)
+        public IDataListValue Value { get; }
+
+        public DataListExtensionBlock(PersistTypeInfo blockTypeInfo, IDataListValue value) : base(blockTypeInfo)
         {
+            Value = value;
         }
+    }
+
+    public interface IDataListValue
+    {
+    }
+
+    public struct DataListValue<T> : IDataListValue
+    {
+        public string Name { get; }
+        public T Value { get; }
+
+        public DataListValue(string name, T value) => (Name, Value) = (name, value);
     }
 
     public class DataListExtensionBlockReader : IScenegraphDataBlockReader<DataListExtensionBlock>
@@ -25,13 +40,13 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
         {
             var cExtension = PersistTypeInfo.Deserialize(reader);
             Debug.Assert(cExtension.Name == "cExtension");
-            DeserializeSingleExtensionItem(reader);
+            var value = DeserializeSingleExtensionItem(reader);
 
-            return new DataListExtensionBlock(blockTypeInfo);
+            return new DataListExtensionBlock(blockTypeInfo, value);
         }
 
         // TODO: store these instead of just reading.
-        private static void DeserializeSingleExtensionItem(IoBuffer reader)
+        private static IDataListValue DeserializeSingleExtensionItem(IoBuffer reader)
         {
             var dataType = reader.ReadByte();
             var name = reader.ReadVariableLengthPascalString();
@@ -41,44 +56,38 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                 case 1:
                     // bool
                     var value = reader.ReadByte() != 0;
-                    break;
+                    return new DataListValue<bool>(name, value);
                 case 2:
                     // sint32
-                    reader.ReadInt32();
-                    break;
+                    return new DataListValue<int>(name, reader.ReadInt32());
                 case 3:
                     // float32
-                    reader.ReadFloat();
-                    break;
+                    return new DataListValue<float>(name, reader.ReadFloat());
                 case 4:
                     // Vec2
-                    Vector2Serializer.Deserialize(reader);
-                    break;
+                    return new DataListValue<Vector2>(name, Vector2Serializer.Deserialize(reader));
                 case 5:
                     // Vec3
-                    Vector3Serializer.Deserialize(reader);
-                    break;
+                    return new DataListValue<Vector3>(name, Vector3Serializer.Deserialize(reader));
                 case 6:
                     // string
-                    reader.ReadVariableLengthPascalString();
-                    break;
+                    return new DataListValue<string>(name, reader.ReadVariableLengthPascalString());
                 case 7:
                     // ExtensionItems list
-                    var numItems = reader.ReadUInt32();
-                    for (var i = 0; i < numItems; i++)
+                    var items = new IDataListValue[reader.ReadUInt32()];
+                    for (var i = 0; i < items.Length; i++)
                     {
-                        DeserializeSingleExtensionItem(reader);
+                        items[i] = DeserializeSingleExtensionItem(reader);
                     }
-                    break;
+                    return new DataListValue<IDataListValue[]>(name, items);
                 case 8:
                     // quanterion
-                    reader.ReadBytes(sizeof(float) * 4);
-                    break;
+                    return new DataListValue<Quaternion>(name, QuaterionSerialzier.Deserialize(reader));
                 case 9:
                     // bytes
                     var len = reader.ReadUInt32();
                     var data = reader.ReadBytes(len);
-                    break;
+                    return new DataListValue<byte[]>(name, data);
                 default:
                     throw new ArgumentException($"Unknown type code in data list extension: {dataType}");
             }
