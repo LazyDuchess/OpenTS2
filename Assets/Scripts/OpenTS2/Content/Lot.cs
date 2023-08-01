@@ -50,40 +50,42 @@ namespace OpenTS2.Content
 
             var gameObject = imposter.CreateRootGameObject();
 
-            gameObject.transform.position = new Vector3(
-                _lotInfo.LocationX * NeighborhoodTerrainAsset.TerrainGridSize,
-                _lotInfo.NeighborhoodToLotHeightOffset,
-                _lotInfo.LocationY * NeighborhoodTerrainAsset.TerrainGridSize);
+            // Rotate based on the whether the frontEdge has changed from the lot's creation time.
+            var rotation = (_lotInfo.CreationFrontEdge - _lotInfo.FrontEdge) * -90;
 
-            // We have to create a GameObject right at the center of the lot so we can pivot our rotation around the
-            // center instead of at the corner.
-            Debug.Log($"{_lotInfo.LotName}, creationFront: {_lotInfo.CreationFrontEdge}, frontEdge: {_lotInfo.FrontEdge}, Width: {_lotInfo.Width}, Depth: {_lotInfo.Depth}, Flags: {_lotInfo.Flags:X}, Edges: {_lotInfo.RoadsAlongEdges:X}, Type: {_lotInfo.LotType:X}");
-            var rotationObject = new GameObject("imposter_rotation_" + _lotInfo.LotName)
+            // Lot imposters are always stored rotated as per their CreationFrontEdge. So a lot facing a road in the
+            // positive x direction, i.e the "front" of the house is towards positive y will have its imposter model
+            // have the house starting at (0, 0) and ending at (width, depth).
+            //
+            // However, regardless of rotation, a lot in the neighborhood is stored with its grid coordinates
+            // corresponding to the bottom-right of the grid. Thus when a lot is rotated, we need to rotate the imposter
+            // from the correct pivot point.
+            var frontEdgeDiff = (_lotInfo.CreationFrontEdge - _lotInfo.FrontEdge) % 4;
+
+            Vector3 pivot;
+            if (frontEdgeDiff == 0) // No rotation.
+                pivot = new Vector3(0, 0, 0);
+            else if (frontEdgeDiff == -1 || frontEdgeDiff == -3) // Counter-clockwise 90
+                pivot = new Vector3(_lotInfo.WorldWidth, 0, 0);
+            else if (frontEdgeDiff == 1 || frontEdgeDiff == 3) // Clockwise 90
+                pivot = new Vector3(0, 0, _lotInfo.WorldDepth);
+            else if (frontEdgeDiff == 2 || frontEdgeDiff == -2) // Full 180 rotation.
+                pivot = new Vector3(_lotInfo.WorldWidth, 0, _lotInfo.WorldDepth);
+            else
+                throw new IndexOutOfRangeException();
+
+            var position = new GameObject($"imposter_position_{_lotInfo.LotName}")
             {
                 transform =
                 {
-                    position = gameObject.transform.position
+                    position = pivot
                 }
             };
-            var lotCenter = _lotInfo.GetLotCenter();
-            rotationObject.transform.position +=
-                new Vector3(lotCenter.Item1 * NeighborhoodTerrainAsset.TerrainGridSize,
-                    0,
-                    lotCenter.Item2 * NeighborhoodTerrainAsset.TerrainGridSize);
-            gameObject.transform.SetParent(rotationObject.transform);
+            gameObject.transform.SetParent(position.transform, worldPositionStays:true);
+            position.transform.position = new Vector3(_lotInfo.WorldLocationX, _lotInfo.NeighborhoodToLotHeightOffset, _lotInfo.WorldLocationY);
+            position.transform.Rotate(0, rotation, 0);
 
-            // Rotate based on the whether the frontEdge has changed from the lot's creation time.
-            var rotation = (_lotInfo.CreationFrontEdge - _lotInfo.FrontEdge) * -90;
-            rotationObject.transform.Rotate(0, rotation, 0);
-
-            // For debugging...
-            var positionRef = new GameObject("imposter_debug_position_" + _lotInfo.LotName);
-            positionRef.transform.position = new Vector3(
-                _lotInfo.LocationX * NeighborhoodTerrainAsset.TerrainGridSize,
-                _lotInfo.NeighborhoodToLotHeightOffset,
-                _lotInfo.LocationY * NeighborhoodTerrainAsset.TerrainGridSize);
-
-            return gameObject;
+            return position;
         }
     }
 }

@@ -39,26 +39,14 @@
             FrontEdge = frontEdge;
         }
 
+        public float WorldLocationX => LocationX * NeighborhoodTerrainAsset.TerrainGridSize;
+        public float WorldLocationY => LocationY * NeighborhoodTerrainAsset.TerrainGridSize;
+        public float WorldWidth => Width * NeighborhoodTerrainAsset.TerrainGridSize;
+        public float WorldDepth => Depth * NeighborhoodTerrainAsset.TerrainGridSize;
+
         public bool HasRoadAlongEdge(LotEdge edge)
         {
             return ((1 << (int)edge) & RoadsAlongEdges) != 0;
-        }
-
-        /// <summary>
-        /// Gets the center of the lot in tiles accounting for roads and the facing direction.
-        /// </summary>
-        public (float, float) GetLotCenter()
-        {
-            var width = Width;
-            var depth = Depth;
-
-            if (CreationFrontEdge - FrontEdge % 2 != 0)
-            {
-                width = Depth;
-                depth = Width;
-            }
-
-            return (width / 2.0f, depth / 2.0f);
         }
     }
 
