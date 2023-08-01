@@ -116,6 +116,8 @@ namespace OpenTS2.Scenes
                     mainTexture = texture.GetSelectedImageAsUnityTexture(ContentProvider.Get())
                 };
 
+                roadMaterial.mainTexture.wrapMode = TextureWrapMode.Clamp;
+
                 MaterialUtils.SetNeighborhoodParameters(roadMaterial);
 
                 _roadMaterialLookup[road.TextureName] = roadMaterial;
