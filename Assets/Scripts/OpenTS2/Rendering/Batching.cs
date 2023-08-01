@@ -111,7 +111,13 @@ namespace OpenTS2.Rendering
                     continue;
                 }
                 var mesh = new Mesh();
-                mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+                var vertAmount = 0;
+                foreach(var candidate in material.Value)
+                {
+                    vertAmount += candidate.Mesh.vertexCount;
+                }
+                if (vertAmount >= UInt16.MaxValue)
+                    mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
                 var batchCandidates = material.Value;
                 var currentIndex = 0;
                 var verts = new List<Vector3>();
