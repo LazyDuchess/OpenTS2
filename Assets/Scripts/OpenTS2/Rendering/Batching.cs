@@ -2,11 +2,40 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using System;
 
 namespace OpenTS2.Rendering
 {
     public static class Batching
     {
+        public struct Candidate
+        {
+            public GameObject gameObject;
+            public Material material;
+            public Mesh mesh;
+            public int submesh;
+            public Candidate(GameObject obj, Material mat, Mesh msh, int subMesh)
+            {
+                gameObject = obj;
+                material = mat;
+                mesh = msh;
+                submesh = subMesh;
+            }
+        }
+
+        struct NonBatchedCandidate
+        {
+            public Mesh Mesh;
+            public Material Material;
+            public Transform Transform;
+            public NonBatchedCandidate(Mesh mesh, Material material, Transform transform)
+            {
+                Mesh = mesh;
+                Material = material;
+                Transform = transform;
+            }
+        }
+
         struct BatchCandidate
         {
             public Mesh Mesh;
@@ -26,10 +55,11 @@ namespace OpenTS2.Rendering
         /// <param name="parent">Parent transform that contains all meshes.</param>
         /// <param name="flipFaces">Whether to flip faces. Set this to true if the meshes are using TS2's coordinate system.</param>
         /// <returns>Parent GameObject containing all batched meshes.</returns>
-        public static GameObject Batch(Transform parent, bool flipFaces = false)
+        public static GameObject Batch(Transform parent, bool flipFaces = false, Predicate<Candidate> predicate = null)
         {
             // TODO - Maybe make this function multithreaded.
             var candidatesByMaterial = new Dictionary<Material, List<BatchCandidate>>();
+            var nonBatchedCandidates = new List<NonBatchedCandidate>();
             var renderers = parent.GetComponentsInChildren<MeshRenderer>();
             foreach (var element in renderers)
             {
@@ -42,6 +72,16 @@ namespace OpenTS2.Rendering
                     var mat = materials[i];
                     if (filter.sharedMesh.subMeshCount <= i)
                         continue;
+                    if (predicate != null)
+                    {
+                        var candidate = new Candidate(element.gameObject, mat, filter.sharedMesh, i);
+                        if (!predicate.Invoke(candidate))
+                        {
+                            var nonBatchedCandidate = new NonBatchedCandidate(filter.sharedMesh, mat, filter.transform);
+                            nonBatchedCandidates.Add(nonBatchedCandidate);
+                            continue;
+                        }
+                    }
                     if (!candidatesByMaterial.TryGetValue(mat, out List<BatchCandidate> candidates))
                     {
                         candidates = new List<BatchCandidate>();
@@ -63,12 +103,12 @@ namespace OpenTS2.Rendering
                 var tris = new List<int>();
                 var uvs = new List<Vector2>();
 
-                var candidateGameObject = new GameObject($"Batch: {material.Key.name}", typeof(BatchedComponent));
-                var batchedComponent = candidateGameObject.GetComponent<BatchedComponent>();
-                batchedComponent.BatchedMesh = mesh;
+                var candidateGameObject = new GameObject($"Batch: {material.Key.name}", typeof(BatchedComponent), typeof(MeshRenderer), typeof(MeshFilter));
                 candidateGameObject.transform.SetParent(finalGameObject.transform);
-                var renderer = candidateGameObject.AddComponent<MeshRenderer>();
-                var filter = candidateGameObject.AddComponent<MeshFilter>();
+                var batchedComponent = candidateGameObject.GetComponent<BatchedComponent>();
+                var renderer = candidateGameObject.GetComponent<MeshRenderer>();
+                var filter = candidateGameObject.GetComponent<MeshFilter>();
+                batchedComponent.BatchedMesh = mesh;
                 renderer.sharedMaterial = material.Key;
                 filter.sharedMesh = mesh;
 
@@ -107,6 +147,18 @@ namespace OpenTS2.Rendering
                 mesh.SetUVs(0, uvs);
                 mesh.RecalculateBounds();
                 mesh.Optimize();
+            }
+            foreach(var nonBatched in nonBatchedCandidates)
+            {
+                var candidateGameObject = new GameObject($"Non-Batched: {nonBatched.Material.name}", typeof(MeshRenderer), typeof(MeshFilter));
+                candidateGameObject.transform.SetParent(finalGameObject.transform);
+                candidateGameObject.transform.position = nonBatched.Transform.position;
+                candidateGameObject.transform.rotation = nonBatched.Transform.rotation;
+                candidateGameObject.transform.localScale = nonBatched.Transform.lossyScale;
+                var renderer = candidateGameObject.GetComponent<MeshRenderer>();
+                var filter = candidateGameObject.GetComponent<MeshFilter>();
+                renderer.sharedMaterial = nonBatched.Material;
+                filter.sharedMesh = nonBatched.Mesh;
             }
             return finalGameObject;
         }

@@ -74,7 +74,7 @@ namespace OpenTS2.Content
             var rotation = (_lotInfo.CreationFrontEdge - _lotInfo.FrontEdge) * -90;
             rotationObject.transform.Rotate(0, rotation, 0);
 
-            return gameObject;
+            return rotationObject;
         }
     }
 }
