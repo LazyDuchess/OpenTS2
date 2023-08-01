@@ -65,9 +65,9 @@ namespace OpenTS2.Content
             Vector3 pivot;
             if (frontEdgeDiff == 0) // No rotation.
                 pivot = new Vector3(0, 0, 0);
-            else if (frontEdgeDiff == -1 || frontEdgeDiff == -3) // Counter-clockwise 90
+            else if (frontEdgeDiff == -1 || frontEdgeDiff == 3) // Counter-clockwise 90
                 pivot = new Vector3(_lotInfo.WorldWidth, 0, 0);
-            else if (frontEdgeDiff == 1 || frontEdgeDiff == 3) // Clockwise 90
+            else if (frontEdgeDiff == 1 || frontEdgeDiff == -3) // Clockwise 90
                 pivot = new Vector3(0, 0, _lotInfo.WorldDepth);
             else if (frontEdgeDiff == 2 || frontEdgeDiff == -2) // Full 180 rotation.
                 pivot = new Vector3(_lotInfo.WorldWidth, 0, _lotInfo.WorldDepth);
