@@ -8,6 +8,26 @@ namespace OpenTS2.Rendering
 {
     public static class Batching
     {
+        /// <summary>
+        /// Final list of meshes to be batched into 1.
+        /// </summary>
+        struct PreparedBatch
+        {
+            public int VertexAmount;
+            public Material Material;
+            public List<BatchCandidate> Candidates;
+
+            public PreparedBatch(Material material)
+            {
+                Material = material;
+                VertexAmount = 0;
+                Candidates = new List<BatchCandidate>();
+            }
+        }
+
+        /// <summary>
+        /// Candidate mesh for batching.
+        /// </summary>
         struct BatchCandidate
         {
             public Material Material;
@@ -23,11 +43,23 @@ namespace OpenTS2.Rendering
             }
         }
 
+        /// <summary>
+        /// Stores results of batching.
+        /// </summary>
         public class BatchResult
         {
+            /// <summary>
+            /// Parent GameObject holding all batched meshes.
+            /// </summary>
             public GameObject BatchedObjectsParent;
+            /// <summary>
+            /// Original renderers that were disabled by batching.
+            /// </summary>
             public List<MeshRenderer> DisabledRenderers = new List<MeshRenderer>();
 
+            /// <summary>
+            /// Re-enables all original renderers that were disabled by batching.
+            /// </summary>
             public void RestoreVisibility()
             {
                 foreach (var renderer in DisabledRenderers)
@@ -35,6 +67,8 @@ namespace OpenTS2.Rendering
             }
         }
 
+        // Might not play nice with some hardware, maybe adjust conditionally.
+        public static int DefaultVertexLimit = 10000000;
         static Dictionary<Shader, bool> s_shadersCantBeBatched = new Dictionary<Shader, bool>();
 
         /// <summary>
@@ -73,7 +107,7 @@ namespace OpenTS2.Rendering
         /// <param name="parent">Parent transform that contains all meshes.</param>
         /// <param name="flipFaces">Whether to flip faces. Set this to true if the meshes are using TS2's coordinate system.</param>
         /// <returns>Parent GameObject containing all batched meshes.</returns>
-        public static BatchResult Batch(Transform parent, bool flipFaces = false)
+        public static BatchResult Batch(Transform parent, bool flipFaces = false, int vertexLimit = 0)
         {
             var result = new BatchResult();
             // TODO - Maybe make this function multithreaded.
@@ -102,70 +136,97 @@ namespace OpenTS2.Rendering
                 }
                 candidates.Add(candidate);
             }
+
+            if (vertexLimit <= 0)
+                vertexLimit = DefaultVertexLimit;
+            var preparedBatches = new List<PreparedBatch>();
+
+            foreach(var mat in candidatesByMaterial)
+            {
+                var material = mat.Key;
+                var candidateList = mat.Value;
+                var currentBatch = new PreparedBatch(material);
+                foreach(var candidate in candidateList)
+                {
+                    currentBatch.VertexAmount += candidate.Mesh.vertexCount;
+                    currentBatch.Candidates.Add(candidate);
+                    if (currentBatch.VertexAmount > vertexLimit)
+                    {
+                        if (currentBatch.Candidates.Count > 1)
+                            preparedBatches.Add(currentBatch);
+                        currentBatch = new PreparedBatch(material);
+                    }
+                }
+                if (currentBatch.Candidates.Count > 1)
+                    preparedBatches.Add(currentBatch);
+            }
+
             var finalGameObject = new GameObject("Batched Objects");
             result.BatchedObjectsParent = finalGameObject;
-            foreach (var material in candidatesByMaterial)
-            {
-                if (material.Value.Count == 1)
-                    continue;
-                var mesh = new Mesh();
-                var vertAmount = 0;
-                foreach (var candidate in material.Value)
-                {
-                    vertAmount += candidate.Mesh.vertexCount;
-                }
-                if (vertAmount >= UInt16.MaxValue)
-                    mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-                var batchCandidates = material.Value;
-                var currentIndex = 0;
-                var verts = new List<Vector3>();
-                var norms = new List<Vector3>();
-                var tris = new List<int>();
-                var uvs = new List<Vector2>();
 
-                var candidateGameObject = new GameObject($"Batched: {material.Key.name}", typeof(BatchedComponent), typeof(MeshRenderer), typeof(MeshFilter));
-                candidateGameObject.transform.SetParent(finalGameObject.transform);
-                var batchedComponent = candidateGameObject.GetComponent<BatchedComponent>();
-                var renderer = candidateGameObject.GetComponent<MeshRenderer>();
-                var filter = candidateGameObject.GetComponent<MeshFilter>();
+            foreach (var batch in preparedBatches)
+            {
+                var mesh = new Mesh();
+                if (batch.VertexAmount >= UInt16.MaxValue)
+                    mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+                var batchGameObject = new GameObject($"Batched: {batch.Material.name}", typeof(BatchedComponent), typeof(MeshRenderer), typeof(MeshFilter));
+
+                batchGameObject.transform.SetParent(finalGameObject.transform);
+
+                var batchedComponent = batchGameObject.GetComponent<BatchedComponent>();
+                var renderer = batchGameObject.GetComponent<MeshRenderer>();
+                var filter = batchGameObject.GetComponent<MeshFilter>();
+
                 batchedComponent.BatchedMesh = mesh;
-                renderer.sharedMaterial = material.Key;
+                renderer.sharedMaterial = batch.Material;
                 filter.sharedMesh = mesh;
 
-                foreach (var candidate in batchCandidates)
+                var index = 0;
+                var vertices = new List<Vector3>();
+                var normals = new List<Vector3>();
+                var triangles = new List<int>();
+                var uvs = new List<Vector2>();
+
+                foreach(var candidate in batch.Candidates)
                 {
-                    result.DisabledRenderers.Add(candidate.Renderer);
                     candidate.Renderer.enabled = false;
-                    var vertices = new List<Vector3>();
-                    var normals = new List<Vector3>();
-                    var uv = new List<Vector2>();
-                    candidate.Mesh.GetVertices(vertices);
-                    var triangles = candidate.Mesh.GetTriangles(0);
-                    candidate.Mesh.GetNormals(normals);
-                    candidate.Mesh.GetUVs(0, uv);
-                    for (var i = 0; i < vertices.Count; i++)
+                    result.DisabledRenderers.Add(candidate.Renderer);
+
+                    var c_vertices = new List<Vector3>();
+                    var c_normals = new List<Vector3>();
+                    var c_uvs = new List<Vector2>();
+                    var c_triangles = candidate.Mesh.GetTriangles(0);
+
+                    candidate.Mesh.GetVertices(c_vertices);
+                    candidate.Mesh.GetNormals(c_normals);
+                    candidate.Mesh.GetUVs(0, c_uvs);
+
+                    for (var i = 0; i < c_vertices.Count; i++)
                     {
-                        vertices[i] = candidate.Transform.TransformPoint(vertices[i]);
+                        c_vertices[i] = candidate.Transform.TransformPoint(c_vertices[i]);
                     }
-                    for (var i = 0; i < normals.Count; i++)
+                    for (var i = 0; i < c_normals.Count; i++)
                     {
-                        normals[i] = candidate.Transform.TransformDirection(normals[i]);
+                        c_normals[i] = candidate.Transform.TransformDirection(c_normals[i]);
                     }
-                    for (var i = 0; i < triangles.Length; i++)
+                    for (var i = 0; i < c_triangles.Length; i++)
                     {
-                        triangles[i] += currentIndex;
+                        c_triangles[i] += index;
                     }
-                    if (flipFaces)
-                        triangles = triangles.Reverse().ToArray();
-                    currentIndex += vertices.Count;
-                    verts.AddRange(vertices);
-                    norms.AddRange(normals);
-                    tris.AddRange(triangles);
-                    uvs.AddRange(uv);
+
+                    index += c_vertices.Count;
+                    vertices.AddRange(c_vertices);
+                    normals.AddRange(c_normals);
+                    triangles.AddRange(c_triangles);
+                    uvs.AddRange(c_uvs);
                 }
-                mesh.SetVertices(verts);
-                mesh.SetNormals(norms);
-                mesh.SetTriangles(tris, 0);
+
+                if (flipFaces)
+                    triangles.Reverse();
+
+                mesh.SetVertices(vertices);
+                mesh.SetNormals(normals);
+                mesh.SetTriangles(triangles, 0);
                 mesh.SetUVs(0, uvs);
                 mesh.RecalculateBounds();
                 mesh.Optimize();
