@@ -118,6 +118,11 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             var key = ResourceCollection.FileLinks[((ExternalReference)resourceRef).FileLinksIndex];
 
             var resourceAsset = ContentProvider.Get().GetAsset<ScenegraphResourceAsset>(key);
+            if (resourceAsset == null)
+            {
+                Debug.LogWarning($"Unable to find cResourceNode with key {key} and name {resource.ResourceName}");
+                return;
+            }
             var resourceObject = resourceAsset.CreateGameObject();
             resourceObject.transform.SetParent(parent.transform, worldPositionStays:false);
         }
