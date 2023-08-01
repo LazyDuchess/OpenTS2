@@ -10,7 +10,7 @@ public class EffectsCodecTest
     public void SetUp()
     {
         TestMain.Initialize();
-        ContentProvider.Get().AddPackage("TestAssets/Codecs/effects.package");
+        ContentProvider.Get().AddPackage("TestAssets/Codecs/Effects.package");
     }
 
     [Test]
