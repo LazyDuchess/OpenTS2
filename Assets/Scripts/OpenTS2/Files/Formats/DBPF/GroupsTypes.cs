@@ -36,6 +36,7 @@ namespace OpenTS2.Files.Formats.DBPF
         public const uint STR = 0x53545223;
         public const uint IMG = 0x856DDBAC;
         public const uint IMG2 = 0x8C3CE95A;
+        public const uint EFFECTS = 0xEA5118B0;
         public const uint DIR = 0xE86B1EEF;
         /// <summary>
         /// Can be XA or MP3.
@@ -55,5 +56,6 @@ namespace OpenTS2.Files.Formats.DBPF
         public const uint Local = 0xFFFFFFFF;
         public const uint DIR = 0xE86B1EEF;
         public const uint Scenegraph = 0x1C0532FA;
+        public const uint Effects = 0xEA5118B1;
     }
 }

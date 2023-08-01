@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using OpenTS2.Common;
 using OpenTS2.Content;
@@ -223,6 +224,10 @@ namespace OpenTS2.Scenes
                     GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_CRES));
 
                 var decorationObject = model.CreateRootGameObject();
+                if (decorationObject.name.Contains("neighborhood_boulder_house_smoke"))
+                {
+                    File.WriteAllText("C:\\Users\\ammar\\UnityProjects\\dump.json", model.ResourceCollection.ToString());
+                }
                 decorationObject.transform.position = decoration.Position.Position;
 
                 // TODO: put this in a helper MonoBehavior or something.
