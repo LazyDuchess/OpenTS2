@@ -8,26 +8,15 @@ namespace OpenTS2.Rendering
 {
     public static class Batching
     {
-        struct NonBatchedCandidate
-        {
-            public Mesh Mesh;
-            public Material Material;
-            public Transform Transform;
-            public NonBatchedCandidate(Mesh mesh, Material material, Transform transform)
-            {
-                Mesh = mesh;
-                Material = material;
-                Transform = transform;
-            }
-        }
-
         struct BatchCandidate
         {
+            public Material Material;
             public Mesh Mesh;
             public Transform Transform;
             public int SubMesh;
-            public BatchCandidate(Mesh mesh, Transform transform, int submesh)
+            public BatchCandidate(Material material, Mesh mesh, Transform transform, int submesh)
             {
+                Material = material;
                 Mesh = mesh;
                 Transform = transform;
                 SubMesh = submesh;
@@ -76,7 +65,7 @@ namespace OpenTS2.Rendering
         {
             // TODO - Maybe make this function multithreaded.
             var candidatesByMaterial = new Dictionary<Material, List<BatchCandidate>>();
-            var nonBatchedCandidates = new List<NonBatchedCandidate>();
+            var nonBatchedCandidates = new List<BatchCandidate>();
             var renderers = parent.GetComponentsInChildren<MeshRenderer>();
             foreach (var element in renderers)
             {
@@ -84,14 +73,16 @@ namespace OpenTS2.Rendering
                 if (filter == null)
                     continue;
                 var materials = element.sharedMaterials;
+                
                 for (var i = 0; i < materials.Length; i++)
                 {
                     var mat = materials[i];
                     if (filter.sharedMesh.subMeshCount <= i)
                         continue;
+                    var candidate = new BatchCandidate(mat, filter.sharedMesh, filter.transform, i);
                     if (!CanBatchShader(mat.shader))
                     {
-                        nonBatchedCandidates.Add(new NonBatchedCandidate(filter.sharedMesh, mat, filter.transform));
+                        nonBatchedCandidates.Add(candidate);
                         continue;
                     }
                     if (!candidatesByMaterial.TryGetValue(mat, out List<BatchCandidate> candidates))
@@ -99,7 +90,7 @@ namespace OpenTS2.Rendering
                         candidates = new List<BatchCandidate>();
                         candidatesByMaterial[mat] = candidates;
                     }
-                    candidates.Add(new BatchCandidate(filter.sharedMesh, filter.transform, i));
+                    candidates.Add(candidate);
                 }
             }
             var finalGameObject = new GameObject("Batched Objects");
