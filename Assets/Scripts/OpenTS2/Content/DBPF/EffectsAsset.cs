@@ -34,9 +34,12 @@ namespace OpenTS2.Content.DBPF
     {
         public ParticleEffect[] Particles { get; }
 
-        public EffectsAsset(ParticleEffect[] particles)
+        public MetaParticle[] MetaParticles { get; }
+
+        public EffectsAsset(ParticleEffect[] particles, MetaParticle[] metaParticles)
         {
             Particles = particles;
+            MetaParticles = metaParticles;
         }
     }
 }

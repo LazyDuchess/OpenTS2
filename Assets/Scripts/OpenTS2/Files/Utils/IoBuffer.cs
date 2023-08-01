@@ -153,6 +153,19 @@ namespace OpenTS2.Files.Utils
         }
 
         /// <summary>
+        /// Reads a 64bit unsigned integer from the current stream.
+        /// </summary>
+        public ulong ReadUInt64()
+        {
+            var value = Reader.ReadUInt64();
+            if (ByteOrder == ByteOrder.BIG_ENDIAN)
+            {
+                value = Endian.SwapUInt64(value);
+            }
+            return value;
+        }
+
+        /// <summary>
         /// Reads an unsigned 32bit integer from the current stream. 
         /// </summary>
         /// <returns>A uint.</returns>
