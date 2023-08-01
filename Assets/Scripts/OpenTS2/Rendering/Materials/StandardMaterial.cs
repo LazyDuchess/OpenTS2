@@ -53,6 +53,11 @@ namespace OpenTS2.Rendering.Materials
                         var texture = ContentProvider.Get().GetAsset<ScenegraphTextureAsset>(
                             new ResourceKey(textureName + "_txtr", definition.GlobalTGI.GroupID, TypeIDs.SCENEGRAPH_TXTR)
                         );
+                        if (texture == null)
+                        {
+                            Debug.Log($"Unable to find texture with name: {textureName}");
+                            break;
+                        }
                         definition.Textures.Add(texture);
                         material.mainTexture = texture.GetSelectedImageAsUnityTexture(ContentProvider.Get());
                         break;
