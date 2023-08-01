@@ -8,21 +8,6 @@ namespace OpenTS2.Rendering
 {
     public static class Batching
     {
-        public struct Candidate
-        {
-            public GameObject gameObject;
-            public Material material;
-            public Mesh mesh;
-            public int submesh;
-            public Candidate(GameObject obj, Material mat, Mesh msh, int subMesh)
-            {
-                gameObject = obj;
-                material = mat;
-                mesh = msh;
-                submesh = subMesh;
-            }
-        }
-
         struct NonBatchedCandidate
         {
             public Mesh Mesh;
@@ -49,13 +34,45 @@ namespace OpenTS2.Rendering
             }
         }
 
+        static Dictionary<Shader, bool> s_shadersCantBeBatched = new Dictionary<Shader, bool>();
+
+        /// <summary>
+        /// Prevents specific shaders from getting batched.
+        /// </summary>
+        /// <param name="shaders">Names of shaders to ignore when batching meshes together.</param>
+        public static void MarkShadersNoBatching(params string[] shaders)
+        {
+            foreach(var shaderName in shaders)
+            {
+                var shader = Shader.Find(shaderName);
+                MarkShadersNoBatching(shader);
+            }
+        }
+
+        /// <summary>
+        /// Prevents specific shaders from getting batched.
+        /// </summary>
+        /// <param name="shaders">Shaders to ignore when batching meshes together.</param>
+        public static void MarkShadersNoBatching(params Shader[] shaders)
+        {
+            foreach(var shader in shaders)
+                s_shadersCantBeBatched[shader] = true;
+        }
+
+        static bool CanBatchShader(Shader shader)
+        {
+            if (!s_shadersCantBeBatched.ContainsKey(shader))
+                return true;
+            return false;
+        }
+
         /// <summary>
         /// Merge meshes sharing the same materials into fewer optimized meshes with all transforms applied.
         /// </summary>
         /// <param name="parent">Parent transform that contains all meshes.</param>
         /// <param name="flipFaces">Whether to flip faces. Set this to true if the meshes are using TS2's coordinate system.</param>
         /// <returns>Parent GameObject containing all batched meshes.</returns>
-        public static GameObject Batch(Transform parent, bool flipFaces = false, Predicate<Candidate> predicate = null)
+        public static GameObject Batch(Transform parent, bool flipFaces = false)
         {
             // TODO - Maybe make this function multithreaded.
             var candidatesByMaterial = new Dictionary<Material, List<BatchCandidate>>();
@@ -72,15 +89,10 @@ namespace OpenTS2.Rendering
                     var mat = materials[i];
                     if (filter.sharedMesh.subMeshCount <= i)
                         continue;
-                    if (predicate != null)
+                    if (!CanBatchShader(mat.shader))
                     {
-                        var candidate = new Candidate(element.gameObject, mat, filter.sharedMesh, i);
-                        if (!predicate.Invoke(candidate))
-                        {
-                            var nonBatchedCandidate = new NonBatchedCandidate(filter.sharedMesh, mat, filter.transform);
-                            nonBatchedCandidates.Add(nonBatchedCandidate);
-                            continue;
-                        }
+                        nonBatchedCandidates.Add(new NonBatchedCandidate(filter.sharedMesh, mat, filter.transform));
+                        continue;
                     }
                     if (!candidatesByMaterial.TryGetValue(mat, out List<BatchCandidate> candidates))
                     {
@@ -90,10 +102,14 @@ namespace OpenTS2.Rendering
                     candidates.Add(new BatchCandidate(filter.sharedMesh, filter.transform, i));
                 }
             }
-            var filteredMaterials = candidatesByMaterial;
             var finalGameObject = new GameObject("Batched Objects");
-            foreach (var material in filteredMaterials)
+            foreach (var material in candidatesByMaterial)
             {
+                if (material.Value.Count == 1)
+                {
+                    MakeNonBatched(material.Value[0].Transform, material.Value[0].Mesh, material.Key);
+                    continue;
+                }
                 var mesh = new Mesh();
                 mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
                 var batchCandidates = material.Value;
@@ -103,7 +119,7 @@ namespace OpenTS2.Rendering
                 var tris = new List<int>();
                 var uvs = new List<Vector2>();
 
-                var candidateGameObject = new GameObject($"Batch: {material.Key.name}", typeof(BatchedComponent), typeof(MeshRenderer), typeof(MeshFilter));
+                var candidateGameObject = new GameObject($"Batched: {material.Key.name}", typeof(BatchedComponent), typeof(MeshRenderer), typeof(MeshFilter));
                 candidateGameObject.transform.SetParent(finalGameObject.transform);
                 var batchedComponent = candidateGameObject.GetComponent<BatchedComponent>();
                 var renderer = candidateGameObject.GetComponent<MeshRenderer>();
@@ -150,17 +166,22 @@ namespace OpenTS2.Rendering
             }
             foreach(var nonBatched in nonBatchedCandidates)
             {
-                var candidateGameObject = new GameObject($"Non-Batched: {nonBatched.Material.name}", typeof(MeshRenderer), typeof(MeshFilter));
-                candidateGameObject.transform.SetParent(finalGameObject.transform);
-                candidateGameObject.transform.position = nonBatched.Transform.position;
-                candidateGameObject.transform.rotation = nonBatched.Transform.rotation;
-                candidateGameObject.transform.localScale = nonBatched.Transform.lossyScale;
-                var renderer = candidateGameObject.GetComponent<MeshRenderer>();
-                var filter = candidateGameObject.GetComponent<MeshFilter>();
-                renderer.sharedMaterial = nonBatched.Material;
-                filter.sharedMesh = nonBatched.Mesh;
+                MakeNonBatched(nonBatched.Transform, nonBatched.Mesh, nonBatched.Material);
             }
             return finalGameObject;
+
+            void MakeNonBatched(Transform transform, Mesh mesh, Material material)
+            {
+                var candidateGameObject = new GameObject($"Non-Batched: {material.name}", typeof(MeshRenderer), typeof(MeshFilter));
+                candidateGameObject.transform.SetParent(finalGameObject.transform);
+                candidateGameObject.transform.position = transform.position;
+                candidateGameObject.transform.rotation = transform.rotation;
+                candidateGameObject.transform.localScale = transform.lossyScale;
+                var renderer = candidateGameObject.GetComponent<MeshRenderer>();
+                var filter = candidateGameObject.GetComponent<MeshFilter>();
+                renderer.sharedMaterial = material;
+                filter.sharedMesh = mesh;
+            }
         }
     }
 }

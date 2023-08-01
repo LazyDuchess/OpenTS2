@@ -22,6 +22,8 @@ namespace OpenTS2.Rendering
             RegisterMaterial<ImposterWallMaterial>();
             RegisterMaterial<ImposterDualPackedSliceMaterial>();
             RegisterMaterial<ImposterRoofMaterial>();
+            // Lot imposter roof shader depends on local space, which gets altered when batching.
+            Batching.MarkShadersNoBatching("OpenTS2/LotImposterRoof");
         }
 
         public static Material Parse(ScenegraphMaterialDefinitionAsset definition)

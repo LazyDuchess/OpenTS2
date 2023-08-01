@@ -59,7 +59,7 @@ namespace OpenTS2.Scenes
             }
 
             var batchedDeco = Batching.Batch(_decorationsParent, flipFaces: true);
-            var batchedLots = Batching.Batch(_lotsParent, flipFaces: true, (x) => x.material.shader.name != "OpenTS2/LotImposterRoof");
+            var batchedLots = Batching.Batch(_lotsParent, flipFaces: true);
             var batchedRoads = Batching.Batch(_roadsParent, flipFaces: false);
 
             _decorationsParent.gameObject.SetActive(false);
