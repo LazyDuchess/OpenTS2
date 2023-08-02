@@ -25,6 +25,8 @@ public class EffectsCodecTest
         Assert.That(effectsAsset.MetaParticles.Length, Is.EqualTo(302));
         Assert.That(effectsAsset.DecalEffects.Length, Is.EqualTo(23));
         Assert.That(effectsAsset.SequenceEffects.Length, Is.EqualTo(82));
+        Assert.That(effectsAsset.SoundEffects.Length, Is.EqualTo(109));
+        Assert.That(effectsAsset.CameraEffects.Length, Is.EqualTo(43));
     }
 
     [Test]
@@ -89,5 +91,31 @@ public class EffectsCodecTest
         Assert.That(decal.Life, Is.EqualTo(0.1).Within(0.05));
         Assert.That(decal.TextureName, Is.EqualTo("terrain_edit_ring"));
         Assert.That(decal.TextureOffset, Is.EqualTo(new Vector2(0, 0)));
+    }
+
+    [Test]
+    public void TestFirstSequenceIsCorrect()
+    {
+        var effectsAsset = ContentProvider.Get()
+            .GetAsset<EffectsAsset>(new ResourceKey(instanceID: 1, groupID: GroupIDs.Effects, typeID: TypeIDs.EFFECTS));
+        var sequence = effectsAsset.SequenceEffects[0];
+
+        Assert.That(sequence.Flags, Is.EqualTo(0x1));
+        Assert.That(sequence.Components.Length, Is.EqualTo(1));
+
+        var component = sequence.Components[0];
+        Assert.That(component.ActivateTime, Is.EqualTo(new Vector2(-1, -1)));
+        Assert.That(component.EffectName, Is.EqualTo("exptAfterImage"));
+    }
+
+    [Test]
+    public void TestFirstSoundIsCorrect()
+    {
+        var effectsAsset = ContentProvider.Get()
+            .GetAsset<EffectsAsset>(new ResourceKey(instanceID: 1, groupID: GroupIDs.Effects, typeID: TypeIDs.EFFECTS));
+        var sound = effectsAsset.SoundEffects[0];
+
+        Assert.That(sound.AudioId, Is.EqualTo(0xFF108046));
+        Assert.That(sound.Volume, Is.EqualTo(0.0));
     }
 }

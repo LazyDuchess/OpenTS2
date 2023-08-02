@@ -47,8 +47,20 @@ namespace OpenTS2.Files.Formats.DBPF
             Debug.Assert(numScrubbers == 0, "There shouldn't be any brush effects in Sims2");
 
             var sequences = new SequenceEffect[reader.ReadUInt32()];
+            for (var i = 0; i < sequences.Length; i++)
+            {
+                sequences[i] = ReadSequenceEffect(reader);
+            }
 
-            return new EffectsAsset(particleEffects, metaParticles, decals, sequences);
+            var sounds = new SoundEffect[reader.ReadUInt32()];
+            for (var i = 0; i < sounds.Length; i++)
+            {
+                sounds[i] = ReadSoundEffect(reader);
+            }
+
+            var cameras = new CameraEffect[reader.ReadUInt32()];
+
+            return new EffectsAsset(particleEffects, metaParticles, decals, sequences, sounds, cameras);
         }
 
         private static Vector3[] ReadMultipleVectors(IoBuffer reader)
@@ -254,6 +266,35 @@ namespace OpenTS2.Files.Formats.DBPF
             var textureOffset = Vector2Serializer.Deserialize(reader);
 
             return new DecalEffect(textureName, life, textureOffset);
+        }
+
+        private static SequenceEffect ReadSequenceEffect(IoBuffer reader)
+        {
+            var version = reader.ReadUInt16();
+            Debug.Assert(version == 1);
+
+            var components = new SequenceComponent[reader.ReadUInt32()];
+            for (var i = 0; i < components.Length; i++)
+            {
+                components[i] = SequenceComponent.Deserialize(reader);
+            }
+
+            var flags = reader.ReadUInt32();
+            return new SequenceEffect(components, flags);
+        }
+
+        private static SoundEffect ReadSoundEffect(IoBuffer reader)
+        {
+            var version = reader.ReadUInt16();
+            Debug.Assert(version == 1);
+
+            var flags = reader.ReadUInt32();
+            var audioId = reader.ReadUInt32();
+            var locationUpdateDelta = reader.ReadFloat();
+            var playTime = reader.ReadFloat();
+            var volume = reader.ReadFloat();
+
+            return new SoundEffect(audioId, volume);
         }
     }
 }
