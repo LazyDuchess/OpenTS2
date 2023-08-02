@@ -76,10 +76,27 @@ namespace OpenTS2.Content.DBPF.Effects
             RandomWalkTurnX = randomWalkTurnX;
             RandomWalkTurnY = randomWalkTurnY;
         }
+
+        public bool IsFlagSet(ParticleFlagBits flag)
+        {
+            var mask = 1UL << (int)flag;
+            return (Flags & mask) != 0;
+        }
+    }
+
+    public enum ParticleFlagBits
+    {
+        /// <summary>
+        /// This flag is set if the particle emitter should be an ellipsoid shape.
+        /// </summary>
+        EmitterIsEllipsoid = 8,
     }
 
     public struct ParticleLife
     {
+        /// <summary>
+        /// Particles get a lifetime in a random range between this vector's start and end.
+        /// </summary>
         public Vector2 Life { get; }
         public float LifePreRoll { get; }
 
@@ -97,7 +114,14 @@ namespace OpenTS2.Content.DBPF.Effects
 
         public BoundingBox EmitDirection { get; }
         public Vector2 EmitSpeed { get; }
+        /// <summary>
+        /// The volume of the emitter defined by its corners. This can either be a cuboid shape, an ellipsoid or a
+        /// torus depending on the flags and EmitTorusWidth.
+        /// </summary>
         public BoundingBox EmitVolume { get; }
+        /// <summary>
+        /// If set to a value greater than 0, emitter is a torus shape.
+        /// </summary>
         public float EmitTorusWidth { get; }
 
         public FloatCurve RateCurve { get; }

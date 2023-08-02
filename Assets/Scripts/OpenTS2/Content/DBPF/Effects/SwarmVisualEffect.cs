@@ -16,14 +16,14 @@ namespace OpenTS2.Content.DBPF.Effects
     public struct EffectDescription
     {
         public string EffectName { get; }
-        public byte BlockType { get; }
-        public int BlockIndex { get; }
+        public byte EffectType { get; }
+        public int EffectIndex { get; }
 
-        private EffectDescription(string effectName, byte blockType, int blockIndex)
+        private EffectDescription(string effectName, byte effectType, int effectIndex)
         {
             EffectName = effectName;
-            BlockType = blockType;
-            BlockIndex = blockIndex;
+            EffectType = effectType;
+            EffectIndex = effectIndex;
         }
 
         public static EffectDescription Deserialize(IoBuffer reader, ushort version)

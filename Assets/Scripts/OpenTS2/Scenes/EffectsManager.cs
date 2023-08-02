@@ -19,7 +19,7 @@ namespace OpenTS2.Scenes
         private EffectsAsset _effects;
         private List<Material> _particleMaterials = new List<Material>();
 
-        private void Start()
+        private void OnEnable()
         {
             var contentProvider = ContentProvider.Get();
             // Load effects package.
@@ -27,6 +27,11 @@ namespace OpenTS2.Scenes
                 Filesystem.GetPackagesInDirectory(Filesystem.GetDataPathForProduct(ProductFlags.BaseGame) + "/Res/Effects"));
             _effects = contentProvider.GetAsset<EffectsAsset>(new ResourceKey(instanceID: 1, groupID: GroupIDs.Effects, typeID: TypeIDs.EFFECTS));
 
+            Debug.Assert(_effects != null, "Couldn't find effects");
+
+            // Apply a sims to unity space transformation.
+            GetComponent<ParticleSystem>().transform.Rotate(-90, 0, 0);
+            GetComponent<ParticleSystem>().transform.localScale = new Vector3(1, -1, 1);
             // Disable emission on the base particle system, only children will emit.
             var emissionModule = GetComponent<ParticleSystem>().emission;
             emissionModule.enabled = false;
@@ -48,12 +53,18 @@ namespace OpenTS2.Scenes
             var visualEffect = _effects.GetEffectByName(effectName);
             foreach (var effectDescription in visualEffect.Descriptions)
             {
+                // TODO: debugging
+                if (!effectDescription.EffectName.Contains("neighborhood_house_smoke2"))
+                {
+                    continue;
+                }
+                // ---
                 var effect = _effects.GetEffectFromVisualEffectDescription(effectDescription);
                 switch (effect)
                 {
                     case ParticleEffect e:
                         var subSystem = CreateForParticleEffect(effectDescription, e);
-                        subSystem.transform.parent = unityParticleSystem.transform;
+                        subSystem.transform.SetParent(unityParticleSystem.transform, worldPositionStays:false);
                         break;
                     default:
                         throw new NotImplementedException($"Effect type {effect} not supported");
@@ -72,6 +83,21 @@ namespace OpenTS2.Scenes
             var emission = system.emission;
             var emissionRateOverTime = emission.rateOverTime;
             emissionRateOverTime.curve = effect.Emission.RateCurve.ToUnityCurve();
+
+            // Set the emitter shape and drection.
+            var shape = system.shape;
+            if (effect.Emission.EmitTorusWidth > 0)
+            {
+                shape.shapeType = ParticleSystemShapeType.Donut;
+            }
+            else if (effect.IsFlagSet(ParticleFlagBits.EmitterIsEllipsoid))
+            {
+                shape.shapeType = ParticleSystemShapeType.Sphere;
+            }
+            else
+            {
+                shape.shapeType = ParticleSystemShapeType.Box;
+            }
 
             var main = system.main;
             main.duration = effect.Life.Life[0];
@@ -92,6 +118,7 @@ namespace OpenTS2.Scenes
 
                 Debug.Log($"material: {effect.Drawing.MaterialName}");
             }
+            Debug.Log($"effect idx: {description.EffectIndex}");
 
             return particleObject;
         }
