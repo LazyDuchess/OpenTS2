@@ -35,8 +35,20 @@ namespace OpenTS2.Files.Formats.DBPF
             }
 
             var decals = new DecalEffect[reader.ReadUInt32()];
+            for (var i = 0; i < decals.Length; i++)
+            {
+                decals[i] = ReadDecalEffect(reader);
+            }
 
-            return new EffectsAsset(particleEffects, metaParticles, decals);
+            var numBrushes = reader.ReadUInt32();
+            Debug.Assert(numBrushes == 0, "There shouldn't be any brush effects in Sims2");
+
+            var numScrubbers = reader.ReadUInt32();
+            Debug.Assert(numScrubbers == 0, "There shouldn't be any brush effects in Sims2");
+
+            var sequences = new SequenceEffect[reader.ReadUInt32()];
+
+            return new EffectsAsset(particleEffects, metaParticles, decals, sequences);
         }
 
         private static Vector3[] ReadMultipleVectors(IoBuffer reader)
@@ -214,6 +226,34 @@ namespace OpenTS2.Files.Formats.DBPF
             reader.ReadFloat();
 
             return new MetaParticle(flags, life, emission, size, color, baseEffect);
+        }
+
+        private static DecalEffect ReadDecalEffect(IoBuffer reader)
+        {
+            var version = reader.ReadUInt16();
+            Debug.Assert(version == 1);
+
+            var flags = reader.ReadUInt32();
+
+            var textureName = reader.ReadUint32PrefixedString();
+            var decalDrawType = reader.ReadByte();
+
+            var lifeType = reader.ReadByte();
+            var life = reader.ReadFloat();
+
+            var rotateCurve = FloatCurve.Deserialize(reader);
+            var sizeCurve = FloatCurve.Deserialize(reader);
+            var alphaCurve = FloatCurve.Deserialize(reader);
+            var colors = ReadMultipleVectors(reader);
+            var aspectCurve = FloatCurve.Deserialize(reader);
+            var alphaVary = reader.ReadFloat();
+            var sizeVary = reader.ReadFloat();
+            var rotateVary = reader.ReadFloat();
+
+            var textureRepeat = reader.ReadFloat();
+            var textureOffset = Vector2Serializer.Deserialize(reader);
+
+            return new DecalEffect(textureName, life, textureOffset);
         }
     }
 }

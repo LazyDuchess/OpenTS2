@@ -38,11 +38,15 @@ namespace OpenTS2.Content.DBPF
 
         public DecalEffect[] DecalEffects { get; }
 
-        public EffectsAsset(ParticleEffect[] particles, MetaParticle[] metaParticles, DecalEffect[] decalEffects)
+        public SequenceEffect[] SequenceEffects { get; }
+
+        public EffectsAsset(ParticleEffect[] particles, MetaParticle[] metaParticles, DecalEffect[] decalEffects,
+            SequenceEffect[] sequenceEffects)
         {
             Particles = particles;
             MetaParticles = metaParticles;
             DecalEffects = decalEffects;
+            SequenceEffects = sequenceEffects;
         }
     }
 }

@@ -24,6 +24,7 @@ public class EffectsCodecTest
         Assert.That(effectsAsset.Particles.Length, Is.EqualTo(1792));
         Assert.That(effectsAsset.MetaParticles.Length, Is.EqualTo(302));
         Assert.That(effectsAsset.DecalEffects.Length, Is.EqualTo(23));
+        Assert.That(effectsAsset.SequenceEffects.Length, Is.EqualTo(82));
     }
 
     [Test]
@@ -76,5 +77,17 @@ public class EffectsCodecTest
         Assert.That(meta.BaseEffect, Is.EqualTo("construction_cursor_dust_effect"));
 
         Assert.That(meta.Color.AlphaCurve.Curve, Is.EquivalentTo(new[] { 1.0f }));
+    }
+
+    [Test]
+    public void TestFirstDecalIsCorrect()
+    {
+        var effectsAsset = ContentProvider.Get()
+            .GetAsset<EffectsAsset>(new ResourceKey(instanceID: 1, groupID: GroupIDs.Effects, typeID: TypeIDs.EFFECTS));
+        var decal = effectsAsset.DecalEffects[0];
+
+        Assert.That(decal.Life, Is.EqualTo(0.1).Within(0.05));
+        Assert.That(decal.TextureName, Is.EqualTo("terrain_edit_ring"));
+        Assert.That(decal.TextureOffset, Is.EqualTo(new Vector2(0, 0)));
     }
 }
