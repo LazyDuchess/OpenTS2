@@ -22,8 +22,8 @@ public class EffectsCodecTest
     public void TestSuccessfullyLoadsAndHasCorrectNumberOfEffects()
     {
         Assert.IsNotNull(_effectsAsset);
-        Assert.That(_effectsAsset.Particles.Length, Is.EqualTo(1792));
-        Assert.That(_effectsAsset.MetaParticles.Length, Is.EqualTo(302));
+        Assert.That(_effectsAsset.ParticleEffects.Length, Is.EqualTo(1792));
+        Assert.That(_effectsAsset.MetaParticleEffects.Length, Is.EqualTo(302));
         Assert.That(_effectsAsset.DecalEffects.Length, Is.EqualTo(23));
         Assert.That(_effectsAsset.SequenceEffects.Length, Is.EqualTo(82));
         Assert.That(_effectsAsset.SoundEffects.Length, Is.EqualTo(109));
@@ -34,13 +34,12 @@ public class EffectsCodecTest
 
         Assert.That(_effectsAsset.EffectNamesToIds["fireflamesfx"], Is.EqualTo(1276));
         Assert.That(_effectsAsset.EffectNamesToIds["washhandsinsink_adultviewer"], Is.EqualTo(1034));
-
     }
 
     [Test]
     public void TestFirstParticleEffectIsCorrect()
     {
-        var particle = _effectsAsset.Particles[0];
+        var particle = _effectsAsset.ParticleEffects[0];
 
         Assert.That(particle.Life.Life, Is.EqualTo(new Vector2(1, 1)));
 
@@ -65,7 +64,7 @@ public class EffectsCodecTest
     [Test]
     public void TestFirstMetaParticleIsCorrect()
     {
-        var meta = _effectsAsset.MetaParticles[0];
+        var meta = _effectsAsset.MetaParticleEffects[0];
 
         Assert.That(meta.Life.Life.x, Is.EqualTo(0.1).Within(0.05));
         Assert.That(meta.Life.Life.y, Is.EqualTo(0.1).Within(0.05));
@@ -164,7 +163,7 @@ public class EffectsCodecTest
         Assert.That(visualEffect.Descriptions.Length, Is.EqualTo(1));
 
         var description = visualEffect.Descriptions[0];
-        Assert.That(description.BaseEffect, Is.EqualTo("construction_cursor_dust"));
+        Assert.That(description.EffectName, Is.EqualTo("construction_cursor_dust"));
         Assert.That(description.BlockIndex, Is.EqualTo(0));
     }
 }

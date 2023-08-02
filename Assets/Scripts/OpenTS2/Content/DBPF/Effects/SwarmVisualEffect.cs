@@ -3,11 +3,11 @@ using OpenTS2.Files.Utils;
 
 namespace OpenTS2.Content.DBPF.Effects
 {
-    public readonly struct VisualEffect : IBaseEffect
+    public readonly struct SwarmVisualEffect : IBaseEffect
     {
         public readonly EffectDescription[] Descriptions;
 
-        public VisualEffect(EffectDescription[] descriptions)
+        public SwarmVisualEffect(EffectDescription[] descriptions)
         {
             Descriptions = descriptions;
         }
@@ -15,12 +15,14 @@ namespace OpenTS2.Content.DBPF.Effects
 
     public struct EffectDescription
     {
-        public string BaseEffect { get; }
+        public string EffectName { get; }
+        public byte BlockType { get; }
         public int BlockIndex { get; }
 
-        private EffectDescription(string baseEffect, int blockIndex)
+        private EffectDescription(string effectName, byte blockType, int blockIndex)
         {
-            BaseEffect = baseEffect;
+            EffectName = effectName;
+            BlockType = blockType;
             BlockIndex = blockIndex;
         }
 
@@ -51,7 +53,7 @@ namespace OpenTS2.Content.DBPF.Effects
             var selectionChance = reader.ReadUInt16();
             var timeScale = reader.ReadFloat();
             var blockIndex = reader.ReadInt32();
-            return new EffectDescription(baseEffect, blockIndex);
+            return new EffectDescription(baseEffect, blockType, blockIndex);
         }
     }
 }

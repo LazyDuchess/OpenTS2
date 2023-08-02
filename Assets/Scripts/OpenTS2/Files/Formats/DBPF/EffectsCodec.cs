@@ -91,7 +91,7 @@ namespace OpenTS2.Files.Formats.DBPF
             Debug.Assert(numLightEffects == 0, "There shouldn't be any light effects in Sims2");
 
             var visualEffectsVersion = reader.ReadUInt16();
-            var visualEffects = new VisualEffect[reader.ReadUInt32()];
+            var visualEffects = new SwarmVisualEffect[reader.ReadUInt32()];
             for (var i = 0; i < visualEffects.Length; i++)
             {
                 visualEffects[i] = ReadVisualEffect(reader, visualEffectsVersion);
@@ -428,7 +428,7 @@ namespace OpenTS2.Files.Formats.DBPF
             return new WaterEffect(flags);
         }
 
-        private static VisualEffect ReadVisualEffect(IoBuffer reader, ushort version)
+        private static SwarmVisualEffect ReadVisualEffect(IoBuffer reader, ushort version)
         {
             var flags = reader.ReadUInt32();
             reader.ReadUInt16();
@@ -451,7 +451,7 @@ namespace OpenTS2.Files.Formats.DBPF
                 descriptions[i] = EffectDescription.Deserialize(reader, version);
             }
 
-            return new VisualEffect(descriptions);
+            return new SwarmVisualEffect(descriptions);
         }
     }
 }
