@@ -4,10 +4,11 @@ using OpenTS2.Common;
 using OpenTS2.Content;
 using OpenTS2.Content.DBPF;
 using OpenTS2.Content.DBPF.Effects;
+using OpenTS2.Content.DBPF.Effects.Types;
 using OpenTS2.Files.Formats.DBPF.Types;
 using OpenTS2.Files.Utils;
 using UnityEngine;
-using Collider = OpenTS2.Content.DBPF.Effects.Collider;
+using Collider = OpenTS2.Content.DBPF.Effects.Types.Collider;
 
 namespace OpenTS2.Files.Formats.DBPF
 {
@@ -80,6 +81,13 @@ namespace OpenTS2.Files.Formats.DBPF
             }
 
             var waters = new WaterEffect[reader.ReadUInt32()];
+            for (var i = 0; i < waters.Length; i++)
+            {
+                waters[i] = ReadWaterEffect(reader);
+            }
+
+            var numLightEffects = reader.ReadUInt32();
+            Debug.Assert(numLightEffects == 0, "There shouldn't be any light effects in Sims2");
 
             return new EffectsAsset(particleEffects, metaParticles, decals, sequences, sounds, cameras, models, screens, waters);
         }
@@ -374,6 +382,32 @@ namespace OpenTS2.Files.Formats.DBPF
             var texture = reader.ReadUint32PrefixedString();
 
             return new ScreenEffect(colors, strength, length, delay, texture);
+        }
+
+        private static WaterEffect ReadWaterEffect(IoBuffer reader)
+        {
+            var version = reader.ReadUInt16();
+            Debug.Assert(version == 1);
+
+            var flags = reader.ReadUInt32();
+            if (flags == 0)
+            {
+                reader.ReadFloat();
+                reader.ReadFloat();
+            }
+            else
+            {
+                reader.ReadByte();
+                reader.ReadByte();
+                reader.ReadInt16();
+                reader.ReadFloat();
+                reader.ReadFloat();
+                reader.ReadFloat();
+                reader.ReadFloat();
+            }
+            reader.ReadFloat();
+
+            return new WaterEffect(flags);
         }
     }
 }

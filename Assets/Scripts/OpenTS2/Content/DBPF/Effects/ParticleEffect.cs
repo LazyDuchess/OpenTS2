@@ -1,6 +1,8 @@
-﻿using OpenTS2.Files.Formats.DBPF.Types;
+﻿using OpenTS2.Content.DBPF.Effects.Types;
+using OpenTS2.Files.Formats.DBPF.Types;
 using OpenTS2.Files.Utils;
 using UnityEngine;
+using Collider = OpenTS2.Content.DBPF.Effects.Types.Collider;
 
 namespace OpenTS2.Content.DBPF.Effects
 {

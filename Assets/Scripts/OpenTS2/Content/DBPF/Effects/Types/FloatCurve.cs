@@ -1,6 +1,6 @@
 ﻿using OpenTS2.Files.Utils;
 
-namespace OpenTS2.Content.DBPF.Effects
+namespace OpenTS2.Content.DBPF.Effects.Types
 {
     /// <summary>
     /// A "curve" of changing float values.

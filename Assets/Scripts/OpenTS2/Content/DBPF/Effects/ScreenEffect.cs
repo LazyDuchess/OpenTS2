@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using OpenTS2.Content.DBPF.Effects.Types;
+using UnityEngine;
 
 namespace OpenTS2.Content.DBPF.Effects
 {

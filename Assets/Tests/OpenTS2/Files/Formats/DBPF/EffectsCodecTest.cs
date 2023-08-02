@@ -143,4 +143,12 @@ public class EffectsCodecTest
         Assert.That(screen.Delay, Is.EqualTo(0));
         Assert.That(screen.Texture, Is.EqualTo("letterbox"));
     }
+
+    [Test]
+    public void TestFirstWaterIsCorrect()
+    {
+        var water = _effectsAsset.WaterEffects[0];
+
+        Assert.That(water.Flags, Is.EqualTo(0));
+    }
 }
