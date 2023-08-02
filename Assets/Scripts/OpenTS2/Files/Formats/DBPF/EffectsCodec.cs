@@ -29,8 +29,14 @@ namespace OpenTS2.Files.Formats.DBPF
             }
 
             var metaParticles = new MetaParticle[reader.ReadUInt32()];
+            for (var i = 0; i < metaParticles.Length; i++)
+            {
+                metaParticles[i] = ReadMetaParticleEffect(reader);
+            }
 
-            return new EffectsAsset(particleEffects, metaParticles);
+            var decals = new DecalEffect[reader.ReadUInt32()];
+
+            return new EffectsAsset(particleEffects, metaParticles, decals);
         }
 
         private static Vector3[] ReadMultipleVectors(IoBuffer reader)
@@ -52,32 +58,14 @@ namespace OpenTS2.Files.Formats.DBPF
             var flags = version < 5 ? reader.ReadUInt32() : reader.ReadUInt64();
 
             // Particle life.
-            var life = new ParticleLife(life: Vector2Serializer.Deserialize(reader), lifePreRoll: reader.ReadFloat());
+            var life = ParticleHelper.ReadParticleLife(reader);
 
             // Rate and emission.
-            var rateDelay = Vector2Serializer.Deserialize(reader);
-            var rateTrigger = Vector2Serializer.Deserialize(reader);
-
-            var emitDirectionBBox = BoundingBox.Deserialize(reader);
-            var emitSpeed = Vector2Serializer.Deserialize(reader);
-            var emitVolumeBBox = BoundingBox.Deserialize(reader);
-            var emitTorusWidth = -1.0f;
-            if (version > 2)
-            {
-                emitTorusWidth = reader.ReadFloat();
-            }
-
-            var rateCurve = FloatCurve.Deserialize(reader);
-            var rateCurveTime = reader.ReadFloat();
-            var rateCurveCycles = reader.ReadUInt16();
-
-            var emission = new ParticleEmission(rateDelay, rateTrigger, emitDirectionBBox, emitSpeed, emitVolumeBBox,
-                emitTorusWidth, rateCurve, rateCurveTime, rateCurveCycles);
+            var emission = ParticleHelper.ReadParticleEmission(reader, version, isMetaParticle:false);
             var rateSpeedScale = reader.ReadFloat();
 
-            var size = new ParticleSize(
-                sizeCurve: FloatCurve.Deserialize(reader), sizeVary: reader.ReadFloat(),
-                aspectCurve: FloatCurve.Deserialize(reader), aspectVary: reader.ReadFloat());
+            // Size and aspect.
+            var size = ParticleHelper.ReadParticleSize(reader);
 
             // Rotation stuff, a bunch of unknowns here.
             var rotateAxis = Vector3Serializer.Deserialize(reader);
@@ -130,26 +118,15 @@ namespace OpenTS2.Files.Formats.DBPF
             reader.ReadFloat();
 
             var screw = reader.ReadFloat();
-
             var wiggles = Wiggle.DeserializeList(reader);
-
             // Bloom.
-            var bloom = new ParticleBloom(alphaRate: reader.ReadByte(), alpha: reader.ReadByte(),
-                sizeRate: reader.ReadByte(), size: reader.ReadByte());
-
+            var bloom = ParticleHelper.ReadParticleBloom(reader);
             var colliders = Collider.DeserializeList(reader);
+
             reader.ReadUint32PrefixedString();
 
             // Terrain interaction.
-            var terrainInteraction = new ParticleTerrainInteraction(
-                bounce: reader.ReadFloat(),
-                repelHeight: reader.ReadFloat(),
-                repelStrength: reader.ReadFloat(),
-                repelScout: reader.ReadFloat(),
-                repelVertical: reader.ReadFloat(),
-                killHeight: reader.ReadFloat(),
-                terrainDeathProbability: reader.ReadFloat(), waterDeathProbability: reader.ReadFloat()
-            );
+            var terrainInteraction = ParticleHelper.ReadParticleTerrainInteraction(reader);
 
             Vector2Serializer.Deserialize(reader);
 
@@ -175,6 +152,68 @@ namespace OpenTS2.Files.Formats.DBPF
                 size, rotateAxis, rotateOffsetX, rotateOffsetY: rotateOffsetY, rotateCurveX: rotateCurveX, rotateCurveY,
                 color, drawing, screw, wiggles, bloom,
                 colliders, terrainInteraction, randomWalkDelay, randomWalkStrength, randomWalkTurnX, randomWalkTurnY);
+        }
+
+        private static MetaParticle ReadMetaParticleEffect(IoBuffer reader)
+        {
+            var version = reader.ReadUInt16();
+            Debug.Assert(version < 3);
+
+            var flags = reader.ReadUInt64();
+            var life = ParticleHelper.ReadParticleLife(reader);
+
+            // Rate and emission.
+            var emission = ParticleHelper.ReadParticleEmission(reader, version, isMetaParticle:true);
+
+            // Size and aspect.
+            var size = ParticleHelper.ReadParticleSize(reader);
+
+            // Rotation.
+            var rotateCurve = FloatCurve.Deserialize(reader);
+            var rotateVary = reader.ReadFloat();
+            var rotateOffset = reader.ReadFloat();
+
+            // Color.
+            var colors = ReadMultipleVectors(reader);
+            var colorVary = Vector3Serializer.Deserialize(reader);
+            var alphaCurve = FloatCurve.Deserialize(reader);
+            var alphaVary = reader.ReadFloat();
+            var color = new ParticleColor(alphaCurve, alphaVary, colors, colorVary);
+
+            var baseEffect = reader.ReadUint32PrefixedString();
+            var particleAlignmentType = reader.ReadByte();
+
+            // A bunch of unknown stuff...
+            Vector3Serializer.Deserialize(reader);
+            reader.ReadFloat();
+            reader.ReadFloat();
+            Vector3Serializer.Deserialize(reader);
+            reader.ReadFloat();
+
+            var screw = reader.ReadFloat();
+            var wiggles = Wiggle.DeserializeList(reader);
+            var bloom = ParticleHelper.ReadParticleBloom(reader);
+            var colliders = Collider.DeserializeList(reader);
+            var terrainInteraction = ParticleHelper.ReadParticleTerrainInteraction(reader);
+
+            Vector2Serializer.Deserialize(reader);
+
+            var randomWalks = new RandomWalk[] { RandomWalk.Deserialize(reader), RandomWalk.Deserialize(reader) };
+            var walkPreferDirection = Vector3Serializer.Deserialize(reader);
+
+            var alignmentDamp = reader.ReadFloat();
+            var alignmentBankWind = reader.ReadFloat();
+            var alignmentBank = reader.ReadFloat();
+
+            // These are guarded behind a `version < 4` guard but the game doesn't read meta-particles higher than 2.
+            Vector3Serializer.Deserialize(reader);
+            FloatCurve.Deserialize(reader);
+            reader.ReadFloat();
+
+            var tractorPoints = TractorPoint.DeserializeList(reader);
+            reader.ReadFloat();
+
+            return new MetaParticle(flags, life, emission, size, color, baseEffect);
         }
     }
 }

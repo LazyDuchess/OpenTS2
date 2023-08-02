@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using OpenTS2.Files.Formats.DBPF.Types;
+using OpenTS2.Files.Utils;
+using UnityEngine;
 
 namespace OpenTS2.Content.DBPF.Effects
 {
@@ -98,11 +100,11 @@ namespace OpenTS2.Content.DBPF.Effects
 
         public FloatCurve RateCurve { get; }
         public float RateCurveTime { get; }
-        public ushort RateCurveCycles { get; }
+        public uint RateCurveCycles { get; }
 
         public ParticleEmission(Vector2 rateDelay, Vector2 rateTrigger, BoundingBox emitDirection, Vector2 emitSpeed,
             BoundingBox emitVolume, float emitTorusWidth, FloatCurve rateCurve, float rateCurveTime,
-            ushort rateCurveCycles)
+            uint rateCurveCycles)
         {
             RateDelay = rateDelay;
             RateTrigger = rateTrigger;
@@ -219,4 +221,70 @@ namespace OpenTS2.Content.DBPF.Effects
             Size = size;
         }
     }
+
+    // These are methods common to both Particle and MetaParticles.
+    #region Particle and MetaParticle common readers
+    public static class ParticleHelper
+    {
+        internal static ParticleLife ReadParticleLife(IoBuffer reader)
+        {
+            return new ParticleLife(life: Vector2Serializer.Deserialize(reader), lifePreRoll: reader.ReadFloat());
+        }
+
+        internal static ParticleEmission ReadParticleEmission(IoBuffer reader, ushort version, bool isMetaParticle)
+        {
+            // Rate and emission.
+            var rateDelay = Vector2Serializer.Deserialize(reader);
+            var rateTrigger = Vector2Serializer.Deserialize(reader);
+
+            var emitDirectionBBox = BoundingBox.Deserialize(reader);
+            var emitSpeed = Vector2Serializer.Deserialize(reader);
+            var emitVolumeBBox = BoundingBox.Deserialize(reader);
+            var emitTorusWidth = -1.0f;
+            if ((isMetaParticle && version > 1) || (!isMetaParticle && version > 2))
+            {
+                emitTorusWidth = reader.ReadFloat();
+            }
+
+            var rateCurve = FloatCurve.Deserialize(reader);
+            var rateCurveTime = reader.ReadFloat();
+            // Yup, for some reason even though it's the same field, particles read as a short whereas metaparticles
+            // read it as an int...
+            var rateCurveCycles = isMetaParticle switch
+            {
+                true => reader.ReadUInt32(),
+                false => reader.ReadUInt16(),
+            };
+
+            return new ParticleEmission(rateDelay, rateTrigger, emitDirectionBBox, emitSpeed, emitVolumeBBox,
+                emitTorusWidth, rateCurve, rateCurveTime, rateCurveCycles);
+        }
+
+        internal static ParticleSize ReadParticleSize(IoBuffer reader)
+        {
+            return new ParticleSize(
+                sizeCurve: FloatCurve.Deserialize(reader), sizeVary: reader.ReadFloat(),
+                aspectCurve: FloatCurve.Deserialize(reader), aspectVary: reader.ReadFloat());
+        }
+
+        internal static ParticleBloom ReadParticleBloom(IoBuffer reader)
+        {
+            return new ParticleBloom(alphaRate: reader.ReadByte(), alpha: reader.ReadByte(),
+                sizeRate: reader.ReadByte(), size: reader.ReadByte());
+        }
+
+        internal static ParticleTerrainInteraction ReadParticleTerrainInteraction(IoBuffer reader)
+        {
+            return new ParticleTerrainInteraction(
+                bounce: reader.ReadFloat(),
+                repelHeight: reader.ReadFloat(),
+                repelStrength: reader.ReadFloat(),
+                repelScout: reader.ReadFloat(),
+                repelVertical: reader.ReadFloat(),
+                killHeight: reader.ReadFloat(),
+                terrainDeathProbability: reader.ReadFloat(), waterDeathProbability: reader.ReadFloat()
+            );
+        }
+    }
+    #endregion
 }

@@ -23,6 +23,7 @@ public class EffectsCodecTest
         Assert.IsNotNull(effectsAsset);
         Assert.That(effectsAsset.Particles.Length, Is.EqualTo(1792));
         Assert.That(effectsAsset.MetaParticles.Length, Is.EqualTo(302));
+        Assert.That(effectsAsset.DecalEffects.Length, Is.EqualTo(23));
     }
 
     [Test]
@@ -50,5 +51,30 @@ public class EffectsCodecTest
         Assert.That(particle.RandomWalkStrength, Is.EqualTo(new Vector2(50, 50)));
         Assert.That(particle.RandomWalkTurnX, Is.EqualTo(0.1).Within(0.005));
         Assert.That(particle.RandomWalkTurnY, Is.EqualTo(0.2).Within(0.005));
+    }
+
+    [Test]
+    public void TestFirstMetaParticleIsCorrect()
+    {
+        var effectsAsset = ContentProvider.Get()
+            .GetAsset<EffectsAsset>(new ResourceKey(instanceID: 1, groupID: GroupIDs.Effects, typeID: TypeIDs.EFFECTS));
+        var meta = effectsAsset.MetaParticles[0];
+
+        Assert.That(meta.Life.Life.x, Is.EqualTo(0.1).Within(0.05));
+        Assert.That(meta.Life.Life.y, Is.EqualTo(0.1).Within(0.05));
+        Assert.That(meta.Life.LifePreRoll, Is.EqualTo(0.1).Within(0.05));
+
+        Assert.That(meta.Emission.RateDelay, Is.EqualTo(new Vector2(-1, -1)));
+        Assert.That(meta.Emission.EmitDirection.LowerCorner, Is.EqualTo(new Vector3(0, 0, 1)));
+        Assert.That(meta.Emission.RateCurve.Curve, Is.EquivalentTo(new[] { 1.0f }));
+
+        Assert.That(meta.Size.SizeCurve.Curve, Is.EquivalentTo(new[] { 1.0f }));
+        Assert.That(meta.Size.SizeVary, Is.EqualTo(0));
+        Assert.That(meta.Size.AspectCurve.Curve, Is.EquivalentTo(new[] { 1.0f }));
+        Assert.That(meta.Size.AspectVary, Is.EqualTo(0));
+
+        Assert.That(meta.BaseEffect, Is.EqualTo("construction_cursor_dust_effect"));
+
+        Assert.That(meta.Color.AlphaCurve.Curve, Is.EquivalentTo(new[] { 1.0f }));
     }
 }
