@@ -176,6 +176,22 @@ namespace OpenTS2.Content.DBPF.Effects
             Colors = colors;
             ColorVary = colorVary;
         }
+
+        /// <summary>
+        /// This returns the range of colors to use for start of the particle.
+        /// </summary>
+        public readonly (Color, Color) GetStartingColorRange()
+        {
+            var minimum = new Color(Colors[0].x - ColorVary[0],
+                Colors[0].y - ColorVary[1],
+                Colors[0].z - ColorVary[2],
+                AlphaCurve.Curve[0] - AlphaVary);
+            var maximum = new Color(Colors[0].x + ColorVary[0],
+                Colors[0].y + ColorVary[1],
+                Colors[0].z + ColorVary[2],
+                AlphaCurve.Curve[0] + AlphaVary);
+            return (minimum, maximum);
+        }
     }
 
     public struct ParticleDrawing

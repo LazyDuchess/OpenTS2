@@ -19,7 +19,7 @@ namespace OpenTS2.Scenes
         private EffectsAsset _effects;
         private List<Material> _particleMaterials = new List<Material>();
 
-        private void OnEnable()
+        private void Awake()
         {
             var contentProvider = ContentProvider.Get();
             // Load effects package.
@@ -53,12 +53,6 @@ namespace OpenTS2.Scenes
             var visualEffect = _effects.GetEffectByName(effectName);
             foreach (var effectDescription in visualEffect.Descriptions)
             {
-                // TODO: debugging
-                if (!effectDescription.EffectName.Contains("neighborhood_house_smoke2"))
-                {
-                    continue;
-                }
-                // ---
                 var effect = _effects.GetEffectFromVisualEffectDescription(effectDescription);
                 switch (effect)
                 {
@@ -81,8 +75,7 @@ namespace OpenTS2.Scenes
             system.Stop(withChildren:true, ParticleSystemStopBehavior.StopEmittingAndClear);
 
             var emission = system.emission;
-            var emissionRateOverTime = emission.rateOverTime;
-            emissionRateOverTime.curve = effect.Emission.RateCurve.ToUnityCurve();
+            emission.rateOverTime = effect.Emission.RateCurve.ToUnityCurve();
 
             // Set the emitter shape and drection.
             var shape = system.shape;
@@ -100,27 +93,47 @@ namespace OpenTS2.Scenes
             }
 
             var main = system.main;
-            main.duration = effect.Life.Life[0];
+            main.startSize = effect.Size.SizeCurve.ToUnityCurveWithVariance(effect.Size.SizeVary);
+            main.startSpeed =
+                new ParticleSystem.MinMaxCurve(min: effect.Emission.EmitSpeed[0], max: effect.Emission.EmitSpeed[1]);
+            main.startLifetime = new ParticleSystem.MinMaxCurve(min:effect.Life.Life[0], max:effect.Life.Life[1]);
+
+            var (minColor, maxColor) = effect.Color.GetStartingColorRange();
+            main.startColor = new ParticleSystem.MinMaxGradient(minColor, maxColor);
 
             if (effect.Drawing.MaterialName != "")
             {
                 var textureAsset = ContentProvider.Get().GetAsset<ScenegraphTextureAsset>(new ResourceKey(
                     $"{effect.Drawing.MaterialName}_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR));
 
-                // TODO: temporarily using the standard shader here.
-                var material = new Material(Shader.Find("OpenTS2/StandardMaterial/AlphaBlended"))
-                {
-                    mainTexture = textureAsset.GetSelectedImageAsUnityTexture(ContentProvider.Get())
-                };
+                var material = MakeParticleMaterial(textureAsset.GetSelectedImageAsUnityTexture(ContentProvider.Get()));
                 _particleMaterials.Add(material);
-
                 system.GetComponent<Renderer>().sharedMaterial = material;
-
-                Debug.Log($"material: {effect.Drawing.MaterialName}");
             }
             Debug.Log($"effect idx: {description.EffectIndex}");
 
             return particleObject;
+        }
+
+        private Material MakeParticleMaterial(Texture texture)
+        {
+            var material = new Material(Shader.Find("Particles/Standard Surface"))
+            {
+                mainTexture = texture
+            };
+            // These are jacked from https://github.com/Unity-Technologies/UnityCsReference/blob/master/Editor/Mono/Inspector/StandardParticlesShaderGUI.cs#L637
+            // for now, may want to do our own shader in the future.
+            material.SetOverrideTag("RenderType", "Transparent");
+            material.SetFloat("_BlendOp", (float)UnityEngine.Rendering.BlendOp.Add);
+            material.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+            material.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.One);
+            material.SetFloat("_ZWrite", 0.0f);
+            material.DisableKeyword("_ALPHATEST_ON");
+            material.EnableKeyword("_ALPHABLEND_ON");
+            material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+            material.DisableKeyword("_ALPHAMODULATE_ON");
+            material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+            return material;
         }
     }
 }
