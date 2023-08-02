@@ -7,34 +7,35 @@ using UnityEngine;
 
 public class EffectsCodecTest
 {
-    [SetUp]
+    private EffectsAsset _effectsAsset;
+
+    [OneTimeSetUp]
     public void SetUp()
     {
         TestMain.Initialize();
         ContentProvider.Get().AddPackage("TestAssets/Codecs/Effects.package");
+        _effectsAsset = ContentProvider.Get()
+            .GetAsset<EffectsAsset>(new ResourceKey(instanceID: 1, groupID: GroupIDs.Effects, typeID: TypeIDs.EFFECTS));
     }
 
     [Test]
     public void TestSuccessfullyLoadsAndHasCorrectNumberOfEffects()
     {
-        var effectsAsset = ContentProvider.Get()
-            .GetAsset<EffectsAsset>(new ResourceKey(instanceID: 1, groupID: GroupIDs.Effects, typeID: TypeIDs.EFFECTS));
-
-        Assert.IsNotNull(effectsAsset);
-        Assert.That(effectsAsset.Particles.Length, Is.EqualTo(1792));
-        Assert.That(effectsAsset.MetaParticles.Length, Is.EqualTo(302));
-        Assert.That(effectsAsset.DecalEffects.Length, Is.EqualTo(23));
-        Assert.That(effectsAsset.SequenceEffects.Length, Is.EqualTo(82));
-        Assert.That(effectsAsset.SoundEffects.Length, Is.EqualTo(109));
-        Assert.That(effectsAsset.CameraEffects.Length, Is.EqualTo(43));
+        Assert.IsNotNull(_effectsAsset);
+        Assert.That(_effectsAsset.Particles.Length, Is.EqualTo(1792));
+        Assert.That(_effectsAsset.MetaParticles.Length, Is.EqualTo(302));
+        Assert.That(_effectsAsset.DecalEffects.Length, Is.EqualTo(23));
+        Assert.That(_effectsAsset.SequenceEffects.Length, Is.EqualTo(82));
+        Assert.That(_effectsAsset.SoundEffects.Length, Is.EqualTo(109));
+        Assert.That(_effectsAsset.CameraEffects.Length, Is.EqualTo(43));
+        Assert.That(_effectsAsset.ModelEffects.Length, Is.EqualTo(40));
+        Assert.That(_effectsAsset.WaterEffects.Length, Is.EqualTo(3));
     }
 
     [Test]
     public void TestFirstParticleEffectIsCorrect()
     {
-        var effectsAsset = ContentProvider.Get()
-            .GetAsset<EffectsAsset>(new ResourceKey(instanceID: 1, groupID: GroupIDs.Effects, typeID: TypeIDs.EFFECTS));
-        var particle = effectsAsset.Particles[0];
+        var particle = _effectsAsset.Particles[0];
 
         Assert.That(particle.Life.Life, Is.EqualTo(new Vector2(1, 1)));
 
@@ -59,9 +60,7 @@ public class EffectsCodecTest
     [Test]
     public void TestFirstMetaParticleIsCorrect()
     {
-        var effectsAsset = ContentProvider.Get()
-            .GetAsset<EffectsAsset>(new ResourceKey(instanceID: 1, groupID: GroupIDs.Effects, typeID: TypeIDs.EFFECTS));
-        var meta = effectsAsset.MetaParticles[0];
+        var meta = _effectsAsset.MetaParticles[0];
 
         Assert.That(meta.Life.Life.x, Is.EqualTo(0.1).Within(0.05));
         Assert.That(meta.Life.Life.y, Is.EqualTo(0.1).Within(0.05));
@@ -84,9 +83,7 @@ public class EffectsCodecTest
     [Test]
     public void TestFirstDecalIsCorrect()
     {
-        var effectsAsset = ContentProvider.Get()
-            .GetAsset<EffectsAsset>(new ResourceKey(instanceID: 1, groupID: GroupIDs.Effects, typeID: TypeIDs.EFFECTS));
-        var decal = effectsAsset.DecalEffects[0];
+        var decal = _effectsAsset.DecalEffects[0];
 
         Assert.That(decal.Life, Is.EqualTo(0.1).Within(0.05));
         Assert.That(decal.TextureName, Is.EqualTo("terrain_edit_ring"));
@@ -96,9 +93,7 @@ public class EffectsCodecTest
     [Test]
     public void TestFirstSequenceIsCorrect()
     {
-        var effectsAsset = ContentProvider.Get()
-            .GetAsset<EffectsAsset>(new ResourceKey(instanceID: 1, groupID: GroupIDs.Effects, typeID: TypeIDs.EFFECTS));
-        var sequence = effectsAsset.SequenceEffects[0];
+        var sequence = _effectsAsset.SequenceEffects[0];
 
         Assert.That(sequence.Flags, Is.EqualTo(0x1));
         Assert.That(sequence.Components.Length, Is.EqualTo(1));
@@ -111,11 +106,41 @@ public class EffectsCodecTest
     [Test]
     public void TestFirstSoundIsCorrect()
     {
-        var effectsAsset = ContentProvider.Get()
-            .GetAsset<EffectsAsset>(new ResourceKey(instanceID: 1, groupID: GroupIDs.Effects, typeID: TypeIDs.EFFECTS));
-        var sound = effectsAsset.SoundEffects[0];
+        var sound = _effectsAsset.SoundEffects[0];
 
         Assert.That(sound.AudioId, Is.EqualTo(0xFF108046));
         Assert.That(sound.Volume, Is.EqualTo(0.0));
+    }
+
+    [Test]
+    public void TestSixthCameraIsCorrect()
+    {
+        var camera = _effectsAsset.CameraEffects[6];
+
+        Assert.That(camera.Life, Is.EqualTo(1.0));
+        Assert.That(camera.ShakeAspect, Is.EqualTo(1.0));
+        Assert.That(camera.CameraSelectName, Is.EqualTo("CAS_ZoomDisabled"));
+    }
+
+    [Test]
+    public void TestFirstModelIsCorrect()
+    {
+        var model = _effectsAsset.ModelEffects[0];
+
+        Assert.That(model.ModelName, Is.EqualTo("destruction_post_mouseup_cres"));
+        Assert.That(model.Size, Is.EqualTo(1.0f));
+        Assert.That(model.Color, Is.EqualTo(new Vector3(1, 1, 1)));
+        Assert.That(model.Alpha, Is.EqualTo(1.0f));
+    }
+
+    [Test]
+    public void TestThirdScreenIsCorrect()
+    {
+        var screen = _effectsAsset.ScreenEffects[3];
+
+        Assert.That(screen.Strength.Curve, Is.EquivalentTo(new[] { 1.0f }));
+        Assert.That(screen.Length, Is.EqualTo(0));
+        Assert.That(screen.Delay, Is.EqualTo(0));
+        Assert.That(screen.Texture, Is.EqualTo("letterbox"));
     }
 }

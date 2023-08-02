@@ -38,9 +38,13 @@ namespace OpenTS2.Content.DBPF
         public SequenceEffect[] SequenceEffects { get; }
         public SoundEffect[] SoundEffects { get; }
         public CameraEffect[] CameraEffects { get; }
+        public ModelEffect[] ModelEffects { get; }
+        public ScreenEffect[] ScreenEffects { get; }
+        public WaterEffect[] WaterEffects { get; }
 
         public EffectsAsset(ParticleEffect[] particles, MetaParticle[] metaParticles, DecalEffect[] decalEffects,
-            SequenceEffect[] sequenceEffects, SoundEffect[] soundEffects, CameraEffect[] cameraEffects)
+            SequenceEffect[] sequenceEffects, SoundEffect[] soundEffects, CameraEffect[] cameraEffects,
+            ModelEffect[] modelEffects, ScreenEffect[] screenEffects, WaterEffect[] waterEffects)
         {
             Particles = particles;
             MetaParticles = metaParticles;
@@ -48,6 +52,9 @@ namespace OpenTS2.Content.DBPF
             SequenceEffects = sequenceEffects;
             SoundEffects = soundEffects;
             CameraEffects = cameraEffects;
+            ModelEffects = modelEffects;
+            ScreenEffects = screenEffects;
+            WaterEffects = waterEffects;
         }
     }
 }

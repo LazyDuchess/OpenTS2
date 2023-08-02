@@ -44,7 +44,7 @@ namespace OpenTS2.Files.Formats.DBPF
             Debug.Assert(numBrushes == 0, "There shouldn't be any brush effects in Sims2");
 
             var numScrubbers = reader.ReadUInt32();
-            Debug.Assert(numScrubbers == 0, "There shouldn't be any brush effects in Sims2");
+            Debug.Assert(numScrubbers == 0, "There shouldn't be any scrubber effects in Sims2");
 
             var sequences = new SequenceEffect[reader.ReadUInt32()];
             for (var i = 0; i < sequences.Length; i++)
@@ -59,8 +59,29 @@ namespace OpenTS2.Files.Formats.DBPF
             }
 
             var cameras = new CameraEffect[reader.ReadUInt32()];
+            for (var i = 0; i < cameras.Length; i++)
+            {
+                cameras[i] = ReadCameraEffect(reader);
+            }
 
-            return new EffectsAsset(particleEffects, metaParticles, decals, sequences, sounds, cameras);
+            var numGameEffects = reader.ReadUInt32();
+            Debug.Assert(numGameEffects == 0, "There shouldn't be any game effects in Sims2");
+
+            var models = new ModelEffect[reader.ReadUInt32()];
+            for (var i = 0; i < models.Length; i++)
+            {
+                models[i] = ReadModelEffect(reader);
+            }
+
+            var screens = new ScreenEffect[reader.ReadUInt32()];
+            for (var i = 0; i < screens.Length; i++)
+            {
+                screens[i] = ReadScreenEffect(reader);
+            }
+
+            var waters = new WaterEffect[reader.ReadUInt32()];
+
+            return new EffectsAsset(particleEffects, metaParticles, decals, sequences, sounds, cameras, models, screens, waters);
         }
 
         private static Vector3[] ReadMultipleVectors(IoBuffer reader)
@@ -295,6 +316,64 @@ namespace OpenTS2.Files.Formats.DBPF
             var volume = reader.ReadFloat();
 
             return new SoundEffect(audioId, volume);
+        }
+
+        private static CameraEffect ReadCameraEffect(IoBuffer reader)
+        {
+            var version = reader.ReadUInt16();
+            Debug.Assert(version == 1);
+
+            var flags = reader.ReadUInt32();
+            var life = reader.ReadFloat();
+            var shakeFadeLength = reader.ReadFloat();
+            var shakeAmplitude = FloatCurve.Deserialize(reader);
+            var shakeFrequency = FloatCurve.Deserialize(reader);
+            var shakeAspect = reader.ReadFloat();
+            var shakeType = reader.ReadByte();
+
+            var heading = FloatCurve.Deserialize(reader);
+            var pitch = FloatCurve.Deserialize(reader);
+            var roll = FloatCurve.Deserialize(reader);
+            var orbit = FloatCurve.Deserialize(reader);
+            var fieldOfView = FloatCurve.Deserialize(reader);
+            var nearClip = FloatCurve.Deserialize(reader);
+            var farClip = FloatCurve.Deserialize(reader);
+
+            var zoom = reader.ReadSByte();
+            var rotate = reader.ReadSByte();
+            var attachRadius = reader.ReadFloat();
+            var cameraSelectName = reader.ReadUint32PrefixedString();
+
+            return new CameraEffect(life, shakeAspect, cameraSelectName);
+        }
+
+        private static ModelEffect ReadModelEffect(IoBuffer reader)
+        {
+            var version = reader.ReadUInt16();
+            Debug.Assert(version == 1);
+
+            var modelName = reader.ReadUint32PrefixedString();
+            var size = reader.ReadFloat();
+            var color = Vector3Serializer.Deserialize(reader);
+            var alpha = reader.ReadFloat();
+
+            return new ModelEffect(modelName, size, color, alpha);
+        }
+
+        private static ScreenEffect ReadScreenEffect(IoBuffer reader)
+        {
+            var version = reader.ReadUInt16();
+            Debug.Assert(version == 1);
+
+            var mode = reader.ReadByte();
+            var flags = reader.ReadUInt32();
+            var colors = ReadMultipleVectors(reader);
+            var strength = FloatCurve.Deserialize(reader);
+            var length = reader.ReadFloat();
+            var delay = reader.ReadFloat();
+            var texture = reader.ReadUint32PrefixedString();
+
+            return new ScreenEffect(colors, strength, length, delay, texture);
         }
     }
 }
