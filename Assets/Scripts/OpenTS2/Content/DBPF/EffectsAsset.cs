@@ -1,4 +1,5 @@
-﻿using OpenTS2.Content.DBPF.Effects;
+﻿using System.Collections.Generic;
+using OpenTS2.Content.DBPF.Effects;
 
 namespace OpenTS2.Content.DBPF
 {
@@ -41,10 +42,13 @@ namespace OpenTS2.Content.DBPF
         public ModelEffect[] ModelEffects { get; }
         public ScreenEffect[] ScreenEffects { get; }
         public WaterEffect[] WaterEffects { get; }
+        public VisualEffect[] VisualEffects { get; }
+        public Dictionary<string, uint> EffectNamesToIds { get; }
 
         public EffectsAsset(ParticleEffect[] particles, MetaParticle[] metaParticles, DecalEffect[] decalEffects,
             SequenceEffect[] sequenceEffects, SoundEffect[] soundEffects, CameraEffect[] cameraEffects,
-            ModelEffect[] modelEffects, ScreenEffect[] screenEffects, WaterEffect[] waterEffects)
+            ModelEffect[] modelEffects, ScreenEffect[] screenEffects, WaterEffect[] waterEffects,
+            VisualEffect[] visualEffects, Dictionary<string, uint> effectNamesToIds)
         {
             Particles = particles;
             MetaParticles = metaParticles;
@@ -55,6 +59,8 @@ namespace OpenTS2.Content.DBPF
             ModelEffects = modelEffects;
             ScreenEffects = screenEffects;
             WaterEffects = waterEffects;
+            VisualEffects = visualEffects;
+            EffectNamesToIds = effectNamesToIds;
         }
     }
 }

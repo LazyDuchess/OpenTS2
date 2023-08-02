@@ -30,6 +30,11 @@ public class EffectsCodecTest
         Assert.That(_effectsAsset.CameraEffects.Length, Is.EqualTo(43));
         Assert.That(_effectsAsset.ModelEffects.Length, Is.EqualTo(40));
         Assert.That(_effectsAsset.WaterEffects.Length, Is.EqualTo(3));
+        Assert.That(_effectsAsset.VisualEffects.Length, Is.EqualTo(1542));
+
+        Assert.That(_effectsAsset.EffectNamesToIds["fireflamesfx"], Is.EqualTo(1276));
+        Assert.That(_effectsAsset.EffectNamesToIds["washhandsinsink_adultviewer"], Is.EqualTo(1034));
+
     }
 
     [Test]
@@ -150,5 +155,16 @@ public class EffectsCodecTest
         var water = _effectsAsset.WaterEffects[0];
 
         Assert.That(water.Flags, Is.EqualTo(0));
+    }
+
+    [Test]
+    public void TestFirstVisualEffectIsCorrect()
+    {
+        var visualEffect = _effectsAsset.VisualEffects[0];
+        Assert.That(visualEffect.Descriptions.Length, Is.EqualTo(1));
+
+        var description = visualEffect.Descriptions[0];
+        Assert.That(description.BaseEffect, Is.EqualTo("construction_cursor_dust"));
+        Assert.That(description.BlockIndex, Is.EqualTo(0));
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using OpenTS2.Common;
 using OpenTS2.Content;
@@ -89,7 +90,23 @@ namespace OpenTS2.Files.Formats.DBPF
             var numLightEffects = reader.ReadUInt32();
             Debug.Assert(numLightEffects == 0, "There shouldn't be any light effects in Sims2");
 
-            return new EffectsAsset(particleEffects, metaParticles, decals, sequences, sounds, cameras, models, screens, waters);
+            var visualEffectsVersion = reader.ReadUInt16();
+            var visualEffects = new VisualEffect[reader.ReadUInt32()];
+            for (var i = 0; i < visualEffects.Length; i++)
+            {
+                visualEffects[i] = ReadVisualEffect(reader, visualEffectsVersion);
+            }
+
+            var effectNamesToIds = new Dictionary<string, uint>();
+            var effectName = "";
+            do {
+                effectName = reader.ReadUint32PrefixedString();
+                var effectId = reader.ReadUInt32();
+                effectNamesToIds[effectName] = effectId;
+            } while (effectName != "end");
+
+            return new EffectsAsset(particleEffects, metaParticles, decals, sequences, sounds, cameras, models, screens,
+                waters, visualEffects, effectNamesToIds);
         }
 
         private static Vector3[] ReadMultipleVectors(IoBuffer reader)
@@ -114,7 +131,7 @@ namespace OpenTS2.Files.Formats.DBPF
             var life = ParticleHelper.ReadParticleLife(reader);
 
             // Rate and emission.
-            var emission = ParticleHelper.ReadParticleEmission(reader, version, isMetaParticle:false);
+            var emission = ParticleHelper.ReadParticleEmission(reader, version, isMetaParticle: false);
             var rateSpeedScale = reader.ReadFloat();
 
             // Size and aspect.
@@ -216,7 +233,7 @@ namespace OpenTS2.Files.Formats.DBPF
             var life = ParticleHelper.ReadParticleLife(reader);
 
             // Rate and emission.
-            var emission = ParticleHelper.ReadParticleEmission(reader, version, isMetaParticle:true);
+            var emission = ParticleHelper.ReadParticleEmission(reader, version, isMetaParticle: true);
 
             // Size and aspect.
             var size = ParticleHelper.ReadParticleSize(reader);
@@ -405,9 +422,36 @@ namespace OpenTS2.Files.Formats.DBPF
                 reader.ReadFloat();
                 reader.ReadFloat();
             }
+
             reader.ReadFloat();
 
             return new WaterEffect(flags);
+        }
+
+        private static VisualEffect ReadVisualEffect(IoBuffer reader, ushort version)
+        {
+            var flags = reader.ReadUInt32();
+            reader.ReadUInt16();
+            if (version < 3)
+            {
+                reader.ReadUInt16();
+            }
+            else
+            {
+                reader.ReadUInt32();
+            }
+
+            reader.ReadUInt32();
+            reader.ReadUInt32();
+            Vector2Serializer.Deserialize(reader);
+
+            var descriptions = new EffectDescription[reader.ReadUInt32()];
+            for (var i = 0; i < descriptions.Length; i++)
+            {
+                descriptions[i] = EffectDescription.Deserialize(reader, version);
+            }
+
+            return new VisualEffect(descriptions);
         }
     }
 }
