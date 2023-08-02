@@ -29,14 +29,16 @@ namespace OpenTS2.Scenes
         void Awake()
         {
             Instance = this;
+
+            var terrain = NeighborhoodManager.CurrentNeighborhood.Terrain;
+            var terrainType = terrain.TerrainType;
+
             _meshFilter = GetComponent<MeshFilter>();
             var contentProvider = ContentProvider.Get();
             var meshRenderer = GetComponent<MeshRenderer>();
             _terrainMaterial = meshRenderer.material;
+            _terrainMaterial.shader = terrainType.TerrainShader;
             _terrainMaterial.SetVector("_LightVector", Sun.forward);
-
-            var terrain = NeighborhoodManager.CurrentNeighborhood.Terrain;
-            var terrainType = terrain.TerrainType;
 
             var matCap = contentProvider.GetAsset<TextureAsset>(s_matCapKey);
             var smooth = contentProvider.GetAsset<ScenegraphTextureAsset>(terrainType.Texture);
@@ -139,8 +141,9 @@ namespace OpenTS2.Scenes
         // TODO: Optimize, maybe multithread.
         void MakeRoughness(Mesh terrainMesh)
         {
-            var maxRoadDistance = 80f;
-            var minRoadDistance = 40f;
+            var terrainType = NeighborhoodManager.CurrentNeighborhood.Terrain.TerrainType;
+            var roadDistanceForRoughness = terrainType.RoadDistanceForRoughness;
+            var roughnessFalloff = terrainType.RoughnessFalloff;
             var vertices = terrainMesh.vertices;
             var colors = terrainMesh.colors;
             var roads = NeighborhoodManager.CurrentNeighborhood.Decorations.RoadDecorations;
@@ -172,7 +175,7 @@ namespace OpenTS2.Scenes
                     color.b = 1f;
                 else
                 {
-                    var amount = Mathf.Clamp((closestRoadDistance - minRoadDistance) / maxRoadDistance, 0f, 1f);
+                    var amount = Mathf.Clamp((closestRoadDistance - roughnessFalloff) / (roadDistanceForRoughness + roughnessFalloff), 0f, 1f);
                     color.b = amount;
                 }
                 colors[i] = color;

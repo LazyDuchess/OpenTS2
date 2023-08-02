@@ -4,12 +4,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OpenTS2.Common;
+using UnityEngine;
 
 namespace OpenTS2.Content
 {
     public abstract class TerrainType
     {
         public abstract string Name { get; }
+        public virtual float RoadDistanceForRoughness => 40f;
+        public virtual float RoughnessFalloff => 40f;
+        public virtual Shader TerrainShader => Shader.Find("OpenTS2/ClassicTerrain");
         public abstract ResourceKey Texture { get; }
         public virtual ResourceKey Texture1 => Texture;
         public virtual ResourceKey Texture2 => Texture1;
