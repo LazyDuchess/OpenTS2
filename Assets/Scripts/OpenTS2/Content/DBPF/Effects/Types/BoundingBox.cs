@@ -2,7 +2,7 @@
 using OpenTS2.Files.Utils;
 using UnityEngine;
 
-namespace OpenTS2.Content.DBPF.Effects
+namespace OpenTS2.Content.DBPF.Effects.Types
 {
     public readonly struct BoundingBox
     {

@@ -1,4 +1,6 @@
-﻿using OpenTS2.Content.DBPF.Effects;
+﻿using System;
+using System.Collections.Generic;
+using OpenTS2.Content.DBPF.Effects;
 
 namespace OpenTS2.Content.DBPF
 {
@@ -32,8 +34,8 @@ namespace OpenTS2.Content.DBPF
     /// </summary>
     public class EffectsAsset : AbstractAsset
     {
-        public ParticleEffect[] Particles { get; }
-        public MetaParticle[] MetaParticles { get; }
+        public ParticleEffect[] ParticleEffects { get; }
+        public MetaParticle[] MetaParticleEffects { get; }
         public DecalEffect[] DecalEffects { get; }
         public SequenceEffect[] SequenceEffects { get; }
         public SoundEffect[] SoundEffects { get; }
@@ -41,13 +43,16 @@ namespace OpenTS2.Content.DBPF
         public ModelEffect[] ModelEffects { get; }
         public ScreenEffect[] ScreenEffects { get; }
         public WaterEffect[] WaterEffects { get; }
+        public SwarmVisualEffect[] VisualEffects { get; }
+        public Dictionary<string, uint> EffectNamesToIds { get; }
 
         public EffectsAsset(ParticleEffect[] particles, MetaParticle[] metaParticles, DecalEffect[] decalEffects,
             SequenceEffect[] sequenceEffects, SoundEffect[] soundEffects, CameraEffect[] cameraEffects,
-            ModelEffect[] modelEffects, ScreenEffect[] screenEffects, WaterEffect[] waterEffects)
+            ModelEffect[] modelEffects, ScreenEffect[] screenEffects, WaterEffect[] waterEffects,
+            SwarmVisualEffect[] visualEffects, Dictionary<string, uint> effectNamesToIds)
         {
-            Particles = particles;
-            MetaParticles = metaParticles;
+            ParticleEffects = particles;
+            MetaParticleEffects = metaParticles;
             DecalEffects = decalEffects;
             SequenceEffects = sequenceEffects;
             SoundEffects = soundEffects;
@@ -55,6 +60,25 @@ namespace OpenTS2.Content.DBPF
             ModelEffects = modelEffects;
             ScreenEffects = screenEffects;
             WaterEffects = waterEffects;
+            VisualEffects = visualEffects;
+            EffectNamesToIds = effectNamesToIds;
+        }
+
+        public SwarmVisualEffect GetEffectByName(string name)
+        {
+            var index = EffectNamesToIds[name];
+            return VisualEffects[index];
+        }
+
+        public IBaseEffect GetEffectFromVisualEffectDescription(EffectDescription description)
+        {
+            return description.BlockType switch
+            {
+                1 => ParticleEffects[description.BlockIndex],
+                6 => SequenceEffects[description.BlockIndex],
+                _ => throw new NotImplementedException(
+                    $"Block type {description.BlockType} in VisualEffect not supported")
+            };
         }
     }
 }

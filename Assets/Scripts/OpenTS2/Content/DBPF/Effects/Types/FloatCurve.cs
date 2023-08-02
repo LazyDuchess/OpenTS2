@@ -1,6 +1,7 @@
 ﻿using OpenTS2.Files.Utils;
+using UnityEngine;
 
-namespace OpenTS2.Content.DBPF.Effects
+namespace OpenTS2.Content.DBPF.Effects.Types
 {
     /// <summary>
     /// A "curve" of changing float values.
@@ -12,6 +13,17 @@ namespace OpenTS2.Content.DBPF.Effects
         public FloatCurve(float[] curve)
         {
             Curve = curve;
+        }
+
+        public AnimationCurve ToUnityCurve()
+        {
+            var keyframes = new Keyframe[Curve.Length];
+            for (var i = 0; i < Curve.Length; i++)
+            {
+                keyframes[i] = new Keyframe(i, Curve[i]);
+            }
+
+            return new AnimationCurve(keyframes);
         }
 
         public static FloatCurve Deserialize(IoBuffer reader)

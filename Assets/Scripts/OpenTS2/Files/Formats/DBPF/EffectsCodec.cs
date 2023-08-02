@@ -1,13 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using OpenTS2.Common;
 using OpenTS2.Content;
 using OpenTS2.Content.DBPF;
 using OpenTS2.Content.DBPF.Effects;
+using OpenTS2.Content.DBPF.Effects.Types;
 using OpenTS2.Files.Formats.DBPF.Types;
 using OpenTS2.Files.Utils;
 using UnityEngine;
-using Collider = OpenTS2.Content.DBPF.Effects.Collider;
+using Collider = OpenTS2.Content.DBPF.Effects.Types.Collider;
 
 namespace OpenTS2.Files.Formats.DBPF
 {
@@ -80,8 +82,31 @@ namespace OpenTS2.Files.Formats.DBPF
             }
 
             var waters = new WaterEffect[reader.ReadUInt32()];
+            for (var i = 0; i < waters.Length; i++)
+            {
+                waters[i] = ReadWaterEffect(reader);
+            }
 
-            return new EffectsAsset(particleEffects, metaParticles, decals, sequences, sounds, cameras, models, screens, waters);
+            var numLightEffects = reader.ReadUInt32();
+            Debug.Assert(numLightEffects == 0, "There shouldn't be any light effects in Sims2");
+
+            var visualEffectsVersion = reader.ReadUInt16();
+            var visualEffects = new SwarmVisualEffect[reader.ReadUInt32()];
+            for (var i = 0; i < visualEffects.Length; i++)
+            {
+                visualEffects[i] = ReadVisualEffect(reader, visualEffectsVersion);
+            }
+
+            var effectNamesToIds = new Dictionary<string, uint>();
+            var effectName = "";
+            do {
+                effectName = reader.ReadUint32PrefixedString();
+                var effectId = reader.ReadUInt32();
+                effectNamesToIds[effectName] = effectId;
+            } while (effectName != "end");
+
+            return new EffectsAsset(particleEffects, metaParticles, decals, sequences, sounds, cameras, models, screens,
+                waters, visualEffects, effectNamesToIds);
         }
 
         private static Vector3[] ReadMultipleVectors(IoBuffer reader)
@@ -106,7 +131,7 @@ namespace OpenTS2.Files.Formats.DBPF
             var life = ParticleHelper.ReadParticleLife(reader);
 
             // Rate and emission.
-            var emission = ParticleHelper.ReadParticleEmission(reader, version, isMetaParticle:false);
+            var emission = ParticleHelper.ReadParticleEmission(reader, version, isMetaParticle: false);
             var rateSpeedScale = reader.ReadFloat();
 
             // Size and aspect.
@@ -208,7 +233,7 @@ namespace OpenTS2.Files.Formats.DBPF
             var life = ParticleHelper.ReadParticleLife(reader);
 
             // Rate and emission.
-            var emission = ParticleHelper.ReadParticleEmission(reader, version, isMetaParticle:true);
+            var emission = ParticleHelper.ReadParticleEmission(reader, version, isMetaParticle: true);
 
             // Size and aspect.
             var size = ParticleHelper.ReadParticleSize(reader);
@@ -374,6 +399,59 @@ namespace OpenTS2.Files.Formats.DBPF
             var texture = reader.ReadUint32PrefixedString();
 
             return new ScreenEffect(colors, strength, length, delay, texture);
+        }
+
+        private static WaterEffect ReadWaterEffect(IoBuffer reader)
+        {
+            var version = reader.ReadUInt16();
+            Debug.Assert(version == 1);
+
+            var flags = reader.ReadUInt32();
+            if (flags == 0)
+            {
+                reader.ReadFloat();
+                reader.ReadFloat();
+            }
+            else
+            {
+                reader.ReadByte();
+                reader.ReadByte();
+                reader.ReadInt16();
+                reader.ReadFloat();
+                reader.ReadFloat();
+                reader.ReadFloat();
+                reader.ReadFloat();
+            }
+
+            reader.ReadFloat();
+
+            return new WaterEffect(flags);
+        }
+
+        private static SwarmVisualEffect ReadVisualEffect(IoBuffer reader, ushort version)
+        {
+            var flags = reader.ReadUInt32();
+            reader.ReadUInt16();
+            if (version < 3)
+            {
+                reader.ReadUInt16();
+            }
+            else
+            {
+                reader.ReadUInt32();
+            }
+
+            reader.ReadUInt32();
+            reader.ReadUInt32();
+            Vector2Serializer.Deserialize(reader);
+
+            var descriptions = new EffectDescription[reader.ReadUInt32()];
+            for (var i = 0; i < descriptions.Length; i++)
+            {
+                descriptions[i] = EffectDescription.Deserialize(reader, version);
+            }
+
+            return new SwarmVisualEffect(descriptions);
         }
     }
 }
