@@ -52,8 +52,7 @@ namespace OpenTS2.Files.Formats.DBPF
             var flags = version < 5 ? reader.ReadUInt32() : reader.ReadUInt64();
 
             // Particle life.
-            var life = Vector2Serializer.Deserialize(reader);
-            var lifePreRoll = reader.ReadFloat();
+            var life = new ParticleLife(life: Vector2Serializer.Deserialize(reader), lifePreRoll: reader.ReadFloat());
 
             // Rate and emission.
             var rateDelay = Vector2Serializer.Deserialize(reader);
@@ -71,15 +70,14 @@ namespace OpenTS2.Files.Formats.DBPF
             var rateCurve = FloatCurve.Deserialize(reader);
             var rateCurveTime = reader.ReadFloat();
             var rateCurveCycles = reader.ReadUInt16();
+
+            var emission = new ParticleEmission(rateDelay, rateTrigger, emitDirectionBBox, emitSpeed, emitVolumeBBox,
+                emitTorusWidth, rateCurve, rateCurveTime, rateCurveCycles);
             var rateSpeedScale = reader.ReadFloat();
 
-            // Size.
-            var sizeCurve = FloatCurve.Deserialize(reader);
-            var sizeVary = reader.ReadFloat();
-
-            // Aspect ratio?
-            var aspectCurve = FloatCurve.Deserialize(reader);
-            var aspectVary = reader.ReadFloat();
+            var size = new ParticleSize(
+                sizeCurve: FloatCurve.Deserialize(reader), sizeVary: reader.ReadFloat(),
+                aspectCurve: FloatCurve.Deserialize(reader), aspectVary: reader.ReadFloat());
 
             // Rotation stuff, a bunch of unknowns here.
             var rotateAxis = Vector3Serializer.Deserialize(reader);
@@ -108,26 +106,21 @@ namespace OpenTS2.Files.Formats.DBPF
                 Vector3Serializer.Deserialize(reader);
             }
 
-            // Alpha.
+            // Color.
             var alphaCurve = FloatCurve.Deserialize(reader);
             var alphaVary = reader.ReadFloat();
-
-            // Color.
             var colors = ReadMultipleVectors(reader);
             var colorVary = Vector3Serializer.Deserialize(reader);
+            var color = new ParticleColor(alphaCurve, alphaVary, colors, colorVary);
 
             // Texture.
-            var materialName = reader.ReadUint32PrefixedString();
-            var tileCountU = reader.ReadByte();
-            var tileCountV = reader.ReadByte();
-
-            var particleAlignmentType = reader.ReadByte();
-            var particleDrawType = reader.ReadByte();
-
-            var layer = reader.ReadFloat();
-            var frameSpeed = reader.ReadFloat();
-            var frameStart = reader.ReadByte();
-            var frameCount = reader.ReadByte();
+            var drawing = new ParticleDrawing(
+                materialName: reader.ReadUint32PrefixedString(),
+                tileCountU: reader.ReadByte(), tileCountV: reader.ReadByte(),
+                particleAlignmentType: reader.ReadByte(), particleDrawType: reader.ReadByte(),
+                layer: reader.ReadFloat(), frameSpeed: reader.ReadFloat(), frameStart: reader.ReadByte(),
+                frameCount: reader.ReadByte()
+            );
 
             Vector3Serializer.Deserialize(reader);
             reader.ReadFloat();
@@ -141,23 +134,22 @@ namespace OpenTS2.Files.Formats.DBPF
             var wiggles = Wiggle.DeserializeList(reader);
 
             // Bloom.
-            var bloomAlphaRate = reader.ReadByte();
-            var bloomAlpha = reader.ReadByte();
-            var bloomSizeRate = reader.ReadByte();
-            var bloomSize = reader.ReadByte();
+            var bloom = new ParticleBloom(alphaRate: reader.ReadByte(), alpha: reader.ReadByte(),
+                sizeRate: reader.ReadByte(), size: reader.ReadByte());
 
             var colliders = Collider.DeserializeList(reader);
             reader.ReadUint32PrefixedString();
 
             // Terrain interaction.
-            var terrainBounce = reader.ReadFloat();
-            var terrainRepelHeight = reader.ReadFloat();
-            var terrainRepelStrength = reader.ReadFloat();
-            var terrainRepelScout = reader.ReadFloat();
-            var terrainRepelVertical = reader.ReadFloat();
-            var terrainRepelKillHeight = reader.ReadFloat();
-            var terrainDeathProbability = reader.ReadFloat();
-            var deathByWaterProbability = reader.ReadFloat();
+            var terrainInteraction = new ParticleTerrainInteraction(
+                bounce: reader.ReadFloat(),
+                repelHeight: reader.ReadFloat(),
+                repelStrength: reader.ReadFloat(),
+                repelScout: reader.ReadFloat(),
+                repelVertical: reader.ReadFloat(),
+                killHeight: reader.ReadFloat(),
+                terrainDeathProbability: reader.ReadFloat(), waterDeathProbability: reader.ReadFloat()
+            );
 
             Vector2Serializer.Deserialize(reader);
 
@@ -179,30 +171,10 @@ namespace OpenTS2.Files.Formats.DBPF
                 throw new NotImplementedException("Particle versions 5 and above not implemented yet");
             }
 
-            return new ParticleEffect(flags: flags, life: life, lifePreRoll: lifePreRoll, rateDelay: rateDelay,
-                rateTrigger: rateTrigger, emitDirection: emitDirectionBBox, emitSpeed: emitSpeed,
-                emitVolume: emitVolumeBBox, emitTorusWidth: emitTorusWidth, rateCurve: rateCurve,
-                rateCurveTime: rateCurveTime, rateCurveCycles: rateCurveCycles, rateSpeedScale: rateSpeedScale,
-                sizeCurve: sizeCurve, sizeVary: sizeVary, aspectCurve: aspectCurve, aspectVary: aspectVary,
-                rotateAxis: rotateAxis,
-                rotateOffsetX: rotateOffsetX, rotateOffsetY: rotateOffsetY, rotateCurveX: rotateCurveX,
-                rotateCurveY: rotateCurveY,
-                alphaCurve: alphaCurve, alphaVary: alphaVary, colors: colors, colorVary: colorVary,
-                materialName: materialName,
-                tileCountU: tileCountU, tileCountV: tileCountV, particleAlignmentType: particleAlignmentType,
-                particleDrawType: particleDrawType,
-                layer: layer, frameSpeed: frameSpeed, frameStart: frameStart, frameCount: frameCount, screw: screw,
-                wiggles: wiggles,
-                bloomAlphaRate: bloomAlphaRate, bloomAlpha: bloomAlpha, bloomSizeRate: bloomSizeRate,
-                bloomSize: bloomSize,
-                colliders: colliders, terrainBounce: terrainBounce, terrainRepelHeight: terrainRepelHeight,
-                terrainRepelStrength: terrainRepelStrength,
-                terrainRepelScout: terrainRepelScout,
-                terrainRepelVertical: terrainRepelVertical, terrainRepelKillHeight: terrainRepelKillHeight,
-                terrainDeathProbability: terrainDeathProbability,
-                deathByWaterProbability: deathByWaterProbability, randomWalkDelay: randomWalkDelay,
-                randomWalkStrength: randomWalkStrength,
-                randomWalkTurnX: randomWalkTurnX, randomWalkTurnY: randomWalkTurnY);
+            return new ParticleEffect(flags, life, emission, rateSpeedScale: rateSpeedScale,
+                size, rotateAxis, rotateOffsetX, rotateOffsetY: rotateOffsetY, rotateCurveX: rotateCurveX, rotateCurveY,
+                color, drawing, screw, wiggles, bloom,
+                colliders, terrainInteraction, randomWalkDelay, randomWalkStrength, randomWalkTurnX, randomWalkTurnY);
         }
     }
 }

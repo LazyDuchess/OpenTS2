@@ -11,27 +11,12 @@ namespace OpenTS2.Content.DBPF.Effects
     {
         public readonly ulong Flags;
 
-        public readonly Vector2 Life;
-        public readonly float LifePreRoll;
+        public readonly ParticleLife Life;
 
-        public readonly Vector2 RateDelay;
-        public readonly Vector2 RateTrigger;
-
-        public readonly BoundingBox EmitDirection;
-        public readonly Vector2 EmitSpeed;
-        public readonly BoundingBox EmitVolume;
-        public readonly float EmitTorusWidth;
-
-        public readonly FloatCurve RateCurve;
-        public readonly float RateCurveTime;
-        public readonly ushort RateCurveCycles;
+        public readonly ParticleEmission Emission;
         public readonly float RateSpeedScale;
 
-        public readonly FloatCurve SizeCurve;
-        public readonly float SizeVary;
-
-        public readonly FloatCurve AspectCurve;
-        public readonly float AspectVary;
+        public readonly ParticleSize Size;
 
         public readonly Vector3 RotateAxis;
         public readonly float RotateOffsetX;
@@ -39,65 +24,86 @@ namespace OpenTS2.Content.DBPF.Effects
         public readonly FloatCurve RotateCurveX;
         public readonly FloatCurve RotateCurveY;
 
-        public readonly FloatCurve AlphaCurve;
-        public readonly float AlphaVary;
-
-        public readonly Vector3[] Colors;
-        public readonly Vector3 ColorVary;
-
-        public readonly string MaterialName;
-        public readonly byte TileCountU;
-        public readonly byte TileCountV;
-
-        public readonly byte ParticleAlignmentType;
-        public readonly byte ParticleDrawType;
-
-        public readonly float Layer;
-        public readonly float FrameSpeed;
-        public readonly byte FrameStart;
-        public readonly byte FrameCount;
+        public readonly ParticleColor Color;
+        public readonly ParticleDrawing Drawing;
 
         public readonly float Screw;
 
         public readonly Wiggle[] Wiggles;
 
-        public readonly byte BloomAlphaRate;
-        public readonly byte BloomAlpha;
-        public readonly byte BloomSizeRate;
-        public readonly byte BloomSize;
+        public readonly ParticleBloom Bloom;
 
         public readonly Collider[] Colliders;
 
-        public readonly float TerrainBounce;
-        public readonly float TerrainRepelHeight;
-        public readonly float TerrainRepelStrength;
-        public readonly float TerrainRepelScout;
-        public readonly float TerrainRepelVertical;
-        public readonly float TerrainRepelKillHeight;
-        public readonly float TerrainDeathProbability;
-        public readonly float DeathByWaterProbability;
+        public readonly ParticleTerrainInteraction TerrainInteraction;
 
         public readonly Vector2 RandomWalkDelay;
         public readonly Vector2 RandomWalkStrength;
         public readonly float RandomWalkTurnX;
         public readonly float RandomWalkTurnY;
 
-        public ParticleEffect(ulong flags, Vector2 life, float lifePreRoll, Vector2 rateDelay, Vector2 rateTrigger,
-            BoundingBox emitDirection, Vector2 emitSpeed, BoundingBox emitVolume, float emitTorusWidth,
-            FloatCurve rateCurve, float rateCurveTime, ushort rateCurveCycles, float rateSpeedScale,
-            FloatCurve sizeCurve, float sizeVary, FloatCurve aspectCurve, float aspectVary, Vector3 rotateAxis,
+        public ParticleEffect(ulong flags, ParticleLife life, ParticleEmission emission, float rateSpeedScale,
+            ParticleSize size, Vector3 rotateAxis,
             float rotateOffsetX, float rotateOffsetY, FloatCurve rotateCurveX, FloatCurve rotateCurveY,
-            FloatCurve alphaCurve, float alphaVary, Vector3[] colors, Vector3 colorVary, string materialName,
-            byte tileCountU, byte tileCountV, byte particleAlignmentType, byte particleDrawType, float layer,
-            float frameSpeed, byte frameStart, byte frameCount, float screw, Wiggle[] wiggles, byte bloomAlphaRate,
-            byte bloomAlpha, byte bloomSizeRate, byte bloomSize, Collider[] colliders, float terrainBounce,
-            float terrainRepelHeight, float terrainRepelStrength, float terrainRepelScout, float terrainRepelVertical, float terrainRepelKillHeight,
-            float terrainDeathProbability, float deathByWaterProbability, Vector2 randomWalkDelay,
+            ParticleColor color, ParticleDrawing drawing, float screw, Wiggle[] wiggles, ParticleBloom bloom,
+            Collider[] colliders,
+            ParticleTerrainInteraction terrainInteraction, Vector2 randomWalkDelay,
             Vector2 randomWalkStrength, float randomWalkTurnX, float randomWalkTurnY)
         {
             Flags = flags;
             Life = life;
+            Emission = emission;
+            RateSpeedScale = rateSpeedScale;
+            Size = size;
+            RotateAxis = rotateAxis;
+            RotateOffsetX = rotateOffsetX;
+            RotateOffsetY = rotateOffsetY;
+            RotateCurveX = rotateCurveX;
+            RotateCurveY = rotateCurveY;
+            Color = color;
+            Drawing = drawing;
+            Screw = screw;
+            Wiggles = wiggles;
+            Bloom = bloom;
+            Colliders = colliders;
+            TerrainInteraction = terrainInteraction;
+            RandomWalkDelay = randomWalkDelay;
+            RandomWalkStrength = randomWalkStrength;
+            RandomWalkTurnX = randomWalkTurnX;
+            RandomWalkTurnY = randomWalkTurnY;
+        }
+    }
+
+    public struct ParticleLife
+    {
+        public Vector2 Life { get; }
+        public float LifePreRoll { get; }
+
+        public ParticleLife(Vector2 life, float lifePreRoll)
+        {
+            Life = life;
             LifePreRoll = lifePreRoll;
+        }
+    }
+
+    public struct ParticleEmission
+    {
+        public Vector2 RateDelay { get; }
+        public Vector2 RateTrigger { get; }
+
+        public BoundingBox EmitDirection { get; }
+        public Vector2 EmitSpeed { get; }
+        public BoundingBox EmitVolume { get; }
+        public float EmitTorusWidth { get; }
+
+        public FloatCurve RateCurve { get; }
+        public float RateCurveTime { get; }
+        public ushort RateCurveCycles { get; }
+
+        public ParticleEmission(Vector2 rateDelay, Vector2 rateTrigger, BoundingBox emitDirection, Vector2 emitSpeed,
+            BoundingBox emitVolume, float emitTorusWidth, FloatCurve rateCurve, float rateCurveTime,
+            ushort rateCurveCycles)
+        {
             RateDelay = rateDelay;
             RateTrigger = rateTrigger;
             EmitDirection = emitDirection;
@@ -107,20 +113,60 @@ namespace OpenTS2.Content.DBPF.Effects
             RateCurve = rateCurve;
             RateCurveTime = rateCurveTime;
             RateCurveCycles = rateCurveCycles;
-            RateSpeedScale = rateSpeedScale;
+        }
+    }
+
+    public struct ParticleSize
+    {
+        public FloatCurve SizeCurve { get; }
+        public float SizeVary { get; }
+
+        public FloatCurve AspectCurve { get; }
+        public float AspectVary { get; }
+
+        public ParticleSize(FloatCurve sizeCurve, float sizeVary, FloatCurve aspectCurve, float aspectVary)
+        {
             SizeCurve = sizeCurve;
             SizeVary = sizeVary;
             AspectCurve = aspectCurve;
             AspectVary = aspectVary;
-            RotateAxis = rotateAxis;
-            RotateOffsetX = rotateOffsetX;
-            RotateOffsetY = rotateOffsetY;
-            RotateCurveX = rotateCurveX;
-            RotateCurveY = rotateCurveY;
+        }
+    }
+
+    public struct ParticleColor
+    {
+        public FloatCurve AlphaCurve { get; }
+        public float AlphaVary { get; }
+
+        public Vector3[] Colors { get; }
+        public Vector3 ColorVary { get; }
+
+        public ParticleColor(FloatCurve alphaCurve, float alphaVary, Vector3[] colors, Vector3 colorVary)
+        {
             AlphaCurve = alphaCurve;
             AlphaVary = alphaVary;
             Colors = colors;
             ColorVary = colorVary;
+        }
+    }
+
+    public struct ParticleDrawing
+    {
+        public string MaterialName { get; }
+        public byte TileCountU { get; }
+        public byte TileCountV { get; }
+
+        public byte ParticleAlignmentType { get; }
+        public byte ParticleDrawType { get; }
+
+        public float Layer { get; }
+        public float FrameSpeed { get; }
+        public byte FrameStart { get; }
+        public byte FrameCount { get; }
+
+        public ParticleDrawing(string materialName, byte tileCountU, byte tileCountV, byte particleAlignmentType,
+            byte particleDrawType, float layer, float frameSpeed, byte frameStart, byte frameCount)
+        {
             MaterialName = materialName;
             TileCountU = tileCountU;
             TileCountV = tileCountV;
@@ -130,25 +176,47 @@ namespace OpenTS2.Content.DBPF.Effects
             FrameSpeed = frameSpeed;
             FrameStart = frameStart;
             FrameCount = frameCount;
-            Screw = screw;
-            Wiggles = wiggles;
-            BloomAlphaRate = bloomAlphaRate;
-            BloomAlpha = bloomAlpha;
-            BloomSizeRate = bloomSizeRate;
-            BloomSize = bloomSize;
-            Colliders = colliders;
-            TerrainBounce = terrainBounce;
-            TerrainRepelHeight = terrainRepelHeight;
-            TerrainRepelStrength = terrainRepelStrength;
-            TerrainRepelScout = terrainRepelScout;
-            TerrainRepelVertical = terrainRepelVertical;
-            TerrainRepelKillHeight = terrainRepelKillHeight;
+        }
+    }
+
+    public struct ParticleTerrainInteraction
+    {
+        public float Bounce { get; }
+        public float RepelHeight { get; }
+        public float RepelStrength { get; }
+        public float RepelScout { get; }
+        public float RepelVertical { get; }
+        public float KillHeight { get; }
+        public float TerrainDeathProbability { get; }
+        public float WaterDeathProbability { get; }
+
+        public ParticleTerrainInteraction(float bounce, float repelHeight, float repelStrength, float repelScout,
+            float repelVertical, float killHeight, float terrainDeathProbability, float waterDeathProbability)
+        {
+            Bounce = bounce;
+            RepelHeight = repelHeight;
+            RepelStrength = repelStrength;
+            RepelScout = repelScout;
+            RepelVertical = repelVertical;
+            KillHeight = killHeight;
             TerrainDeathProbability = terrainDeathProbability;
-            DeathByWaterProbability = deathByWaterProbability;
-            RandomWalkDelay = randomWalkDelay;
-            RandomWalkStrength = randomWalkStrength;
-            RandomWalkTurnX = randomWalkTurnX;
-            RandomWalkTurnY = randomWalkTurnY;
+            WaterDeathProbability = waterDeathProbability;
+        }
+    }
+
+    public struct ParticleBloom
+    {
+        public byte AlphaRate { get; }
+        public byte Alpha { get; }
+        public byte SizeRate { get; }
+        public byte Size { get; }
+
+        public ParticleBloom(byte alphaRate, byte alpha, byte sizeRate, byte size)
+        {
+            AlphaRate = alphaRate;
+            Alpha = alpha;
+            SizeRate = sizeRate;
+            Size = size;
         }
     }
 }

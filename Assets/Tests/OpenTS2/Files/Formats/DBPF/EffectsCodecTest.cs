@@ -32,20 +32,20 @@ public class EffectsCodecTest
             .GetAsset<EffectsAsset>(new ResourceKey(instanceID: 1, groupID: GroupIDs.Effects, typeID: TypeIDs.EFFECTS));
         var particle = effectsAsset.Particles[0];
 
-        Assert.That(particle.Life, Is.EqualTo(new Vector2(1, 1)));
+        Assert.That(particle.Life.Life, Is.EqualTo(new Vector2(1, 1)));
 
-        Assert.That(particle.MaterialName, Is.EqualTo("effects-puff"));
-        Assert.That(particle.TileCountU, Is.EqualTo(1));
-        Assert.That(particle.TileCountV, Is.EqualTo(1));
+        Assert.That(particle.Drawing.MaterialName, Is.EqualTo("effects-puff"));
+        Assert.That(particle.Drawing.TileCountU, Is.EqualTo(1));
+        Assert.That(particle.Drawing.TileCountV, Is.EqualTo(1));
 
         Assert.That(particle.Wiggles.Length, Is.EqualTo(0));
 
         Assert.That(particle.Colliders.Length, Is.EqualTo(0));
 
-        Assert.That(particle.TerrainBounce, Is.EqualTo(1.0f));
-        Assert.That(particle.TerrainRepelKillHeight, Is.EqualTo(-1000000000.0f));
-        Assert.That(particle.TerrainDeathProbability, Is.EqualTo(0.0f));
-        Assert.That(particle.DeathByWaterProbability, Is.EqualTo(1.0f));
+        Assert.That(particle.TerrainInteraction.Bounce, Is.EqualTo(1.0f));
+        Assert.That(particle.TerrainInteraction.KillHeight, Is.EqualTo(-1000000000.0f));
+        Assert.That(particle.TerrainInteraction.TerrainDeathProbability, Is.EqualTo(0.0f));
+        Assert.That(particle.TerrainInteraction.WaterDeathProbability, Is.EqualTo(1.0f));
 
         Assert.That(particle.RandomWalkStrength, Is.EqualTo(new Vector2(50, 50)));
         Assert.That(particle.RandomWalkTurnX, Is.EqualTo(0.1).Within(0.005));
