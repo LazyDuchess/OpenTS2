@@ -98,8 +98,14 @@ namespace OpenTS2.Scenes
                 new ParticleSystem.MinMaxCurve(min: effect.Emission.EmitSpeed[0], max: effect.Emission.EmitSpeed[1]);
             main.startLifetime = new ParticleSystem.MinMaxCurve(min:effect.Life.Life[0], max:effect.Life.Life[1]);
 
+            // Set colors.
             var (minColor, maxColor) = effect.Color.GetStartingColorRange();
             main.startColor = new ParticleSystem.MinMaxGradient(minColor, maxColor);
+
+            var colorOverLifetime = system.colorOverLifetime;
+            var (minColorGradient, maxColorGradient) = effect.Color.GetColorGradientsOverTime();
+            colorOverLifetime.color = new ParticleSystem.MinMaxGradient(minColorGradient, maxColorGradient);
+            colorOverLifetime.enabled = true;
 
             if (effect.Drawing.MaterialName != "")
             {
