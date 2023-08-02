@@ -75,6 +75,8 @@ namespace OpenTS2.Scenes
 
         private void RenderRoad(RoadDecoration road)
         {
+            var roadTextureUnformatted = NeighborhoodManager.CurrentNeighborhood.Terrain.TerrainType.RoadTextureName;
+            var roadTextureName = road.GetTextureName(roadTextureUnformatted);
             var roadObject = new GameObject("road", typeof(MeshFilter), typeof(MeshRenderer))
             {
                 transform =
@@ -94,17 +96,18 @@ namespace OpenTS2.Scenes
             var uvs = GetUVsForConnectionFlags(connectionFlag);
 
             roadMesh.SetUVs(0, uvs);
+            // TODO - Make this smoother, maybe generate a low res normal map from the terrain height map or calculate normals ourselves.
             roadMesh.RecalculateNormals();
-            roadObject.GetComponent<MeshFilter>().mesh = roadMesh;
+            roadObject.GetComponent<MeshFilter>().sharedMesh = roadMesh;
 
-            if (!_roadMaterialLookup.TryGetValue(road.TextureName, out Material roadMaterial))
+            if (!_roadMaterialLookup.TryGetValue(roadTextureName, out Material roadMaterial))
             {
-                var texture = ContentProvider.Get().GetAsset<ScenegraphTextureAsset>(new ResourceKey(road.TextureName,
+                var texture = ContentProvider.Get().GetAsset<ScenegraphTextureAsset>(new ResourceKey(roadTextureName,
                 GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR));
 
                 if (texture == null)
                 {
-                    Debug.LogWarning($"Failed to find texture for road: {road.TextureName}");
+                    Debug.LogWarning($"Failed to find texture for road: {roadTextureName}");
                     return;
                 }
 
@@ -117,7 +120,7 @@ namespace OpenTS2.Scenes
 
                 MaterialUtils.SetNeighborhoodParameters(roadMaterial);
 
-                _roadMaterialLookup[road.TextureName] = roadMaterial;
+                _roadMaterialLookup[roadTextureName] = roadMaterial;
 
                 // Store a reference to the road texture so it doesn't get collected while we use it.
                 AddReference(texture);

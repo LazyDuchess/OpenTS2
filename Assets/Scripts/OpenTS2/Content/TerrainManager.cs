@@ -37,7 +37,8 @@ namespace OpenTS2.Content
                 Texture2 = new ResourceKey("desert-medium_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
                 Roughness = new ResourceKey("desert-rough_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
                 Roughness1 = new ResourceKey("desert-rough-red_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
-                Roughness2 = new ResourceKey("desert-rough-red_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR)
+                Roughness2 = new ResourceKey("desert-rough-red_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
+                RoadTextureName = "desert_roads_{0}_txtr"
             };
             var concrete = new TerrainType
             {
@@ -48,7 +49,8 @@ namespace OpenTS2.Content
                 Texture2 = new ResourceKey("concrete-smooth_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
                 Roughness = new ResourceKey("dirt-grey_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
                 Roughness1 = new ResourceKey("dirt-grey_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
-                Roughness2 = new ResourceKey("dirt-grey_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR)
+                Roughness2 = new ResourceKey("dirt-grey_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
+                RoadTextureName = "concrete_roads_{0}_txtr"
             };
             var dirt = new TerrainType
             {
@@ -62,7 +64,8 @@ namespace OpenTS2.Content
                 Texture2 = new ResourceKey("dirt-green_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
                 Roughness = new ResourceKey("dirt-rough-light_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
                 Roughness1 = new ResourceKey("dirt-green-brown_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
-                Roughness2 = new ResourceKey("dirt-green-brown_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR)
+                Roughness2 = new ResourceKey("dirt-green-brown_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
+                RoadTextureName = "dirt_roads_{0}_txtr"
             };
             RegisterTerrainType(temperate);
             RegisterTerrainType(desert);

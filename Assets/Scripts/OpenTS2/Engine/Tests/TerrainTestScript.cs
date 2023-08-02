@@ -26,7 +26,7 @@ public class TerrainTestScript : MonoBehaviour
             contentProvider.GetAsset<NeighborhoodTerrainAsset>(
                 new ResourceKey(0x0, groupName, TypeIDs.NHOOD_TERRAIN));
         //terrainAsset.ApplyToTerrain(terrain);
-        terrainMeshFilter.mesh = terrainAsset.MakeMesh();
+        terrainMeshFilter.sharedMesh = terrainAsset.MakeMesh();
     }
     
 }

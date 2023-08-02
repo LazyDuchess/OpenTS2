@@ -88,7 +88,7 @@ namespace OpenTS2.Scenes
                 };
                 _particleMaterials.Add(material);
 
-                system.GetComponent<Renderer>().material = material;
+                system.GetComponent<Renderer>().sharedMaterial = material;
 
                 Debug.Log($"material: {effect.Drawing.MaterialName}");
             }

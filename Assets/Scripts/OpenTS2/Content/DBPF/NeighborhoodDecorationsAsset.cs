@@ -67,9 +67,10 @@ namespace OpenTS2.Content.DBPF
         public RoadDecoration(DecorationPosition position, Vector3[] roadCorners, uint pieceId, uint underTextureId, byte flags, byte connectionFlag) =>
             (Position, RoadCorners, PieceId, UnderTextureId, Flags, ConnectionFlag) = (position, roadCorners, pieceId, underTextureId, flags, connectionFlag);
 
-        // TODO: this probably isn't exactly right. Don't hard code new_raods in here and check if OR with 0x4 is
-        // correct.
-        public string TextureName => $"new_roads_{(PieceId | 0x04):x8}_txtr";
+        public string GetTextureName(string texture)
+        {
+            return string.Format(texture, $"{(PieceId | 0x04):x8}");
+        }
     }
 
     /// <summary>

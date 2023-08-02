@@ -21,5 +21,6 @@ namespace OpenTS2.Content
         public ResourceKey Roughness;
         public ResourceKey Roughness1;
         public ResourceKey Roughness2;
+        public string RoadTextureName = "new_roads_{0}_txtr";
     }
 }

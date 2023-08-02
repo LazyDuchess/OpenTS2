@@ -36,6 +36,7 @@ namespace OpenTS2.Scenes
             _meshFilter = GetComponent<MeshFilter>();
             var contentProvider = ContentProvider.Get();
             var meshRenderer = GetComponent<MeshRenderer>();
+            // Using .material here cause i want to instantiate it
             _terrainMaterial = meshRenderer.material;
             _terrainMaterial.shader = terrainType.TerrainShader;
             _terrainMaterial.SetVector("_LightVector", Sun.forward);
@@ -88,7 +89,7 @@ namespace OpenTS2.Scenes
                 MakeVertexColors(terrainMesh, vars1, vars2);
             MakeRoughness(terrainMesh);
             LightmapManager.RenderShadowMap();
-            meshRenderer.material.SetTexture("_ShoreMask", LightmapManager.ShoreMap);
+            meshRenderer.sharedMaterial.SetTexture("_ShoreMask", LightmapManager.ShoreMap);
             MaterialUtils.SetNeighborhoodParameters(_terrainMaterial);
         }
 

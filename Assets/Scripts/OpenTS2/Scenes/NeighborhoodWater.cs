@@ -17,7 +17,7 @@ namespace OpenTS2.Scenes
             if (CameraReflection.Instance != null)
             {
                 var meshRenderer = GetComponent<MeshRenderer>();
-                meshRenderer.material.SetTexture("_Reflection", CameraReflection.Instance.ReflectionTexture);
+                meshRenderer.sharedMaterial.SetTexture("_Reflection", CameraReflection.Instance.ReflectionTexture);
             }
         }
     }
