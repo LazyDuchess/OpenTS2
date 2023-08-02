@@ -14,6 +14,7 @@ namespace OpenTS2.Content
         public virtual float RoadDistanceForRoughness => 40f;
         public virtual float RoughnessFalloff => 40f;
         public virtual Shader TerrainShader => Shader.Find("OpenTS2/ClassicTerrain");
+        public virtual bool MakeVariation => true;
         public abstract ResourceKey Texture { get; }
         public virtual ResourceKey Texture1 => Texture;
         public virtual ResourceKey Texture2 => Texture1;

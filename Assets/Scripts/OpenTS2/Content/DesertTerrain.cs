@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using OpenTS2.Common;
 using OpenTS2.Files.Formats.DBPF;
+using UnityEngine;
 
 namespace OpenTS2.Content
 {
@@ -16,7 +17,10 @@ namespace OpenTS2.Content
     public class DesertTerrain : TerrainType
     {
         public override string Name => "Desert";
-
+        public override Shader TerrainShader => Shader.Find("OpenTS2/DesertTerrain");
+        public override float RoadDistanceForRoughness => 20f;
+        public override float RoughnessFalloff => 80f;
+        public override bool MakeVariation => false;
         public override ResourceKey Texture => new ResourceKey("desert-smooth_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR);
         public override ResourceKey Texture1 => new ResourceKey("desert-medium_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR);
 

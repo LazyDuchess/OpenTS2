@@ -84,7 +84,8 @@ namespace OpenTS2.Scenes
             var vars1 = GetVariationRectangles(terrainAsset.Width, terrainAsset.Height);
             var vars2 = GetVariationRectangles(terrainAsset.Width, terrainAsset.Height);
             
-            MakeVertexColors(terrainMesh, vars1, vars2);
+            if (terrainAsset.TerrainType.MakeVariation)
+                MakeVertexColors(terrainMesh, vars1, vars2);
             MakeRoughness(terrainMesh);
             LightmapManager.RenderShadowMap();
             meshRenderer.material.SetTexture("_ShoreMask", LightmapManager.ShoreMap);
@@ -175,7 +176,7 @@ namespace OpenTS2.Scenes
                     color.b = 1f;
                 else
                 {
-                    var amount = Mathf.Clamp((closestRoadDistance - roughnessFalloff) / (roadDistanceForRoughness + roughnessFalloff), 0f, 1f);
+                    var amount = Mathf.Clamp((closestRoadDistance - roadDistanceForRoughness) / (roadDistanceForRoughness + roughnessFalloff), 0f, 1f);
                     color.b = amount;
                 }
                 colors[i] = color;

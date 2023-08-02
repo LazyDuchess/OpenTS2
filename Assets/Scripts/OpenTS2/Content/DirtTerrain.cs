@@ -13,7 +13,7 @@ namespace OpenTS2.Content
     // Texture1 is a little further away
     // Roughness is far from roads
     // Roughness1 seems to show up on top of Roughness on the sides of hilly terrain, kinda like cliffs but with a different threshold.
-    public class DirtTerrain : TerrainType
+    public class DirtTerrain : DesertTerrain
     {
         public override string Name => "Dirt";
 
