@@ -1,8 +1,11 @@
-﻿using System;
+﻿using OpenTS2.Common;
+using OpenTS2.Files.Formats.DBPF;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace OpenTS2.Content
 {
@@ -11,16 +14,65 @@ namespace OpenTS2.Content
         private static Dictionary<string, TerrainType> s_terrainTypes = new Dictionary<string, TerrainType>();
         public static void Initialize()
         {
-            RegisterTerrainType<TemperateTerrain>();
-            RegisterTerrainType<DesertTerrain>();
-            RegisterTerrainType<ConcreteTerrain>();
-            RegisterTerrainType<DirtTerrain>();
+            var temperate = new TerrainType
+            {
+                Name = "Temperate",
+                Texture = new ResourceKey("nh-temperate-wet-00_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
+                Texture1 = new ResourceKey("nh-temperate-wet-01_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
+                Texture2 = new ResourceKey("nh-temperate-wet-01_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
+                Roughness = new ResourceKey("nh-temperate-drydry-00_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
+                Roughness1 = new ResourceKey("nh-temperate-drydry-01_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
+                Roughness2 = new ResourceKey("nh-temperate-drydry-02_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR)
+
+            };
+            var desert = new TerrainType
+            {
+                Name = "Desert",
+                TerrainShader = Shader.Find("OpenTS2/DesertTerrain"),
+                RoadDistanceForRoughness = 20f,
+                RoughnessFalloff = 80f,
+                MakeVariation = false,
+                Texture = new ResourceKey("desert-smooth_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
+                Texture1 = new ResourceKey("desert-medium_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
+                Texture2 = new ResourceKey("desert-medium_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
+                Roughness = new ResourceKey("desert-rough_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
+                Roughness1 = new ResourceKey("desert-rough-red_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
+                Roughness2 = new ResourceKey("desert-rough-red_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR)
+            };
+            var concrete = new TerrainType
+            {
+                Name = "Concrete",
+                MakeVariation = false,
+                Texture = new ResourceKey("concrete-smooth_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
+                Texture1 = new ResourceKey("concrete-smooth_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
+                Texture2 = new ResourceKey("concrete-smooth_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
+                Roughness = new ResourceKey("dirt-grey_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
+                Roughness1 = new ResourceKey("dirt-grey_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
+                Roughness2 = new ResourceKey("dirt-grey_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR)
+            };
+            var dirt = new TerrainType
+            {
+                Name = "Dirt",
+                TerrainShader = Shader.Find("OpenTS2/DesertTerrain"),
+                RoadDistanceForRoughness = 20f,
+                RoughnessFalloff = 80f,
+                MakeVariation = false,
+                Texture = new ResourceKey("dirt-rough_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
+                Texture1 = new ResourceKey("dirt-green_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
+                Texture2 = new ResourceKey("dirt-green_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
+                Roughness = new ResourceKey("dirt-rough-light_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
+                Roughness1 = new ResourceKey("dirt-green-brown_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
+                Roughness2 = new ResourceKey("dirt-green-brown_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR)
+            };
+            RegisterTerrainType(temperate);
+            RegisterTerrainType(desert);
+            RegisterTerrainType(concrete);
+            RegisterTerrainType(dirt);
         }
 
-        public static void RegisterTerrainType<T>() where T : TerrainType
+        public static void RegisterTerrainType(TerrainType type)
         {
-            var instance = Activator.CreateInstance(typeof(T)) as TerrainType;
-            s_terrainTypes[instance.Name] = instance;
+            s_terrainTypes[type.Name] = type;
         }
 
         public static TerrainType GetTerrainType(string key)
