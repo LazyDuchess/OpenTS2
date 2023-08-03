@@ -164,6 +164,6 @@ public class EffectsCodecTest
 
         var description = visualEffect.Descriptions[0];
         Assert.That(description.EffectName, Is.EqualTo("construction_cursor_dust"));
-        Assert.That(description.BlockIndex, Is.EqualTo(0));
+        Assert.That(description.EffectIndex, Is.EqualTo(0));
     }
 }

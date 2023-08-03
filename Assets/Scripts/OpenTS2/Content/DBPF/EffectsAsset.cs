@@ -72,12 +72,12 @@ namespace OpenTS2.Content.DBPF
 
         public IBaseEffect GetEffectFromVisualEffectDescription(EffectDescription description)
         {
-            return description.BlockType switch
+            return description.EffectType switch
             {
-                1 => ParticleEffects[description.BlockIndex],
-                6 => SequenceEffects[description.BlockIndex],
+                1 => ParticleEffects[description.EffectIndex],
+                6 => SequenceEffects[description.EffectIndex],
                 _ => throw new NotImplementedException(
-                    $"Block type {description.BlockType} in VisualEffect not supported")
+                    $"Block type {description.EffectType} in VisualEffect not supported")
             };
         }
     }

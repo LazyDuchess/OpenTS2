@@ -1,4 +1,5 @@
-﻿using OpenTS2.Content.DBPF.Effects.Types;
+﻿using System;
+using OpenTS2.Content.DBPF.Effects.Types;
 using OpenTS2.Files.Formats.DBPF.Types;
 using OpenTS2.Files.Utils;
 using UnityEngine;
@@ -76,11 +77,29 @@ namespace OpenTS2.Content.DBPF.Effects
             RandomWalkTurnX = randomWalkTurnX;
             RandomWalkTurnY = randomWalkTurnY;
         }
+
+        public bool IsFlagSet(ParticleFlagBits flag)
+        {
+            var mask = 1UL << (int)flag;
+            return (Flags & mask) != 0;
+        }
+    }
+
+    public enum ParticleFlagBits
+    {
+        /// <summary>
+        /// This flag is set if the particle emitter should be an ellipsoid shape.
+        /// </summary>
+        EmitterIsEllipsoid = 8,
     }
 
     public struct ParticleLife
     {
+        /// <summary>
+        /// Particles get a lifetime in a random range between this vector's start and end.
+        /// </summary>
         public Vector2 Life { get; }
+
         public float LifePreRoll { get; }
 
         public ParticleLife(Vector2 life, float lifePreRoll)
@@ -97,7 +116,16 @@ namespace OpenTS2.Content.DBPF.Effects
 
         public BoundingBox EmitDirection { get; }
         public Vector2 EmitSpeed { get; }
+
+        /// <summary>
+        /// The volume of the emitter defined by its corners. This can either be a cuboid shape, an ellipsoid or a
+        /// torus depending on the flags and EmitTorusWidth.
+        /// </summary>
         public BoundingBox EmitVolume { get; }
+
+        /// <summary>
+        /// If set to a value greater than 0, emitter is a torus shape.
+        /// </summary>
         public float EmitTorusWidth { get; }
 
         public FloatCurve RateCurve { get; }
@@ -151,6 +179,61 @@ namespace OpenTS2.Content.DBPF.Effects
             AlphaVary = alphaVary;
             Colors = colors;
             ColorVary = colorVary;
+        }
+
+        /// <summary>
+        /// This returns the range of colors to use for start of the particle.
+        /// </summary>
+        public readonly (Color, Color) GetStartingColorRange()
+        {
+            var minimum = new Color(Colors[0].x - ColorVary[0],
+                Colors[0].y - ColorVary[1],
+                Colors[0].z - ColorVary[2],
+                Math.Max(AlphaCurve.Curve[0] - AlphaVary, 0));
+            var maximum = new Color(Colors[0].x + ColorVary[0],
+                Colors[0].y + ColorVary[1],
+                Colors[0].z + ColorVary[2],
+                Math.Min(AlphaCurve.Curve[0] + AlphaVary, 1));
+            return (minimum, maximum);
+        }
+
+        public readonly (Gradient, Gradient) GetColorGradientsOverTime()
+        {
+            var minColorKeys = new GradientColorKey[Colors.Length];
+            var maxColorKeys = new GradientColorKey[Colors.Length];
+
+            // Unity supports a maximum of 8 keys.
+            Debug.Assert(Colors.Length <= 8);
+            for (var i = 0; i < Colors.Length; i++)
+            {
+                var time = ((float)i) / Colors.Length;
+
+                var color = Colors[i];
+                minColorKeys[i] = new GradientColorKey(
+                    new Color(color.x - ColorVary[0], color.y - ColorVary[1], color.z - ColorVary[2]), time);
+                maxColorKeys[i] = new GradientColorKey(
+                    new Color(color.x + ColorVary[0], color.y + ColorVary[1], color.z + ColorVary[2]), time);
+            }
+
+            // Unity supports a maximum of 8 keys.
+            Debug.Assert(AlphaCurve.Curve.Length <= 8);
+
+            var minAlphaKeys = new GradientAlphaKey[AlphaCurve.Curve.Length];
+            var maxAlphaKeys = new GradientAlphaKey[AlphaCurve.Curve.Length];
+            for (var i = 0; i < AlphaCurve.Curve.Length; i++)
+            {
+                var time = ((float)i) / AlphaCurve.Curve.Length;
+
+                var alpha = AlphaCurve.Curve[i];
+                minAlphaKeys[i] = new GradientAlphaKey(Math.Max(alpha - AlphaVary, 0), time);
+                maxAlphaKeys[i] = new GradientAlphaKey(Math.Min(alpha + AlphaVary, 1), time);
+            }
+
+            var minGradient = new Gradient();
+            minGradient.SetKeys(minColorKeys, minAlphaKeys);
+            var maxGradient = new Gradient();
+            maxGradient.SetKeys(maxColorKeys, maxAlphaKeys);
+            return (minGradient, maxGradient);
         }
     }
 
@@ -225,7 +308,9 @@ namespace OpenTS2.Content.DBPF.Effects
     }
 
     // These are methods common to both Particle and MetaParticles.
+
     #region Particle and MetaParticle common readers
+
     public static class ParticleHelper
     {
         internal static ParticleLife ReadParticleLife(IoBuffer reader)
@@ -288,5 +373,6 @@ namespace OpenTS2.Content.DBPF.Effects
             );
         }
     }
+
     #endregion
 }

@@ -15,7 +15,7 @@ namespace OpenTS2.Content.DBPF.Effects.Types
             Curve = curve;
         }
 
-        public AnimationCurve ToUnityCurve()
+        public ParticleSystem.MinMaxCurve ToUnityCurve()
         {
             var keyframes = new Keyframe[Curve.Length];
             for (var i = 0; i < Curve.Length; i++)
@@ -23,7 +23,21 @@ namespace OpenTS2.Content.DBPF.Effects.Types
                 keyframes[i] = new Keyframe(i, Curve[i]);
             }
 
-            return new AnimationCurve(keyframes);
+            return new ParticleSystem.MinMaxCurve(1.0f, new AnimationCurve(keyframes));
+        }
+
+        public ParticleSystem.MinMaxCurve ToUnityCurveWithVariance(float vary)
+        {
+            var lowerKeyframes = new Keyframe[Curve.Length];
+            var upperKeyframes = new Keyframe[Curve.Length];
+            for (var i = 0; i < Curve.Length; i++)
+            {
+                lowerKeyframes[i] = new Keyframe(i, Curve[i] - vary);
+                upperKeyframes[i] = new Keyframe(i, Curve[i] + vary);
+            }
+
+            return new ParticleSystem.MinMaxCurve(1.0f,
+                new AnimationCurve(lowerKeyframes), new AnimationCurve(upperKeyframes));
         }
 
         public static FloatCurve Deserialize(IoBuffer reader)
