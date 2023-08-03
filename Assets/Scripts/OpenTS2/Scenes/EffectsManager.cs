@@ -96,11 +96,16 @@ namespace OpenTS2.Scenes
                 shape.shapeType = ParticleSystemShapeType.Box;
             }
 
+            // Set particle lifetime and speed.
             var main = system.main;
-            main.startSize = effect.Size.SizeCurve.ToUnityCurveWithVariance(effect.Size.SizeVary);
+            main.startLifetime = new ParticleSystem.MinMaxCurve(min:effect.Life.Life[0], max:effect.Life.Life[1]);
             main.startSpeed =
                 new ParticleSystem.MinMaxCurve(min: effect.Emission.EmitSpeed[0], max: effect.Emission.EmitSpeed[1]);
-            main.startLifetime = new ParticleSystem.MinMaxCurve(min:effect.Life.Life[0], max:effect.Life.Life[1]);
+
+            // Set particle size over time.
+            var sizeOverTime = system.sizeOverLifetime;
+            sizeOverTime.size = effect.Size.SizeCurve.ToUnityCurveWithVariance(effect.Size.SizeVary);
+            sizeOverTime.enabled = true;
 
             // Set colors.
             var colorOverLifetime = system.colorOverLifetime;
