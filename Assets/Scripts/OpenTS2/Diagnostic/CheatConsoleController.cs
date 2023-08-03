@@ -16,10 +16,11 @@ namespace OpenTS2.Diagnostic
         public InputField CheatInputField;
         public Text ConsoleOutput;
         public ScrollRect ConsoleScroll;
-        [ConsoleProperty("ots2_consoleMaxChars")]
         private static int _maxCharacters = 50000;
+        private static int _maxHistory = 100;
         bool _isOpen = false;
-        string _lastCheat = "";
+        List<string> _history = new List<string>();
+        int _currentHistory = -1;
 
         private void Awake()
         {
@@ -28,9 +29,15 @@ namespace OpenTS2.Diagnostic
                 Destroy(gameObject);
                 return;
             }
+            CheatInputField.onValueChanged.AddListener(OnTextChanged);
             s_singleton = this;
             ConsoleParent.SetActive(false);
             DontDestroyOnLoad(this);
+        }
+
+        void OnTextChanged(string value)
+        {
+            _currentHistory = -1;
         }
 
         private void Update()
@@ -39,10 +46,53 @@ namespace OpenTS2.Diagnostic
                 ToggleConsole();
             if (!_isOpen)
                 return;
-            if (Input.GetKeyDown(KeyCode.Return))
+            if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
                 Submit();
-            if (Input.GetKeyDown(KeyCode.UpArrow) && !string.IsNullOrEmpty(_lastCheat) && CheatInputField.isFocused)
-                CheatInputField.text = _lastCheat;
+            if (Input.GetKeyDown(KeyCode.UpArrow) && CheatInputField.isFocused)
+            {
+                HistoryUp();
+            }
+            if (Input.GetKeyDown(KeyCode.DownArrow) && CheatInputField.isFocused)
+            {
+                HistoryDown();
+            }
+        }
+
+        void AddToHistory(string text)
+        {
+            _history.Insert(0, text);
+            if (_history.Count > _maxHistory)
+                _history.RemoveRange(_maxHistory, _history.Count - _maxHistory);
+        }
+
+        void HistoryUp()
+        {
+            CheatInputField.onValueChanged.RemoveListener(OnTextChanged);
+            if (_history.Count > 0)
+            {
+                _currentHistory++;
+                if (_currentHistory < 0)
+                    _currentHistory = _history.Count - 1;
+                if (_currentHistory >= _history.Count)
+                    _currentHistory = 0;
+                CheatInputField.text = _history[_currentHistory];
+            }
+            CheatInputField.onValueChanged.AddListener(OnTextChanged);
+        }
+
+        void HistoryDown()
+        {
+            CheatInputField.onValueChanged.RemoveListener(OnTextChanged);
+            if (_history.Count > 0)
+            {
+                _currentHistory--;
+                if (_currentHistory < 0)
+                    _currentHistory = _history.Count - 1;
+                if (_currentHistory >= _history.Count)
+                    _currentHistory = 0;
+                CheatInputField.text = _history[_currentHistory];
+            }
+            CheatInputField.onValueChanged.AddListener(OnTextChanged);
         }
 
         void ToggleConsole()
@@ -70,7 +120,7 @@ namespace OpenTS2.Diagnostic
         void Submit()
         {
             Log($"> {CheatInputField.text}");
-            _lastCheat = CheatInputField.text;
+            AddToHistory(CheatInputField.text);
             try
             {
                 CheatSystem.Execute(CheatInputField.text, this);
