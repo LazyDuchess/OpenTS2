@@ -1,6 +1,7 @@
 ﻿using OpenTS2.Assemblies;
 using OpenTS2.Client;
 using OpenTS2.Content;
+using OpenTS2.Diagnostic;
 using OpenTS2.Files;
 using OpenTS2.Files.Formats.DBPF;
 using OpenTS2.Rendering;
@@ -30,6 +31,7 @@ namespace OpenTS2.Engine
             MaterialManager.Initialize();
             Filesystem.Initialize(new JSONPathProvider(), epManager);
             CodecAttribute.Initialize();
+            CheatSystem.Initialize();
             //Initialize the game assembly, do all reflection things.
             AssemblyHelper.InitializeLoadedAssemblies();
             s_initialized = true;

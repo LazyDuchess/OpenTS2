@@ -13,18 +13,7 @@ namespace OpenTS2.Diagnostic
         public bool GetBool(int index)
         {
             var arg = _args[index];
-            var parsedArg = arg.Trim().ToLowerInvariant();
-            if (parsedArg == "true")
-                return true;
-            if (parsedArg == "on")
-                return true;
-            var parsedInt = int.TryParse(parsedArg, out int asInt);
-            if (parsedInt)
-            {
-                if (asInt > 0)
-                    return true;
-            }
-            return false;
+            return CheatSystem.ParseBoolean(arg);
         }
         public string GetString(int index)
         {
@@ -45,12 +34,21 @@ namespace OpenTS2.Diagnostic
             {
                 if (command[i] == '"')
                 {
+                    if (inString)
+                    {
+                        _args.Add(stringSoFar);
+                        stringSoFar = "";
+                    }
                     inString = !inString;
                     continue;
                 }
                 if (command[i] == ' ' && !inString)
                 {
-                    _args.Add(stringSoFar);
+                    if (stringSoFar != "")
+                    {
+                        _args.Add(stringSoFar);
+                        stringSoFar = "";
+                    }
                     continue;
                 }
                 stringSoFar += command[i];

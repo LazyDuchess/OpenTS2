@@ -12,11 +12,13 @@ using UnityEngine;
 using OpenTS2.Components;
 using OpenTS2.Engine;
 using OpenTS2.Rendering;
+using OpenTS2.Diagnostic;
 
 namespace OpenTS2.Scenes
 {
     public class NeighborhoodDecorations : AssetReferenceComponent
     {
+        private static BooleanProperty s_enableBatchingProp = new BooleanProperty("ots2_HoodBatching", true);
         private Dictionary<string, Material> _roadMaterialLookup = new Dictionary<string, Material>();
         private Transform _decorationsParent;
         private Transform _roadsParent;
@@ -59,9 +61,12 @@ namespace OpenTS2.Scenes
                 }
             }
 
-            var batchedDeco = Batching.Batch(_decorationsParent, flipFaces: true);
-            var batchedLots = Batching.Batch(_lotsParent, flipFaces: true);
-            var batchedRoads = Batching.Batch(_roadsParent, flipFaces: false);
+            if (s_enableBatchingProp.Value)
+            {
+                var batchedDeco = Batching.Batch(_decorationsParent, flipFaces: true);
+                var batchedLots = Batching.Batch(_lotsParent, flipFaces: true);
+                var batchedRoads = Batching.Batch(_roadsParent, flipFaces: false);
+            }
         }
 
         // Clean up the road materials we created. Textures should get garbage collected.
