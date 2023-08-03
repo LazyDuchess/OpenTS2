@@ -19,9 +19,6 @@ public class EffectsTest : MonoBehaviour
         var effect = effectsManager.CreateEffect("neighborhood_house_smoking");
         //effectsManager.StartEffect("neighborhood_hanggliders");
 
-        foreach (var particles in effect.GetComponentsInChildren<ParticleSystem>())
-        {
-            particles.Play();
-        }
+        effect.PlayEffect();
     }
 }
