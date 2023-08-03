@@ -62,6 +62,17 @@ namespace OpenTS2.Scenes
                         var subSystem = CreateForParticleEffect(effectDescription, e);
                         subSystem.transform.SetParent(unityParticleSystem.transform, worldPositionStays: false);
                         break;
+                    case MetaParticle e:
+                        // TODO: apply adjustments from meta particle on the base particle effect.
+                        StartEffect(e.BaseEffect);
+                        break;
+                    case ModelEffect e:
+                        Debug.Log($"modeleffect mode name: {e.ModelName}");
+                        var model = ContentProvider.Get()
+                            .GetAsset<ScenegraphResourceAsset>(new ResourceKey(e.ModelName, GroupIDs.Scenegraph,
+                                TypeIDs.SCENEGRAPH_CRES));
+                        model.CreateRootGameObject();
+                        break;
                     default:
                         throw new NotImplementedException($"Effect type {effect} not supported");
                 }

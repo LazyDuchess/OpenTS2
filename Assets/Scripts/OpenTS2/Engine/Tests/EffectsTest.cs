@@ -17,5 +17,6 @@ public class EffectsTest : MonoBehaviour
 
         var effectsManager = GetComponent<EffectsManager>();
         effectsManager.StartEffect("neighborhood_house_smoking");
+        //effectsManager.StartEffect("neighborhood_hanggliders");
     }
 }
