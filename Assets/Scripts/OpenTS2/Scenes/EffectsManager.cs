@@ -13,11 +13,10 @@ using UnityEngine;
 
 namespace OpenTS2.Scenes
 {
-    [RequireComponent(typeof(ParticleSystem))]
     public class EffectsManager : MonoBehaviour
     {
         private EffectsAsset _effects;
-        private List<Material> _particleMaterials = new List<Material>();
+        private readonly List<Material> _particleMaterials = new List<Material>();
 
         private void Awake()
         {
@@ -30,13 +29,6 @@ namespace OpenTS2.Scenes
                 typeID: TypeIDs.EFFECTS));
 
             Debug.Assert(_effects != null, "Couldn't find effects");
-
-            // Apply a sims to unity space transformation.
-            GetComponent<ParticleSystem>().transform.Rotate(-90, 0, 0);
-            GetComponent<ParticleSystem>().transform.localScale = new Vector3(1, -1, 1);
-            // Disable emission on the base particle system, only children will emit.
-            var emissionModule = GetComponent<ParticleSystem>().emission;
-            emissionModule.enabled = false;
         }
 
         // Clean up the materials we created.
@@ -48,9 +40,11 @@ namespace OpenTS2.Scenes
             }
         }
 
-        public void StartEffect(string effectName)
+        public GameObject CreateEffect(string effectName)
         {
-            var unityParticleSystem = GetComponent<ParticleSystem>();
+            var simsToUnityTransform = new GameObject(effectName + "_transform");
+            simsToUnityTransform.transform.Rotate(-90, 0, 0);
+            simsToUnityTransform.transform.localScale = new Vector3(1, -1, 1);
 
             var visualEffect = _effects.GetEffectByName(effectName);
             foreach (var effectDescription in visualEffect.Descriptions)
@@ -59,26 +53,26 @@ namespace OpenTS2.Scenes
                 switch (effect)
                 {
                     case ParticleEffect e:
-                        var subSystem = CreateForParticleEffect(effectDescription, e);
-                        subSystem.transform.SetParent(unityParticleSystem.transform, worldPositionStays: false);
+                        var particleEffectSystem = CreateForParticleEffect(effectDescription, e);
+                        particleEffectSystem.transform.SetParent(simsToUnityTransform.transform, worldPositionStays: false);
                         break;
                     case MetaParticle e:
                         // TODO: apply adjustments from meta particle on the base particle effect.
-                        StartEffect(e.BaseEffect);
-                        break;
+                        return CreateEffect(e.BaseEffect);
                     case ModelEffect e:
                         Debug.Log($"modeleffect mode name: {e.ModelName}");
                         var model = ContentProvider.Get()
                             .GetAsset<ScenegraphResourceAsset>(new ResourceKey(e.ModelName, GroupIDs.Scenegraph,
                                 TypeIDs.SCENEGRAPH_CRES));
-                        model.CreateRootGameObject();
+                        var modelObject = model.CreateGameObject();
+                        modelObject.transform.SetParent(simsToUnityTransform.transform, worldPositionStays: false);
                         break;
                     default:
                         throw new NotImplementedException($"Effect type {effect} not supported");
                 }
             }
 
-            unityParticleSystem.Play(withChildren: true);
+            return simsToUnityTransform;
         }
 
         private GameObject CreateForParticleEffect(EffectDescription description, ParticleEffect effect)

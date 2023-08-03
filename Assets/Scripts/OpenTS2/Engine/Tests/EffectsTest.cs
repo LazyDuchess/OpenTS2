@@ -16,7 +16,12 @@ public class EffectsTest : MonoBehaviour
             Filesystem.GetPackagesInDirectory(Filesystem.GetDataPathForProduct(ProductFlags.BaseGame) + "/Res/Sims3D"));
 
         var effectsManager = GetComponent<EffectsManager>();
-        effectsManager.StartEffect("neighborhood_house_smoking");
+        var effect = effectsManager.CreateEffect("neighborhood_house_smoking");
         //effectsManager.StartEffect("neighborhood_hanggliders");
+
+        foreach (var particles in effect.GetComponentsInChildren<ParticleSystem>())
+        {
+            particles.Play();
+        }
     }
 }
