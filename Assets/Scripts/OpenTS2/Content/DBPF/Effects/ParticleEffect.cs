@@ -91,6 +91,9 @@ namespace OpenTS2.Content.DBPF.Effects
         /// This flag is set if the particle emitter should be an ellipsoid shape.
         /// </summary>
         EmitterIsEllipsoid = 8,
+        ParticleHasMaterial = 21,
+        ParticleHasShape = 22,
+        ParticleMaterialIsLight = 23,
     }
 
     public struct ParticleLife
@@ -253,7 +256,7 @@ namespace OpenTS2.Content.DBPF.Effects
         public byte TileCountV { get; }
 
         public byte ParticleAlignmentType { get; }
-        public byte ParticleDrawType { get; }
+        public DrawType ParticleDrawType { get; }
 
         public float Layer { get; }
         public float FrameSpeed { get; }
@@ -267,11 +270,27 @@ namespace OpenTS2.Content.DBPF.Effects
             TileCountU = tileCountU;
             TileCountV = tileCountV;
             ParticleAlignmentType = particleAlignmentType;
-            ParticleDrawType = particleDrawType;
+            if (!Enum.IsDefined(typeof(DrawType), particleDrawType))
+            {
+                throw new ArgumentException($"Invalid particleDrawType: {particleDrawType}");
+            }
+            ParticleDrawType = (DrawType)particleDrawType;
             Layer = layer;
             FrameSpeed = frameSpeed;
             FrameStart = frameStart;
             FrameCount = frameCount;
+        }
+
+        public enum DrawType : byte
+        {
+            Decal = 0,
+            DecalInvertDepth = 1,
+            DecalIgnoreDepth = 2,
+            DepthDecal = 3,
+            Additive = 4,
+            AdditiveInvertDepth = 5,
+            AdditiveIgnoreDepth = 6,
+            Modulate = 7,
         }
     }
 
