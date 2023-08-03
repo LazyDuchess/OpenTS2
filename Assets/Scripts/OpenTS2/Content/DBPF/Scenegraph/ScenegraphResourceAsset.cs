@@ -45,9 +45,16 @@ namespace OpenTS2.Content.DBPF.Scenegraph
 
             var gameObject = new GameObject(resourceName, typeof(AssetReferenceComponent));
             // Traverse the graph if present and render out any sub-resources.
-            if (firstResourceNode.Tree != null)
+            try
             {
-                RenderCompositionTree(gameObject, firstResourceNode.Tree);
+                if (firstResourceNode.Tree != null)
+                {
+                    RenderCompositionTree(gameObject, firstResourceNode.Tree);
+                }
+            }
+            catch(Exception e)
+            {
+                Debug.LogException(e);
             }
             return gameObject;
         }
