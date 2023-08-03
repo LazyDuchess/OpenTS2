@@ -181,20 +181,33 @@ namespace OpenTS2.Content.DBPF.Effects
             ColorVary = colorVary;
         }
 
+        private readonly (Color, Color) GetMinMaxColorAtTimeStep(int time)
+        {
+            var min = new Color(FxVary.VaryValueMin(Colors[time].x, ColorVary[0]),
+                FxVary.VaryValueMin(Colors[time].y, ColorVary[1]),
+                FxVary.VaryValueMin(Colors[time].z, ColorVary[2]));
+            var max = new Color(FxVary.VaryValueMax(Colors[time].x, ColorVary[0]),
+                FxVary.VaryValueMax(Colors[time].y, ColorVary[1]),
+                FxVary.VaryValueMax(Colors[time].z, ColorVary[2]));
+            var (minAlpha, maxAlpha) = GetMinMaxAlphaAtTimeStep(time);
+            min.a = minAlpha;
+            max.a = maxAlpha;
+            return (min, max);
+        }
+
+        private readonly (float, float) GetMinMaxAlphaAtTimeStep(int time)
+        {
+            var min = Math.Max(0, FxVary.VaryValueMin(AlphaCurve.Curve[time], AlphaVary));
+            var max = Math.Min(1, FxVary.VaryValueMax(AlphaCurve.Curve[time], AlphaVary));
+            return (min, max);
+        }
+
         /// <summary>
         /// This returns the range of colors to use for start of the particle.
         /// </summary>
         public readonly (Color, Color) GetStartingColorRange()
         {
-            var minimum = new Color(Colors[0].x - ColorVary[0],
-                Colors[0].y - ColorVary[1],
-                Colors[0].z - ColorVary[2],
-                Math.Max(AlphaCurve.Curve[0] - AlphaVary, 0));
-            var maximum = new Color(Colors[0].x + ColorVary[0],
-                Colors[0].y + ColorVary[1],
-                Colors[0].z + ColorVary[2],
-                Math.Min(AlphaCurve.Curve[0] + AlphaVary, 1));
-            return (minimum, maximum);
+            return GetMinMaxColorAtTimeStep(0);
         }
 
         public readonly (Gradient, Gradient) GetColorGradientsOverTime()
@@ -207,12 +220,9 @@ namespace OpenTS2.Content.DBPF.Effects
             for (var i = 0; i < Colors.Length; i++)
             {
                 var time = ((float)i) / Colors.Length;
-
-                var color = Colors[i];
-                minColorKeys[i] = new GradientColorKey(
-                    new Color(color.x - ColorVary[0], color.y - ColorVary[1], color.z - ColorVary[2]), time);
-                maxColorKeys[i] = new GradientColorKey(
-                    new Color(color.x + ColorVary[0], color.y + ColorVary[1], color.z + ColorVary[2]), time);
+                var (min, max) = GetMinMaxColorAtTimeStep(i);
+                minColorKeys[i] = new GradientColorKey(min, time);
+                maxColorKeys[i] = new GradientColorKey(max, time);
             }
 
             // Unity supports a maximum of 8 keys.
@@ -223,10 +233,9 @@ namespace OpenTS2.Content.DBPF.Effects
             for (var i = 0; i < AlphaCurve.Curve.Length; i++)
             {
                 var time = ((float)i) / AlphaCurve.Curve.Length;
-
-                var alpha = AlphaCurve.Curve[i];
-                minAlphaKeys[i] = new GradientAlphaKey(Math.Max(alpha - AlphaVary, 0), time);
-                maxAlphaKeys[i] = new GradientAlphaKey(Math.Min(alpha + AlphaVary, 1), time);
+                var (min, max) = GetMinMaxAlphaAtTimeStep(i);
+                minAlphaKeys[i] = new GradientAlphaKey(min, time);
+                maxAlphaKeys[i] = new GradientAlphaKey(max, time);
             }
 
             var minGradient = new Gradient();

@@ -99,9 +99,6 @@ namespace OpenTS2.Scenes
             main.startLifetime = new ParticleSystem.MinMaxCurve(min:effect.Life.Life[0], max:effect.Life.Life[1]);
 
             // Set colors.
-            var (minColor, maxColor) = effect.Color.GetStartingColorRange();
-            main.startColor = new ParticleSystem.MinMaxGradient(minColor, maxColor);
-
             var colorOverLifetime = system.colorOverLifetime;
             var (minColorGradient, maxColorGradient) = effect.Color.GetColorGradientsOverTime();
             colorOverLifetime.color = new ParticleSystem.MinMaxGradient(minColorGradient, maxColorGradient);
@@ -121,7 +118,7 @@ namespace OpenTS2.Scenes
             return particleObject;
         }
 
-        private Material MakeParticleMaterial(Texture texture)
+        private static Material MakeParticleMaterial(Texture texture)
         {
             var material = new Material(Shader.Find("Particles/Standard Surface"))
             {
@@ -130,7 +127,7 @@ namespace OpenTS2.Scenes
             // These are jacked from https://github.com/Unity-Technologies/UnityCsReference/blob/master/Editor/Mono/Inspector/StandardParticlesShaderGUI.cs#L637
             // for now, may want to do our own shader in the future.
             material.SetOverrideTag("RenderType", "Transparent");
-            material.SetFloat("_BlendOp", (float)UnityEngine.Rendering.BlendOp.Add);
+            material.SetFloat("_BlendOp", (float)UnityEngine.Rendering.BlendOp.Multiply);
             material.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
             material.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.One);
             material.SetFloat("_ZWrite", 0.0f);

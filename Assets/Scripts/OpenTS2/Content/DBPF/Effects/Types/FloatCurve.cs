@@ -32,8 +32,9 @@ namespace OpenTS2.Content.DBPF.Effects.Types
             var upperKeyframes = new Keyframe[Curve.Length];
             for (var i = 0; i < Curve.Length; i++)
             {
-                lowerKeyframes[i] = new Keyframe(i, Curve[i] - vary);
-                upperKeyframes[i] = new Keyframe(i, Curve[i] + vary);
+                var (minValue, maxValue) = FxVary.CalculateVary(Curve[i], vary);
+                lowerKeyframes[i] = new Keyframe(i, minValue);
+                upperKeyframes[i] = new Keyframe(i, maxValue);
             }
 
             return new ParticleSystem.MinMaxCurve(1.0f,
