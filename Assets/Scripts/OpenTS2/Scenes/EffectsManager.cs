@@ -77,8 +77,12 @@ namespace OpenTS2.Scenes
             var emission = system.emission;
             emission.rateOverTime = effect.Emission.RateCurve.ToUnityCurve();
 
-            // Set the emitter shape and drection.
+            // Set the emitter shape and direction.
             var shape = system.shape;
+            var (emitterPos, emitterRotation, emitterScale) = effect.Emission.EmitVolume.GetCenterRotationAndScale();
+            shape.position = emitterPos;
+            shape.rotation = emitterRotation.eulerAngles;
+            shape.scale = emitterScale;
             if (effect.Emission.EmitTorusWidth > 0)
             {
                 shape.shapeType = ParticleSystemShapeType.Donut;
