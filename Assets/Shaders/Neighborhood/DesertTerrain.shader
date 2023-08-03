@@ -4,7 +4,7 @@ Shader "OpenTS2/DesertTerrain"
 {
     Properties
     {
-        _MainTex ("Texture", 2D) = "white" {}
+        _MainTex("Texture", 2D) = "white" {}
         _Shore("Shore Texture", 2D) = "white" {}
         _ShoreMask("Shore Mask", 2D) = "black" {}
         _Variation1("Variation 1", 2D) = "white" {}
@@ -20,9 +20,9 @@ Shader "OpenTS2/DesertTerrain"
         _TerrainHeight("Terrain Height", float) = 128
         _ShadowMap("Shadow Map", 2D) = "white" {}
     }
-    SubShader
+        SubShader
     {
-        Tags { "RenderType"="Opaque" }
+        Tags { "RenderType" = "Opaque" }
         LOD 100
 
         Stencil {
@@ -43,6 +43,25 @@ Shader "OpenTS2/DesertTerrain"
             #include "UnityCG.cginc"
             #include "opents2_terrain_common.cginc"
 
+            struct appdata {
+                TERRAIN_APPDATA;
+            };
+
+            struct v2f
+            {
+                TERRAIN_V2F;
+                float hills : TEXCOORD6;
+            };
+
+            v2f vert(appdata v)
+            {
+                TERRAIN_VERT;
+                o.hills = max(0, o.height - (_SeaLevel * 1.135));
+                o.hills *= 0.12;
+                o.hills = min(1, o.hills);
+                return o;
+            }
+
             fixed4 frag(v2f i) : SV_Target
             {
                 // sample the texture
@@ -53,11 +72,7 @@ Shader "OpenTS2/DesertTerrain"
 
                 rCol = tex2D(_Roughness, i.uv);
 
-                float redAmount = max(0, i.height - (_SeaLevel * 1.135));
-                redAmount *= 0.12;
-                redAmount = min(1, redAmount);
-
-                rCol = lerp(rCol, redHill, redAmount);
+                rCol = lerp(rCol, redHill, i.hills);
 
                 col = lerp(col, rCol, pow(i.roughness, 2));
 
@@ -73,7 +88,7 @@ Shader "OpenTS2/DesertTerrain"
                 col = lerp(col, shoreCol, shoreAmount);
                 col = lerp(col, cliffCol, i.cliff);
                 col *= tex2D(_MatCap, i.matcapUv);
-            
+
                 fixed4 seaColor = fixed4(0, 0, 0, 1);
 
                 float seaAmount = pow(max(0,-(i.height - _SeaLevel)) * 0.02, 0.4);

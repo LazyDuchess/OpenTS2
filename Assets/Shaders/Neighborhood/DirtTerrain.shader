@@ -1,6 +1,6 @@
 // Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
 
-Shader "OpenTS2/ClassicTerrain"
+Shader "OpenTS2/DirtTerrain"
 {
     Properties
     {
@@ -8,11 +8,9 @@ Shader "OpenTS2/ClassicTerrain"
         _Shore("Shore Texture", 2D) = "white" {}
         _ShoreMask("Shore Mask", 2D) = "black" {}
         _Variation1("Variation 1", 2D) = "white" {}
-        _Variation2("Variation 2", 2D) = "white" {}
         _CliffTex("Cliff Texture", 2D) = "white" {}
         _Roughness("Roughness Texture", 2D) = "white" {}
         _Roughness1("Roughness Variation 1", 2D) = "white" {}
-        _Roughness2("Roughness Variation 2", 2D) = "white" {}
         _MatCap("MatCap", 2D) = "white" {}
         _LightVector("Light Vector", Vector) = (.33, .33, -.33, 0)
         _Ambient("Ambient", float) = 0
@@ -52,11 +50,17 @@ Shader "OpenTS2/ClassicTerrain"
             struct v2f
             {
                 TERRAIN_V2F;
+                float side : TEXCOORD6;
+                float hills : TEXCOORD7;
             };
 
             v2f vert(appdata v)
             {
                 TERRAIN_VERT;
+                o.side = clamp(((-(dot(worldNormal, float3(0, 1, 0)) - 1)) - 0.15) * 5, 0, 1);
+                o.hills = max(0, o.height - (_SeaLevel * 1.135));
+                o.hills *= 0.12;
+                o.hills = min(1, o.hills);
                 return o;
             }
 
@@ -64,18 +68,20 @@ Shader "OpenTS2/ClassicTerrain"
             {
                 // sample the texture
                 fixed4 col = tex2D(_MainTex, i.uv);
-                fixed4 rCol = tex2D(_Roughness, i.uv);
-                if (i.color.r >= 0.99)
-                {
-                    col = tex2D(_Variation1, i.uv);
-                    rCol = tex2D(_Roughness1, i.uv);
-                }
-                if (i.color.g >= 0.99)
-                {
-                    col = tex2D(_Variation2, i.uv);
-                    rCol = tex2D(_Roughness2, i.uv);
-                }
-                col = lerp(col, rCol, i.roughness);
+                fixed4 rCol = tex2D(_Variation1, i.uv);
+                fixed4 redHill = tex2D(_Roughness1, i.uv);
+                col = lerp(col, rCol, min(1,i.roughness * 2));
+
+                rCol = tex2D(_Roughness, i.uv);
+
+                redHill = lerp(redHill, rCol, i.side);
+
+                rCol = lerp(rCol, redHill, i.hills);
+
+                col = lerp(col, rCol, pow(i.roughness, 2));
+
+                
+
                 fixed4 cliffCol = tex2D(_CliffTex, i.uv);
 
                 fixed4 shadowMapCol = tex2D(_ShadowMap, i.shadowUv);

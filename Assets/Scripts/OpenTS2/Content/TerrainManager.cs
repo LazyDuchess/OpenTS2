@@ -55,15 +55,15 @@ namespace OpenTS2.Content
             var dirt = new TerrainType
             {
                 Name = "Dirt",
-                TerrainShader = Shader.Find("OpenTS2/DesertTerrain"),
+                TerrainShader = Shader.Find("OpenTS2/DirtTerrain"),
                 RoadDistanceForRoughness = 20f,
                 RoughnessFalloff = 80f,
                 MakeVariation = false,
                 Texture = new ResourceKey("dirt-rough_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
                 Texture1 = new ResourceKey("dirt-green_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
                 Texture2 = new ResourceKey("dirt-green_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
-                Roughness = new ResourceKey("dirt-rough-light_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
-                Roughness1 = new ResourceKey("dirt-green-brown_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
+                Roughness = new ResourceKey("dirt-green-brown_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
+                Roughness1 = new ResourceKey("dirt-rough-light_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
                 Roughness2 = new ResourceKey("dirt-green-brown_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR),
                 RoadTextureName = "dirt_roads_{0}_txtr"
             };
