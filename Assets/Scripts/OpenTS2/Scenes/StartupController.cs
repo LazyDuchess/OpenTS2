@@ -71,7 +71,15 @@ namespace OpenTS2.Scenes
                 ContentLoading.LoadGameContentAsync(_loadProgress).ContinueWith((task) => { OnFinishLoading(); }, TaskScheduler.FromCurrentSynchronizationContext());
             }
             else
+            {
                 OnFinishLoading();
+                if (InitialLoadScreenBackgroundImage != null)
+                    Destroy(InitialLoadScreenBackgroundImage.gameObject);
+                if (InitialLoadScreenLogoImage != null)
+                    Destroy(InitialLoadScreenLogoImage.gameObject);
+                if (InitialLoadScreenReiaPlayer != null)
+                    Destroy(InitialLoadScreenReiaPlayer.gameObject);
+            }
             MusicController.PlayMusic(AudioManager.SplashAudio);
         }
 
