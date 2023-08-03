@@ -19,6 +19,7 @@ namespace OpenTS2.Scenes
 {
     public class StartupController : MonoBehaviour
     {
+        public static bool GameLoaded = false;
         public float FadeOutTime = 1f;
         public UIBMPComponent InitialLoadScreenBackgroundImage;
         public UIBMPComponent InitialLoadScreenLogoImage;
@@ -34,39 +35,44 @@ namespace OpenTS2.Scenes
 
         private void Start()
         {
-            var contentProvider = ContentProvider.Get();
-            ContentLoading.LoadContentStartup();
-            PluginSupport.Initialize();
-            MusicController.PlayMusic(AudioManager.SplashAudio);
-            if (EnableReia)
+            if (!GameLoaded)
             {
-                if (InitialLoadScreenReiaPlayer != null)
+                var contentProvider = ContentProvider.Get();
+                ContentLoading.LoadContentStartup();
+                PluginSupport.Initialize();
+                if (EnableReia)
                 {
-                    InitialLoadScreenReiaPlayer.SetReia(_initialLoadScreenReiaKey, StreamReia);
-                    InitialLoadScreenReiaPlayer.Speed = 0f;
+                    if (InitialLoadScreenReiaPlayer != null)
+                    {
+                        InitialLoadScreenReiaPlayer.SetReia(_initialLoadScreenReiaKey, StreamReia);
+                        InitialLoadScreenReiaPlayer.Speed = 0f;
+                    }
                 }
+                else
+                    InitialLoadScreenReiaPlayer.gameObject.SetActive(false);
+                if (InitialLoadScreenBackgroundImage != null)
+                {
+                    var bgAsset = contentProvider.GetAsset<TextureAsset>(_initialLoadScreenBackgroundKey);
+                    if (bgAsset != null)
+                    {
+                        InitialLoadScreenBackgroundImage.SetTexture(bgAsset);
+                        InitialLoadScreenBackgroundImage.SetNativeSize();
+                    }
+                }
+                if (InitialLoadScreenLogoImage != null)
+                {
+                    var fgAsset = contentProvider.GetAsset<TextureAsset>(_initialLoadScreenLogoKey);
+                    if (fgAsset != null)
+                    {
+                        InitialLoadScreenLogoImage.SetTexture(fgAsset);
+                        InitialLoadScreenLogoImage.SetNativeSize();
+                    }
+                }
+                ContentLoading.LoadGameContentAsync(_loadProgress).ContinueWith((task) => { OnFinishLoading(); }, TaskScheduler.FromCurrentSynchronizationContext());
             }
             else
-                InitialLoadScreenReiaPlayer.gameObject.SetActive(false);
-            if (InitialLoadScreenBackgroundImage != null)
-            {
-                var bgAsset = contentProvider.GetAsset<TextureAsset>(_initialLoadScreenBackgroundKey);
-                if (bgAsset != null)
-                {
-                    InitialLoadScreenBackgroundImage.SetTexture(bgAsset);
-                    InitialLoadScreenBackgroundImage.SetNativeSize();
-                }
-            }
-            if (InitialLoadScreenLogoImage != null)
-            {
-                var fgAsset = contentProvider.GetAsset<TextureAsset>(_initialLoadScreenLogoKey);
-                if (fgAsset != null)
-                {
-                    InitialLoadScreenLogoImage.SetTexture(fgAsset);
-                    InitialLoadScreenLogoImage.SetNativeSize();
-                }
-            }
-            ContentLoading.LoadGameContentAsync(_loadProgress).ContinueWith((task) => { OnFinishLoading(); }, TaskScheduler.FromCurrentSynchronizationContext());
+                OnFinishLoading();
+            MusicController.PlayMusic(AudioManager.SplashAudio);
         }
 
         private void Update()
@@ -93,12 +99,13 @@ namespace OpenTS2.Scenes
         private void OnFinishLoading()
         {
             CursorController.Cursor = CursorController.CursorType.Hourglass;
-            if (LoadObjects)
+            if (LoadObjects && !GameLoaded)
             {
                 var oMgr = ObjectManager.Get();
                 oMgr.Initialize();
             }
-            NeighborhoodManager.Initialize();
+            if (!GameLoaded)
+                NeighborhoodManager.Initialize();
             CursorController.Cursor = CursorController.CursorType.Default;
             Debug.Log("All loaded");
             FadeOutLoading();
@@ -110,6 +117,7 @@ namespace OpenTS2.Scenes
             {
                 Debug.Log(e.ToString());
             }
+            GameLoaded = true;
         }
 
         void FadeOutLoading()

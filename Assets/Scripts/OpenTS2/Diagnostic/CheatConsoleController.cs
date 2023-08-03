@@ -11,6 +11,7 @@ namespace OpenTS2.Diagnostic
     /// </summary>
     public class CheatConsoleController : MonoBehaviour, IConsoleOutput
     {
+        private static CheatConsoleController s_singleton = null;
         public GameObject ConsoleParent;
         public InputField CheatInputField;
         public Text ConsoleOutput;
@@ -22,6 +23,12 @@ namespace OpenTS2.Diagnostic
 
         private void Awake()
         {
+            if (s_singleton != null)
+            {
+                Destroy(gameObject);
+                return;
+            }
+            s_singleton = this;
             ConsoleParent.SetActive(false);
             DontDestroyOnLoad(this);
         }

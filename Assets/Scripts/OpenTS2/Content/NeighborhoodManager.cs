@@ -41,6 +41,19 @@ namespace OpenTS2.Content
             }
         }
 
+        public static void LeaveNeighborhood()
+        {
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.None;
+            CursorController.Cursor = CursorController.CursorType.Hourglass;
+            ContentProvider.Get().Changes.SaveChanges();
+            if (CurrentNeighborhood != null)
+                ContentLoading.UnloadNeighborhoodContentSync();
+            CurrentNeighborhood = null;
+            SceneManager.LoadScene("Startup");
+            CursorController.Cursor = CursorController.CursorType.Default;
+        }
+
         public static void EnterNeighborhood(Neighborhood neighborhood)
         {
             CursorController.Cursor = CursorController.CursorType.Hourglass;

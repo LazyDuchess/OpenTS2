@@ -18,6 +18,7 @@ namespace OpenTS2.Diagnostic
             RegisterCheat<HelpCheat>();
             RegisterCheat<PropsCheat>();
             RegisterCheat<ClearCheat>();
+            RegisterCheat<GoToShellCheat>();
             Assemblies.AssemblyHelper.AssemblyProcesses += RegisterPropsForType;
         }
 
