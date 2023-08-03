@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using System;
+using OpenTS2.Diagnostic;
 
 namespace OpenTS2.Rendering
 {
@@ -68,6 +69,7 @@ namespace OpenTS2.Rendering
         }
 
         // Might not play nice with some hardware, maybe adjust conditionally.
+        [ConsoleProperty("ots2_batchingVertexLimit")]
         public static int DefaultVertexLimit = 10000000;
         static Dictionary<Shader, bool> s_shadersCantBeBatched = new Dictionary<Shader, bool>();
 

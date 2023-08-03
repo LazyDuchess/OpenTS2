@@ -6,11 +6,19 @@ using UnityEngine.UI;
 
 namespace OpenTS2.Diagnostic
 {
-    public class CheatConsoleController : MonoBehaviour
+    /// <summary>
+    /// Controls the behavior of the cheat console.
+    /// </summary>
+    public class CheatConsoleController : MonoBehaviour, IConsoleOutput
     {
         public GameObject ConsoleParent;
         public InputField CheatInputField;
+        public Text ConsoleOutput;
+        public ScrollRect ConsoleScroll;
+        [ConsoleProperty("ots2_consoleMaxChars")]
+        private static int _maxCharacters = 50000;
         bool _isOpen = false;
+        string _lastCheat = "";
 
         private void Awake()
         {
@@ -26,6 +34,8 @@ namespace OpenTS2.Diagnostic
                 return;
             if (Input.GetKeyDown(KeyCode.Return))
                 Submit();
+            if (Input.GetKeyDown(KeyCode.UpArrow) && !string.IsNullOrEmpty(_lastCheat) && CheatInputField.isFocused)
+                CheatInputField.text = _lastCheat;
         }
 
         void ToggleConsole()
@@ -52,16 +62,53 @@ namespace OpenTS2.Diagnostic
 
         void Submit()
         {
+            Log($"> {CheatInputField.text}");
+            _lastCheat = CheatInputField.text;
             try
             {
-                CheatSystem.Execute(CheatInputField.text);
+                CheatSystem.Execute(CheatInputField.text, this);
             }
             catch(Exception e)
             {
+                Log(e.ToString());
                 Debug.LogException(e);
             }
             CheatInputField.text = "";
-            CloseConsole();
+            StartCoroutine(ActivateInput());
+        }
+
+        void Truncate()
+        {
+            if (ConsoleOutput.text.Length > _maxCharacters)
+            {
+                ConsoleOutput.text = ConsoleOutput.text.Substring(ConsoleOutput.text.Length-_maxCharacters,_maxCharacters);
+            }
+        }
+
+        public void Log(string str)
+        {
+            ConsoleOutput.text += $"  {str}{Environment.NewLine}";
+            Truncate();
+            StartCoroutine(ScrollToBottom());
+        }
+
+        public void Clear()
+        {
+            ConsoleOutput.text = "";
+            StartCoroutine(ScrollToBottom());
+        }
+
+        IEnumerator ScrollToBottom()
+        {
+            yield return null;
+            ConsoleScroll.verticalNormalizedPosition = 0;
+        }
+
+        IEnumerator ActivateInput()
+        {
+            yield return null;
+            CheatInputField.Select();
+            CheatInputField.ActivateInputField();
         }
     }
 }

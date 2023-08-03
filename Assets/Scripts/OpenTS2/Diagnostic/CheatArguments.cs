@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace OpenTS2.Diagnostic
 {
+    /// <summary>
+    /// Arguments passed to the cheat console.
+    /// </summary>
     public class CheatArguments
     {
         private List<string> _args;

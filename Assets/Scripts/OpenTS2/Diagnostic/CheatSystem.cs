@@ -10,23 +10,43 @@ namespace OpenTS2.Diagnostic
 {
     public static class CheatSystem
     {
-        private static Dictionary<string, Cheat> s_cheatsByName = new Dictionary<string, Cheat>();
-        private static Dictionary<string, ConsoleProperty> s_propertiesByName = new Dictionary<string, ConsoleProperty>();
+        public static Dictionary<string, Cheat> CheatsByName = new Dictionary<string, Cheat>();
+        public static Dictionary<string, IConsoleProperty> PropertiesByName = new Dictionary<string, IConsoleProperty>();
         public static void Initialize()
         {
-            RegisterCheat<BoolPropCheat>();
+            ConsolePropertyCheats.RegisterAllCheats();
+            RegisterCheat<HelpCheat>();
+            RegisterCheat<PropsCheat>();
+            RegisterCheat<ClearCheat>();
             Assemblies.AssemblyHelper.AssemblyProcesses += RegisterPropsForType;
         }
 
         private static void RegisterPropsForType(Type type, Assembly assembly)
         {
             var fields = type.GetFields(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public);
-            foreach(var field in fields)
+            var props = type.GetProperties(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public);
+            foreach (var field in fields)
             {
-                if (field.FieldType.IsSubclassOf(typeof(ConsoleProperty)))
+                var attr = field.GetCustomAttribute<ConsolePropertyAttribute>();
+                if (attr != null)
                 {
-                    var prop = field.GetValue(null) as ConsoleProperty;
-                    RegisterProperty(prop, prop.Name);
+                    var name = attr.Name;
+                    if (string.IsNullOrEmpty(name))
+                        name = field.Name;
+                    var fieldProp = new FieldConsoleProperty(field);
+                    RegisterProperty(fieldProp, name);
+                }
+            }
+            foreach (var prop in fields)
+            {
+                var attr = prop.GetCustomAttribute<ConsolePropertyAttribute>();
+                if (attr != null)
+                {
+                    var name = attr.Name;
+                    if (string.IsNullOrEmpty(name))
+                        name = prop.Name;
+                    var fieldProp = new FieldConsoleProperty(prop);
+                    RegisterProperty(fieldProp, name);
                 }
             }
         }
@@ -34,20 +54,20 @@ namespace OpenTS2.Diagnostic
         public static void RegisterCheat<T>() where T : Cheat
         {
             var cheat = Activator.CreateInstance(typeof(T)) as Cheat;
-            s_cheatsByName[cheat.Name.Trim().ToLowerInvariant()] = cheat;
+            CheatsByName[cheat.Name.Trim().ToLowerInvariant()] = cheat;
         }
 
-        public static void RegisterProperty(ConsoleProperty property, string name)
+        public static void RegisterProperty(IConsoleProperty property, string name)
         {
-            s_propertiesByName[name.Trim().ToLowerInvariant()] = property;
+            PropertiesByName[name.Trim().ToLowerInvariant()] = property;
         }
 
-        public static void Execute(string command)
+        public static void Execute(string command, IConsoleOutput output = null)
         {
             var cheatArgs = new CheatArguments(command);
             var cmd = cheatArgs.GetString(0).Trim().ToLowerInvariant();
-            var cheat = s_cheatsByName[cmd];
-            cheat.Execute(cheatArgs);
+            var cheat = CheatsByName[cmd];
+            cheat.Execute(cheatArgs, output);
         }
 
         public static bool ParseBoolean(string arg)
@@ -66,10 +86,10 @@ namespace OpenTS2.Diagnostic
             return false;
         }
 
-        public static ConsoleProperty GetProperty(string name)
+        public static IConsoleProperty GetProperty(string name)
         {
             var nameParsed = name.Trim().ToLowerInvariant();
-            return s_propertiesByName[nameParsed];
+            return PropertiesByName[nameParsed];
         }
     }
 }
