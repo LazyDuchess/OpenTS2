@@ -6,7 +6,7 @@ Shader "OpenTS2/LotImposterBlend"
     }
     SubShader
     {
-        Tags { "RenderType" = "Transparent" "Queue" = "Transparent"  }
+        Tags { "RenderType" = "Transparent" "Queue" = "Transparent-1"  }
         LOD 100
 
         // Render on top of the hood terrain, behind everything else
