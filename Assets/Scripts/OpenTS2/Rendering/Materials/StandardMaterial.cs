@@ -19,6 +19,7 @@ namespace OpenTS2.Rendering.Materials
         private static readonly int AlphaMultiplier = Shader.PropertyToID("_AlphaMultiplier");
         private static readonly int SeaLevel = Shader.PropertyToID("_SeaLevel");
         private static readonly int DiffuseCoefficient = Shader.PropertyToID("_DiffuseCoefficient");
+        private static readonly int BumpMap = Shader.PropertyToID("_BumpMap");
 
         public override Material Parse(ScenegraphMaterialDefinitionAsset definition)
         {
@@ -38,12 +39,27 @@ namespace OpenTS2.Rendering.Materials
             }
 
             var material = new Material(shader);
-
+            var bumpMapEnabled = false;
+            ScenegraphTextureAsset bumpMapTexture = null;
             // Adjust the material properties based on the corresponding keys.
             foreach (var property in definition.MaterialDefinition.MaterialProperties)
             {
                 switch (property.Key)
                 {
+                    case "stdMatNormalMapTextureEnabled":
+                        if (property.Value == "true")
+                            bumpMapEnabled = true;
+                        break;
+                    case "stdMatNormalMapTextureName":
+                        bumpMapTexture = ContentProvider.Get().GetAsset<ScenegraphTextureAsset>(
+                            new ResourceKey(property.Value + "_txtr", definition.GlobalTGI.GroupID, TypeIDs.SCENEGRAPH_TXTR)
+                        );
+                        if (bumpMapTexture == null)
+                        {
+                            Debug.Log($"Unable to find bump map texture with name: {bumpMapTexture}");
+                            break;
+                        }
+                        break;
                     case "stdMatAlphaRefValue":
                         var alphaCutoffValue = int.Parse(property.Value);
                         material.SetFloat(AlphaCutOff, alphaCutoffValue / 255.0f);
@@ -69,6 +85,12 @@ namespace OpenTS2.Rendering.Materials
                         material.SetColor(DiffuseCoefficient, new Color(coefficients[0], coefficients[1], coefficients[2]));
                         break;
                 }
+            }
+
+            if (bumpMapEnabled && bumpMapTexture != null)
+            {
+                definition.Textures.Add(bumpMapTexture);
+                material.SetTexture(BumpMap, bumpMapTexture.GetSelectedImageAsUnityTexture(ContentProvider.Get()));
             }
 
             var neighborhood = NeighborhoodManager.CurrentNeighborhood;

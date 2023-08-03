@@ -94,7 +94,7 @@ namespace OpenTS2.Diagnostic
 
         public void Log(string str)
         {
-            ConsoleOutput.text += $"  {str}{Environment.NewLine}";
+            ConsoleOutput.text += $"{str}{Environment.NewLine}";
             Truncate();
             StartCoroutine(ScrollToBottom());
         }
