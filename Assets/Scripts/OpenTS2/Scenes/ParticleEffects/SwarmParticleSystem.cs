@@ -38,6 +38,10 @@ namespace OpenTS2.Scenes.ParticleEffects
                         var modelObject = model.CreateGameObject();
                         modelObject.transform.SetParent(transform, worldPositionStays: false);
                         break;
+                    case DecalEffect e:
+                        var decalObject = e.CreateGameObject();
+                        decalObject.transform.SetParent(transform, worldPositionStays: false);
+                        break;
                     default:
                         throw new NotImplementedException($"Effect type {effect} not supported");
                 }
