@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using OpenTS2.Common;
+using OpenTS2.Components;
 using OpenTS2.Content;
 using OpenTS2.Content.DBPF;
 using OpenTS2.Content.DBPF.Effects;
@@ -31,6 +32,10 @@ namespace OpenTS2.Scenes.ParticleEffects
                         var particleEffectSystem = CreateChildSystemForParticleEffect(effectDescription, e);
                         particleEffectSystem.transform.SetParent(transform, worldPositionStays: false);
                         break;
+                    case MetaParticle e:
+                        var metaParticleSystem = CreateGameObjectForMetaParticleSystem(effectDescription.EffectName, e, effectsAsset);
+                        metaParticleSystem.transform.SetParent(transform, worldPositionStays: false);
+                        break;
                     case ModelEffect e:
                         var model = ContentProvider.Get()
                             .GetAsset<ScenegraphResourceAsset>(new ResourceKey(e.ModelName, GroupIDs.Scenegraph,
@@ -53,20 +58,34 @@ namespace OpenTS2.Scenes.ParticleEffects
             GetComponent<ParticleSystem>().Play(withChildren: true);
         }
 
-        private readonly List<Material> _particleMaterials = new List<Material>();
-
-        // Clean up the materials we created.
-        private void OnDestroy()
+        private static GameObject CreateGameObjectForMetaParticleSystem(string effectName, MetaParticle e, EffectsAsset effectsAsset)
         {
-            foreach (var mat in _particleMaterials)
+            // A meta-particle is basically "extra-stuff" like an altered lifetime or emission rate attached
+            // to an existing particle effect. For now we just handle some particular types of child effects.
+            var metaParticles = new GameObject(effectName);
+
+            var baseVisualEffect = effectsAsset.GetEffectByName(e.BaseEffect);
+            foreach (var desc in baseVisualEffect.Descriptions)
             {
-                mat.Free();
+                var baseEffect =
+                    effectsAsset.GetEffectFromVisualEffectDescription(desc);
+                if (!(baseEffect is ModelEffect modelEffect))
+                {
+                    throw new NotImplementedException($"Can't handle meta-particles with a base effect of {baseEffect}");
+                }
+
+                var particleObject = new GameObject(desc.EffectName, typeof(SwarmMetaParticleSystem));
+                var metaSystem = particleObject.GetComponent<SwarmMetaParticleSystem>();
+                metaSystem.SetModelBaseEffect(e, modelEffect);
+                particleObject.transform.SetParent(metaParticles.transform, worldPositionStays: false);
             }
+
+            return metaParticles;
         }
 
-        private GameObject CreateChildSystemForParticleEffect(EffectDescription description, ParticleEffect effect)
+        private static GameObject CreateChildSystemForParticleEffect(EffectDescription description, ParticleEffect effect)
         {
-            var particleObject = new GameObject(description.EffectName, typeof(ParticleSystem));
+            var particleObject = new GameObject(description.EffectName, typeof(ParticleSystem), typeof(AssetReferenceComponent));
             var system = particleObject.GetComponent<ParticleSystem>();
             system.Stop(withChildren: true, ParticleSystemStopBehavior.StopEmittingAndClear);
 
@@ -126,8 +145,8 @@ namespace OpenTS2.Scenes.ParticleEffects
 
                 var material = MakeParticleMaterial(textureAsset.GetSelectedImageAsUnityTexture(ContentProvider.Get()),
                     effect.Drawing.ParticleDrawType);
-                _particleMaterials.Add(material);
                 system.GetComponent<Renderer>().sharedMaterial = material;
+                particleObject.GetComponent<AssetReferenceComponent>().AddReference(textureAsset);
             }
 
             return particleObject;
