@@ -18,7 +18,8 @@ public class EffectsTest : MonoBehaviour
         EffectsManager.Get().Initialize();
 
         //var effect = EffectsManager.Get().CreateEffectWithUnityTransform("neighborhood_house_smoking");
-        var effect = EffectsManager.Get().CreateEffectWithUnityTransform("neighborhood_hanggliders");
+        //var effect = EffectsManager.Get().CreateEffectWithUnityTransform("neighborhood_hanggliders");
+        var effect = EffectsManager.Get().CreateEffectWithUnityTransform("neighborhood_hotairballoon");
 
         effect.PlayEffect();
     }

@@ -70,15 +70,23 @@ namespace OpenTS2.Scenes.ParticleEffects
             {
                 var baseEffect =
                     effectsAsset.GetEffectFromVisualEffectDescription(desc);
-                if (!(baseEffect is ModelEffect modelEffect))
-                {
-                    throw new NotImplementedException(
-                        $"Can't handle meta-particles with a base effect of {baseEffect}");
-                }
 
                 var particleObject = new GameObject(desc.EffectName, typeof(SwarmMetaParticleSystem));
                 var metaSystem = particleObject.GetComponent<SwarmMetaParticleSystem>();
-                metaSystem.SetModelBaseEffect(e, modelEffect);
+
+                switch (baseEffect)
+                {
+                    case ModelEffect modelEffect:
+                        metaSystem.SetModelBaseEffect(e, modelEffect);
+                        break;
+                    case ParticleEffect particleEffect:
+                        metaSystem.SetParticleBaseEffect(e, particleEffect);
+                        break;
+                    default:
+                        throw new NotImplementedException(
+                            $"Can't handle meta-particles with a base effect of {baseEffect}");
+                }
+
                 particleObject.transform.SetParent(metaParticles.transform, worldPositionStays: false);
             }
 
@@ -93,6 +101,13 @@ namespace OpenTS2.Scenes.ParticleEffects
             var system = particleObject.GetComponent<ParticleSystem>();
             system.Stop(withChildren: true, ParticleSystemStopBehavior.StopEmittingAndClear);
 
+            SetParticleParameters(system, particleObject, effect);
+
+            return particleObject;
+        }
+
+        internal static void SetParticleParameters(ParticleSystem system, GameObject particleObject, ParticleEffect effect)
+        {
             SetParticleEmitterRateAndShape(system.emission, system.shape, effect.Emission, effect.Flags);
             SetParticleSpeedAndLifetime(system.main, effect.Emission, effect.Life);
             SetParticleDirection(system.velocityOverLifetime, effect.Emission);
@@ -109,8 +124,6 @@ namespace OpenTS2.Scenes.ParticleEffects
                 system.GetComponent<Renderer>().sharedMaterial = material;
                 particleObject.GetComponent<AssetReferenceComponent>().AddReference(textureAsset);
             }
-
-            return particleObject;
         }
 
         internal static void SetParticleEmitterRateAndShape(ParticleSystem.EmissionModule emissionModule,
