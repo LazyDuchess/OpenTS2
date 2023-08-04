@@ -25,7 +25,7 @@ namespace OpenTS2.Diagnostic
                     if (!cheat.Key.Contains(wildcard))
                         continue;
                 }
-                var str = cheat.Key;
+                var str = cheat.Value.Name;
                 var desc = cheat.Value.Description;
                 if (!string.IsNullOrEmpty(desc))
                 {

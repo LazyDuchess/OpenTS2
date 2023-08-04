@@ -2,6 +2,7 @@
 using OpenTS2.Content;
 using OpenTS2.Content.DBPF.Effects;
 using OpenTS2.Content.DBPF.Scenegraph;
+using OpenTS2.Diagnostic;
 using OpenTS2.Engine;
 using OpenTS2.Files.Formats.DBPF;
 using System;
@@ -15,6 +16,8 @@ namespace OpenTS2.Scenes.ParticleEffects
 {
     public class SwarmDecal : MonoBehaviour
     {
+        [ConsoleProperty("enableDecals")]
+        private static bool s_enableDecals = true;
         private static int s_location = Shader.PropertyToID("_Location");
         private static int s_rotation = Shader.PropertyToID("_Rotation");
         private ScenegraphTextureAsset _textureAsset;
@@ -24,6 +27,8 @@ namespace OpenTS2.Scenes.ParticleEffects
 
         private void Start()
         {
+            if (!s_enableDecals)
+                return;
             _position = transform.position;
             _rotation = transform.rotation.eulerAngles;
             Initialize();
