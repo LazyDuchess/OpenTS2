@@ -80,8 +80,7 @@ namespace OpenTS2.Content.DBPF.Effects
 
         public bool IsFlagSet(ParticleFlagBits flag)
         {
-            var mask = 1UL << (int)flag;
-            return (Flags & mask) != 0;
+            return flag.IsFlagSet(Flags);
         }
     }
 
@@ -94,6 +93,17 @@ namespace OpenTS2.Content.DBPF.Effects
         ParticleHasMaterial = 21,
         ParticleHasShape = 22,
         ParticleMaterialIsLight = 23,
+    }
+
+    /// <summary>
+    /// Extension method so `IsFlagSet` can be called on a plain long in shared code between Particle and MetaParticle.
+    /// </summary>
+    public static class ParticleFlagBitsExtensions {
+        public static bool IsFlagSet(this ParticleFlagBits flagBit, ulong flags)
+        {
+            var mask = 1UL << (int)flagBit;
+            return (flags & mask) != 0;
+        }
     }
 
     public struct ParticleLife

@@ -18,9 +18,14 @@ namespace OpenTS2.Scenes.ParticleEffects
         public void SetModelBaseEffect(MetaParticle effect, ModelEffect baseModelEffect)
         {
             _particleSystem = GetComponent<ParticleSystem>();
-            // TODO: change this, it's just for testing.
-            var main = _particleSystem.main;
-            main.maxParticles = 1;
+
+            // Set particle system parameters.
+            SwarmParticleSystem.SetParticleEmitterRateAndShape(_particleSystem.emission, _particleSystem.shape, effect.Emission, effect.Flags);
+            SwarmParticleSystem.SetParticleSpeedAndLifetime(_particleSystem.main, effect.Emission, effect.Life);
+            SwarmParticleSystem.SetParticleDirection(_particleSystem.velocityOverLifetime, effect.Emission);
+            SwarmParticleSystem.SetParticleSizeOverTime(_particleSystem.sizeOverLifetime, effect.Size);
+            SwarmParticleSystem.SetParticleColorOverTime(_particleSystem.colorOverLifetime, effect.Color);
+
 
             // Kinda hacky but for now we just render out the scenegraph and get the first mesh and material out of it.
             // Unity's built-in particle system can't spawn full GameObjects but it can handle meshes.

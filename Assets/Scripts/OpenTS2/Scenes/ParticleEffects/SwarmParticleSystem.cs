@@ -93,8 +93,8 @@ namespace OpenTS2.Scenes.ParticleEffects
             var system = particleObject.GetComponent<ParticleSystem>();
             system.Stop(withChildren: true, ParticleSystemStopBehavior.StopEmittingAndClear);
 
-            SetParticleEmitterRateAndShape(system.emission, system.shape, effect, effect.Emission);
-            SetParticleSpeedAndLifetime(system.main, effect);
+            SetParticleEmitterRateAndShape(system.emission, system.shape, effect.Emission, effect.Flags);
+            SetParticleSpeedAndLifetime(system.main, effect.Emission, effect.Life);
             SetParticleDirection(system.velocityOverLifetime, effect.Emission);
             SetParticleSizeOverTime(system.sizeOverLifetime, effect.Size);
             SetParticleColorOverTime(system.colorOverLifetime, effect.Color);
@@ -113,8 +113,8 @@ namespace OpenTS2.Scenes.ParticleEffects
             return particleObject;
         }
 
-        private static void SetParticleEmitterRateAndShape(ParticleSystem.EmissionModule emissionModule,
-            ParticleSystem.ShapeModule shape, ParticleEffect effect, ParticleEmission emission)
+        internal static void SetParticleEmitterRateAndShape(ParticleSystem.EmissionModule emissionModule,
+            ParticleSystem.ShapeModule shape, ParticleEmission emission, ulong flags)
         {
             // Set emitter rate.
             emissionModule.rateOverTime = emission.RateCurve.ToUnityCurve();
@@ -128,7 +128,7 @@ namespace OpenTS2.Scenes.ParticleEffects
             {
                 shape.shapeType = ParticleSystemShapeType.Donut;
             }
-            else if (effect.IsFlagSet(ParticleFlagBits.EmitterIsEllipsoid))
+            else if (ParticleFlagBits.EmitterIsEllipsoid.IsFlagSet(flags))
             {
                 shape.shapeType = ParticleSystemShapeType.Sphere;
             }
@@ -138,14 +138,14 @@ namespace OpenTS2.Scenes.ParticleEffects
             }
         }
 
-        private static void SetParticleSpeedAndLifetime(ParticleSystem.MainModule main, ParticleEffect effect)
+        internal static void SetParticleSpeedAndLifetime(ParticleSystem.MainModule main, ParticleEmission emission, ParticleLife life)
         {
-            main.startLifetime = new ParticleSystem.MinMaxCurve(min: effect.Life.Life[0], max: effect.Life.Life[1]);
+            main.startLifetime = new ParticleSystem.MinMaxCurve(min: life.Life[0], max: life.Life[1]);
             main.startSpeed =
-                new ParticleSystem.MinMaxCurve(min: effect.Emission.EmitSpeed[0], max: effect.Emission.EmitSpeed[1]);
+                new ParticleSystem.MinMaxCurve(min: emission.EmitSpeed[0], max: emission.EmitSpeed[1]);
         }
 
-        private static void SetParticleDirection(ParticleSystem.VelocityOverLifetimeModule velocityOverTime,
+        internal static void SetParticleDirection(ParticleSystem.VelocityOverLifetimeModule velocityOverTime,
             ParticleEmission emission)
         {
             velocityOverTime.enabled = true;
@@ -157,13 +157,13 @@ namespace OpenTS2.Scenes.ParticleEffects
                 emission.EmitDirection.UpperCorner[2]);
         }
 
-        private static void SetParticleSizeOverTime(ParticleSystem.SizeOverLifetimeModule sizeOverTime, ParticleSize size)
+        internal static void SetParticleSizeOverTime(ParticleSystem.SizeOverLifetimeModule sizeOverTime, ParticleSize size)
         {
             sizeOverTime.size = size.SizeCurve.ToUnityCurveWithVariance(size.SizeVary);
             sizeOverTime.enabled = true;
         }
 
-        private static void SetParticleColorOverTime(ParticleSystem.ColorOverLifetimeModule colorOverLifetime,
+        internal static void SetParticleColorOverTime(ParticleSystem.ColorOverLifetimeModule colorOverLifetime,
             ParticleColor color)
         {
             var (minColorGradient, maxColorGradient) = color.GetColorGradientsOverTime();
