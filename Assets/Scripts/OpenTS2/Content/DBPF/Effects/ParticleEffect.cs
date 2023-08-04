@@ -225,28 +225,36 @@ namespace OpenTS2.Content.DBPF.Effects
 
         public readonly (Gradient, Gradient) GetColorGradientsOverTime()
         {
-            var minColorKeys = new GradientColorKey[Colors.Length];
-            var maxColorKeys = new GradientColorKey[Colors.Length];
+            // Unfortunately, unity supports only a maximum of 8 keys so we have to pick the nearest time step from the
+            // swarm system for now.
+            if (Colors.Length >= 8 || AlphaCurve.Curve.Length >= 8)
+            {
+                Debug.LogWarning("Effect has too many color or alpha values");
+            }
+            var colorLength = Math.Min(Colors.Length, 8);
+            var alphaLength = Math.Min(AlphaCurve.Curve.Length, 8);
 
-            // Unity supports a maximum of 8 keys.
-            Debug.Assert(Colors.Length <= 8);
-            for (var i = 0; i < Colors.Length; i++)
+            var minColorKeys = new GradientColorKey[colorLength];
+            var maxColorKeys = new GradientColorKey[colorLength];
+
+            for (var i = 0; i < colorLength; i++)
             {
                 var time = ((float)i) / Colors.Length;
-                var (min, max) = GetMinMaxColorAtTimeStep(i);
+                var colorIndex = (int) Math.Floor((float)i / colorLength * Colors.Length);
+
+                var (min, max) = GetMinMaxColorAtTimeStep(colorIndex);
                 minColorKeys[i] = new GradientColorKey(min, time);
                 maxColorKeys[i] = new GradientColorKey(max, time);
             }
 
-            // Unity supports a maximum of 8 keys.
-            Debug.Assert(AlphaCurve.Curve.Length <= 8);
-
-            var minAlphaKeys = new GradientAlphaKey[AlphaCurve.Curve.Length];
-            var maxAlphaKeys = new GradientAlphaKey[AlphaCurve.Curve.Length];
-            for (var i = 0; i < AlphaCurve.Curve.Length; i++)
+            var minAlphaKeys = new GradientAlphaKey[alphaLength];
+            var maxAlphaKeys = new GradientAlphaKey[alphaLength];
+            for (var i = 0; i < alphaLength; i++)
             {
                 var time = ((float)i) / AlphaCurve.Curve.Length;
-                var (min, max) = GetMinMaxAlphaAtTimeStep(i);
+                var alphaIndex = (int) Math.Floor((float)i / alphaLength * AlphaCurve.Curve.Length);
+
+                var (min, max) = GetMinMaxAlphaAtTimeStep(alphaIndex);
                 minAlphaKeys[i] = new GradientAlphaKey(min, time);
                 maxAlphaKeys[i] = new GradientAlphaKey(max, time);
             }

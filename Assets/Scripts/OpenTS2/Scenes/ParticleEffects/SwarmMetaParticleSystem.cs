@@ -40,9 +40,8 @@ namespace OpenTS2.Scenes.ParticleEffects
             modelObject.SetActive(false);
 
             var modelMeshRenderer = modelObject.GetComponentsInChildren<MeshRenderer>();
-            Debug.Assert(modelMeshRenderer.Length == 1);
+            Debug.Assert(modelMeshRenderer.Length == 1, "Model in meta-particle has more than 1 mesh");
             var modelMeshFilters = modelObject.GetComponentsInChildren<MeshFilter>();
-            Debug.Assert(modelMeshFilters.Length == 1);
 
             var particleRenderer = _particleSystem.GetComponent<ParticleSystemRenderer>();
             particleRenderer.renderMode = ParticleSystemRenderMode.Mesh;
