@@ -14,24 +14,26 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
         public const string BLOCK_NAME = "cDataListExtension";
         public override string BlockName => BLOCK_NAME;
 
-        public IDataListValue Value { get; }
+        public DataListValue Value { get; }
 
-        public DataListExtensionBlock(PersistTypeInfo blockTypeInfo, IDataListValue value) : base(blockTypeInfo)
+        public DataListExtensionBlock(PersistTypeInfo blockTypeInfo, DataListValue value) : base(blockTypeInfo)
         {
             Value = value;
         }
     }
 
-    public interface IDataListValue
+    public abstract class DataListValue
     {
+        public string Name;
+
+        public DataListValue(string name) => (Name) = (name);
     }
 
-    public struct DataListValue<T> : IDataListValue
+    public class DataListValue<T> : DataListValue
     {
-        public string Name { get; }
         public T Value { get; }
 
-        public DataListValue(string name, T value) => (Name, Value) = (name, value);
+        public DataListValue(string name, T value) : base(name) => (Value) = (value);
     }
 
     public class DataListExtensionBlockReader : IScenegraphDataBlockReader<DataListExtensionBlock>
@@ -46,7 +48,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
         }
 
         // TODO: store these instead of just reading.
-        private static IDataListValue DeserializeSingleExtensionItem(IoBuffer reader)
+        private static DataListValue DeserializeSingleExtensionItem(IoBuffer reader)
         {
             var dataType = reader.ReadByte();
             var name = reader.ReadVariableLengthPascalString();
@@ -74,12 +76,12 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                     return new DataListValue<string>(name, reader.ReadVariableLengthPascalString());
                 case 7:
                     // ExtensionItems list
-                    var items = new IDataListValue[reader.ReadUInt32()];
+                    var items = new DataListValue[reader.ReadUInt32()];
                     for (var i = 0; i < items.Length; i++)
                     {
                         items[i] = DeserializeSingleExtensionItem(reader);
                     }
-                    return new DataListValue<IDataListValue[]>(name, items);
+                    return new DataListValue<DataListValue[]>(name, items);
                 case 8:
                     // quanterion
                     return new DataListValue<Quaternion>(name, QuaterionSerialzier.Deserialize(reader));

@@ -17,7 +17,7 @@ public class EffectsTest : MonoBehaviour
         // Initialize effects manager manually since we aren't using startup controller.
         EffectsManager.Get().Initialize();
 
-        var effect = EffectsManager.Get().CreateEffect("neighborhood_house_smoking");
+        var effect = EffectsManager.Get().CreateEffectWithUnityTransform("neighborhood_house_smoking");
         //effectsManager.StartEffect("neighborhood_hanggliders");
 
         effect.PlayEffect();

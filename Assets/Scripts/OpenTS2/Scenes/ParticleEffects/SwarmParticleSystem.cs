@@ -42,11 +42,6 @@ namespace OpenTS2.Scenes.ParticleEffects
                         throw new NotImplementedException($"Effect type {effect} not supported");
                 }
             }
-
-            // Perform a sims-space to unity-space transform for this effects system.
-            var thisTransform = transform;
-            thisTransform.Rotate(-90, 0, 0);
-            thisTransform.localScale = new Vector3(1, -1, 1);
         }
 
         public void PlayEffect()
@@ -130,8 +125,6 @@ namespace OpenTS2.Scenes.ParticleEffects
                 _particleMaterials.Add(material);
                 system.GetComponent<Renderer>().sharedMaterial = material;
             }
-
-            Debug.Log($"effect idx: {description.EffectIndex}");
 
             return particleObject;
         }

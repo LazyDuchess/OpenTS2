@@ -37,6 +37,11 @@ namespace OpenTS2.Content
             Debug.Assert(_effects != null, "Couldn't find effects");
         }
 
+        public bool HasEffect(string effectName)
+        {
+            return _effects.EffectNamesToIds.ContainsKey(effectName);
+        }
+
         public SwarmParticleSystem CreateEffect(string effectName)
         {
             var visualEffect = _effects.GetEffectByName(effectName);
@@ -46,6 +51,16 @@ namespace OpenTS2.Content
             swarmSystem.SetVisualEffect(visualEffect, _effects);
 
             return swarmSystem;
+        }
+
+        public SwarmParticleSystem CreateEffectWithUnityTransform(string effectName)
+        {
+            var system = CreateEffect(effectName);
+            // Perform a sims-space to unity-space transform for this effects system.
+            var transform = system.transform;
+            transform.Rotate(-90, 0, 0);
+            transform.localScale = new Vector3(1, -1, 1);
+            return system;
         }
     }
 }

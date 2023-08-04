@@ -75,6 +75,61 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                         throw new ArgumentException("Got null reference in CompositionTree");
                 }
             }
+
+            // Next iterate over all the extension references.
+            foreach (var extensionReference in tree.Graph.Extensions)
+            {
+                if (!(extensionReference is InternalReference internalRef))
+                {
+                    throw new ArgumentException("Got non-internal reference for Extension in resource node");
+                }
+
+                var extension = ResourceCollection.Blocks[internalRef.BlockIndex];
+                if (!(extension is DataListExtensionBlock extensionBlock))
+                {
+                    throw new ArgumentException($"Expected cDataExtensionBlock, got {extension}");
+                }
+
+                HandleExtension(parent, extensionBlock);
+            }
+        }
+
+        private void HandleExtension(GameObject parent, DataListExtensionBlock extension)
+        {
+            // This is the only extension we care about right now.
+            if (extension.Value.Name != "EffectsList")
+            {
+                return;
+            }
+
+            var effectsList = (DataListValue<DataListValue[]>)extension.Value;
+            foreach (var dataListValue in effectsList.Value)
+            {
+                var effectSlotToName = (DataListValue<string>)dataListValue;
+
+                var slotName = effectSlotToName.Name;
+                var effectName = effectSlotToName.Value;
+                // The game seriously has effects in the scenegraph that don't exist... ignore those
+                if (!EffectsManager.Get().HasEffect(effectName))
+                {
+                    continue;
+                }
+
+                // TODO: these effects are not in the right place, they need to be placed in the right slot. Right now
+                // this isn't easy to do as we don't have a mapping of tags -> GameObject. This will be easier once
+                // the scenegraph has its own MonoBehavior.
+                try
+                {
+                    var swarmParticleSystem = EffectsManager.Get().CreateEffect(effectName);
+                    swarmParticleSystem.transform.SetParent(parent.transform, worldPositionStays: false);
+                    swarmParticleSystem.PlayEffect();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"Unable to render effect {effectName}");
+                    Debug.LogException(e);
+                }
+            }
         }
 
         private void RenderInternalCompositionTreeChild(GameObject parent, InternalReference reference)
