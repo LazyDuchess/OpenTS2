@@ -54,6 +54,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             }
             catch(Exception e)
             {
+                Debug.LogError($"Error while traversing graph for {resourceName}");
                 Debug.LogException(e);
             }
             return gameObject;
