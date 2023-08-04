@@ -74,6 +74,7 @@ namespace OpenTS2.Content.DBPF
         {
             return description.EffectType switch
             {
+                0 => VisualEffects[description.EffectIndex],
                 1 => ParticleEffects[description.EffectIndex],
                 2 => MetaParticleEffects[description.EffectIndex],
                 3 => DecalEffects[description.EffectIndex],

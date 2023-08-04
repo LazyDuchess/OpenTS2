@@ -27,6 +27,12 @@ namespace OpenTS2.Scenes.ParticleEffects
                 var effect = effectsAsset.GetEffectFromVisualEffectDescription(effectDescription);
                 switch (effect)
                 {
+                    case SwarmVisualEffect e:
+                        // TODO: there is a selectionChance here that needs to be considered.
+                        var system = new GameObject("SwarmParticleSystem", typeof(ParticleSystem), typeof(SwarmParticleSystem));
+                        system.GetComponent<SwarmParticleSystem>().SetVisualEffect(e, effectsAsset);
+                        system.transform.SetParent(transform, worldPositionStays: false);
+                        break;
                     case ParticleEffect e:
                         var particleEffectSystem = CreateChildSystemForParticleEffect(effectDescription, e);
                         particleEffectSystem.transform.SetParent(transform, worldPositionStays: false);

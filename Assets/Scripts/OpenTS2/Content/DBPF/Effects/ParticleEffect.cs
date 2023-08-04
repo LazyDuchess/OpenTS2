@@ -202,9 +202,12 @@ namespace OpenTS2.Content.DBPF.Effects
             var max = new Color(FxVary.VaryValueMax(Colors[time].x, ColorVary[0]),
                 FxVary.VaryValueMax(Colors[time].y, ColorVary[1]),
                 FxVary.VaryValueMax(Colors[time].z, ColorVary[2]));
-            var (minAlpha, maxAlpha) = GetMinMaxAlphaAtTimeStep(time);
-            min.a = minAlpha;
-            max.a = maxAlpha;
+            if (time < AlphaCurve.Curve.Length)
+            {
+                var (minAlpha, maxAlpha) = GetMinMaxAlphaAtTimeStep(time);
+                min.a = minAlpha;
+                max.a = maxAlpha;
+            }
             return (min, max);
         }
 
