@@ -1,31 +1,37 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using OpenTS2.Common;
-using OpenTS2.Content;
+﻿using OpenTS2.Common;
 using OpenTS2.Content.DBPF;
-using OpenTS2.Content.DBPF.Effects;
-using OpenTS2.Content.DBPF.Scenegraph;
-using OpenTS2.Engine;
 using OpenTS2.Files;
 using OpenTS2.Files.Formats.DBPF;
 using OpenTS2.Scenes.ParticleEffects;
 using UnityEngine;
 
-namespace OpenTS2.Scenes
+namespace OpenTS2.Content
 {
-    public class EffectsManager : MonoBehaviour
+    public class EffectsManager
     {
-        private EffectsAsset _effects;
+        private static EffectsManager _instance;
 
-        private void Awake()
+        public static EffectsManager Get()
         {
-            var contentProvider = ContentProvider.Get();
+            return _instance;
+        }
+
+        public EffectsManager(ContentProvider provider)
+        {
+            _instance = this;
+            _provider = provider;
+        }
+
+        private EffectsAsset _effects;
+        private readonly ContentProvider _provider;
+
+        public void Initialize()
+        {
             // Load effects package.
-            contentProvider.AddPackages(
+            _provider.AddPackages(
                 Filesystem.GetPackagesInDirectory(Filesystem.GetDataPathForProduct(ProductFlags.BaseGame) +
                                                   "/Res/Effects"));
-            _effects = contentProvider.GetAsset<EffectsAsset>(new ResourceKey(instanceID: 1, groupID: GroupIDs.Effects,
+            _effects = _provider.GetAsset<EffectsAsset>(new ResourceKey(instanceID: 1, groupID: GroupIDs.Effects,
                 typeID: TypeIDs.EFFECTS));
 
             Debug.Assert(_effects != null, "Couldn't find effects");
@@ -41,6 +47,5 @@ namespace OpenTS2.Scenes
 
             return swarmSystem;
         }
-
     }
 }

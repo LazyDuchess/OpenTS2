@@ -4,7 +4,6 @@ using OpenTS2.Scenes;
 using UnityEngine;
 
 
-[RequireComponent(typeof(EffectsManager))]
 public class EffectsTest : MonoBehaviour
 {
     private void Start()
@@ -15,8 +14,10 @@ public class EffectsTest : MonoBehaviour
         contentProvider.AddPackages(
             Filesystem.GetPackagesInDirectory(Filesystem.GetDataPathForProduct(ProductFlags.BaseGame) + "/Res/Sims3D"));
 
-        var effectsManager = GetComponent<EffectsManager>();
-        var effect = effectsManager.CreateEffect("neighborhood_house_smoking");
+        // Initialize effects manager manually since we aren't using startup controller.
+        EffectsManager.Get().Initialize();
+
+        var effect = EffectsManager.Get().CreateEffect("neighborhood_house_smoking");
         //effectsManager.StartEffect("neighborhood_hanggliders");
 
         effect.PlayEffect();

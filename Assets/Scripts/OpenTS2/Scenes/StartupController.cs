@@ -111,6 +111,8 @@ namespace OpenTS2.Scenes
             {
                 var oMgr = ObjectManager.Get();
                 oMgr.Initialize();
+
+                EffectsManager.Get().Initialize();
             }
             if (!GameLoaded)
                 NeighborhoodManager.Initialize();

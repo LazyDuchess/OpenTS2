@@ -27,6 +27,8 @@ namespace OpenTS2.Engine
             var epManager = new EPManager();
             var contentProvider = new ContentProvider();
             var objectManager = new ObjectManager(contentProvider);
+            var effectsManager = new EffectsManager(contentProvider);
+
             TerrainManager.Initialize();
             MaterialManager.Initialize();
             Filesystem.Initialize(new JSONPathProvider(), epManager);
