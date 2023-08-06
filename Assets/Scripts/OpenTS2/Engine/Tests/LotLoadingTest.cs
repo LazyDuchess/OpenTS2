@@ -24,6 +24,8 @@ namespace OpenTS2.Engine.Tests
             var lotFullPath = Path.Combine(lotsFolderPath, lotFilename);
             var lotPackage = contentProvider.AddPackage(lotFullPath);
 
+            // Load effects.
+            EffectsManager.Get().Initialize();
             // Load base game assets.
             contentProvider.AddPackages(
                 Filesystem.GetPackagesInDirectory(Filesystem.GetDataPathForProduct(ProductFlags.BaseGame) +
