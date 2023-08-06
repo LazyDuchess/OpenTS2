@@ -21,13 +21,12 @@ namespace OpenTS2.Files.Formats.DBPF
             reader.Seek(SeekOrigin.Current, 64);
 
             var typeId = reader.ReadUInt32();
-            Debug.Assert(typeId == TypeIDs.LOT_OBJECT);
             var version = reader.ReadUInt32();
             var blockName = reader.ReadVariableLengthPascalString();
             // TODO: add support for cAnimatable
             if (blockName != "cObject")
             {
-                return null;
+                return new LotObjectAsset("", new Vector3(), new Quaternion());
             }
 
             var resourceName = reader.ReadVariableLengthPascalString();
