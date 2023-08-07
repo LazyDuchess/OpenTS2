@@ -1,4 +1,5 @@
-﻿using OpenTS2.Files.Formats.DBPF.Types;
+﻿using System;
+using OpenTS2.Files.Formats.DBPF.Types;
 using OpenTS2.Files.Utils;
 using UnityEngine;
 
@@ -49,10 +50,14 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                 morphChannelWeights[i] = reader.ReadFloat();
             }
 
-            var morphChannelNames = new string[morphChannelWeights.Length];
-            for (var i = 0; i < morphChannelNames.Length; i++)
+            var morphChannelNames = Array.Empty<string>();
+            if (blockTypeInfo.Version >= 21)
             {
-                morphChannelNames[i] = reader.ReadVariableLengthPascalString();
+                morphChannelNames = new string[morphChannelWeights.Length];
+                for (var i = 0; i < morphChannelNames.Length; i++)
+                {
+                    morphChannelNames[i] = reader.ReadVariableLengthPascalString();
+                }
             }
 
             // This byte array carries the kMaterialFloat1/2/3/4 attributes. These are likely used in the shader for
@@ -60,7 +65,11 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             var byteArrayLength = reader.ReadUInt32();
             var materialFloats = reader.ReadBytes(byteArrayLength);
 
-            var shapeColor = reader.ReadUInt32();
+            uint shapeColor = 0;
+            if (blockTypeInfo.Version > 19)
+            {
+                shapeColor = reader.ReadUInt32();
+            }
 
             return new ShapeRefNodeBlock(blockTypeInfo, shapes, renderable, morphChannelWeights, morphChannelNames, shapeColor);
         }
