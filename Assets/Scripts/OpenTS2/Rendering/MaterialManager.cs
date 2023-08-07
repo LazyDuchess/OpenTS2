@@ -22,6 +22,12 @@ namespace OpenTS2.Rendering
             RegisterMaterial<ImposterWallMaterial>();
             RegisterMaterial<ImposterDualPackedSliceMaterial>();
             RegisterMaterial<ImposterRoofMaterial>();
+
+            RegisterMaterial<TextureAlphaMaterial>();
+            RegisterMaterial<VertexAlphaMaterial>();
+            RegisterMaterial<PhongAlphaMaterial>();
+            RegisterMaterial<PhongTextureMaterial>();
+
             // Ideally we'd just disable the mesh renderer to save a draw call but Maxis had to make it weird of course.
             // Could maybe have an ApplyToRenderer(MeshRenderer, MaterialDef) function that does just that if the material def is Null instead.
             RegisterMaterial<NullMaterial>();
@@ -32,7 +38,7 @@ namespace OpenTS2.Rendering
         public static Material Parse(ScenegraphMaterialDefinitionAsset definition)
         {
             if (!s_materials.TryGetValue(definition.MaterialDefinition.Type, out AbstractMaterial material))
-                throw new KeyNotFoundException($"Can't find material type {definition.MaterialDefinition.Type}");
+                throw new KeyNotFoundException($"Can't find material type {definition.MaterialDefinition.Type} for {definition.MaterialDefinition.MaterialName}");
             return material.Parse(definition);
         }
 
