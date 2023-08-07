@@ -51,7 +51,7 @@ namespace OpenTS2.Files.Formats.DBPF
                 {
                     reader.ReadUInt32(); // unknown
                 }
-                
+
                 var unknownPairCount = reader.ReadInt32();
                 for (var j = 0; j < unknownPairCount; j++)
                 {

@@ -5,60 +5,78 @@ using UnityEngine;
 
 namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block.GeometryData
 {
-    /* Element ids and their names as from the wiki and game.
-    ╔═════════════╦════════════════════════╦══════════════╗
-    ║ ID          ║ Wiki Name              ║ Game Name    ║
-    ╠═════════════╬════════════════════════╬══════════════╣
-    ║ 0x114113c3  ║ (EP4) VertexID         ║ vertexid     ║
-    ╠═════════════╬════════════════════════╬══════════════╣
-    ║ 0x114113cd  ║ (EP4) RegionMask       ║ seamvertexid ║
-    ╠═════════════╬════════════════════════╬══════════════╣
-    ║ 0x1c4afc56  ║ Blend Indices          ║              ║
-    ╠═════════════╬════════════════════════╬══════════════╣
-    ║ 0x3b83078b  ║ Normals List           ║ norm         ║
-    ╠═════════════╬════════════════════════╬══════════════╣
-    ║ 0x3bd70105  ║ Bone Weights           ║ weights      ║
-    ╠═════════════╬════════════════════════╬══════════════╣
-    ║ 0x5b830781  ║ Vertices               ║ pos          ║
-    ╠═════════════╬════════════════════════╬══════════════╣
-    ║ 0x5c4afc5c  ║ Blend Weights          ║              ║
-    ╠═════════════╬════════════════════════╬══════════════╣
-    ║ 0x5cf2cfe1  ║ Morph Vertex Deltas    ║ posdelta     ║
-    ╠═════════════╬════════════════════════╬══════════════╣
-    ║ 0x69d92b93  ║ Bump Map Normal Deltas ║ binorm       ║
-    ╠═════════════╬════════════════════════╬══════════════╣
-    ║ 0x7c4dee82  ║ Target Indices         ║              ║
-    ╠═════════════╬════════════════════════╬══════════════╣
-    ║ 0x89d92ba0  ║ Bump Map Normals       ║ tangent      ║
-    ╠═════════════╬════════════════════════╬══════════════╣
-    ║ 0x9bb38afb  ║ Binormals              ║              ║
-    ╠═════════════╬════════════════════════╬══════════════╣
-    ║ 0xbb8307ab  ║ UV Coordinates         ║ tc           ║
-    ╠═════════════╬════════════════════════╬══════════════╣
-    ║ 0xcb6f3a6a  ║ Normal Morph Deltas    ║ normdelta    ║
-    ╠═════════════╬════════════════════════╬══════════════╣
-    ║ 0xcb7206a1  ║ Colour                 ║ uvdelta      ║
-    ╠═════════════╬════════════════════════╬══════════════╣
-    ║ 0xdb830795  ║ UV Coordinate Deltas   ║ col          ║
-    ╠═════════════╬════════════════════════╬══════════════╣
-    ║ 0xdcf2cfdc  ║ Morph Vertex Map       ║ targetidx    ║
-    ╠═════════════╬════════════════════════╬══════════════╣
-    ║ 0xeb720693  ║ Colour Deltas          ║ coldelta     ║
-    ╠═════════════╬════════════════════════╬══════════════╣
-    ║ 0xfbd70111  ║ Bone Assignments       ║ blendidx     ║
-    ╚═════════════╩════════════════════════╩══════════════╝ */
+    /* Element ids and their names as from the wiki and game. Parenthesized names are my reverse-engineered names from
+       the game.
+
+    ╔═════════════╦════════════════════════╦══════════════════╗
+    ║ ID          ║ Wiki Name              ║ Game Name        ║
+    ╠═════════════╬════════════════════════╬══════════════════╣
+    ║ 0x114113c3  ║ (EP4) VertexID         ║ vertexid         ║
+    ╠═════════════╬════════════════════════╬══════════════════╣
+    ║ 0x114113cd  ║ (EP4) RegionMask       ║ seamvertexid     ║
+    ╠═════════════╬════════════════════════╬══════════════════╣
+    ║ 0x1c4afc56  ║ Blend Indices          ║ (pos_delta_idx)  ║
+    ╠═════════════╬════════════════════════╬══════════════════╣
+    ║ 0x3b83078b  ║ Normals List           ║ norm             ║
+    ╠═════════════╬════════════════════════╬══════════════════╣
+    ║ 0x3bd70105  ║ Bone Weights           ║ weights          ║
+    ╠═════════════╬════════════════════════╬══════════════════╣
+    ║ 0x5b830781  ║ Vertices               ║ pos              ║
+    ╠═════════════╬════════════════════════╬══════════════════╣
+    ║ 0x5c4afc5c  ║ Blend Weights          ║                  ║
+    ╠═════════════╬════════════════════════╬══════════════════╣
+    ║ 0x5cf2cfe1  ║ Morph Vertex Deltas    ║ posdelta         ║
+    ╠═════════════╬════════════════════════╬══════════════════╣
+    ║ 0x69d92b93  ║ Bump Map Normal Deltas ║ binorm           ║
+    ╠═════════════╬════════════════════════╬══════════════════╣
+    ║ 0x7c4dee82  ║ Target Indices         ║ (norm_delta_idx) ║
+    ╠═════════════╬════════════════════════╬══════════════════╣
+    ║ 0x89d92ba0  ║ Bump Map Normals       ║ tangent          ║
+    ╠═════════════╬════════════════════════╬══════════════════╣
+    ║ 0x9bb38afb  ║ Binormals              ║                  ║
+    ╠═════════════╬════════════════════════╬══════════════════╣
+    ║ 0xbb8307ab  ║ UV Coordinates         ║ tc               ║
+    ╠═════════════╬════════════════════════╬══════════════════╣
+    ║ 0xcb6f3a6a  ║ Normal Morph Deltas    ║ normdelta        ║
+    ╠═════════════╬════════════════════════╬══════════════════╣
+    ║ 0xcb7206a1  ║ Colour                 ║ uvdelta          ║
+    ╠═════════════╬════════════════════════╬══════════════════╣
+    ║ 0xdb830795  ║ UV Coordinate Deltas   ║ col              ║
+    ╠═════════════╬════════════════════════╬══════════════════╣
+    ║ 0xdcf2cfdc  ║ Morph Vertex Map       ║ targetidx        ║
+    ╠═════════════╬════════════════════════╬══════════════════╣
+    ║ 0xeb720693  ║ Colour Deltas          ║ coldelta         ║
+    ╠═════════════╬════════════════════════╬══════════════════╣
+    ║ 0xfbd70111  ║ Bone Assignments       ║ blendidx         ║
+    ╚═════════════╩════════════════════════╩══════════════════╝ */
     internal static class GeometryElementIds
     {
         public const uint Normals = 0x3b83078b;
         public const uint Vertices = 0x5b830781;
         public const uint Tangents = 0x89d92ba0;
         public const uint UVMap = 0xbb8307ab;
-
         /// <summary>
         /// The wiki claims this is a "UV Coordinate Delta" but the game seems to have three sets of these elements and
         /// they're called `color`. Each element seems to be an `unsigned long` with a packed ARGB color value.
         /// </summary>
         public const uint Color = 0xdb830795;
+
+        /// <summary>
+        /// How much each vertex should move during a morph animation.
+        /// </summary>
+        public const uint MorphVertexPositionDelta = 0x5cf2cfe1;
+        public const uint MorphVertexPositionIndices = 0x1c4afc56;
+        /// <summary>
+        /// How much the normal vectors should move during a morph animation.
+        /// </summary>
+        public const uint MorphNormalDelta = 0xcb6f3a6a;
+        public const uint MorphNormalIndices = 0x7c4dee82;
+
+        // Not sure about this one, whether it relates to bone-animation or morphs.
+        public const uint MorphVertexMap = 0xdcf2cfdc;
+
+        public const uint BoneAssignments = 0xfbd70111;
+        public const uint BoneWeights = 0x3bd70105;
     }
 
     /// <summary>
@@ -79,6 +97,17 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block.GeometryData
                 GeometryElementIds.Tangents => new TangentElement(elementData),
                 GeometryElementIds.UVMap => new UVMapElement(elementData),
                 GeometryElementIds.Color => new ColorElement(elementData),
+
+                GeometryElementIds.MorphVertexPositionDelta => new MorphVertexPositionDeltaElement(elementData),
+                GeometryElementIds.MorphVertexPositionIndices => new MorphVertexPositionIndicesElement(elementData),
+                GeometryElementIds.MorphNormalDelta => new MorphNormalDeltaElement(elementData),
+                GeometryElementIds.MorphNormalIndices => new MorphNormalIndicesElement(elementData),
+
+                GeometryElementIds.MorphVertexMap => new MorphVertexMapElement(elementData),
+
+                GeometryElementIds.BoneAssignments => new BoneAssignmentsElement(elementData),
+                GeometryElementIds.BoneWeights => new BoneWeightsElement(elementData),
+
                 _ => throw new ArgumentException($"Unknown geometry element id {elementId:X}")
             };
         }
@@ -144,6 +173,26 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block.GeometryData
         }
     }
 
+    /// <summary>
+    /// A GeometryElement consisting of unsigned shorts, usually used to represent vertex indices.
+    /// </summary>
+    public abstract class UnsignedInt16Element : GeometryElement
+    {
+        public ushort[] Data { get; }
+
+        protected UnsignedInt16Element(byte[] elementData)
+        {
+            var numElements = elementData.Length / sizeof(ushort);
+            Data = new ushort[numElements];
+
+            var buffer = IoBuffer.FromBytes(elementData);
+            for (var i = 0; i < numElements; i++)
+            {
+                Data[i] = buffer.ReadUInt16();
+            }
+        }
+    }
+
     public class VertexElement : Vec3Element
     {
         public VertexElement(byte[] elementData) : base(elementData)
@@ -175,6 +224,55 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block.GeometryData
     public class ColorElement : UnsignedInt32Element
     {
         public ColorElement(byte[] elementData) : base(elementData)
+        {
+        }
+    }
+
+    public class MorphVertexPositionDeltaElement : Vec3Element
+    {
+        public MorphVertexPositionDeltaElement(byte[] elementData) : base(elementData)
+        {
+        }
+    }
+
+    public class MorphVertexPositionIndicesElement : UnsignedInt16Element
+    {
+        public MorphVertexPositionIndicesElement(byte[] elementData) : base(elementData)
+        {
+        }
+    }
+
+    public class MorphNormalDeltaElement : Vec3Element
+    {
+        public MorphNormalDeltaElement(byte[] elementData) : base(elementData)
+        {
+        }
+    }
+
+    public class MorphNormalIndicesElement : UnsignedInt16Element
+    {
+        public MorphNormalIndicesElement(byte[] elementData) : base(elementData)
+        {
+        }
+    }
+
+    public class MorphVertexMapElement : UnsignedInt32Element
+    {
+        public MorphVertexMapElement(byte[] elementData) : base(elementData)
+        {
+        }
+    }
+
+    public class BoneAssignmentsElement : UnsignedInt32Element
+    {
+        public BoneAssignmentsElement(byte[] elementData) : base(elementData)
+        {
+        }
+    }
+
+    public class BoneWeightsElement : Vec3Element
+    {
+        public BoneWeightsElement(byte[] elementData) : base(elementData)
         {
         }
     }
