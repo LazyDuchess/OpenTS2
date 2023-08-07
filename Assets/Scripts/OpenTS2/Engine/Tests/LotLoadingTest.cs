@@ -43,17 +43,17 @@ namespace OpenTS2.Engine.Tests
                 {
                     var lotObject = entry.GetAsset<LotObjectAsset>();
                     var resource = contentProvider.GetAsset<ScenegraphResourceAsset>(
-                        new ResourceKey(lotObject.ResourceName + "_cres", GroupIDs.Scenegraph,
+                        new ResourceKey(lotObject.Object.ResourceName + "_cres", GroupIDs.Scenegraph,
                             TypeIDs.SCENEGRAPH_CRES));
                     if (resource == null)
                     {
-                        Debug.Log($"Could not find lot object: {lotObject.ResourceName}");
+                        Debug.Log($"Could not find lot object: {lotObject.Object.ResourceName}");
                         continue;
                     }
 
                     var model = resource.CreateRootGameObject();
-                    model.transform.GetChild(0).localPosition = lotObject.Position;
-                    model.transform.GetChild(0).localRotation = lotObject.Rotation;
+                    model.transform.GetChild(0).localPosition = lotObject.Object.Position;
+                    model.transform.GetChild(0).localRotation = lotObject.Object.Rotation;
                 }
                 catch (Exception e)
                 {

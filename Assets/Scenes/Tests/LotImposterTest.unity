@@ -250,11 +250,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 967368437}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: da850026e80446f982162bc799cc7303, type: 3}
+  m_Script: {fileID: 11500000, guid: ae55ca702468969409878906ed55d473, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   NeighborhoodPrefix: N001
-  LotID: 10
+  LotID: 11
 --- !u!4 &967368439
 Transform:
   m_ObjectHideFlags: 0
