@@ -16,13 +16,13 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
         public override string BlockName => BLOCK_NAME;
 
         public ObjectReference[] Shapes { get; }
-        public RenderableNode Renderable { get; }
+        public RenderableNodeBlock Renderable { get; }
 
         public float[] MorphChannelWeights { get; }
         public string[] MorphChannelNames { get; }
         public uint ShapeColor { get; }
 
-        public ShapeRefNodeBlock(PersistTypeInfo blockTypeInfo, ObjectReference[] shapes, RenderableNode renderable,
+        public ShapeRefNodeBlock(PersistTypeInfo blockTypeInfo, ObjectReference[] shapes, RenderableNodeBlock renderable,
             float[] morphChannelWeights,
             string[] morphChannelNames, uint shapeColor) : base(blockTypeInfo) =>
             (Shapes, Renderable, MorphChannelWeights, MorphChannelNames, ShapeColor) =
@@ -33,7 +33,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
     {
         public ShapeRefNodeBlock Deserialize(IoBuffer reader, PersistTypeInfo blockTypeInfo)
         {
-            var renderable = RenderableNode.Deserialize(reader);
+            var renderable = RenderableNodeBlock.Deserialize(reader);
 
             var shapes = new ObjectReference[reader.ReadUInt32()];
             for (var i = 0; i < shapes.Length; i++)
@@ -63,68 +63,6 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             var shapeColor = reader.ReadUInt32();
 
             return new ShapeRefNodeBlock(blockTypeInfo, shapes, renderable, morphChannelWeights, morphChannelNames, shapeColor);
-        }
-    }
-
-    // These scenegraph blocks are all part of cShapeRef. They currently live here but can be moved out if they're
-    // used in places that aren't just cShapeRef.
-
-    /// <summary>
-    /// cRenderableNode
-    /// </summary>
-    public class RenderableNode
-    {
-        public BoundedNode Bounded { get; }
-        public string[] RenderGroups { get; }
-        public uint RenderGroupId { get; }
-        public bool AddToDisplayList { get; }
-
-        public RenderableNode(BoundedNode bounded, string[] renderGroups, uint renderGroupId, bool addToDisplayList) =>
-            (Bounded, RenderGroups, RenderGroupId, AddToDisplayList) =
-            (bounded, renderGroups, renderGroupId, addToDisplayList);
-
-        public static RenderableNode Deserialize(IoBuffer reader)
-        {
-            var typeInfo = PersistTypeInfo.Deserialize(reader);
-            Debug.Assert(typeInfo.Name == "cRenderableNode");
-
-            var bounded = BoundedNode.Deserialize(reader);
-
-            var partOfAllRenderGroups = reader.ReadByte() != 0;
-            var renderGroups = new string[reader.ReadUInt32()];
-            for (var i = 0; i < renderGroups.Length; i++)
-            {
-                renderGroups[i] = reader.ReadVariableLengthPascalString();
-            }
-
-            var renderGroupId = reader.ReadUInt32();
-            // kAddToDisplayListMaskBit
-            var addToDisplayList = reader.ReadByte() != 0;
-
-            return new RenderableNode(bounded, renderGroups, renderGroupId, addToDisplayList);
-        }
-    }
-
-    /// <summary>
-    /// cBoundedNode, a node that has a bounding box.
-    /// </summary>
-    public class BoundedNode
-    {
-        public TransformNodeBlock Transform { get; }
-
-        public BoundedNode(TransformNodeBlock transform) => (Transform) = (transform);
-
-        public static BoundedNode Deserialize(IoBuffer reader)
-        {
-            var typeInfo = PersistTypeInfo.Deserialize(reader);
-            Debug.Assert(typeInfo.Name == "cBoundedNode");
-
-            var transform = TransformNodeBlockReader.DeserializeWithoutTypeInfo(reader);
-
-            // ignored boolean, always written as 0.
-            var ignoredBool = reader.ReadByte();
-
-            return new BoundedNode(transform);
         }
     }
 }

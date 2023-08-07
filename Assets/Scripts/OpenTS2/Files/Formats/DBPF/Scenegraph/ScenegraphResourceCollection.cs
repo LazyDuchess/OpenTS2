@@ -124,6 +124,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph
                 { ResourceNodeBlock.TYPE_ID, new ResourceNodeBlockReader() },
                 { DataListExtensionBlock.TYPE_ID, new DataListExtensionBlockReader() },
                 { ShapeRefNodeBlock.TYPE_ID, new ShapeRefNodeBlockReader() },
+                { LightRefNodeBlock.TYPE_ID, new LightRefNodeBlockReader() },
                 { TransformNodeBlock.TYPE_ID, new TransformNodeBlockReader() },
             };
 
