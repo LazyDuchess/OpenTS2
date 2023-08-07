@@ -47,8 +47,11 @@ namespace OpenTS2.Files.Formats.DBPF
             for (var i = 0; i < numSkins; i++)
             {
                 var skinName = reader.ReadVariableLengthPascalString();
-                reader.ReadUInt32(); // unknown
-
+                if (version > 16)
+                {
+                    reader.ReadUInt32(); // unknown
+                }
+                
                 var unknownPairCount = reader.ReadInt32();
                 for (var j = 0; j < unknownPairCount; j++)
                 {
