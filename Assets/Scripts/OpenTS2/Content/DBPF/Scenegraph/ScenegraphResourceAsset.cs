@@ -86,12 +86,17 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                 }
 
                 var extension = ResourceCollection.Blocks[internalRef.BlockIndex];
-                if (!(extension is DataListExtensionBlock extensionBlock))
+                switch (extension)
                 {
-                    throw new ArgumentException($"Expected cDataExtensionBlock, got {extension}");
+                    case BoneDataExtensionBlock boneDataExtensionBlock:
+                        // TODO: handle bone data extensions.
+                        break;
+                    case DataListExtensionBlock extensionBlock:
+                        HandleExtension(parent, extensionBlock);
+                        break;
+                    default:
+                        throw new ArgumentException($"Unknown extension block type: {extension}");
                 }
-
-                HandleExtension(parent, extensionBlock);
             }
         }
 
