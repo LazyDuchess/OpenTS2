@@ -44,13 +44,6 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             StaticBoundMesh.Free();
         }
 
-
-        internal struct BlendShapeInfo
-        {
-            private Vector3[] deltaVertices;
-            private Vector3[] deltaNormals;
-        }
-
         private Mesh InitializeMeshFromPrimitive(GeometryDataContainerBlock geometryBlock, MeshPrimitive primitive)
         {
             var mesh = new Mesh

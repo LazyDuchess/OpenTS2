@@ -67,10 +67,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
         public MeshComponent[] Components { get; }
         public MeshPrimitive[] Primitives { get; }
 
-        /// <summary>
-        /// Keys are group names and values are channel names.
-        /// </summary>
-        public Dictionary<string, string> MorphTargets { get; }
+        public MorphTarget[] MorphTargets { get; }
 
         /// <summary>
         /// Static bounding mesh for the whole model. Only used when there are no joints/bones.
@@ -84,7 +81,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
 
         public GeometryDataContainerBlock(PersistTypeInfo blockTypeInfo,
             ScenegraphResource resource, GeometryElement[] elements,
-            MeshComponent[] components, MeshPrimitive[] primitives, Dictionary<string, string> morphTargets,
+            MeshComponent[] components, MeshPrimitive[] primitives, MorphTarget[] morphTargets,
             MeshGeometry staticBounds, MeshGeometry[] bonesBounds) : base(blockTypeInfo)
         {
             Resource = resource;
@@ -104,6 +101,14 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
         public List<GeometryElement> GetGeometryElementsForMeshComponent(MeshComponent component)
         {
             return component.GeometryElementIndices.Select(elementIndex => Elements[elementIndex]).ToList();
+        }
+
+        public readonly struct MorphTarget
+        {
+            public readonly string groupName;
+            public readonly string channelName;
+
+            public MorphTarget(string group, string channel) => (groupName, channelName) = (group, channel);
         }
     }
 
@@ -266,15 +271,15 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             }
         }
 
-        private static Dictionary<string, string> ReadMorphTargets(IoBuffer reader)
+        private static GeometryDataContainerBlock.MorphTarget[] ReadMorphTargets(IoBuffer reader)
         {
-            var morphTargets = new Dictionary<string, string>();
             var numberOfMorphTargets = reader.ReadUInt32();
+            var morphTargets = new GeometryDataContainerBlock.MorphTarget[numberOfMorphTargets];
             for (var i = 0; i < numberOfMorphTargets; i++)
             {
                 var groupName = reader.ReadVariableLengthPascalString();
                 var channelName = reader.ReadVariableLengthPascalString();
-                morphTargets[groupName] = channelName;
+                morphTargets[i] = new GeometryDataContainerBlock.MorphTarget(groupName, channelName);
             }
 
             return morphTargets;
