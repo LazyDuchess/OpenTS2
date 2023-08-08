@@ -126,6 +126,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph
                 { ShapeRefNodeBlock.TYPE_ID, new ShapeRefNodeBlockReader() },
                 { LightRefNodeBlock.TYPE_ID, new LightRefNodeBlockReader() },
                 { TransformNodeBlock.TYPE_ID, new TransformNodeBlockReader() },
+                { BoneDataExtensionBlock.TYPE_ID, new BoneDataExtensionBlockReader() },
             };
 
         private static ResourceKey ReadResourceKey(IoBuffer reader)
