@@ -68,6 +68,11 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
         public MeshPrimitive[] Primitives { get; }
 
         /// <summary>
+        /// Keys are group names and values are channel names.
+        /// </summary>
+        public Dictionary<string, string> MorphTargets { get; }
+
+        /// <summary>
         /// Static bounding mesh for the whole model. Only used when there are no joints/bones.
         /// </summary>
         public MeshGeometry StaticBounds { get; }
@@ -79,10 +84,17 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
 
         public GeometryDataContainerBlock(PersistTypeInfo blockTypeInfo,
             ScenegraphResource resource, GeometryElement[] elements,
-            MeshComponent[] components, MeshPrimitive[] primitives,
+            MeshComponent[] components, MeshPrimitive[] primitives, Dictionary<string, string> morphTargets,
             MeshGeometry staticBounds, MeshGeometry[] bonesBounds) : base(blockTypeInfo)
-            => (Resource, Elements, Components, Primitives, StaticBounds, BonesBounds) = (resource, elements,
-                components, primitives, staticBounds, bonesBounds);
+        {
+            Resource = resource;
+            Elements = elements;
+            Components = components;
+            Primitives = primitives;
+            MorphTargets = morphTargets;
+            StaticBounds = staticBounds;
+            BonesBounds = bonesBounds;
+        }
 
         public MeshComponent GetMeshComponentForPrimitive(MeshPrimitive primitive)
         {
@@ -105,11 +117,13 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             var components = ReadMeshComponentsSection(reader, blockTypeInfo);
             var primitives = ReadPrimitivesSection(reader, blockTypeInfo);
 
+            ReadPoseTransforms(reader);
+            var morphTargets = ReadMorphTargets(reader);
             var staticBound = ReadStaticBoundSection(reader, blockTypeInfo);
             var bones = ReadBonesSection(reader, blockTypeInfo);
 
             return new GeometryDataContainerBlock(blockTypeInfo, resource, elements, components, primitives,
-                staticBound, bones);
+                morphTargets, staticBound, bones);
         }
 
         private static ushort[] ReadIndices(IoBuffer reader, uint version)
@@ -242,7 +256,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             return new MeshGeometry { Vertices = vertices, Faces = faces };
         }
 
-        private static MeshGeometry ReadStaticBoundSection(IoBuffer reader, PersistTypeInfo blockTypeInfo)
+        private static void ReadPoseTransforms(IoBuffer reader)
         {
             var numberOfPoseTransforms = reader.ReadUInt32();
             for (var i = 0; i < numberOfPoseTransforms; i++)
@@ -250,14 +264,24 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                 var rotation = QuaterionSerialzier.Deserialize(reader);
                 var position = Vector3Serializer.Deserialize(reader);
             }
+        }
 
+        private static Dictionary<string, string> ReadMorphTargets(IoBuffer reader)
+        {
+            var morphTargets = new Dictionary<string, string>();
             var numberOfMorphTargets = reader.ReadUInt32();
             for (var i = 0; i < numberOfMorphTargets; i++)
             {
-                reader.ReadVariableLengthPascalString();
-                reader.ReadVariableLengthPascalString();
+                var groupName = reader.ReadVariableLengthPascalString();
+                var channelName = reader.ReadVariableLengthPascalString();
+                morphTargets[groupName] = channelName;
             }
 
+            return morphTargets;
+        }
+
+        private static MeshGeometry ReadStaticBoundSection(IoBuffer reader, PersistTypeInfo blockTypeInfo)
+        {
             return ReadGeometry(reader, blockTypeInfo.Version);
         }
 
