@@ -222,21 +222,42 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                     if (!shape.Materials.TryGetValue(primitive.Key, out var material))
                     {
                         continue;
-
                     }
 
-                    // Create an object for the primitive and parent it to the root game object.
-                    var primitiveObject = new GameObject(primitive.Key, typeof(MeshFilter), typeof(MeshRenderer))
+                    GameObject primitiveObject;
+                    // Make a SkinnedMeshRender or a regular renderer depending on if we have blend shapes.
+                    if (primitive.Value.blendShapeCount != 0)
                     {
-                        transform =
-                        {
-                            rotation = shapeTransform.Rotation,
-                            position = shapeTransform.Transform
-                        }
-                    };
+                        primitiveObject =
+                            new GameObject(primitive.Key, typeof(SkinnedMeshRenderer))
+                            {
+                                transform =
+                                {
+                                    rotation = shapeTransform.Rotation,
+                                    position = shapeTransform.Transform
+                                }
+                            };
 
-                    primitiveObject.GetComponent<MeshFilter>().sharedMesh = primitive.Value;
-                    primitiveObject.GetComponent<MeshRenderer>().sharedMaterial = material.GetAsUnityMaterial();
+                        primitiveObject.GetComponent<SkinnedMeshRenderer>().sharedMesh = primitive.Value;
+                        primitiveObject.GetComponent<SkinnedMeshRenderer>().sharedMaterial =
+                            material.GetAsUnityMaterial();
+                    }
+                    else
+                    {
+                        primitiveObject =
+                            new GameObject(primitive.Key, typeof(MeshFilter), typeof(MeshRenderer))
+                            {
+                                transform =
+                                {
+                                    rotation = shapeTransform.Rotation,
+                                    position = shapeTransform.Transform
+                                }
+                            };
+
+                        primitiveObject.GetComponent<MeshFilter>().sharedMesh = primitive.Value;
+                        primitiveObject.GetComponent<MeshRenderer>().sharedMaterial =
+                            material.GetAsUnityMaterial();
+                    }
 
                     primitiveObject.transform.SetParent(parent.transform, worldPositionStays:false);
                 }

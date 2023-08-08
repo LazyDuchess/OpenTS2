@@ -44,6 +44,13 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             StaticBoundMesh.Free();
         }
 
+
+        internal struct BlendShapeInfo
+        {
+            private Vector3[] deltaVertices;
+            private Vector3[] deltaNormals;
+        }
+
         private Mesh InitializeMeshFromPrimitive(GeometryDataContainerBlock geometryBlock, MeshPrimitive primitive)
         {
             var mesh = new Mesh
@@ -81,11 +88,32 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                     case UVMapElement uvMap:
                         mesh.SetUVs(0, GetUVMapForMeshComponent(uvMap, meshComponent));
                         break;
+
+                    // Handled below in animation section.
+                    case MorphNormalDeltaElement _:
+                    case MorphVertexPositionDeltaElement _:
+                    // These might just be the indices of the vertices that are affected by the vertex delta and
+                    // normal delta.
+                    case MorphNormalIndicesElement _:
+                    case MorphVertexPositionIndicesElement _:
+                        break;
+
                     default:
                         Debug.LogWarning($"Unknown geometry element type: {geometryElement.GetType()}");
                         break;
                 }
             }
+
+
+            // Add blend animations.
+            var deltaVertices = elements.OfType<MorphVertexPositionDeltaElement>().ToArray();
+            var deltaNormals = elements.OfType<MorphNormalDeltaElement>().ToArray();
+
+            for (var i = 0; i < deltaVertices.Length; i++)
+            {
+                mesh.AddBlendShapeFrame($"blend-{i}", 100.0f, deltaVertices[i].Data, deltaNormals[i].Data, null);
+            }
+            mesh.RecalculateTangents();
 
             return mesh;
         }
