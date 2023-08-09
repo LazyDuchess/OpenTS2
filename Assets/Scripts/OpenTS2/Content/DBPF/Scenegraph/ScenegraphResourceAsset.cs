@@ -169,7 +169,14 @@ namespace OpenTS2.Content.DBPF.Scenegraph
 
         private void RenderTransformNode(GameObject parent, TransformNodeBlock transformNode)
         {
-            var transform = new GameObject("transform", typeof(AssetReferenceComponent));
+            var name = "transform";
+
+            var tag = transformNode.CompositionTree.Graph.Tag;
+            if (tag != "")
+            {
+                name = tag;
+            }
+            var transform = new GameObject(name, typeof(AssetReferenceComponent));
             RenderCompositionTree(transform, transformNode.CompositionTree);
 
             transform.transform.localRotation = transformNode.Rotation;
