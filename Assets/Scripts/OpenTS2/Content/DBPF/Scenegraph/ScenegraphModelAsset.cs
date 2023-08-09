@@ -246,7 +246,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                 {
                     continue;
                 }
-                mesh.AddBlendShapeFrame(animation.MorphTarget.groupName, weight, animation.VertexPositionDeltas,
+                mesh.AddBlendShapeFrame(animation.MorphTarget.channelName, weight, animation.VertexPositionDeltas,
                     animation.VertexNormalDeltas, null);
                 weight += 0.00001f;
             }
