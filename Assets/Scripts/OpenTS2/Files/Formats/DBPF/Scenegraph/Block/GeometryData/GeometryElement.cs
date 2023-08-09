@@ -65,14 +65,25 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block.GeometryData
         /// How much each vertex should move during a morph animation.
         /// </summary>
         public const uint MorphVertexPositionDelta = 0x5cf2cfe1;
+        /// <summary>
+        /// Contains the vertex indices that have vertex position deltas, useless extra information.
+        /// </summary>
         public const uint MorphVertexPositionIndices = 0x1c4afc56;
         /// <summary>
         /// How much the normal vectors should move during a morph animation.
         /// </summary>
         public const uint MorphNormalDelta = 0xcb6f3a6a;
+        /// <summary>
+        /// Contains the vertex indices that have normal deltas, useless extra information.
+        /// </summary>
         public const uint MorphNormalIndices = 0x7c4dee82;
-
-        // Not sure about this one, whether it relates to bone-animation or morphs.
+        /// <summary>
+        /// This is a bit of a special structure, it has a uint32 for each vertex. It maps out which
+        /// MorphVertexPositionDelta and MorphNormalDelta blocks should affect the vertex and which morphTarget the
+        /// morph is considered part of.
+        ///
+        /// See SceneGraphModelAsset.AddBlendAnimations for more details.
+        /// </summary>
         public const uint MorphVertexMap = 0xdcf2cfdc;
 
         public const uint BoneAssignments = 0xfbd70111;
@@ -102,7 +113,6 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block.GeometryData
                 GeometryElementIds.MorphVertexPositionIndices => new MorphVertexPositionIndicesElement(elementData),
                 GeometryElementIds.MorphNormalDelta => new MorphNormalDeltaElement(elementData),
                 GeometryElementIds.MorphNormalIndices => new MorphNormalIndicesElement(elementData),
-
                 GeometryElementIds.MorphVertexMap => new MorphVertexMapElement(elementData),
 
                 GeometryElementIds.BoneAssignments => new BoneAssignmentsElement(elementData),
