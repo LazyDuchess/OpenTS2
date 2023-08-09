@@ -223,7 +223,6 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                     // 3rd delta map.
                     var deltaMapIdx = (3 - byteIdx);
                     Debug.Assert(deltaMapIdx < vertexPosDeltas.Length);
-                    Debug.Assert(deltaMapIdx < vertexNormDeltas.Length);
                     var morphTarget = morphTargets[(int)vertexMapByte];
 
                     if (animations[vertexMapByte] == null)
@@ -232,7 +231,11 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                     }
 
                     animations[vertexMapByte].VertexPositionDeltas[i] = vertexPosDeltas[deltaMapIdx].Data[i];
-                    animations[vertexMapByte].VertexNormalDeltas[i] = vertexNormDeltas[deltaMapIdx].Data[i];
+                    // Optionally the normal morph might be defined.
+                    if (deltaMapIdx < vertexNormDeltas.Length)
+                    {
+                        animations[vertexMapByte].VertexNormalDeltas[i] = vertexNormDeltas[deltaMapIdx].Data[i];
+                    }
                 }
             }
 

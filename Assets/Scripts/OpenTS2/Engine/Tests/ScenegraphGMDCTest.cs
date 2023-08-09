@@ -16,7 +16,7 @@ public class ScenegraphGMDCTest : MonoBehaviour
             Filesystem.GetPackagesInDirectory(Filesystem.GetDataPathForProduct(ProductFlags.BaseGame) + "/Res/Sims3D"));
 
         var resource = contentProvider.GetAsset<ScenegraphResourceAsset>(
-            new ResourceKey("chairReclinerPuffy_cres", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_CRES));
+            new ResourceKey("puFace_cres", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_CRES));
 
         Debug.Log($"scenegraphModel: {resource.GlobalTGI}");
         var gameObject = resource.CreateRootGameObject();
