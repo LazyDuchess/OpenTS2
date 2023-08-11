@@ -25,6 +25,7 @@ namespace OpenTS2.Files.Formats.DBPF
         public const uint SCENEGRAPH_GMND = Scenegraph.Block.GeometryNodeBlock.TYPE_ID;
         public const uint SCENEGRAPH_SHPE = Scenegraph.Block.ShapeBlock.TYPE_ID;
         public const uint SCENEGRAPH_CRES = Scenegraph.Block.ResourceNodeBlock.TYPE_ID;
+        public const uint SCENEGRAPH_ANIM = Scenegraph.Block.AnimResourceConstBlock.TYPE_ID;
         public const uint NHOOD_TERRAIN = 0xABCB5DA4;
         // Neighborhood info
         public const uint NHOOD_INFO = 0xAC8A7A2E;
