@@ -14,7 +14,7 @@ public class ScenegraphAnimationCodecTest
     }
 
     [Test]
-    public void TestLoadsGeometryNode()
+    public void TestLoadsAnimationNode()
     {
         var animationAsset = ContentProvider.Get()
             .GetAsset<ScenegraphAnimationAsset>(new ResourceKey("a2o-pinball-play-lose_anim", 0x1C0532FA,

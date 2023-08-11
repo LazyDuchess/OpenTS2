@@ -13,10 +13,20 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
         {
         }
 
-        public struct AnimTarget
+        public class AnimTarget
         {
-            public int NumSharedChannels;
             public string TagName;
+
+            public int NumSharedChannels;
+            public SharedChannel[] Channels;
+        }
+
+        public class SharedChannel
+        {
+            public string ChannelName;
+
+            public uint BoneHash;
+            public uint ChannelFlags;
         }
     }
 
@@ -70,11 +80,14 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             var animTargets = new AnimResourceConstBlock.AnimTarget[numAnimTargets];
             for (var i = 0; i < numAnimTargets; i++)
             {
+                animTargets[i] = new AnimResourceConstBlock.AnimTarget();
+
                 // 2 ignored uint32s
                 reader.ReadBytes(4 * 2);
 
                 var animType = reader.ReadUInt16();
                 animTargets[i].NumSharedChannels = reader.ReadUInt16();
+                animTargets[i].Channels = new AnimResourceConstBlock.SharedChannel[animTargets[i].NumSharedChannels];
                 var numIKChains = reader.ReadUInt16();
                 var tagLengthMaybe = reader.ReadUInt16();
 
@@ -85,7 +98,6 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             for (var i = 0; i < numAnimTargets; i++)
             {
                 animTargets[i].TagName = reader.ReadNullTerminatedString();
-                Debug.Log($"  animTargetTagString: {animTargets[i].TagName}");
             }
 
             ReadPadding(reader, reader.Stream.Position - initialStreamPosition);
@@ -95,13 +107,14 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                 var target = animTargets[i];
                 for (var j = 0; j < target.NumSharedChannels; j++)
                 {
+                    var channel = new AnimResourceConstBlock.SharedChannel();
+                    target.Channels[j] = channel;
+
                     // 2 ignored uint32s
                     reader.ReadBytes(4 * 2);
-
-                    var boneHash = reader.ReadUInt32();
-                    Debug.Log($"  boneHash: {boneHash:X}");
+                    channel.BoneHash = reader.ReadUInt32();
                     reader.ReadUInt32(); // 1 ignored uint32.
-                    var channelFlags = reader.ReadUInt32();
+                    channel.ChannelFlags = reader.ReadUInt32();
                     reader.ReadUInt32(); // 1 ignored uint32.
                 }
             }
@@ -111,8 +124,35 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                 var target = animTargets[i];
                 for (var j = 0; j < target.NumSharedChannels; j++)
                 {
-                    var channelName = reader.ReadNullTerminatedString();
-                    Debug.Log($"  channelName: {channelName}");
+                    target.Channels[j].ChannelName = reader.ReadNullTerminatedString();
+                }
+            }
+
+            ReadPadding(reader, reader.Stream.Position - initialStreamPosition);
+
+            for (var i = 0; i < numAnimTargets; i++)
+            {
+                var target = animTargets[i];
+                for (var j = 0; j < target.NumSharedChannels; j++)
+                {
+                    var numComponents = (target.Channels[j].ChannelFlags >> 5) & 0b111;
+                    for (var k = 0; k < numComponents; k++)
+                    {
+                        // The exact format here depends on some flags...
+                        // for now this is just from the wiki.
+                        reader.ReadUInt16();
+                        reader.ReadInt16();
+                        reader.ReadUInt32();
+                    }
+                }
+            }
+
+            foreach (var target in animTargets)
+            {
+                Debug.Log($"AnimTarget {target.TagName}");
+                foreach (var channel in target.Channels)
+                {
+                    Debug.Log($"  name: {channel.ChannelName}, bonehash: {channel.BoneHash:X}");
                 }
             }
 
