@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using OpenTS2.Files.Utils;
 using UnityEngine;
 
@@ -20,6 +21,23 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
 
             public int NumSharedChannels;
             public SharedChannel[] Channels;
+
+            public int NumIKChains;
+            public IKChain[] IKChains;
+        }
+
+        /// <summary>
+        /// Inverse kinematics chain.
+        /// </summary>
+        public class IKChain
+        {
+            public int NumIkTargets;
+            public Target[] IkTargets;
+
+            public class Target
+            {
+
+            }
         }
 
         public class SharedChannel
@@ -53,7 +71,6 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                         var keyframe = new IKeyFrame.BakedKeyFrame();
                         KeyFrames[i] = keyframe;
 
-                        var data = 0.0f;
                         if (Type == DataType.FloatingPoint32)
                         {
                             keyframe.Data = reader.ReadFloat();
@@ -61,7 +78,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                         else
                         {
                             // TODO: convert from fixed point to floating point here.
-                            reader.ReadUInt16();
+                            reader.ReadInt16();
                         }
                     } else if (TangentCurveType == CurveType.ContinuousTangents)
                     {
@@ -192,6 +209,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
     {
         public AnimResourceConstBlock Deserialize(IoBuffer reader, PersistTypeInfo blockTypeInfo)
         {
+            Debug.Assert(blockTypeInfo.Version > 5);
             var resource = ScenegraphResource.Deserialize(reader);
 
             // The game treats the data as a free byte array and uses this size to refer to it...
@@ -244,12 +262,14 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
 
                 var animType = reader.ReadUInt16();
                 animTargets[i].NumSharedChannels = reader.ReadUInt16();
-                animTargets[i].Channels = new AnimResourceConstBlock.SharedChannel[animTargets[i].NumSharedChannels];
-                var numIKChains = reader.ReadUInt16();
+                animTargets[i].NumIKChains = reader.ReadByte();
+                var channelType = reader.ReadByte();
                 var tagLengthMaybe = reader.ReadUInt16();
 
                 // 3 ignored uint32s.
                 reader.ReadBytes(4 * 3);
+
+                animTargets[i].Channels = new AnimResourceConstBlock.SharedChannel[animTargets[i].NumSharedChannels];
             }
 
             // Another aligned section... the names of each animation target's targetted tag.
@@ -302,7 +322,8 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             {
                 foreach (var channel in target.Channels)
                 {
-                    var numComponents = (channel.ChannelFlags >> 5) & 0b111;
+                    var numComponents = (channel.ChannelFlags >> (5 + 24)) & 0b111;
+                    //var numComponents = (channel.ChannelFlags >> 5) & 0b111;
                     channel.Components = new AnimResourceConstBlock.ChannelComponent[numComponents];
 
                     for (var k = 0; k < numComponents; k++)
@@ -334,12 +355,106 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                 }
             }
 
+            // IK chain info for each animation target.
+            foreach (var target in animTargets)
+            {
+                target.IKChains = new AnimResourceConstBlock.IKChain[target.NumIKChains];
+                for (var i = 0; i < target.NumIKChains; i++)
+                {
+                    var ikChain = new AnimResourceConstBlock.IKChain();
+                    target.IKChains[i] = ikChain;
+
+                    // 2 ignored uint32s.
+                    reader.ReadBytes(2 * 4);
+
+                    var animTargetIdx = reader.ReadUInt16();
+                    ikChain.NumIkTargets = reader.ReadUInt16();
+
+                    var nameCRC = reader.ReadUInt32();
+                    reader.ReadBytes(1); // ignored uint8
+                    // (these are technically null terminators so the crc32 can be treated as a string in game.)
+                    var nameMirrorCRC = reader.ReadUInt32();
+                    reader.ReadBytes(1); // ignored uint8
+
+                    var intRelatedToIkStrategy = reader.ReadUInt32();
+
+                    var beginBoneCRC = reader.ReadUInt32();
+                    reader.ReadBytes(1); // ignored uint8
+                    var beginBoneMirrorCRC = reader.ReadUInt32();
+                    reader.ReadBytes(1); // ignored uint8
+                    var endBoneCRC = reader.ReadUInt32();
+                    reader.ReadBytes(1); // ignored uint8
+                    var endBoneMirrorCRC = reader.ReadUInt32();
+                    reader.ReadBytes(1); // ignored uint8
+                    var twistVectorNameCRC = reader.ReadUInt32();
+                    reader.ReadBytes(1); // ignored uint8
+                    var twistVectorBoneCRC = reader.ReadUInt32();
+                    reader.ReadBytes(1); // ignored uint8
+                    var twistVectorMirrorBoneCRC = reader.ReadUInt32();
+                    reader.ReadBytes(1); // ignored uint8
+                    var ikWeightCRC = reader.ReadUInt32();
+                    reader.ReadBytes(1); // ignored uint8
+                    reader.ReadUInt32(); // 1 ignored uint32
+                }
+            }
+
+            // Details of each ik chain target.
+            foreach (var animTarget in animTargets)
+            {
+                foreach (var ikChain in animTarget.IKChains)
+                {
+                    ikChain.IkTargets = new AnimResourceConstBlock.IKChain.Target[ikChain.NumIkTargets];
+                    for (var i = 0; i < ikChain.NumIkTargets; i++)
+                    {
+                        var target = new AnimResourceConstBlock.IKChain.Target();
+                        ikChain.IkTargets[i] = target;
+
+                        // 2 ignored uint32s.
+                        reader.ReadBytes(2 * 4);
+
+                        var animTargetIdx = reader.ReadUInt16();
+                        var ikChainIdx = reader.ReadUInt16();
+                        var targetType = reader.ReadByte();
+
+                        var boneCRC = reader.ReadUInt32();
+                        reader.ReadBytes(1); // ignored uint8
+                        var boneMirrorCRC = reader.ReadUInt32();
+                        reader.ReadBytes(1); // ignored uint8
+                        var rotationCRC = reader.ReadUInt32();
+                        reader.ReadBytes(1); // ignored uint8
+                        var rotation2CRC = reader.ReadUInt32();
+                        reader.ReadBytes(1); // ignored uint8
+                        var translationCRC = reader.ReadUInt32();
+                        reader.ReadBytes(1); // ignored uint8
+                        var contactCRC = reader.ReadUInt32();
+                        reader.ReadBytes(1); // ignored uint8
+                    }
+                }
+            }
+
+            for (var i = 0; i < numEventKeys; i++)
+            {
+                reader.ReadUInt32(); // ignored uint32, points to the vtable internally.
+
+                var ticks = reader.ReadUInt16();
+                var type = reader.ReadInt16();
+                var eventDataStringLength = reader.ReadUInt16();
+                
+                reader.ReadUInt32(); // ignored uint32, points to the the data string internally.
+            }
+
+            for (var i = 0; i < numEventKeys; i++)
+            {
+                var eventDataString = reader.ReadNullTerminatedString();
+                Debug.Log($"== eventDataString:\n{eventDataString}");
+            }
+
             foreach (var target in animTargets)
             {
                 Debug.Log($"AnimTarget {target.TagName}");
                 foreach (var channel in target.Channels)
                 {
-                    Debug.Log($"  name: {channel.ChannelName}, bonehash: {channel.BoneHash:X}");
+                    Debug.Log($"  channel name: {channel.ChannelName}, bonehash: {channel.BoneHash:X}, components: {channel.Components.Length}");
 
                     foreach (var component in channel.Components)
                     {
@@ -361,7 +476,6 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             for (var i = 0; i < (length % 4); i++)
             {
                 var paddingByte = reader.ReadByte();
-                Debug.Log($"padding: {paddingByte:x}");
                 Debug.Assert(i == paddingByte);
             }
         }
