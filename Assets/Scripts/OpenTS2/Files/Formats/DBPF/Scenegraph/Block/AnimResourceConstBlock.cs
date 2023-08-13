@@ -1,4 +1,5 @@
-﻿using OpenTS2.Files.Utils;
+﻿using System;
+using OpenTS2.Files.Utils;
 using UnityEngine;
 
 namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
@@ -27,6 +28,163 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
 
             public uint BoneHash;
             public uint ChannelFlags;
+
+            public ChannelComponent[] Components;
+        }
+
+        /// <summary>
+        /// This is where the actual animation keyframes live. Each animation channel can have multiple of these.
+        /// </summary>
+        public class ChannelComponent
+        {
+            public DataType Type;
+            public CurveType TangentCurveType;
+            public int NumKeyFrames;
+            public IKeyFrame[] KeyFrames;
+
+            internal void ReadKeyFrames(IoBuffer reader)
+            {
+                KeyFrames = new IKeyFrame[NumKeyFrames];
+
+                for (var i = 0; i < NumKeyFrames; i++)
+                {
+                    if (TangentCurveType == CurveType.BakedTangents)
+                    {
+                        var keyframe = new IKeyFrame.BakedKeyFrame();
+                        KeyFrames[i] = keyframe;
+
+                        var data = 0.0f;
+                        if (Type == DataType.FloatingPoint32)
+                        {
+                            keyframe.Data = reader.ReadFloat();
+                        }
+                        else
+                        {
+                            // TODO: convert from fixed point to floating point here.
+                            reader.ReadUInt16();
+                        }
+                    } else if (TangentCurveType == CurveType.ContinuousTangents)
+                    {
+                        var keyframe = new IKeyFrame.ContinuousKeyFrame();
+                        KeyFrames[i] = keyframe;
+
+                        keyframe.Short1 = reader.ReadUInt16();
+
+                        if (Type == DataType.FloatingPoint32)
+                        {
+                            keyframe.Data = reader.ReadFloat();
+                        }
+                        else
+                        {
+                            // TODO: convert from fixed point to floating point here.
+                            reader.ReadUInt16();
+                        }
+
+                        keyframe.Short2 = reader.ReadInt16();
+                    } else if (TangentCurveType == CurveType.DiscontinuousTangents)
+                    {
+                        var keyframe = new IKeyFrame.DiscontinuousKeyFrame();
+                        KeyFrames[i] = keyframe;
+
+                        keyframe.Short1 = reader.ReadUInt16();
+                        if (Type == DataType.FloatingPoint32)
+                        {
+                            keyframe.Data = reader.ReadFloat();
+                        }
+                        else
+                        {
+                            // TODO: convert from fixed point to floating point here.
+                            reader.ReadUInt16();
+                        }
+
+                        keyframe.Short2 = reader.ReadInt16();
+                        keyframe.Short3 = reader.ReadInt16();
+                    }
+                }
+            }
+
+
+            public enum CurveType
+            {
+                BakedTangents = 0,
+                ContinuousTangents = 1,
+                DiscontinuousTangents = 2,
+            }
+
+            public static CurveType ChannelCurveTypeFromPackedByte(byte packedByte)
+            {
+                if (!Enum.IsDefined(typeof(CurveType), packedByte & 0b11))
+                {
+                    throw new ArgumentException($"Invalid curve type: {packedByte & 0b11}");
+                }
+                return (CurveType)(packedByte & 0b11);
+            }
+
+            public enum DataType
+            {
+                /// 8.7 fixed point
+                FixedPoint8_7,
+                /// 9.7 fixed point
+                FixedPoint9_7,
+
+                /// 5.10 Fixed point
+                FixedPoint5_10,
+                /// 5.11 fixed point
+                FixedPoint5_11,
+
+                /// 3.12 fixed point
+                FixedPoint3_12,
+                /// 3.13 fixed point
+                FixedPoint3_13,
+
+                /// plain floats.
+                FloatingPoint32,
+            }
+
+            public static DataType ChannelDataTypeFromSerializedPackedByte(byte packedByte) {
+                // 5th bit set is float.
+                if ((packedByte & 0b10000) != 0)
+                {
+                    return DataType.FloatingPoint32;
+                }
+
+                // Next check the top 3 (out of 5) bits and the curve type.
+                var topThreeBits = (packedByte >> 2 & 0b111);
+                var curveType = ChannelCurveTypeFromPackedByte(packedByte);
+                return topThreeBits switch
+                {
+                    0b000 when curveType == CurveType.BakedTangents => DataType.FixedPoint8_7,
+                    0b000 => DataType.FixedPoint9_7,
+                    0b001 when curveType == CurveType.BakedTangents => DataType.FixedPoint5_10,
+                    0b001 => DataType.FixedPoint5_11,
+                    0b011 when curveType == CurveType.BakedTangents => DataType.FixedPoint3_12,
+                    0b011 => DataType.FixedPoint3_13,
+                    _ => throw new ArgumentException($"Invalid data type: {packedByte}")
+                };
+            }
+        }
+    }
+
+    public interface IKeyFrame
+    {
+        public struct BakedKeyFrame : IKeyFrame
+        {
+            public float Data;
+        }
+
+        public struct ContinuousKeyFrame : IKeyFrame
+        {
+            public ushort Short1;
+            public float Data;
+            public short Short2;
+        }
+
+        public struct DiscontinuousKeyFrame : IKeyFrame
+        {
+            public ushort Short1;
+            public float Data;
+            public short Short2;
+            public short Short3;
         }
     }
 
@@ -64,8 +222,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             var preStretchFactor = reader.ReadFloat();
             var rootStretchDisplacement = reader.ReadFloat();
 
-            // We need to note the stream position here because the rest of the data is aligned on 4-byte boundaries
-            // sometimes.
+            // We need to note the stream position here because string data is aligned on 4-byte boundaries sometimes.
             var initialStreamPosition = reader.Stream.Position;
 
             var skeletonTag = reader.ReadNullTerminatedString();
@@ -95,11 +252,12 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                 reader.ReadBytes(4 * 3);
             }
 
+            // Another aligned section... the names of each animation target's targetted tag.
+            initialStreamPosition = reader.Stream.Position;
             for (var i = 0; i < numAnimTargets; i++)
             {
                 animTargets[i].TagName = reader.ReadNullTerminatedString();
             }
-
             ReadPadding(reader, reader.Stream.Position - initialStreamPosition);
 
             for (var i = 0; i < numAnimTargets; i++)
@@ -116,9 +274,19 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                     reader.ReadUInt32(); // 1 ignored uint32.
                     channel.ChannelFlags = reader.ReadUInt32();
                     reader.ReadUInt32(); // 1 ignored uint32.
+
+                    // Channel types and their order:
+                    //   ChannelTypeF1
+                    //   ChannelTypeF3
+                    //   ChannelTypeF4
+                    //   ChannelTypeQ
+                    //   ChannelTypeXYZ
+                    //   ChannelTypeF2
                 }
             }
 
+            // Another aligned section... the names of each of the animation channels.
+            initialStreamPosition = reader.Stream.Position;
             for (var i = 0; i < numAnimTargets; i++)
             {
                 var target = animTargets[i];
@@ -127,22 +295,41 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                     target.Channels[j].ChannelName = reader.ReadNullTerminatedString();
                 }
             }
-
             ReadPadding(reader, reader.Stream.Position - initialStreamPosition);
 
-            for (var i = 0; i < numAnimTargets; i++)
+            // Next up the number of animation components in each channel and its keyframe types.
+            foreach (var target in animTargets)
             {
-                var target = animTargets[i];
-                for (var j = 0; j < target.NumSharedChannels; j++)
+                foreach (var channel in target.Channels)
                 {
-                    var numComponents = (target.Channels[j].ChannelFlags >> 5) & 0b111;
+                    var numComponents = (channel.ChannelFlags >> 5) & 0b111;
+                    channel.Components = new AnimResourceConstBlock.ChannelComponent[numComponents];
+
                     for (var k = 0; k < numComponents; k++)
                     {
-                        // The exact format here depends on some flags...
-                        // for now this is just from the wiki.
-                        reader.ReadUInt16();
-                        reader.ReadInt16();
-                        reader.ReadUInt32();
+                        var component = new AnimResourceConstBlock.ChannelComponent();
+                        channel.Components[k] = component;
+
+                        component.NumKeyFrames = reader.ReadUInt16();
+                        var dataType = reader.ReadByte();
+                        reader.ReadBytes(1 + 4); // 1 ignored byte and 1 ignored uint32.
+
+                        component.Type =
+                            AnimResourceConstBlock.ChannelComponent.ChannelDataTypeFromSerializedPackedByte(dataType);
+                        component.TangentCurveType =
+                            AnimResourceConstBlock.ChannelComponent.ChannelCurveTypeFromPackedByte(dataType);
+                    }
+                }
+            }
+
+            // Now the actual keyframe data.
+            foreach (var target in animTargets)
+            {
+                foreach (var channel in target.Channels)
+                {
+                    foreach (var component in channel.Components)
+                    {
+                        component.ReadKeyFrames(reader);
                     }
                 }
             }
@@ -153,6 +340,15 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                 foreach (var channel in target.Channels)
                 {
                     Debug.Log($"  name: {channel.ChannelName}, bonehash: {channel.BoneHash:X}");
+
+                    foreach (var component in channel.Components)
+                    {
+                        Debug.Log($"    numKeyFrames: {component.NumKeyFrames}, type: {component.Type}, tangentType: {component.TangentCurveType}");
+                        foreach (var keyframe in component.KeyFrames)
+                        {
+                            Debug.Log($"      {keyframe.GetType()}");
+                        }
+                    }
                 }
             }
 
