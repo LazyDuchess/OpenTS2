@@ -116,7 +116,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                 var slotName = effectSlotToName.Name;
                 var effectName = effectSlotToName.Value;
                 // The game seriously has effects in the scenegraph that don't exist... ignore those
-                if (!EffectsManager.Get().HasEffect(effectName))
+                if (!EffectsManager.Get().Ready || !EffectsManager.Get().HasEffect(effectName))
                 {
                     continue;
                 }

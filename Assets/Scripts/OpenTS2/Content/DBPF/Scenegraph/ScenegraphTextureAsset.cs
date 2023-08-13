@@ -151,8 +151,14 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                     for (var k = 0; k < Math.Min(4, height); k++)
                     {
                         var pixelIndex = (j * 4) + k;
+                        var outputAlphaIndex = outputIndex + (j * width) + k;
+                        // This can happen with really narrow images like 8x2.
+                        if (outputAlphaIndex >= alphaValues.Length)
+                        {
+                            continue;
+                        }
                         // Get the lower 4-bits if we're at pixels 0, 2, 4 etc or the higher 4-bits for even pixels.
-                        alphaValues[outputIndex + (j * width) + k] = (pixelIndex % 2) switch
+                        alphaValues[outputAlphaIndex] = (pixelIndex % 2) switch
                         {
                             0 => (byte)(data[inputBlockDataIndex + (pixelIndex / 2)] & 0xF),
                             _ => (byte)((data[inputBlockDataIndex + (pixelIndex / 2)] >> 4) & 0xF)

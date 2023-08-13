@@ -25,6 +25,8 @@ namespace OpenTS2.Content
         private EffectsAsset _effects;
         private readonly ContentProvider _provider;
 
+        public bool Ready { get; private set; }
+
         public void Initialize()
         {
             // Load effects package.
@@ -35,6 +37,7 @@ namespace OpenTS2.Content
                 typeID: TypeIDs.EFFECTS));
 
             Debug.Assert(_effects != null, "Couldn't find effects");
+            Ready = true;
         }
 
         public bool HasEffect(string effectName)

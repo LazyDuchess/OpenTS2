@@ -16,7 +16,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
         /// The different primitives or groups in the model. For example, a bed may have a "bedding" and a "frame"
         /// mesh primitive.
         /// </summary>
-        public Dictionary<String, Mesh> Primitives { get; } = new Dictionary<String, Mesh>();
+        public Dictionary<string, Mesh> Primitives { get; } = new Dictionary<string, Mesh>();
 
         public ScenegraphModelAsset(GeometryDataContainerBlock geometryBlock)
         {
