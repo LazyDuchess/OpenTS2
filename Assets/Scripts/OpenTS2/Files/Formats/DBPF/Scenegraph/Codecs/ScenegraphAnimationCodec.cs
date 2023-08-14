@@ -17,7 +17,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Codecs
 
             var animationBlock =
                 ScenegraphResourceCollection.DeserializeSingletonScenegraphBlock<AnimResourceConstBlock>(reader);
-            return new ScenegraphAnimationAsset();
+            return new ScenegraphAnimationAsset(animationBlock);
         }
     }
 }

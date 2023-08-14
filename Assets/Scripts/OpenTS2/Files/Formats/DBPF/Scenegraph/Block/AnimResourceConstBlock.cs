@@ -5,21 +5,29 @@ using UnityEngine;
 
 namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
 {
+    /// <summary>
+    /// A scenegraph cAnimResoureConst block. This represents a single animation and maybe some events on it like
+    /// sound effects. The const here refers to the fact that the data in here cannot be changed in the sims, it
+    /// is a read-only structure.
+    /// </summary>
     public class AnimResourceConstBlock : ScenegraphDataBlock
     {
         public const uint TYPE_ID = 0xfb00791e;
         public const string BLOCK_NAME = "cAnimResourceConst";
         public override string BlockName => BLOCK_NAME;
 
-        public AnimResourceConstBlock(PersistTypeInfo blockTypeInfo) : base(blockTypeInfo)
-        {
-        }
-
         /// <summary>
         /// This is the constant used by Sims 2 to convert between tick durations in the animations to their number of
         /// frames.
         /// </summary>
         public const double FramesPerTick = 0.03;
+
+        public AnimTarget[] AnimTargets;
+
+        public AnimResourceConstBlock(PersistTypeInfo blockTypeInfo, AnimTarget[] animTargets) : base(blockTypeInfo)
+        {
+            AnimTargets = animTargets;
+        }
 
         /// <summary>
         /// A single morph target or bone to be controlled by the animation. Each target can have multiple channels
@@ -255,8 +263,8 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             Debug.Assert(blockTypeInfo.Version > 5);
             var resource = ScenegraphResource.Deserialize(reader);
 
-            // The game treats the data as a free byte array and uses this size to refer to it...
-            // we just read it normally.
+            // The game treats the data as a free byte array and basically just overlays some structs on it. This is
+            // probably for optimization but we read it normally here so we can ignore this field.
             var serializedSize = reader.ReadUInt32();
 
             var durationTicks = reader.ReadUInt16();
@@ -502,7 +510,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                 }
             }
 
-            return new AnimResourceConstBlock(blockTypeInfo);
+            return new AnimResourceConstBlock(blockTypeInfo, animTargets);
         }
 
         // For some reason this format pads to 4-byte boundaries sometimes...we deal with that here.
