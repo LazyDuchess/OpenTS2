@@ -237,8 +237,8 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                     }
 
                     GameObject primitiveObject;
-                    // Make a SkinnedMeshRender or a regular renderer depending on if we have blend shapes.
-                    if (primitive.Value.blendShapeCount != 0)
+                    // Make a SkinnedMeshRender or a regular renderer depending on if we have blend shapes or bones.
+                    if (primitive.Value.blendShapeCount != 0 || primitive.Value.boneWeights.Length != 0)
                     {
                         primitiveObject =
                             new GameObject(primitive.Key, typeof(SkinnedMeshRenderer))

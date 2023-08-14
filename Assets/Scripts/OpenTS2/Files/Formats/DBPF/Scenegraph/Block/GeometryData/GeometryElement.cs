@@ -86,7 +86,16 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block.GeometryData
         /// </summary>
         public const uint MorphVertexMap = 0xdcf2cfdc;
 
+        /// <summary>
+        /// One uint32 per vertex. Each 8-bit value in the uint32 represents an assigned bone index. A value of 255
+        /// means no bone is assigned.
+        /// </summary>
         public const uint BoneAssignments = 0xfbd70111;
+        /// <summary>
+        /// Depending on the number of bones per vertex this can be either a list of floats, a list of two floats or a
+        /// list of three floats. The floats should add up to 1.0 and represent the weight for the corresponding bone
+        /// from the BoneAssignments.
+        /// </summary>
         public const uint BoneWeights = 0x3bd70105;
     }
 
@@ -99,7 +108,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block.GeometryData
     /// </summary>
     public abstract class GeometryElement
     {
-        public static GeometryElement ReadElement(uint elementId, byte[] elementData)
+        public static GeometryElement ReadElement(uint elementId, byte[] elementData, uint elementFormat)
         {
             return elementId switch
             {
@@ -116,7 +125,10 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block.GeometryData
                 GeometryElementIds.MorphVertexMap => new MorphVertexMapElement(elementData),
 
                 GeometryElementIds.BoneAssignments => new BoneAssignmentsElement(elementData),
-                GeometryElementIds.BoneWeights => new BoneWeightsElement(elementData),
+
+                GeometryElementIds.BoneWeights when elementFormat == 0 => new BoneWeightsForSingleBonesElement(elementData),
+                GeometryElementIds.BoneWeights when elementFormat == 1 => new BoneWeightsForTwoBonesElement(elementData),
+                GeometryElementIds.BoneWeights => new BoneWeightsForThreeBonesElement(elementData),
 
                 _ => throw new ArgumentException($"Unknown geometry element id {elementId:X}")
             };
@@ -159,6 +171,26 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block.GeometryData
             for (var i = 0; i < numElements; i++)
             {
                 Data[i] = Vector2Serializer.Deserialize(buffer);
+            }
+        }
+    }
+
+    /// <summary>
+    /// A GeometryElement consisting of floats.
+    /// </summary>
+    public abstract class FloatElement : GeometryElement
+    {
+        public float[] Data { get; }
+
+        protected FloatElement(byte[] elementData)
+        {
+            var numElements = elementData.Length / sizeof(float);
+            Data = new float[numElements];
+
+            var buffer = IoBuffer.FromBytes(elementData);
+            for (var i = 0; i < numElements; i++)
+            {
+                Data[i] = buffer.ReadFloat();
             }
         }
     }
@@ -280,9 +312,28 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block.GeometryData
         }
     }
 
-    public class BoneWeightsElement : Vec3Element
+    public interface IBoneWeightsElement
     {
-        public BoneWeightsElement(byte[] elementData) : base(elementData)
+
+    }
+
+    public class BoneWeightsForSingleBonesElement : FloatElement, IBoneWeightsElement
+    {
+        public BoneWeightsForSingleBonesElement(byte[] elementData) : base(elementData)
+        {
+        }
+    }
+
+    public class BoneWeightsForTwoBonesElement : Vec2Element, IBoneWeightsElement
+    {
+        public BoneWeightsForTwoBonesElement(byte[] elementData) : base(elementData)
+        {
+        }
+    }
+
+    public class BoneWeightsForThreeBonesElement : Vec3Element, IBoneWeightsElement
+    {
+        public BoneWeightsForThreeBonesElement(byte[] elementData) : base(elementData)
         {
         }
     }

@@ -49,6 +49,10 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
         public string Name;
         public uint ComponentIndex;
         public ushort[] Faces;
+        /// <summary>
+        /// Translates from the local bone assignment numbers to the "real" bone indices in the GMDC.
+        /// </summary>
+        public ushort[] BoneIndices;
     }
 
     public class GeometryDataContainerBlock : ScenegraphDataBlock
@@ -66,6 +70,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
 
         public MeshComponent[] Components { get; }
         public MeshPrimitive[] Primitives { get; }
+        public BindPose[] BindPoses { get; }
 
         public MorphTarget[] MorphTargets { get; }
 
@@ -81,13 +86,14 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
 
         public GeometryDataContainerBlock(PersistTypeInfo blockTypeInfo,
             ScenegraphResource resource, GeometryElement[] elements,
-            MeshComponent[] components, MeshPrimitive[] primitives, MorphTarget[] morphTargets,
+            MeshComponent[] components, MeshPrimitive[] primitives, BindPose[] bindPoses, MorphTarget[] morphTargets,
             MeshGeometry staticBounds, MeshGeometry[] bonesBounds) : base(blockTypeInfo)
         {
             Resource = resource;
             Elements = elements;
             Components = components;
             Primitives = primitives;
+            BindPoses = bindPoses;
             MorphTargets = morphTargets;
             StaticBounds = staticBounds;
             BonesBounds = bonesBounds;
@@ -110,6 +116,14 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
 
             public MorphTarget(string group, string channel) => (groupName, channelName) = (group, channel);
         }
+
+        public readonly struct BindPose
+        {
+            public readonly Vector3 Position;
+            public readonly Quaternion Rotation;
+
+            public BindPose(Vector3 position, Quaternion rotation) => (Position, Rotation) = (position, rotation);
+        }
     }
 
     public class GeometryDataContainerBlockReader : IScenegraphDataBlockReader<GeometryDataContainerBlock>
@@ -122,13 +136,13 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             var components = ReadMeshComponentsSection(reader, blockTypeInfo);
             var primitives = ReadPrimitivesSection(reader, blockTypeInfo);
 
-            ReadPoseTransforms(reader);
+            var bindPoses = ReadPoseTransforms(reader);
             var morphTargets = ReadMorphTargets(reader);
             var staticBound = ReadStaticBoundSection(reader, blockTypeInfo);
             var bones = ReadBonesSection(reader, blockTypeInfo);
 
             return new GeometryDataContainerBlock(blockTypeInfo, resource, elements, components, primitives,
-                morphTargets, staticBound, bones);
+                bindPoses, morphTargets, staticBound, bones);
         }
 
         private static ushort[] ReadIndices(IoBuffer reader, uint version)
@@ -156,7 +170,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                 reader.ReadUInt32();
                 var elementId = reader.ReadUInt32();
                 reader.ReadUInt32();
-                reader.ReadUInt32();
+                var elementFormat = reader.ReadUInt32();
                 reader.ReadUInt32();
 
                 // This data gets interpreted differently depending
@@ -167,7 +181,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                 var indicesArray = ReadIndices(reader, blockTypeInfo.Version);
 
                 // TODO: for now this is just based on the element id and data, we might need to start parsing the rest.
-                elements[i] = GeometryElement.ReadElement(elementId, data);
+                elements[i] = GeometryElement.ReadElement(elementId, data, elementFormat);
             }
 
             return elements;
@@ -223,13 +237,11 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                 //   marked as opacity amount in simswiki
                 reader.ReadInt32();
 
-                if (blockTypeInfo.Version > 1)
-                {
-                    var remappedBoneIndices = ReadIndices(reader, blockTypeInfo.Version);
-                }
+                Debug.Assert(blockTypeInfo.Version > 1);
+                var remappedBoneIndices = ReadIndices(reader, blockTypeInfo.Version);
 
                 primitives[i] = new MeshPrimitive
-                    { Name = primitiveName, ComponentIndex = componentIndex, Faces = faces };
+                    { Name = primitiveName, ComponentIndex = componentIndex, Faces = faces, BoneIndices = remappedBoneIndices };
             }
 
             return primitives;
@@ -261,14 +273,17 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             return new MeshGeometry { Vertices = vertices, Faces = faces };
         }
 
-        private static void ReadPoseTransforms(IoBuffer reader)
+        private static GeometryDataContainerBlock.BindPose[] ReadPoseTransforms(IoBuffer reader)
         {
-            var numberOfPoseTransforms = reader.ReadUInt32();
-            for (var i = 0; i < numberOfPoseTransforms; i++)
+            var bindPoses = new GeometryDataContainerBlock.BindPose[reader.ReadUInt32()];
+            for (var i = 0; i < bindPoses.Length; i++)
             {
                 var rotation = QuaterionSerialzier.Deserialize(reader);
                 var position = Vector3Serializer.Deserialize(reader);
+                bindPoses[i] = new GeometryDataContainerBlock.BindPose(position, rotation);
             }
+
+            return bindPoses;
         }
 
         private static GeometryDataContainerBlock.MorphTarget[] ReadMorphTargets(IoBuffer reader)

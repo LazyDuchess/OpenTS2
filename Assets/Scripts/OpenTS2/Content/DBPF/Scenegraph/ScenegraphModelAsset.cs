@@ -4,6 +4,7 @@ using System.Linq;
 using OpenTS2.Engine;
 using OpenTS2.Files.Formats.DBPF.Scenegraph.Block;
 using OpenTS2.Files.Formats.DBPF.Scenegraph.Block.GeometryData;
+using Unity.Collections;
 using UnityEngine;
 
 namespace OpenTS2.Content.DBPF.Scenegraph
@@ -59,6 +60,9 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             mesh.SetVertices(GetVerticesForMeshComponent(vertices, meshComponent));
             mesh.SetTriangles(primitive.Faces, 0);
 
+            BoneAssignmentsElement boneAssignment = null;
+            IBoneWeightsElement boneWeights = null;
+
             foreach (var geometryElement in elements)
             {
                 switch (geometryElement)
@@ -84,6 +88,14 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                         mesh.SetUVs(0, GetUVMapForMeshComponent(uvMap, meshComponent));
                         break;
 
+                    // Set the bone assignment and weights when they show up so they can be added to the mesh.
+                    case BoneAssignmentsElement boneAssignmentsElement:
+                        boneAssignment = boneAssignmentsElement;
+                        break;
+                    case IBoneWeightsElement boneWeightsElement:
+                        boneWeights = boneWeightsElement;
+                        break;
+
                     // Handled below in the blend animations section.
                     case MorphVertexMapElement _:
                     case MorphNormalDeltaElement _:
@@ -96,6 +108,13 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                         Debug.LogWarning($"Unknown geometry element type: {geometryElement.GetType()}");
                         break;
                 }
+            }
+
+            // Add bones if present.
+            if (boneAssignment != null)
+            {
+                Debug.Assert(boneWeights != null, "Bone weights null when boneAssignments present");
+                AssignBones(mesh, primitive.BoneIndices, geometryBlock.BindPoses, boneAssignment, boneWeights);
             }
 
             // Add morph animations if present.
@@ -256,6 +275,75 @@ namespace OpenTS2.Content.DBPF.Scenegraph
 
             // We call recalculate tangents
             mesh.RecalculateTangents();
+        }
+
+        private static void AssignBones(Mesh mesh, IReadOnlyList<ushort> boneIndices,
+            GeometryDataContainerBlock.BindPose[] bindPoses, BoneAssignmentsElement boneAssignments,
+            IBoneWeightsElement boneWeights)
+        {
+            var bonesPerVertex = new byte[mesh.vertexCount];
+            // Allocate at least
+            var weights = new List<BoneWeight1>(mesh.vertexCount);
+
+            // Need to keep track of this to allocate bind poses.
+            uint maxBoneId = 0;
+
+            for (var i = 0; i < mesh.vertexCount; i++)
+            {
+                // Total number of bones for this vertex.
+                byte numBones = 0;
+                // Iterate over the bytes in the bone assignment.
+                for (var j = 0; j < 4; j++)
+                {
+                    var byteIdx = (3 - j);
+                    var boneId = (boneAssignments.Data[i] >> (byteIdx * 8)) & 0xFF;
+                    if (boneId == 255)
+                    {
+                        continue;
+                    }
+                    numBones++;
+                    maxBoneId = Math.Max(boneId, maxBoneId);
+
+                    var boneWeight = new BoneWeight1
+                    {
+                        boneIndex = (int)boneId,
+                        weight = GetBoneWeight(boneWeights, i, j)
+                    };
+                    weights.Add(boneWeight);
+                }
+                bonesPerVertex[i] = numBones;
+            }
+
+            var bonesPerVertexArray = new NativeArray<byte>(bonesPerVertex, Allocator.Temp);
+            var weightsArray = new NativeArray<BoneWeight1>(weights.ToArray(), Allocator.Temp);
+            mesh.SetBoneWeights(bonesPerVertexArray, weightsArray);
+
+            // Set the bind poses for each bone.
+            var unityBindPoses = new Matrix4x4[maxBoneId];
+            for (var boneId = 0; boneId < maxBoneId; boneId++)
+            {
+                // Look up the real boneId.
+                var mappedBoneId = boneIndices[boneId];
+                // Get the bone bind pose.
+                var bindPose = bindPoses[mappedBoneId];
+                unityBindPoses[boneId] = Matrix4x4.TRS(bindPose.Position, bindPose.Rotation, Vector3.one);
+            }
+            // TODO: this needs to be done along with setting mesh.bones
+            //mesh.bindposes = unityBindPoses;
+        }
+
+        /// <summary>
+        /// Grabs the bone weight for the given vertex index from boneWeights for the nth bone assignment number.
+        /// </summary>
+        private static float GetBoneWeight(IBoneWeightsElement boneWeights, int vertexIdx, int boneNumber)
+        {
+            return boneWeights switch
+            {
+                BoneWeightsForSingleBonesElement element => element.Data[vertexIdx],
+                BoneWeightsForTwoBonesElement element => element.Data[vertexIdx][boneNumber],
+                BoneWeightsForThreeBonesElement element => element.Data[vertexIdx][boneNumber],
+                _ => throw new ArgumentException($"Unknown boneWeights type: {boneWeights}")
+            };
         }
     }
 }
