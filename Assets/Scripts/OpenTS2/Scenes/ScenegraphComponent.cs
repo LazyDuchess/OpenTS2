@@ -143,9 +143,6 @@ namespace OpenTS2.Scenes
                 var extension = ResourceCollection.Blocks[internalRef.BlockIndex];
                 switch (extension)
                 {
-                    case BoneDataExtensionBlock boneDataExtensionBlock:
-                        // TODO: handle bone data extensions.
-                        break;
                     case DataListExtensionBlock extensionBlock:
                         HandleExtension(parent, extensionBlock);
                         break;
@@ -296,6 +293,12 @@ namespace OpenTS2.Scenes
                     // Make a SkinnedMeshRender or a regular renderer depending on if we have blend shapes or bones.
                     if (primitive.Value.NeedsSkinnedRenderer)
                     {
+                        // Add an animation component so we can play animations in this scenegraph.
+                        if (GetComponent<Animation>() == null)
+                        {
+                            gameObject.AddComponent<Animation>();
+                        }
+
                         primitiveObject =
                             new GameObject(primitive.Key, typeof(SkinnedMeshRenderer))
                             {
