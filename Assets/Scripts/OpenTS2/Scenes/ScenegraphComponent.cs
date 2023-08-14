@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using OpenTS2.Common;
 using OpenTS2.Components;
@@ -68,15 +69,53 @@ namespace OpenTS2.Scenes
                 {
                     RenderCompositionTree(gameObject, firstResourceNode.Tree);
                 }
+
+                BindBonesInMeshes();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Debug.LogError($"Error while traversing graph for {name}");
                 Debug.LogException(e);
             }
         }
 
-                private void RenderCompositionTree(GameObject parent, CompositionTreeNodeBlock tree)
+        /// <summary>
+        /// Mapping of bone ids to their unity transform objects. Used to look up and bind bones to animated meshes.
+        /// </summary>
+        private Dictionary<uint, Transform> _boneIdToTransform = new Dictionary<uint, Transform>();
+        /// <summary>
+        /// A queue of meshes that need to have their animation bones bound after the scenegraph is done rendering.
+        /// </summary>
+        private Queue<(ScenegraphModelAsset.ModelPrimitive, SkinnedMeshRenderer)> _meshesToBindBonesFor = new Queue<(ScenegraphModelAsset.ModelPrimitive, SkinnedMeshRenderer)>();
+
+        private void BindBonesInMeshes()
+        {
+            while (_meshesToBindBonesFor.Count > 0)
+            {
+                var primitiveAndRenderer = _meshesToBindBonesFor.Dequeue();
+                BindBonesInMesh(primitiveAndRenderer.Item1, primitiveAndRenderer.Item2);
+            }
+        }
+
+        private void BindBonesInMesh(ScenegraphModelAsset.ModelPrimitive primitive, SkinnedMeshRenderer renderer)
+        {
+            var bones = new Transform[primitive.ScenegraphBoneIds.Length];
+            for (var i = 0; i < primitive.ScenegraphBoneIds.Length; i++)
+            {
+                var boneId = primitive.ScenegraphBoneIds[i];
+                if (!_boneIdToTransform.TryGetValue(boneId, out var bone))
+                {
+                    Debug.LogWarning($"Scenegraph GMDC had bone id {boneId} not found in scenegraph.");
+                    return;
+                }
+                bones[i] = bone;
+            }
+
+            renderer.bones = bones;
+            renderer.sharedMesh.bindposes = primitive.BindPoses;
+        }
+
+        private void RenderCompositionTree(GameObject parent, CompositionTreeNodeBlock tree)
         {
             foreach (var reference in tree.References)
             {
@@ -185,20 +224,21 @@ namespace OpenTS2.Scenes
 
         private void RenderTransformNode(GameObject parent, TransformNodeBlock transformNode)
         {
-            var name = "transform";
+            var transformName = "transform";
 
-            var tag = transformNode.CompositionTree.Graph.Tag;
-            if (tag != "")
+            var transformTag = transformNode.CompositionTree.Graph.Tag;
+            if (transformTag != "")
             {
-                name = tag;
+                transformName = transformTag;
             }
-            var transform = new GameObject(name, typeof(AssetReferenceComponent));
-            RenderCompositionTree(transform, transformNode.CompositionTree);
+            var transformObj = new GameObject(transformName, typeof(AssetReferenceComponent));
+            RenderCompositionTree(transformObj, transformNode.CompositionTree);
 
-            transform.transform.localRotation = transformNode.Rotation;
-            transform.transform.position = transformNode.Transform;
+            transformObj.transform.localRotation = transformNode.Rotation;
+            transformObj.transform.position = transformNode.Transform;
 
-            transform.transform.SetParent(parent.transform, worldPositionStays:false);
+            transformObj.transform.SetParent(parent.transform, worldPositionStays:false);
+            _boneIdToTransform[transformNode.BoneId] = transformObj.transform;
         }
 
         private void RenderResourceNode(GameObject parent, ResourceNodeBlock resource)
@@ -266,9 +306,13 @@ namespace OpenTS2.Scenes
                                 }
                             };
 
-                        primitiveObject.GetComponent<SkinnedMeshRenderer>().sharedMesh = primitive.Value.Mesh;
-                        primitiveObject.GetComponent<SkinnedMeshRenderer>().sharedMaterial =
-                            material.GetAsUnityMaterial();
+                        var skinnedRenderer = primitiveObject.GetComponent<SkinnedMeshRenderer>();
+                        skinnedRenderer.sharedMesh = primitive.Value.Mesh;
+                        skinnedRenderer.sharedMaterial = material.GetAsUnityMaterial();
+                        if (primitive.Value.HasBones)
+                        {
+                            _meshesToBindBonesFor.Enqueue((primitive.Value, skinnedRenderer));
+                        }
                     }
                     else
                     {

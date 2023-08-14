@@ -53,6 +53,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             /// Set to true when the primitive has morph animations or bones.
             /// </summary>
             public bool NeedsSkinnedRenderer { get; internal set; }
+            public bool HasBones => BindPoses != null;
 
             public Matrix4x4[] BindPoses { get; internal set; }
             public ushort[] ScenegraphBoneIds { get; internal set; }
