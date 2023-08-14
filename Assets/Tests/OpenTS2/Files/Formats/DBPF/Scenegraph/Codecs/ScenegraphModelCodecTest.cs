@@ -31,7 +31,7 @@
             Assert.That(modelAsset.Primitives.ContainsKey("teapot"), Is.True);
 
             var teapotPrimitive = modelAsset.Primitives["teapot"];
-            Assert.That(teapotPrimitive.vertexCount, Is.EqualTo(13248));
-            Assert.That(teapotPrimitive.triangles.Length / 3, Is.EqualTo(6320));
+            Assert.That(teapotPrimitive.Mesh.vertexCount, Is.EqualTo(13248));
+            Assert.That(teapotPrimitive.Mesh.triangles.Length / 3, Is.EqualTo(6320));
         }
     }

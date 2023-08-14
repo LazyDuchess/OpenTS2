@@ -238,7 +238,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
 
                     GameObject primitiveObject;
                     // Make a SkinnedMeshRender or a regular renderer depending on if we have blend shapes or bones.
-                    if (primitive.Value.blendShapeCount != 0 || primitive.Value.boneWeights.Length != 0)
+                    if (primitive.Value.NeedsSkinnedRenderer)
                     {
                         primitiveObject =
                             new GameObject(primitive.Key, typeof(SkinnedMeshRenderer))
@@ -250,7 +250,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                                 }
                             };
 
-                        primitiveObject.GetComponent<SkinnedMeshRenderer>().sharedMesh = primitive.Value;
+                        primitiveObject.GetComponent<SkinnedMeshRenderer>().sharedMesh = primitive.Value.Mesh;
                         primitiveObject.GetComponent<SkinnedMeshRenderer>().sharedMaterial =
                             material.GetAsUnityMaterial();
                     }
@@ -266,7 +266,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                                 }
                             };
 
-                        primitiveObject.GetComponent<MeshFilter>().sharedMesh = primitive.Value;
+                        primitiveObject.GetComponent<MeshFilter>().sharedMesh = primitive.Value.Mesh;
                         primitiveObject.GetComponent<MeshRenderer>().sharedMaterial =
                             material.GetAsUnityMaterial();
                     }

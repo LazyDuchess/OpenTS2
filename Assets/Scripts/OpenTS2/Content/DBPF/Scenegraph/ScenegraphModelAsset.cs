@@ -17,7 +17,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
         /// The different primitives or groups in the model. For example, a bed may have a "bedding" and a "frame"
         /// mesh primitive.
         /// </summary>
-        public Dictionary<string, Mesh> Primitives { get; } = new Dictionary<string, Mesh>();
+        public Dictionary<string, ModelPrimitive> Primitives { get; } = new Dictionary<string, ModelPrimitive>();
 
         public ScenegraphModelAsset(GeometryDataContainerBlock geometryBlock)
         {
@@ -40,18 +40,31 @@ namespace OpenTS2.Content.DBPF.Scenegraph
         {
             foreach (var prim in Primitives)
             {
-                prim.Value.Free();
+                prim.Value.Mesh.Free();
             }
 
             StaticBoundMesh.Free();
         }
 
-        private Mesh InitializeMeshFromPrimitive(GeometryDataContainerBlock geometryBlock, MeshPrimitive primitive)
+        public class ModelPrimitive
         {
+            public Mesh Mesh { get; internal set; }
+            /// <summary>
+            /// Set to true when the primitive has morph animations or bones.
+            /// </summary>
+            public bool NeedsSkinnedRenderer { get; internal set; }
+
+            public Matrix4x4[] BindPoses { get; internal set; }
+        }
+
+        private ModelPrimitive InitializeMeshFromPrimitive(GeometryDataContainerBlock geometryBlock, MeshPrimitive primitive)
+        {
+            var modelPrimitive = new ModelPrimitive();
             var mesh = new Mesh
             {
                 name = geometryBlock.Resource.ResourceName + "_" + primitive.Name
             };
+            modelPrimitive.Mesh = mesh;
 
             var meshComponent = geometryBlock.GetMeshComponentForPrimitive(primitive);
             var elements = geometryBlock.GetGeometryElementsForMeshComponent(meshComponent);
@@ -114,7 +127,9 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             if (boneAssignment != null)
             {
                 Debug.Assert(boneWeights != null, "Bone weights null when boneAssignments present");
-                AssignBones(mesh, primitive.BoneIndices, geometryBlock.BindPoses, boneAssignment, boneWeights);
+                AssignBones(modelPrimitive, primitive.BoneIndices, geometryBlock.BindPoses, boneAssignment, boneWeights);
+
+                modelPrimitive.NeedsSkinnedRenderer = true;
             }
 
             // Add morph animations if present.
@@ -123,9 +138,11 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             {
                 Debug.Assert(vertexMap.Length == 1);
                 AddMorphAnimations(mesh, vertexMap[0], elements, geometryBlock.MorphTargets);
+
+                modelPrimitive.NeedsSkinnedRenderer = true;
             }
 
-            return mesh;
+            return modelPrimitive;
         }
 
         /// <summary>
@@ -277,18 +294,18 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             mesh.RecalculateTangents();
         }
 
-        private static void AssignBones(Mesh mesh, IReadOnlyList<ushort> boneIndices,
-            GeometryDataContainerBlock.BindPose[] bindPoses, BoneAssignmentsElement boneAssignments,
+        private static void AssignBones(ModelPrimitive primitive, IReadOnlyList<ushort> boneIndices,
+            IReadOnlyList<GeometryDataContainerBlock.BindPose> bindPoses, BoneAssignmentsElement boneAssignments,
             IBoneWeightsElement boneWeights)
         {
-            var bonesPerVertex = new byte[mesh.vertexCount];
+            var bonesPerVertex = new byte[primitive.Mesh.vertexCount];
             // Allocate at least
-            var weights = new List<BoneWeight1>(mesh.vertexCount);
+            var weights = new List<BoneWeight1>(primitive.Mesh.vertexCount);
 
             // Need to keep track of this to allocate bind poses.
             uint maxBoneId = 0;
 
-            for (var i = 0; i < mesh.vertexCount; i++)
+            for (var i = 0; i < primitive.Mesh.vertexCount; i++)
             {
                 // Total number of bones for this vertex.
                 byte numBones = 0;
@@ -316,7 +333,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
 
             var bonesPerVertexArray = new NativeArray<byte>(bonesPerVertex, Allocator.Temp);
             var weightsArray = new NativeArray<BoneWeight1>(weights.ToArray(), Allocator.Temp);
-            mesh.SetBoneWeights(bonesPerVertexArray, weightsArray);
+            primitive.Mesh.SetBoneWeights(bonesPerVertexArray, weightsArray);
 
             // Set the bind poses for each bone.
             var unityBindPoses = new Matrix4x4[maxBoneId];
@@ -328,8 +345,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                 var bindPose = bindPoses[mappedBoneId];
                 unityBindPoses[boneId] = Matrix4x4.TRS(bindPose.Position, bindPose.Rotation, Vector3.one);
             }
-            // TODO: this needs to be done along with setting mesh.bones
-            //mesh.bindposes = unityBindPoses;
+            primitive.BindPoses = unityBindPoses;
         }
 
         /// <summary>
