@@ -55,6 +55,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             public bool NeedsSkinnedRenderer { get; internal set; }
 
             public Matrix4x4[] BindPoses { get; internal set; }
+            public ushort[] ScenegraphBoneIds { get; internal set; }
         }
 
         private ModelPrimitive InitializeMeshFromPrimitive(GeometryDataContainerBlock geometryBlock, MeshPrimitive primitive)
@@ -335,17 +336,19 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             var weightsArray = new NativeArray<BoneWeight1>(weights.ToArray(), Allocator.Temp);
             primitive.Mesh.SetBoneWeights(bonesPerVertexArray, weightsArray);
 
-            // Set the bind poses for each bone.
-            var unityBindPoses = new Matrix4x4[maxBoneId];
+            // Create a mapping of the local bone ids for the primitive to their global scenegraph ones and
+            // set the bind poses for each bone.
+            primitive.ScenegraphBoneIds = new ushort[maxBoneId];
+            primitive.BindPoses = new Matrix4x4[maxBoneId];
             for (var boneId = 0; boneId < maxBoneId; boneId++)
             {
                 // Look up the real boneId.
                 var mappedBoneId = boneIndices[boneId];
+                primitive.ScenegraphBoneIds[boneId] = mappedBoneId;
                 // Get the bone bind pose.
                 var bindPose = bindPoses[mappedBoneId];
-                unityBindPoses[boneId] = Matrix4x4.TRS(bindPose.Position, bindPose.Rotation, Vector3.one);
+                primitive.BindPoses[boneId] = Matrix4x4.TRS(bindPose.Position, bindPose.Rotation, Vector3.one);
             }
-            primitive.BindPoses = unityBindPoses;
         }
 
         /// <summary>
