@@ -17,7 +17,16 @@ public class ScenegraphAnimationCodecTest
     public void TestLoadsAnimationNode()
     {
         var animationAsset = ContentProvider.Get()
-            .GetAsset<ScenegraphAnimationAsset>(new ResourceKey("a2o-pinball-play-lose_anim", 0x1C0532FA,
+            .GetAsset<ScenegraphAnimationAsset>(new ResourceKey("a2o-pinball-play-lose_anim", GroupIDs.Scenegraph,
+                TypeIDs.SCENEGRAPH_ANIM));
+        Assert.IsNotNull(animationAsset);
+    }
+
+    [Test]
+    public void TestLoadsAnimationAndHasCorrectChannels()
+    {
+        var animationAsset = ContentProvider.Get()
+            .GetAsset<ScenegraphAnimationAsset>(new ResourceKey("o-vehiclePizza-driveOff_anim", GroupIDs.Scenegraph,
                 TypeIDs.SCENEGRAPH_ANIM));
         Assert.IsNotNull(animationAsset);
     }

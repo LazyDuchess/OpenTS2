@@ -15,6 +15,16 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
         {
         }
 
+        /// <summary>
+        /// This is the constant used by Sims 2 to convert between tick durations in the animations to their number of
+        /// frames.
+        /// </summary>
+        public const double FramesPerTick = 0.03;
+
+        /// <summary>
+        /// A single morph target or bone to be controlled by the animation. Each target can have multiple channels
+        /// inside that control rotation, position, etc.
+        /// </summary>
         public class AnimTarget
         {
             public string TagName;
@@ -40,6 +50,9 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             }
         }
 
+        /// <summary>
+        /// Controls a single aspect of a single target's animation such as the rotation of a single bone.
+        /// </summary>
         public class SharedChannel
         {
             public string ChannelName;
@@ -47,7 +60,37 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             public uint BoneHash;
             public uint ChannelFlags;
 
+            private uint ChannelTypeBits => (ChannelFlags >> 22) & 0b111;
+            // What type of data this channel carries.
+            public ChannelType Type => Enum.IsDefined(typeof(ChannelType), ChannelTypeBits)
+                ? (ChannelType)ChannelTypeBits
+                : throw new InvalidCastException($"Channel type has invalid value: {ChannelTypeBits}");
+
+            // Calculated from the top 8 bits of the most-significant byte of ChannelFlags.
+            public uint NumComponents => (ChannelFlags >> 29) & 0b111;
+
+            // Bottom 15 bits give the channel duration.
+            public uint DurationTicks => ChannelFlags & 0x7FFF;
+
             public ChannelComponent[] Components;
+        }
+
+        // Channel types and their order:
+        //   ChannelTypeF1
+        //   ChannelTypeF3
+        //   ChannelTypeF4
+        //   ChannelTypeQ
+        //   ChannelTypeXYZ
+        //   ChannelTypeF2
+        public enum ChannelType : uint
+        {
+            Float1 = 0,
+            Float3 = 1,
+            Float4 = 2,
+            // This is called "ChannelTypeQ" for quaternion but the data is encoded as euler angles...
+            EulerRotation = 3,
+            TransformXYZ = 4,
+            Float2 = 5,
         }
 
         /// <summary>
@@ -294,14 +337,6 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                     reader.ReadUInt32(); // 1 ignored uint32.
                     channel.ChannelFlags = reader.ReadUInt32();
                     reader.ReadUInt32(); // 1 ignored uint32.
-
-                    // Channel types and their order:
-                    //   ChannelTypeF1
-                    //   ChannelTypeF3
-                    //   ChannelTypeF4
-                    //   ChannelTypeQ
-                    //   ChannelTypeXYZ
-                    //   ChannelTypeF2
                 }
             }
 
@@ -322,8 +357,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             {
                 foreach (var channel in target.Channels)
                 {
-                    var numComponents = (channel.ChannelFlags >> (5 + 24)) & 0b111;
-                    //var numComponents = (channel.ChannelFlags >> 5) & 0b111;
+                    var numComponents = channel.NumComponents;
                     channel.Components = new AnimResourceConstBlock.ChannelComponent[numComponents];
 
                     for (var k = 0; k < numComponents; k++)
@@ -449,12 +483,13 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                 Debug.Log($"== eventDataString:\n{eventDataString}");
             }
 
+            Debug.Log($"durationTicks: {durationTicks}");
             foreach (var target in animTargets)
             {
                 Debug.Log($"AnimTarget {target.TagName}");
                 foreach (var channel in target.Channels)
                 {
-                    Debug.Log($"  channel name: {channel.ChannelName}, bonehash: {channel.BoneHash:X}, components: {channel.Components.Length}");
+                    Debug.Log($"  channel name: {channel.ChannelName}, bonehash: {channel.BoneHash:X}, type: {channel.Type}, duration: {channel.DurationTicks}, components: {channel.Components.Length}");
 
                     foreach (var component in channel.Components)
                     {
