@@ -303,9 +303,8 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             var bonesPerVertex = new byte[primitive.Mesh.vertexCount];
             // Allocate at least
             var weights = new List<BoneWeight1>(primitive.Mesh.vertexCount);
-
             // Need to keep track of this to allocate bind poses.
-            uint maxBoneId = 0;
+            var boneIds = new HashSet<int>();
 
             for (var i = 0; i < primitive.Mesh.vertexCount; i++)
             {
@@ -321,7 +320,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                         continue;
                     }
                     numBones++;
-                    maxBoneId = Math.Max(boneId, maxBoneId);
+                    boneIds.Add((int)boneId);
 
                     var boneWeight = new BoneWeight1
                     {
@@ -339,11 +338,11 @@ namespace OpenTS2.Content.DBPF.Scenegraph
 
             // Create a mapping of the local bone ids for the primitive to their global scenegraph ones and
             // set the bind poses for each bone.
-            primitive.ScenegraphBoneIds = new ushort[maxBoneId];
-            primitive.BindPoses = new Matrix4x4[maxBoneId];
-            for (var boneId = 0; boneId < maxBoneId; boneId++)
+            primitive.ScenegraphBoneIds = new ushort[boneIds.Count];
+            primitive.BindPoses = new Matrix4x4[boneIds.Count];
+            foreach (var boneId in boneIds)
             {
-                // Look up the real boneId.
+                // Look up the real/scenegraph boneId.
                 var mappedBoneId = boneIndices[boneId];
                 primitive.ScenegraphBoneIds[boneId] = mappedBoneId;
                 // Get the bone bind pose.
