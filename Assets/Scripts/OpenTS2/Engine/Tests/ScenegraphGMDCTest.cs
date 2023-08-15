@@ -16,8 +16,10 @@ public class ScenegraphGMDCTest : MonoBehaviour
         contentProvider.AddPackages(
             Filesystem.GetPackagesInDirectory(Filesystem.GetDataPathForProduct(ProductFlags.BaseGame) + "/Res/Sims3D"));
 
+        var resourceName = "vehiclePizza_cres";
+        //var resourceName = "chairReclinerPuffy_cres";
         var resource = contentProvider.GetAsset<ScenegraphResourceAsset>(
-            new ResourceKey("vehiclePizza_cres", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_CRES));
+            new ResourceKey(resourceName, GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_CRES));
 
         Debug.Log($"scenegraphModel: {resource.GlobalTGI}");
         var gameObject = resource.CreateRootGameObject();
@@ -25,6 +27,7 @@ public class ScenegraphGMDCTest : MonoBehaviour
 
         // For animation testing...
         AddAnimations(gameObject);
+        //AddChairAnimations(gameObject);
     }
 
     private static void AddAnimations(GameObject gameObject)
@@ -46,6 +49,17 @@ public class ScenegraphGMDCTest : MonoBehaviour
             new ResourceKey("o-vehiclePizza-stop_anim", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_ANIM));
         clip = stop.CreateClipFromResource(scenegraphComponent.BoneNamesToRelativePaths);
         anim.AddClip(clip, "stop");
+    }
+
+    private static void AddChairAnimations(GameObject gameObject)
+    {
+        var anim = gameObject.GetComponentInChildren<Animation>();
+        var scenegraphComponent = gameObject.GetComponentInChildren<ScenegraphComponent>();
+
+        var recline = ContentProvider.Get().GetAsset<ScenegraphAnimationAsset>(
+            new ResourceKey("o2a-chairRecliner-recline_anim", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_ANIM));
+        var clip = recline.CreateClipFromResource(scenegraphComponent.BoneNamesToRelativePaths);
+        anim.AddClip(clip, "recline");
     }
 
 }

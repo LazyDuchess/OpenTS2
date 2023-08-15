@@ -24,15 +24,22 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             {
                 foreach (var channel in target.Channels)
                 {
-                    var relativePathToBone = bonesToRelativePaths[channel.ChannelName];
-                    CreateCurvesForChannel(clip, channel, relativePathToBone);
+                    if (bonesToRelativePaths.TryGetValue(channel.ChannelName, out var relativePathToBone))
+                    {
+                        CreateBoneCurvesForChannel(clip, channel, relativePathToBone);
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"Bone for animation channel {channel.ChannelName} not found");
+                    }
+                    // TODO: handle morph animations.
                 }
             }
 
             return clip;
         }
 
-        private static void CreateCurvesForChannel(AnimationClip clip, AnimResourceConstBlock.SharedChannel channel, string relativePathToBone)
+        private static void CreateBoneCurvesForChannel(AnimationClip clip, AnimResourceConstBlock.SharedChannel channel, string relativePathToBone)
         {
             if (channel.Type == AnimResourceConstBlock.ChannelType.EulerRotation)
             {
