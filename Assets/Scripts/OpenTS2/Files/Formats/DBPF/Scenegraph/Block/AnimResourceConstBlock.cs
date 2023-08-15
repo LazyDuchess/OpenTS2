@@ -119,54 +119,33 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                 {
                     if (TangentCurveType == CurveType.BakedTangents)
                     {
-                        var keyframe = new IKeyFrame.BakedKeyFrame();
+                        var keyframe = new IKeyFrame.BakedKeyFrame
+                        {
+                            Data = ReadKeyFrameData(reader, Type)
+                        };
                         KeyFrames[i] = keyframe;
-
-                        if (Type == DataType.FloatingPoint32)
-                        {
-                            keyframe.Data = reader.ReadFloat();
-                        }
-                        else
-                        {
-                            // TODO: convert from fixed point to floating point here.
-                            reader.ReadInt16();
-                        }
                     } else if (TangentCurveType == CurveType.ContinuousTangents)
                     {
-                        var keyframe = new IKeyFrame.ContinuousKeyFrame();
+                        var keyframe = new IKeyFrame.ContinuousKeyFrame
+                        {
+                            // In and out-tangents are always 5.10 fixed points.
+                            TangentIn = ReadKeyFrameData(reader, DataType.FixedPoint5_10),
+                            Data = ReadKeyFrameData(reader, Type),
+                            TangentOut = ReadKeyFrameData(reader, DataType.FixedPoint5_10)
+                        };
+
                         KeyFrames[i] = keyframe;
-
-                        keyframe.Short1 = reader.ReadUInt16();
-
-                        if (Type == DataType.FloatingPoint32)
-                        {
-                            keyframe.Data = reader.ReadFloat();
-                        }
-                        else
-                        {
-                            // TODO: convert from fixed point to floating point here.
-                            reader.ReadUInt16();
-                        }
-
-                        keyframe.Short2 = reader.ReadInt16();
                     } else if (TangentCurveType == CurveType.DiscontinuousTangents)
                     {
-                        var keyframe = new IKeyFrame.DiscontinuousKeyFrame();
+                        var keyframe = new IKeyFrame.DiscontinuousKeyFrame
+                        {
+                            Time = reader.ReadUInt16(),
+                            TangentIn = ReadKeyFrameData(reader, DataType.FixedPoint5_10),
+                            Data = ReadKeyFrameData(reader, Type),
+                            TangentOut = ReadKeyFrameData(reader, DataType.FixedPoint5_10)
+                        };
+
                         KeyFrames[i] = keyframe;
-
-                        keyframe.Short1 = reader.ReadUInt16();
-                        if (Type == DataType.FloatingPoint32)
-                        {
-                            keyframe.Data = reader.ReadFloat();
-                        }
-                        else
-                        {
-                            // TODO: convert from fixed point to floating point here.
-                            reader.ReadUInt16();
-                        }
-
-                        keyframe.Short2 = reader.ReadInt16();
-                        keyframe.Short3 = reader.ReadInt16();
                     }
                 }
             }
@@ -179,7 +158,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                 DiscontinuousTangents = 2,
             }
 
-            public static CurveType ChannelCurveTypeFromPackedByte(byte packedByte)
+            internal static CurveType ChannelCurveTypeFromPackedByte(byte packedByte)
             {
                 if (!Enum.IsDefined(typeof(CurveType), packedByte & 0b11))
                 {
@@ -209,7 +188,32 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                 FloatingPoint32,
             }
 
-            public static DataType ChannelDataTypeFromSerializedPackedByte(byte packedByte) {
+            /// <summary>
+            /// Reads a data point from the keyframe with the given type, converting fixed point numbers to floats.
+            /// </summary>
+            private static float ReadKeyFrameData(IoBuffer reader, DataType type)
+            {
+                if (type == DataType.FloatingPoint32)
+                {
+                    return reader.ReadFloat();
+                }
+
+                var fixedPoint = (float) reader.ReadInt16();
+                var divisor = type switch
+                {
+                    DataType.FixedPoint8_7 => 128.0, // Divided by 2^7, maybe needs top bit masked off.
+                    DataType.FixedPoint9_7 => 128.0, // Divided by 2^7
+                    DataType.FixedPoint5_10 => 1024.0, // Divided by 2^10, maybe needs top bit masked off.
+                    DataType.FixedPoint5_11 => 2048.0, // Divided by 2^11
+                    DataType.FixedPoint3_12 => 4096.0, // Divided by 2^12, maybe needs top bit masked off.
+                    DataType.FixedPoint3_13 => 8192.0, // Divided by 2^12
+                    _ => throw new NotImplementedException($"Can't read keyframe data type: {type}")
+                };
+                var floatingPoint = fixedPoint / divisor;
+                return (float)floatingPoint;
+            }
+
+            internal static DataType ChannelDataTypeFromSerializedPackedByte(byte packedByte) {
                 // 5th bit set is float.
                 if ((packedByte & 0b10000) != 0)
                 {
@@ -238,21 +242,36 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
         public struct BakedKeyFrame : IKeyFrame
         {
             public float Data;
+
+            public override string ToString()
+            {
+                return $"BakedKeyFrame (Data={Data})";
+            }
         }
 
         public struct ContinuousKeyFrame : IKeyFrame
         {
-            public ushort Short1;
+            public float TangentIn;
             public float Data;
-            public short Short2;
+            public float TangentOut;
+
+            public override string ToString()
+            {
+                return $"ContinuousKeyFrame (Data={Data} tangentIn={TangentIn} tangentOut={TangentOut})";
+            }
         }
 
         public struct DiscontinuousKeyFrame : IKeyFrame
         {
-            public ushort Short1;
+            public ushort Time;
             public float Data;
-            public short Short2;
-            public short Short3;
+            public float TangentIn;
+            public float TangentOut;
+
+            public override string ToString()
+            {
+                return $"DiscontinuousKeyFrame (t={Time} Data={Data} tangentIn={TangentIn} tangentOut={TangentOut})";
+            }
         }
     }
 
@@ -298,8 +317,6 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             Debug.Assert(skeletonTag.Length == skeletonTagLength);
             var dataString = reader.ReadNullTerminatedString();
             Debug.Assert(dataString.Length == dataStringLength);
-
-            Debug.Log($"skeletonTag: {skeletonTag}, dataString: {dataString}");
 
             ReadPadding(reader, reader.Stream.Position - initialStreamPosition);
 
@@ -488,9 +505,10 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             for (var i = 0; i < numEventKeys; i++)
             {
                 var eventDataString = reader.ReadNullTerminatedString();
-                Debug.Log($"== eventDataString:\n{eventDataString}");
             }
 
+            // Debugging print.
+            /*
             Debug.Log($"durationTicks: {durationTicks}");
             foreach (var target in animTargets)
             {
@@ -504,11 +522,12 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                         Debug.Log($"    numKeyFrames: {component.NumKeyFrames}, type: {component.Type}, tangentType: {component.TangentCurveType}");
                         foreach (var keyframe in component.KeyFrames)
                         {
-                            Debug.Log($"      {keyframe.GetType()}");
+                            Debug.Log($"      {keyframe}");
                         }
                     }
                 }
             }
+            */
 
             return new AnimResourceConstBlock(blockTypeInfo, animTargets);
         }
