@@ -82,11 +82,13 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                         unityKeyframes[i] = new Keyframe(keyFrameTimeEven,  keyFrame.Data);
                         break;
                     case IKeyFrame.ContinuousKeyFrame keyFrame:
-                        unityKeyframes[i] = new Keyframe(keyFrameTimeEven, keyFrame.Data);
+                        unityKeyframes[i] = new Keyframe(keyFrameTimeEven, keyFrame.Data,
+                            GetTangentIn(i, component.KeyFrames), GetTangentOut(i, component.KeyFrames));
                         break;
                     case IKeyFrame.DiscontinuousKeyFrame keyFrame:
                         var time = (float)keyFrame.Time;
-                        unityKeyframes[i] = new Keyframe(ConvertTimeToSeconds(time), keyFrame.Data);
+                        unityKeyframes[i] = new Keyframe(ConvertTimeToSeconds(time), keyFrame.Data,
+                            GetTangentIn(i, component.KeyFrames), GetTangentOut(i, component.KeyFrames));
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -98,8 +100,44 @@ namespace OpenTS2.Content.DBPF.Scenegraph
 
         private static float ConvertTimeToSeconds(float timeInTicks)
         {
-            // Assuming 30fps for now.
-            return (float)(timeInTicks * AnimResourceConstBlock.FramesPerTick / 30.0);
+            // Assuming 24fps for now.
+            return (float)(timeInTicks * AnimResourceConstBlock.FramesPerTick / 24.0);
+        }
+
+        private static float GetTangentIn(int frameIdx, IReadOnlyList<IKeyFrame> frames)
+        {
+            if (frameIdx == 0 || frames.Count == 1)
+                return 0f;
+
+            switch (frames[frameIdx])
+            {
+                case IKeyFrame.ContinuousKeyFrame keyFrame:
+                    var previousContFrame = (IKeyFrame.ContinuousKeyFrame)frames[frameIdx - 1];
+                    return keyFrame.TangentOut * (keyFrame.TangentIn - previousContFrame.TangentIn);
+                case IKeyFrame.DiscontinuousKeyFrame keyFrame:
+                    var previousDiscontFrame = (IKeyFrame.DiscontinuousKeyFrame)frames[frameIdx - 1];
+                    return keyFrame.TangentOut * (keyFrame.TangentIn - previousDiscontFrame.TangentIn);
+            }
+
+            throw new ArgumentOutOfRangeException($"Invalid frame type: {frames[frameIdx]}");
+        }
+
+        private static float GetTangentOut(int frameIdx, IReadOnlyList<IKeyFrame> frames)
+        {
+            if (frameIdx == frames.Count - 1 || frames.Count == 1)
+                return 0f;
+
+            switch (frames[frameIdx])
+            {
+                case IKeyFrame.ContinuousKeyFrame keyFrame:
+                    var nextContFrame = (IKeyFrame.ContinuousKeyFrame)frames[frameIdx + 1];
+                    return keyFrame.TangentOut * (nextContFrame.TangentIn - keyFrame.TangentIn);
+                case IKeyFrame.DiscontinuousKeyFrame keyFrame:
+                    var nextDiscontFrame = (IKeyFrame.DiscontinuousKeyFrame)frames[frameIdx + 1];
+                    return keyFrame.TangentOut * (nextDiscontFrame.TangentIn - keyFrame.TangentIn);
+            }
+
+            throw new ArgumentOutOfRangeException($"Invalid frame type: {frames[frameIdx]}");
         }
     }
 }

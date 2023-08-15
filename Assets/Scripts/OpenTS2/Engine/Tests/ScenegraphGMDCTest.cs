@@ -36,6 +36,16 @@ public class ScenegraphGMDCTest : MonoBehaviour
             new ResourceKey("o-vehiclePizza-driveOff_anim", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_ANIM));
         var clip = driveOff.CreateClipFromResource(scenegraphComponent.BoneNamesToRelativePaths);
         anim.AddClip(clip, "driveOff");
+
+        var drive = ContentProvider.Get().GetAsset<ScenegraphAnimationAsset>(
+            new ResourceKey("o-vehiclePizza-drive_anim", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_ANIM));
+        clip = drive.CreateClipFromResource(scenegraphComponent.BoneNamesToRelativePaths);
+        anim.AddClip(clip, "drive");
+
+        var stop = ContentProvider.Get().GetAsset<ScenegraphAnimationAsset>(
+            new ResourceKey("o-vehiclePizza-stop_anim", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_ANIM));
+        clip = stop.CreateClipFromResource(scenegraphComponent.BoneNamesToRelativePaths);
+        anim.AddClip(clip, "stop");
     }
 
 }
