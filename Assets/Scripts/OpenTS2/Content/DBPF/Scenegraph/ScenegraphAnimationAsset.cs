@@ -87,8 +87,8 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                         break;
                     case IKeyFrame.DiscontinuousKeyFrame keyFrame:
                         var time = (float)keyFrame.Time;
-                        unityKeyframes[i] = new Keyframe(ConvertTimeToSeconds(time), keyFrame.Data,
-                            GetTangentIn(i, component.KeyFrames), GetTangentOut(i, component.KeyFrames));
+                        // TODO: fix in and out tangents for discontinuous frames.
+                        unityKeyframes[i] = new Keyframe(ConvertTimeToSeconds(time), keyFrame.Data);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -116,7 +116,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                     return keyFrame.TangentOut * (keyFrame.TangentIn - previousContFrame.TangentIn);
                 case IKeyFrame.DiscontinuousKeyFrame keyFrame:
                     var previousDiscontFrame = (IKeyFrame.DiscontinuousKeyFrame)frames[frameIdx - 1];
-                    return keyFrame.TangentOut * (keyFrame.TangentIn - previousDiscontFrame.TangentIn);
+                    return keyFrame.TangentOut * (keyFrame.Time - previousDiscontFrame.Time);
             }
 
             throw new ArgumentOutOfRangeException($"Invalid frame type: {frames[frameIdx]}");
@@ -134,7 +134,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                     return keyFrame.TangentOut * (nextContFrame.TangentIn - keyFrame.TangentIn);
                 case IKeyFrame.DiscontinuousKeyFrame keyFrame:
                     var nextDiscontFrame = (IKeyFrame.DiscontinuousKeyFrame)frames[frameIdx + 1];
-                    return keyFrame.TangentOut * (nextDiscontFrame.TangentIn - keyFrame.TangentIn);
+                    return keyFrame.TangentOut * (nextDiscontFrame.Time - keyFrame.Time);
             }
 
             throw new ArgumentOutOfRangeException($"Invalid frame type: {frames[frameIdx]}");
