@@ -38,13 +38,13 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             {
                 var curveX =
                     new AnimationCurve(CreateKeyFramesForComponent(channel.DurationTicks, channel.Components[0]));
-                clip.SetCurve(relativePathToBone, typeof(Transform), "localRotation.x", curveX);
+                clip.SetCurve(relativePathToBone, typeof(Transform), "localEulerAngles.x", curveX);
                 var curveY =
                     new AnimationCurve(CreateKeyFramesForComponent(channel.DurationTicks, channel.Components[1]));
-                clip.SetCurve(relativePathToBone, typeof(Transform), "localRotation.y", curveY);
+                clip.SetCurve(relativePathToBone, typeof(Transform), "localEulerAngles.y", curveY);
                 var curveZ =
                     new AnimationCurve(CreateKeyFramesForComponent(channel.DurationTicks, channel.Components[2]));
-                clip.SetCurve(relativePathToBone, typeof(Transform), "localRotation.z", curveZ);
+                clip.SetCurve(relativePathToBone, typeof(Transform), "localEulerAngles.z", curveZ);
             }
             else if (channel.Type == AnimResourceConstBlock.ChannelType.TransformXYZ)
             {
@@ -97,7 +97,8 @@ namespace OpenTS2.Content.DBPF.Scenegraph
 
         private static float ConvertTimeToSeconds(float timeInTicks)
         {
-            return (float)(timeInTicks * AnimResourceConstBlock.FramesPerTick);
+            // Assuming 30fps for now.
+            return (float)(timeInTicks * AnimResourceConstBlock.FramesPerTick / 30.0);
         }
     }
 }
