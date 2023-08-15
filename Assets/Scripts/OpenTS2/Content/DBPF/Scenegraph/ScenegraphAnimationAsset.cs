@@ -77,15 +77,16 @@ namespace OpenTS2.Content.DBPF.Scenegraph
 
                 switch (component.KeyFrames[i])
                 {
+                    // TODO: re-enable tangentIn and tangentOut once they're figured out.
                     case IKeyFrame.BakedKeyFrame keyFrame:
                         unityKeyframes[i] = new Keyframe(keyFrameTimeEven,  keyFrame.Data);
                         break;
                     case IKeyFrame.ContinuousKeyFrame keyFrame:
-                        unityKeyframes[i] = new Keyframe(keyFrameTimeEven, keyFrame.Data, keyFrame.TangentIn, keyFrame.TangentOut);
+                        unityKeyframes[i] = new Keyframe(keyFrameTimeEven, keyFrame.Data);
                         break;
                     case IKeyFrame.DiscontinuousKeyFrame keyFrame:
                         var time = (float)keyFrame.Time;
-                        unityKeyframes[i] = new Keyframe(ConvertTimeToSeconds(time), keyFrame.Data, keyFrame.TangentIn, keyFrame.TangentOut);
+                        unityKeyframes[i] = new Keyframe(ConvertTimeToSeconds(time), keyFrame.Data);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();

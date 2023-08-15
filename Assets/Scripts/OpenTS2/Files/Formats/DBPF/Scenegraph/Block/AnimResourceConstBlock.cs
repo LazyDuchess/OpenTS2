@@ -199,14 +199,15 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                 }
 
                 var fixedPoint = (float) reader.ReadInt16();
+                // TODO: The full 16-bit width data types like 5.10 are weird, gotta figure out how the game encodes them.
                 var divisor = type switch
                 {
                     DataType.FixedPoint8_7 => 128.0, // Divided by 2^7, maybe needs top bit masked off.
                     DataType.FixedPoint9_7 => 128.0, // Divided by 2^7
                     DataType.FixedPoint5_10 => 1024.0, // Divided by 2^10, maybe needs top bit masked off.
-                    DataType.FixedPoint5_11 => 2048.0, // Divided by 2^11
+                    DataType.FixedPoint5_11 => 1024.0, // Divided by 2^11
                     DataType.FixedPoint3_12 => 4096.0, // Divided by 2^12, maybe needs top bit masked off.
-                    DataType.FixedPoint3_13 => 8192.0, // Divided by 2^12
+                    DataType.FixedPoint3_13 => 4096.0, // Divided by 2^12
                     _ => throw new NotImplementedException($"Can't read keyframe data type: {type}")
                 };
                 var floatingPoint = fixedPoint / divisor;

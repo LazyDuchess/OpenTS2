@@ -63,9 +63,9 @@ public class ScenegraphAnimationCodecTest
         Assert.That(translationChannel.Components[2].KeyFrames.Length, Is.EqualTo(3));
         Assert.That(translationChannel.Components[2].KeyFrames[0], Is.TypeOf<IKeyFrame.ContinuousKeyFrame>());
         var rootTransZKeyFrames = translationChannel.Components[2].KeyFrames;
-        Assert.That(((IKeyFrame.ContinuousKeyFrame) rootTransZKeyFrames[0]).Data, Is.EqualTo(0.465).Within(0.01));
-        Assert.That(((IKeyFrame.ContinuousKeyFrame) rootTransZKeyFrames[1]).Data, Is.EqualTo(0.467).Within(0.01));
-        Assert.That(((IKeyFrame.ContinuousKeyFrame) rootTransZKeyFrames[2]).Data, Is.EqualTo(0.464).Within(0.01));
+        Assert.That(((IKeyFrame.ContinuousKeyFrame) rootTransZKeyFrames[0]).Data, Is.EqualTo(0.930).Within(0.01));
+        Assert.That(((IKeyFrame.ContinuousKeyFrame) rootTransZKeyFrames[1]).Data, Is.EqualTo(0.935).Within(0.01));
+        Assert.That(((IKeyFrame.ContinuousKeyFrame) rootTransZKeyFrames[2]).Data, Is.EqualTo(0.929).Within(0.01));
 
         // The fourth channel is the car body's rotation.
         var bodyRotation = animTarget.Channels[3];
