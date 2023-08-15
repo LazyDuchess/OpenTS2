@@ -71,11 +71,42 @@ namespace OpenTS2.Scenes
                 }
 
                 BindBonesInMeshes();
+                ComputeRelativeBonePaths();
             }
             catch (Exception e)
             {
                 Debug.LogError($"Error while traversing graph for {name}");
                 Debug.LogException(e);
+            }
+        }
+
+        /// <summary>
+        /// A mapping of bone names such as "body_rot" to their path relative to the scenegraph component
+        /// "vehiclepizza/root_trans/root_rot/body_trans/body_rot". This is used for animating bones as unity
+        /// needs their relative paths for animations.
+        /// </summary>
+        public Dictionary<string, string> BoneNamesToRelativePaths = new Dictionary<string, string>();
+        private Dictionary<string, Transform> _boneNamesToTransform = new Dictionary<string, Transform>();
+
+        private void ComputeRelativeBonePaths()
+        {
+            // For now I'm just going down the children and computing the relative path, but we can probably do this
+            // more cleanly when we build the nodes.
+            TraverseChildrenGameObjectsAndAddRelativeBones("", transform.GetChild(0));
+        }
+
+        private void TraverseChildrenGameObjectsAndAddRelativeBones(string pathSoFar, Transform parentObj)
+        {
+            if (_boneNamesToTransform.ContainsKey(parentObj.name))
+            {
+                BoneNamesToRelativePaths[parentObj.name] = $"{pathSoFar}{parentObj.name}";
+            }
+
+            pathSoFar += $"{parentObj.name}/";
+            for (var i = 0; i < parentObj.childCount; i++)
+            {
+                var child = parentObj.GetChild(i);
+                TraverseChildrenGameObjectsAndAddRelativeBones(pathSoFar, child);
             }
         }
 
@@ -236,6 +267,7 @@ namespace OpenTS2.Scenes
 
             transformObj.transform.SetParent(parent.transform, worldPositionStays:false);
             _boneIdToTransform[transformNode.BoneId] = transformObj.transform;
+            _boneNamesToTransform[transformName] = transformObj.transform;
         }
 
         private void RenderResourceNode(GameObject parent, ResourceNodeBlock resource)
