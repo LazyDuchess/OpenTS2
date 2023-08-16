@@ -280,7 +280,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             // Now we can actually attach the subset of morphs this mesh uses for unity. Only catch is unity requires
             // the frameWeight parameter to be increasing, so we just start at 99% and increment. Not sure if it should
             // be equally distributed yet.
-            var weight = 99f;
+            var weight = 99.9f;
             foreach (var animation in animations)
             {
                 if (animation == null)

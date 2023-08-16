@@ -14,7 +14,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             AnimResource = animResource;
         }
 
-        public AnimationClip CreateClipFromResource(Dictionary<string, string> bonesToRelativePaths)
+        public AnimationClip CreateClipFromResource(Dictionary<string, string> bonesToRelativePaths, Dictionary<string, List<string>> blendsToRelativePaths)
         {
             var clip = new AnimationClip();
             // mark as legacy for now, this might need to change when we do IK animations.
@@ -27,16 +27,45 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                     if (bonesToRelativePaths.TryGetValue(channel.ChannelName, out var relativePathToBone))
                     {
                         CreateBoneCurvesForChannel(clip, channel, relativePathToBone);
+                    } else if (blendsToRelativePaths.TryGetValue(channel.ChannelName, out var relativePathsToBlend))
+                    {
+                        foreach (var blendRelativePath in relativePathsToBlend)
+                        {
+                            CreateBlendCurveForChannel(clip, channel, blendRelativePath);
+                        }
                     }
                     else
                     {
-                        Debug.LogWarning($"Bone for animation channel {channel.ChannelName} not found");
+                        Debug.LogWarning($"Bone or blend for animation channel {channel.ChannelName} not found");
                     }
-                    // TODO: handle morph animations.
                 }
             }
 
             return clip;
+        }
+
+        private static void CreateBlendCurveForChannel(AnimationClip clip, AnimResourceConstBlock.SharedChannel channel,
+            string relativePathToBlend)
+        {
+            if (channel.Type != AnimResourceConstBlock.ChannelType.Float1)
+            {
+                throw new ArgumentException("Invalid channel type for blend shape animation");
+            }
+
+            // unity blend shapes are from 0 to 99, whereas sims has them as 0 to 1.0
+            // Multiply each keyframe value by 100.
+            var originalKeyFrames = CreateKeyFramesForComponent(channel.DurationTicks, channel.Components[0]);
+            var keyFrames = new Keyframe[originalKeyFrames.Length];
+            for (var i = 0; i < originalKeyFrames.Length; i++)
+            {
+                keyFrames[i] = new Keyframe(originalKeyFrames[i].time, originalKeyFrames[i].value * 100,
+                    originalKeyFrames[i].inTangent, originalKeyFrames[i].outTangent);
+            }
+
+            var curve = new AnimationCurve(keyFrames);
+            var property = $"blendShape.{channel.ChannelName}";
+            Debug.Log($"path: {relativePathToBlend} property: {property}");
+            clip.SetCurve(relativePathToBlend, typeof(SkinnedMeshRenderer), property, curve);
         }
 
         private static void CreateBoneCurvesForChannel(AnimationClip clip, AnimResourceConstBlock.SharedChannel channel, string relativePathToBone)
@@ -89,14 +118,16 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                         unityKeyframes[i] = new Keyframe(keyFrameTimeEven,  keyFrame.Data);
                         break;
                     case IKeyFrame.ContinuousKeyFrame keyFrame:
-                        unityKeyframes[i] = new Keyframe(keyFrameTimeEven, keyFrame.Data,
-                            GetTangentIn(i, component.KeyFrames), GetTangentOut(i, component.KeyFrames));
+                        // TODO: these tangentin and tangentout values are based on the original gradient where the x-axis
+                        // is in ticks. We use seconds for the x-axis so the gradients need to be changed accordingly.
+                        unityKeyframes[i] = new Keyframe(keyFrameTimeEven, keyFrame.Data/*,
+                            GetTangentIn(i, component.KeyFrames), GetTangentOut(i, component.KeyFrames)*/);
                         break;
                     case IKeyFrame.DiscontinuousKeyFrame keyFrame:
                         var time = (float)keyFrame.Time;
                         // TODO: fix in and out tangents for discontinuous frames.
-                        unityKeyframes[i] = new Keyframe(ConvertTimeToSeconds(time), keyFrame.Data,
-                            GetTangentIn(i, component.KeyFrames), GetTangentOut(i, component.KeyFrames));
+                        unityKeyframes[i] = new Keyframe(ConvertTimeToSeconds(time), keyFrame.Data/*,
+                            GetTangentIn(i, component.KeyFrames), GetTangentOut(i, component.KeyFrames)*/);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -106,10 +137,12 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             return unityKeyframes;
         }
 
+        // Assuming 30fps for now.
+        private const float TicksToSeconds = (float)(AnimResourceConstBlock.FramesPerTick / 30.0);
+
         private static float ConvertTimeToSeconds(float timeInTicks)
         {
-            // Assuming 24fps for now.
-            return (float)(timeInTicks * AnimResourceConstBlock.FramesPerTick / 24.0);
+            return timeInTicks * TicksToSeconds;
         }
 
         private static float GetTangentIn(int frameIdx, IReadOnlyList<IKeyFrame> frames)

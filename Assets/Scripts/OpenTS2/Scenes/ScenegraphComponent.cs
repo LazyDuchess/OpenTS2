@@ -71,7 +71,7 @@ namespace OpenTS2.Scenes
                 }
 
                 BindBonesInMeshes();
-                ComputeRelativeBonePaths();
+                ComputeRelativeBoneAndBlendPaths();
             }
             catch (Exception e)
             {
@@ -85,28 +85,45 @@ namespace OpenTS2.Scenes
         /// "vehiclepizza/root_trans/root_rot/body_trans/body_rot". This is used for animating bones as unity
         /// needs their relative paths for animations.
         /// </summary>
-        public Dictionary<string, string> BoneNamesToRelativePaths = new Dictionary<string, string>();
-        private Dictionary<string, Transform> _boneNamesToTransform = new Dictionary<string, Transform>();
+        public readonly Dictionary<string, string> BoneNamesToRelativePaths = new Dictionary<string, string>();
+        private readonly Dictionary<string, Transform> _boneNamesToTransform = new Dictionary<string, Transform>();
+        /// <summary>
+        /// A mapping of blend shapes such as "recliningbend" and "slot_0_indent" to the paths relative to the
+        /// scenegraph component "chair_living/fabric". This can include multiple components, hence the list of strings.
+        /// </summary>
+        public readonly Dictionary<string, List<string>> BlendNamesToRelativePaths = new Dictionary<string, List<string>>();
+        private readonly Dictionary<Transform, List<string>> _unityObjectsToBlends = new Dictionary<Transform, List<string>>();
 
-        private void ComputeRelativeBonePaths()
+        private void ComputeRelativeBoneAndBlendPaths()
         {
             // For now I'm just going down the children and computing the relative path, but we can probably do this
             // more cleanly when we build the nodes.
-            TraverseChildrenGameObjectsAndAddRelativeBones("", transform.GetChild(0));
+            TraverseChildrenGameObjectsAndAddRelativeBonesAndPaths("", transform.GetChild(0));
         }
 
-        private void TraverseChildrenGameObjectsAndAddRelativeBones(string pathSoFar, Transform parentObj)
+        private void TraverseChildrenGameObjectsAndAddRelativeBonesAndPaths(string pathSoFar, Transform parentObj)
         {
             if (_boneNamesToTransform.ContainsKey(parentObj.name))
             {
                 BoneNamesToRelativePaths[parentObj.name] = $"{pathSoFar}{parentObj.name}";
+            }
+            if (_unityObjectsToBlends.TryGetValue(parentObj, out var blends))
+            {
+                foreach (var blend in blends)
+                {
+                    if (!BlendNamesToRelativePaths.ContainsKey(blend))
+                    {
+                        BlendNamesToRelativePaths[blend] = new List<string>();
+                    }
+                    BlendNamesToRelativePaths[blend].Add($"{pathSoFar}{parentObj.name}");
+                }
             }
 
             pathSoFar += $"{parentObj.name}/";
             for (var i = 0; i < parentObj.childCount; i++)
             {
                 var child = parentObj.GetChild(i);
-                TraverseChildrenGameObjectsAndAddRelativeBones(pathSoFar, child);
+                TraverseChildrenGameObjectsAndAddRelativeBonesAndPaths(pathSoFar, child);
             }
         }
 
@@ -348,6 +365,13 @@ namespace OpenTS2.Scenes
                         {
                             _meshesToBindBonesFor.Enqueue((primitive.Value, skinnedRenderer));
                         }
+
+                        var blends = new List<string>();
+                        for (var i = 0; i < skinnedRenderer.sharedMesh.blendShapeCount; i++)
+                        {
+                            blends.Add(skinnedRenderer.sharedMesh.GetBlendShapeName(i));
+                        }
+                        _unityObjectsToBlends[primitiveObject.transform] = blends;
                     }
                     else
                     {

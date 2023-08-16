@@ -37,17 +37,17 @@ public class ScenegraphGMDCTest : MonoBehaviour
 
         var driveOff = ContentProvider.Get().GetAsset<ScenegraphAnimationAsset>(
             new ResourceKey("o-vehiclePizza-driveOff_anim", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_ANIM));
-        var clip = driveOff.CreateClipFromResource(scenegraphComponent.BoneNamesToRelativePaths);
+        var clip = driveOff.CreateClipFromResource(scenegraphComponent.BoneNamesToRelativePaths, scenegraphComponent.BlendNamesToRelativePaths);
         anim.AddClip(clip, "driveOff");
 
         var drive = ContentProvider.Get().GetAsset<ScenegraphAnimationAsset>(
             new ResourceKey("o-vehiclePizza-drive_anim", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_ANIM));
-        clip = drive.CreateClipFromResource(scenegraphComponent.BoneNamesToRelativePaths);
+        clip = drive.CreateClipFromResource(scenegraphComponent.BoneNamesToRelativePaths, scenegraphComponent.BlendNamesToRelativePaths);
         anim.AddClip(clip, "drive");
 
         var stop = ContentProvider.Get().GetAsset<ScenegraphAnimationAsset>(
             new ResourceKey("o-vehiclePizza-stop_anim", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_ANIM));
-        clip = stop.CreateClipFromResource(scenegraphComponent.BoneNamesToRelativePaths);
+        clip = stop.CreateClipFromResource(scenegraphComponent.BoneNamesToRelativePaths, scenegraphComponent.BlendNamesToRelativePaths);
         anim.AddClip(clip, "stop");
     }
 
@@ -58,7 +58,7 @@ public class ScenegraphGMDCTest : MonoBehaviour
 
         var recline = ContentProvider.Get().GetAsset<ScenegraphAnimationAsset>(
             new ResourceKey("o2a-chairRecliner-recline_anim", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_ANIM));
-        var clip = recline.CreateClipFromResource(scenegraphComponent.BoneNamesToRelativePaths);
+        var clip = recline.CreateClipFromResource(scenegraphComponent.BoneNamesToRelativePaths, scenegraphComponent.BlendNamesToRelativePaths);
         anim.AddClip(clip, "recline");
     }
 
