@@ -64,7 +64,6 @@ namespace OpenTS2.Content.DBPF.Scenegraph
 
             var curve = new AnimationCurve(keyFrames);
             var property = $"blendShape.{channel.ChannelName}";
-            Debug.Log($"path: {relativePathToBlend} property: {property}");
             clip.SetCurve(relativePathToBlend, typeof(SkinnedMeshRenderer), property, curve);
         }
 

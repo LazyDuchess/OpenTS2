@@ -98,7 +98,10 @@ namespace OpenTS2.Scenes
         {
             // For now I'm just going down the children and computing the relative path, but we can probably do this
             // more cleanly when we build the nodes.
-            TraverseChildrenGameObjectsAndAddRelativeBonesAndPaths("", transform.GetChild(0));
+            if (transform.childCount > 0)
+            {
+                TraverseChildrenGameObjectsAndAddRelativeBonesAndPaths("", transform.GetChild(0));
+            }
         }
 
         private void TraverseChildrenGameObjectsAndAddRelativeBonesAndPaths(string pathSoFar, Transform parentObj)
