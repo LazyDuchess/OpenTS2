@@ -95,7 +95,8 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                     case IKeyFrame.DiscontinuousKeyFrame keyFrame:
                         var time = (float)keyFrame.Time;
                         // TODO: fix in and out tangents for discontinuous frames.
-                        unityKeyframes[i] = new Keyframe(ConvertTimeToSeconds(time), keyFrame.Data);
+                        unityKeyframes[i] = new Keyframe(ConvertTimeToSeconds(time), keyFrame.Data,
+                            GetTangentIn(i, component.KeyFrames), GetTangentOut(i, component.KeyFrames));
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();

@@ -126,23 +126,32 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                         KeyFrames[i] = keyframe;
                     } else if (TangentCurveType == CurveType.ContinuousTangents)
                     {
+                        var tangentIn = reader.ReadUInt16();
+                        var data = ReadKeyFrameData(reader, ref tangentIn, Type);
+                        var tangentOut = reader.ReadUInt16();
+
                         var keyframe = new IKeyFrame.ContinuousKeyFrame
                         {
                             // In and out-tangents are always 5.10 fixed points.
-                            TangentIn = ReadKeyFrameData(reader, DataType.FixedPoint5_10),
-                            Data = ReadKeyFrameData(reader, Type),
-                            TangentOut = ReadKeyFrameData(reader, DataType.FixedPoint5_10)
+                            TangentIn = ConvertFixedPointToFloatingPoint(DataType.FixedPoint5_10, tangentIn),
+                            Data = data,
+                            TangentOut = ConvertFixedPointToFloatingPoint(DataType.FixedPoint5_10, tangentOut)
                         };
 
                         KeyFrames[i] = keyframe;
                     } else if (TangentCurveType == CurveType.DiscontinuousTangents)
                     {
+                        var time = reader.ReadUInt16();
+                        var data = ReadKeyFrameData(reader, ref time, Type);
+                        var tangentIn = reader.ReadUInt16();
+                        var tangentOut = reader.ReadUInt16();
+
                         var keyframe = new IKeyFrame.DiscontinuousKeyFrame
                         {
-                            Time = reader.ReadUInt16(),
-                            TangentIn = ReadKeyFrameData(reader, DataType.FixedPoint5_10),
-                            Data = ReadKeyFrameData(reader, Type),
-                            TangentOut = ReadKeyFrameData(reader, DataType.FixedPoint5_10)
+                            Time = time,
+                            Data = data,
+                            TangentIn = ConvertFixedPointToFloatingPoint(DataType.FixedPoint5_10, tangentIn),
+                            TangentOut = ConvertFixedPointToFloatingPoint(DataType.FixedPoint5_10, tangentOut)
                         };
 
                         KeyFrames[i] = keyframe;
@@ -188,32 +197,6 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                 FloatingPoint32,
             }
 
-            /// <summary>
-            /// Reads a data point from the keyframe with the given type, converting fixed point numbers to floats.
-            /// </summary>
-            private static float ReadKeyFrameData(IoBuffer reader, DataType type)
-            {
-                if (type == DataType.FloatingPoint32)
-                {
-                    return reader.ReadFloat();
-                }
-
-                var fixedPoint = (float) reader.ReadInt16();
-                // TODO: The full 16-bit width data types like 5.10 are weird, gotta figure out how the game encodes them.
-                var divisor = type switch
-                {
-                    DataType.FixedPoint8_7 => 128.0, // Divided by 2^7, maybe needs top bit masked off.
-                    DataType.FixedPoint9_7 => 128.0, // Divided by 2^7
-                    DataType.FixedPoint5_10 => 1024.0, // Divided by 2^10, maybe needs top bit masked off.
-                    DataType.FixedPoint5_11 => 1024.0, // Divided by 2^11
-                    DataType.FixedPoint3_12 => 4096.0, // Divided by 2^12, maybe needs top bit masked off.
-                    DataType.FixedPoint3_13 => 4096.0, // Divided by 2^12
-                    _ => throw new NotImplementedException($"Can't read keyframe data type: {type}")
-                };
-                var floatingPoint = fixedPoint / divisor;
-                return (float)floatingPoint;
-            }
-
             internal static DataType ChannelDataTypeFromSerializedPackedByte(byte packedByte) {
                 // 5th bit set is float.
                 if ((packedByte & 0b10000) != 0)
@@ -234,6 +217,99 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                     0b011 => DataType.FixedPoint3_13,
                     _ => throw new ArgumentException($"Invalid data type: {packedByte}")
                 };
+            }
+
+            /// <summary>
+            /// Reads a data point from the keyframe with the given type, converting fixed point numbers to floats.
+            ///
+            /// One weird gotcha, some fixed point types "steal" a bit from the short that came before it. Hence, we
+            /// need to pass a reference to the short read before the data so it can be masked off.
+            /// </summary>
+            private static float ReadKeyFrameData(IoBuffer reader, ref ushort precedingShort, DataType type)
+            {
+                if (type == DataType.FloatingPoint32)
+                {
+                    return reader.ReadFloat();
+                }
+
+                int fixedPoint;
+                if (NumBitsForFixedPointDataType(type) == 16)
+                {
+                    // Need to steal a bit from the preceding short.
+                    fixedPoint = reader.ReadInt16();
+                    fixedPoint = (fixedPoint << 1) | ((precedingShort >> 15) & 0b1);
+                    precedingShort &= 0x7FFF;
+                }
+                else
+                {
+                    fixedPoint = reader.ReadUInt16();
+                }
+
+                return ConvertFixedPointToFloatingPoint(type, fixedPoint);
+            }
+
+            /// <summary>
+            /// Reads a data point from the keyframe with the given type, converting fixed point numbers to floats.
+            ///
+            /// One weird gotcha, some fixed point types "steal" a bit from the short that came before it. Hence, we
+            /// need to pass a reference to the short read before the data so it can be masked off.
+            /// </summary>
+            private static float ReadKeyFrameData(IoBuffer reader, DataType type)
+            {
+                if (type == DataType.FloatingPoint32)
+                {
+                    return reader.ReadFloat();
+                }
+                if (NumBitsForFixedPointDataType(type) == 16)
+                {
+                    throw new ArgumentException($"{type} needs 16 bits but no preceding short givenn");
+                }
+                return ConvertFixedPointToFloatingPoint(type, reader.ReadUInt16());
+            }
+
+            private static int NumBitsForFixedPointDataType(DataType type)
+            {
+                return type switch
+                {
+                    DataType.FixedPoint8_7 => 15,
+                    DataType.FixedPoint9_7 => 16,
+                    DataType.FixedPoint5_10 => 15,
+                    DataType.FixedPoint5_11 => 16,
+                    DataType.FixedPoint3_12 => 15,
+                    DataType.FixedPoint3_13 => 16,
+                    _ => throw new ArgumentOutOfRangeException($"Not a known fixed point type: {type}")
+                };
+            }
+
+            private static float ConvertFixedPointToFloatingPoint(DataType type, int fixedPoint)
+            {
+                var numBits = NumBitsForFixedPointDataType(type);
+                // Check if the numBits-th bit is set, as that is the sign bit.
+                var isNegative = ((1 << numBits) & fixedPoint) != 0;
+                // If the number is negative, make the whole fixedPoint int negative, basically performing a sign
+                // extension.
+                // -1 represented with a 17-bit fixed point will look like 0xFFFF, however fixedPoint will be
+                // 0x0000FFFF, we want it to be 0xFFFFFFFF.
+                if (isNegative)
+                {
+                    fixedPoint |= 0x7FFF_0000;
+                    // Shift the sign bit up to make the number negative.
+                    fixedPoint <<= 1;
+                    // Shift everything back, this will be an arithmetic-shift so the sign bit will be preserved.
+                    fixedPoint >>= 1;
+                }
+
+                var divisor = type switch
+                {
+                    DataType.FixedPoint8_7 => 128.0, // Divided by 2^7
+                    DataType.FixedPoint9_7 => 128.0, // Divided by 2^7
+                    DataType.FixedPoint5_10 => 1024.0, // Divided by 2^10
+                    DataType.FixedPoint5_11 => 2048.0, // Divided by 2^11
+                    DataType.FixedPoint3_12 => 4096.0, // Divided by 2^12
+                    DataType.FixedPoint3_13 => 8192.0, // Divided by 2^13
+                    _ => throw new ArgumentOutOfRangeException($"Not a known fixed point type: {type}")
+                };
+                return (float)(fixedPoint / divisor);
             }
         }
     }

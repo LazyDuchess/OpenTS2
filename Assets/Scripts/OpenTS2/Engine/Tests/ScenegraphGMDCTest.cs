@@ -16,8 +16,8 @@ public class ScenegraphGMDCTest : MonoBehaviour
         contentProvider.AddPackages(
             Filesystem.GetPackagesInDirectory(Filesystem.GetDataPathForProduct(ProductFlags.BaseGame) + "/Res/Sims3D"));
 
-        var resourceName = "vehiclePizza_cres";
-        //var resourceName = "chairReclinerPuffy_cres";
+        //var resourceName = "vehiclePizza_cres";
+        var resourceName = "chairReclinerPuffy_cres";
         var resource = contentProvider.GetAsset<ScenegraphResourceAsset>(
             new ResourceKey(resourceName, GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_CRES));
 
@@ -26,8 +26,8 @@ public class ScenegraphGMDCTest : MonoBehaviour
         Debug.Log($"gameObject: {gameObject}");
 
         // For animation testing...
-        AddAnimations(gameObject);
-        //AddChairAnimations(gameObject);
+        //AddAnimations(gameObject);
+        AddChairAnimations(gameObject);
     }
 
     private static void AddAnimations(GameObject gameObject)
