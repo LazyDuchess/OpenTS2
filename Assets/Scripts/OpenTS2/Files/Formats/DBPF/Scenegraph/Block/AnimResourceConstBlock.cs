@@ -126,16 +126,16 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                         KeyFrames[i] = keyframe;
                     } else if (TangentCurveType == CurveType.ContinuousTangents)
                     {
-                        var tangentIn = reader.ReadUInt16();
-                        var data = ReadKeyFrameData(reader, ref tangentIn, Type);
+                        var time = reader.ReadUInt16();
+                        var data = ReadKeyFrameData(reader, ref time, Type);
                         var tangentOut = reader.ReadUInt16();
 
                         var keyframe = new IKeyFrame.ContinuousKeyFrame
                         {
                             // In and out-tangents are always 5.10 fixed points.
-                            TangentIn = ConvertFixedPointToFloatingPoint(DataType.FixedPoint5_10, tangentIn),
+                            Time = time,
                             Data = data,
-                            TangentOut = ConvertFixedPointToFloatingPoint(DataType.FixedPoint5_10, tangentOut)
+                            TangentIn = ConvertFixedPointToFloatingPoint(DataType.FixedPoint5_10, tangentOut)
                         };
 
                         KeyFrames[i] = keyframe;
@@ -326,18 +326,20 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             }
         }
 
+        // Has only a tangent out but comes with time tick information.
         public struct ContinuousKeyFrame : IKeyFrame
         {
-            public float TangentIn;
+            public ushort Time;
             public float Data;
-            public float TangentOut;
+            public float TangentIn;
 
             public override string ToString()
             {
-                return $"ContinuousKeyFrame (Data={Data} tangentIn={TangentIn} tangentOut={TangentOut})";
+                return $"ContinuousKeyFrame (Data={Data} Time={Time} TangentIn={TangentIn})";
             }
         }
 
+        // Has both tangent in and out information.
         public struct DiscontinuousKeyFrame : IKeyFrame
         {
             public ushort Time;

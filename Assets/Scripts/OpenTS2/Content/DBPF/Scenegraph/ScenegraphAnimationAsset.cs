@@ -14,7 +14,8 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             AnimResource = animResource;
         }
 
-        public AnimationClip CreateClipFromResource(Dictionary<string, string> bonesToRelativePaths, Dictionary<string, List<string>> blendsToRelativePaths)
+        public AnimationClip CreateClipFromResource(Dictionary<string, string> bonesToRelativePaths,
+            Dictionary<string, List<string>> blendsToRelativePaths)
         {
             var clip = new AnimationClip();
             // mark as legacy for now, this might need to change when we do IK animations.
@@ -27,7 +28,8 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                     if (bonesToRelativePaths.TryGetValue(channel.ChannelName, out var relativePathToBone))
                     {
                         CreateBoneCurvesForChannel(clip, channel, relativePathToBone);
-                    } else if (blendsToRelativePaths.TryGetValue(channel.ChannelName, out var relativePathsToBlend))
+                    }
+                    else if (blendsToRelativePaths.TryGetValue(channel.ChannelName, out var relativePathsToBlend))
                     {
                         foreach (var blendRelativePath in relativePathsToBlend)
                         {
@@ -59,7 +61,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             for (var i = 0; i < originalKeyFrames.Length; i++)
             {
                 keyFrames[i] = new Keyframe(originalKeyFrames[i].time, originalKeyFrames[i].value * 100,
-                    originalKeyFrames[i].inTangent, originalKeyFrames[i].outTangent);
+                    originalKeyFrames[i].inTangent * 100, originalKeyFrames[i].outTangent * 100);
             }
 
             var curve = new AnimationCurve(keyFrames);
@@ -67,7 +69,8 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             clip.SetCurve(relativePathToBlend, typeof(SkinnedMeshRenderer), property, curve);
         }
 
-        private static void CreateBoneCurvesForChannel(AnimationClip clip, AnimResourceConstBlock.SharedChannel channel, string relativePathToBone)
+        private static void CreateBoneCurvesForChannel(AnimationClip clip, AnimResourceConstBlock.SharedChannel channel,
+            string relativePathToBone)
         {
             if (channel.Type == AnimResourceConstBlock.ChannelType.EulerRotation)
             {
@@ -106,26 +109,23 @@ namespace OpenTS2.Content.DBPF.Scenegraph
 
             for (var i = 0; i < component.KeyFrames.Length; i++)
             {
-                // If this animation has baked data or continuous tangents then the time steps are evenly distributed
-                // across its duration. Discontinuous tangents can have a time step anywhere.
-                var keyFrameTimeEven = ConvertTimeToSeconds(durationTicks * (((float)i) / component.NumKeyFrames));
-
                 switch (component.KeyFrames[i])
                 {
-                    // TODO: re-enable tangentIn and tangentOut once they're figured out.
                     case IKeyFrame.BakedKeyFrame keyFrame:
-                        unityKeyframes[i] = new Keyframe(keyFrameTimeEven,  keyFrame.Data);
+                        // If this animation has baked data then the time steps are evenly distributed
+                        // across its duration.
+                        var keyFrameTimeEven =
+                            ConvertTimeToSeconds(durationTicks * (((float)i) / component.NumKeyFrames));
+
+                        unityKeyframes[i] = new Keyframe(keyFrameTimeEven, keyFrame.Data);
                         break;
                     case IKeyFrame.ContinuousKeyFrame keyFrame:
-                        // TODO: these tangentin and tangentout values are based on the original gradient where the x-axis
-                        // is in ticks. We use seconds for the x-axis so the gradients need to be changed accordingly.
-                        unityKeyframes[i] = new Keyframe(keyFrameTimeEven, keyFrame.Data/*,
-                            GetTangentIn(i, component.KeyFrames), GetTangentOut(i, component.KeyFrames)*/);
+                        // TODO: fix tangentin and tangentout values.
+                        unityKeyframes[i] = new Keyframe(ConvertTimeToSeconds(keyFrame.Time), keyFrame.Data,
+                            GetTangentIn(i, component.KeyFrames), GetTangentOut(i, component.KeyFrames));
                         break;
                     case IKeyFrame.DiscontinuousKeyFrame keyFrame:
-                        var time = (float)keyFrame.Time;
-                        // TODO: fix in and out tangents for discontinuous frames.
-                        unityKeyframes[i] = new Keyframe(ConvertTimeToSeconds(time), keyFrame.Data/*,
+                        unityKeyframes[i] = new Keyframe(ConvertTimeToSeconds(keyFrame.Time), keyFrame.Data /*,
                             GetTangentIn(i, component.KeyFrames), GetTangentOut(i, component.KeyFrames)*/);
                         break;
                     default:
@@ -153,10 +153,14 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             {
                 case IKeyFrame.ContinuousKeyFrame keyFrame:
                     var previousContFrame = (IKeyFrame.ContinuousKeyFrame)frames[frameIdx - 1];
-                    return keyFrame.TangentOut * (keyFrame.TangentIn - previousContFrame.TangentIn);
+                    return keyFrame.TangentIn *
+                           (ConvertTimeToSeconds(keyFrame.Time) - ConvertTimeToSeconds(previousContFrame.Time)) *
+                           TicksToSeconds;
                 case IKeyFrame.DiscontinuousKeyFrame keyFrame:
                     var previousDiscontFrame = (IKeyFrame.DiscontinuousKeyFrame)frames[frameIdx - 1];
-                    return keyFrame.TangentOut * (keyFrame.Time - previousDiscontFrame.Time);
+                    return keyFrame.TangentIn *
+                           (ConvertTimeToSeconds(keyFrame.Time) - ConvertTimeToSeconds(previousDiscontFrame.Time)) *
+                           TicksToSeconds;
             }
 
             throw new ArgumentOutOfRangeException($"Invalid frame type: {frames[frameIdx]}");
@@ -169,12 +173,14 @@ namespace OpenTS2.Content.DBPF.Scenegraph
 
             switch (frames[frameIdx])
             {
-                case IKeyFrame.ContinuousKeyFrame keyFrame:
-                    var nextContFrame = (IKeyFrame.ContinuousKeyFrame)frames[frameIdx + 1];
-                    return keyFrame.TangentOut * (nextContFrame.TangentIn - keyFrame.TangentIn);
+                case IKeyFrame.ContinuousKeyFrame _:
+                    // The tangent-out is just the next frame's tangentIn.
+                    return GetTangentIn(frameIdx + 1, frames);
                 case IKeyFrame.DiscontinuousKeyFrame keyFrame:
                     var nextDiscontFrame = (IKeyFrame.DiscontinuousKeyFrame)frames[frameIdx + 1];
-                    return keyFrame.TangentOut * (nextDiscontFrame.Time - keyFrame.Time);
+                    return keyFrame.TangentOut *
+                           (ConvertTimeToSeconds(nextDiscontFrame.Time) - ConvertTimeToSeconds(keyFrame.Time)) *
+                           TicksToSeconds;
             }
 
             throw new ArgumentOutOfRangeException($"Invalid frame type: {frames[frameIdx]}");
