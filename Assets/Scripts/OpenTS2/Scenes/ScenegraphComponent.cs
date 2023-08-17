@@ -255,6 +255,9 @@ namespace OpenTS2.Scenes
                 case ResourceNodeBlock resourceNode:
                     RenderResourceNode(parent, resourceNode);
                     break;
+                case LightRefNodeBlock lightRef:
+                    RenderLightRefNode(parent, lightRef);
+                    break;
                 default:
                     throw new ArgumentException($"Unsupported block type in render composition tree {block}");
             }
@@ -398,6 +401,23 @@ namespace OpenTS2.Scenes
                     primitiveObject.transform.SetParent(parent.transform, worldPositionStays:false);
                 }
             }
+        }
+
+        private void RenderLightRefNode(GameObject parent, LightRefNodeBlock lightRef)
+        {
+            var shapeTransform = lightRef.Renderable.Bounded.Transform;
+            // Render any sub-objects in the transform node.
+            RenderTransformNode(parent, shapeTransform);
+
+            Debug.Assert(lightRef.Light is ExternalReference);
+            var lightKey = ResourceCollection.FileLinks[((ExternalReference) lightRef.Light).FileLinksIndex];
+
+            if (lightKey.GroupID == GroupIDs.Local)
+            {
+                // Use our groupId if the reference has a local group id.
+                lightKey = lightKey.WithGroupID(_resourceAssetKey.GroupID);
+            }
+            // TODO: read and render the light here.
         }
     }
 }
