@@ -310,6 +310,8 @@ namespace OpenTS2.Scenes
         private void RenderShapeRefNode(GameObject parent, ShapeRefNodeBlock shapeRef)
         {
             var shapeTransform = shapeRef.Renderable.Bounded.Transform;
+            // Render any sub-objects in the transform node.
+            RenderTransformNode(parent, shapeTransform);
 
             // TODO: handle multiple shapes here.
             if (shapeRef.Shapes.Length == 0)
