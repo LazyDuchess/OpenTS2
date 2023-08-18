@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using OpenTS2.Common;
-using OpenTS2.Components;
 using OpenTS2.Content;
 using OpenTS2.Content.DBPF.Scenegraph;
 using OpenTS2.Files.Formats.DBPF;
@@ -10,7 +9,7 @@ using OpenTS2.Files.Formats.DBPF.Scenegraph;
 using OpenTS2.Files.Formats.DBPF.Scenegraph.Block;
 using UnityEngine;
 
-namespace OpenTS2.Scenes
+namespace OpenTS2.Components
 {
     /// <summary>
     /// This is a Sims 2 Scenegraph rendering component for unity.
