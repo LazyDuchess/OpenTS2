@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using OpenTS2.Common;
 using OpenTS2.Engine;
@@ -129,10 +130,10 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             return unityFormat;
         }
 
-        private static byte[] SwapBGR24ToRGB24(byte[] data)
+        private static byte[] SwapBGR24ToRGB24(IReadOnlyList<byte> data)
         {
-            var output = new byte[data.Length];
-            for (var i = 0; i < data.Length; i += 3)
+            var output = new byte[data.Count];
+            for (var i = 0; i < data.Count; i += 3)
             {
                 output[i] = data[i + 2];
                 output[i + 1] = data[i + 1];
