@@ -1,4 +1,5 @@
-﻿using OpenTS2.Files.Formats.DBPF.Scenegraph;
+﻿using OpenTS2.Components;
+using OpenTS2.Files.Formats.DBPF.Scenegraph;
 using OpenTS2.Scenes;
 using UnityEngine;
 
