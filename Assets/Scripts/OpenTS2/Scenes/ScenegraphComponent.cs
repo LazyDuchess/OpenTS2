@@ -197,6 +197,9 @@ namespace OpenTS2.Scenes
                     case DataListExtensionBlock extensionBlock:
                         HandleExtension(parent, extensionBlock);
                         break;
+                    case BoneDataExtensionBlock _:
+                        // TODO: see if anything needs to be done for bone data blocks.
+                        break;
                     default:
                         throw new ArgumentException($"Unknown extension block type: {extension}");
                 }

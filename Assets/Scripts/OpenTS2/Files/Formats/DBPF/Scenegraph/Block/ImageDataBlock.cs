@@ -154,7 +154,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
     public enum ScenegraphTextureFormat : uint
     {
         RGBA32 = 1,
-        RGB24 = 2,
+        BGR24 = 2,
         Alpha8 = 3,
         DXT1 = 4,
         DXT3 = 5,
@@ -164,7 +164,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
         Luminance8 = 6,
         Luminance16 = 7,
         DXT5 = 8,
-        RGB24_repeat = 9, // Yup, two different values for the same format :/
+        BGR24_repeat = 9, // Yup, two different values for the same format :/
     }
 
     internal static class ScenegraphTextureFormatMethods

@@ -89,14 +89,16 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             {
                 // All of these can be used as-is without conversion.
                 case ScenegraphTextureFormat.RGBA32:
-                case ScenegraphTextureFormat.RGB24:
                 case ScenegraphTextureFormat.Alpha8:
                 case ScenegraphTextureFormat.DXT1:
                 case ScenegraphTextureFormat.Luminance8:
                 case ScenegraphTextureFormat.Luminance16:
                 case ScenegraphTextureFormat.DXT5:
-                case ScenegraphTextureFormat.RGB24_repeat:
                     return data;
+                // This needs to be converted from BGR to RGB for unity.
+                case ScenegraphTextureFormat.BGR24:
+                case ScenegraphTextureFormat.BGR24_repeat:
+                    return SwapBGR24ToRGB24(data);
                 // This needs a conversion as unity no longer supports DXT-3 natively.
                 case ScenegraphTextureFormat.DXT3:
                     return ConvertDxt3ToRgba(data, width, height);
@@ -109,9 +111,12 @@ namespace OpenTS2.Content.DBPF.Scenegraph
         {
             var unityFormat = format switch
             {
+
                 ScenegraphTextureFormat.RGBA32 => TextureFormat.BGRA32,
-                // TODO: this might be wrong as the game uses BRGA for 32-bit textures.
-                ScenegraphTextureFormat.RGB24 => TextureFormat.RGB24,
+                // Note, BGR is converted to RGB.
+                ScenegraphTextureFormat.BGR24 => TextureFormat.RGB24,
+                ScenegraphTextureFormat.BGR24_repeat => TextureFormat.RGB24,
+
                 ScenegraphTextureFormat.Alpha8 => TextureFormat.Alpha8,
                 ScenegraphTextureFormat.DXT1 => TextureFormat.DXT1,
                 // Note, DXT3 is converted to RGBA.
@@ -119,11 +124,21 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                 ScenegraphTextureFormat.Luminance8 => TextureFormat.R8,
                 ScenegraphTextureFormat.Luminance16 => TextureFormat.R16,
                 ScenegraphTextureFormat.DXT5 => TextureFormat.DXT5,
-                // TODO: this might be wrong as the game uses BRGA for 32-bit textures.
-                ScenegraphTextureFormat.RGB24_repeat => TextureFormat.RGB24,
                 _ => throw new ArgumentOutOfRangeException(nameof(format), format, null)
             };
             return unityFormat;
+        }
+
+        private static byte[] SwapBGR24ToRGB24(byte[] data)
+        {
+            var output = new byte[data.Length];
+            for (var i = 0; i < data.Length; i += 3)
+            {
+                output[i] = data[i + 2];
+                output[i + 1] = data[i + 1];
+                output[i + 2] = data[i];
+            }
+            return output;
         }
 
         private static byte[] ConvertDxt3ToRgba(byte[] data, int width, int height)
