@@ -96,6 +96,16 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                     new AnimationCurve(CreateKeyFramesForComponent(channel.DurationTicks, channel.Components[2]));
                 clip.SetCurve(relativePathToBone, typeof(Transform), "localPosition.z", curveZ);
             }
+            else if (channel.Type == AnimResourceConstBlock.ChannelType.Float1)
+            {
+                // Only seen this where the length is 1 and it sets all values of the transform to zero. Assert here in
+                // case we see another case and its not related to position.
+                Debug.Assert(channel.Components[0].NumKeyFrames == 1);
+                var curve = new AnimationCurve(CreateKeyFramesForComponent(channel.DurationTicks, channel.Components[0]));
+                clip.SetCurve(relativePathToBone, typeof(Transform), "localPosition.x", curve);
+                clip.SetCurve(relativePathToBone, typeof(Transform), "localPosition.y", curve);
+                clip.SetCurve(relativePathToBone, typeof(Transform), "localPosition.z", curve);
+            }
             else
             {
                 throw new NotImplementedException($"Unsupported channel type: {channel.Type}");

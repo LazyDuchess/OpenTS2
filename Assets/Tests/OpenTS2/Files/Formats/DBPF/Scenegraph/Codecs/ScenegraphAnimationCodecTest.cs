@@ -84,4 +84,19 @@ public class ScenegraphAnimationCodecTest
             Is.EqualTo(AnimResourceConstBlock.ChannelComponent.CurveType.BakedTangents));
         Assert.That(bodyRotation.Components[2].KeyFrames.Length, Is.EqualTo(1));
     }
+
+    [Test]
+    public void TestLoadsInverseKinematicChains()
+    {
+        var animationAsset = ContentProvider.Get()
+            .GetAsset<ScenegraphAnimationAsset>(new ResourceKey("a2o-pinball-play-lose_anim", GroupIDs.Scenegraph,
+                TypeIDs.SCENEGRAPH_ANIM));
+
+        var skeletonTarget = animationAsset.AnimResource.AnimTargets[0];
+        Assert.That(skeletonTarget.TagName, Is.EqualTo("auskel"));
+
+        Assert.That(skeletonTarget.IKChains.Length, Is.EqualTo(4));
+        var ikChain1 = skeletonTarget.IKChains[0];
+        Assert.That(ikChain1.IkTargets.Length, Is.EqualTo(1));
+    }
 }
