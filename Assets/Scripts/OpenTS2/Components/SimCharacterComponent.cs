@@ -15,27 +15,24 @@ namespace OpenTS2.Components
         public static SimCharacterComponent CreateNakedBaseSim()
         {
             const string nakedBodyResourceName = "amBodyNaked_cres";
-            var resource = ContentProvider.Get().GetAsset<ScenegraphResourceAsset>(
+            var nakedBodyAsset = ContentProvider.Get().GetAsset<ScenegraphResourceAsset>(
                 new ResourceKey(nakedBodyResourceName, GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_CRES));
 
-            var bodyObject = resource.CreateRootGameObject();
-            var scenegraph = bodyObject.GetComponentInChildren<ScenegraphComponent>();
+            const string baldHairResourceName = "amHairBald_cres";
+            var baldHairAsset = ContentProvider.Get().GetAsset<ScenegraphResourceAsset>(
+                new ResourceKey(baldHairResourceName, GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_CRES));
+
+            const string baseFaceResourceName = "amFace_cres";
+            var baseFaceAsset = ContentProvider.Get().GetAsset<ScenegraphResourceAsset>(
+                new ResourceKey(baseFaceResourceName, GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_CRES));
+
+            var simsObject =
+                ScenegraphComponent.CreateRootScenegraph(new[] { nakedBodyAsset, baldHairAsset, baseFaceAsset });
+            var scenegraph = simsObject.GetComponentInChildren<ScenegraphComponent>();
 
             var gameObject = new GameObject("sim_character", typeof(SimCharacterComponent));
-            bodyObject.transform.parent = gameObject.transform;
+            simsObject.transform.parent = gameObject.transform;
             return gameObject.GetComponent<SimCharacterComponent>();
-
-            /*
-                     resourceName = "amBodyNaked_cres";
-        resource = contentProvider.GetAsset<ScenegraphResourceAsset>(
-            new ResourceKey(resourceName, GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_CRES));
-        var bodyObject = resource.CreateRootGameObject();
-
-        resourceName = "amHairBald_cres";
-        resource = contentProvider.GetAsset<ScenegraphResourceAsset>(
-            new ResourceKey(resourceName, GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_CRES));
-        var hairObject = resource.CreateRootGameObject();
-             */
         }
     }
 }

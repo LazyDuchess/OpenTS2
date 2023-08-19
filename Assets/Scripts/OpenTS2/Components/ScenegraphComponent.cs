@@ -25,7 +25,12 @@ namespace OpenTS2.Components
         /// </summary>
         public static GameObject CreateRootScenegraph(ScenegraphResourceAsset resourceAsset)
         {
-            var scenegraph = CreateScenegraphComponent(resourceAsset);
+            return CreateRootScenegraph(new []{ resourceAsset });
+        }
+
+        public static GameObject CreateRootScenegraph(ScenegraphResourceAsset[] resourceAssets)
+        {
+            var scenegraph = CreateScenegraphComponent(resourceAssets);
             var simsTransform = new GameObject(scenegraph.name + "_transform");
 
             // Apply a transformation to convert from the sims coordinate space to unity.
@@ -41,36 +46,51 @@ namespace OpenTS2.Components
         /// </summary>
         public static ScenegraphComponent CreateScenegraphComponent(ScenegraphResourceAsset resourceAsset)
         {
+            return CreateScenegraphComponent(new[] { resourceAsset });
+        }
+
+        /// <summary>
+        /// Creates a scenegraph component from a multiple scenegraph resource assets.
+        /// </summary>
+        public static ScenegraphComponent CreateScenegraphComponent(ScenegraphResourceAsset[] resourceAssets)
+        {
             var scenegraph = new GameObject("scenegraph", typeof(ScenegraphComponent));
             var scenegraphComponent = scenegraph.GetComponent<ScenegraphComponent>();
 
-            scenegraphComponent.CreateFromScenegraphComponent(resourceAsset.ResourceCollection, resourceAsset.GlobalTGI);
+            scenegraphComponent.CreateFromScenegraphComponents(resourceAssets.Select(asset => asset.ResourceCollection),
+                resourceAssets[0].GlobalTGI);
 
             return scenegraphComponent;
         }
 
-        public ScenegraphResourceCollection ResourceCollection { get; private set; }
         private ResourceKey _resourceAssetKey;
 
-        private void CreateFromScenegraphComponent(ScenegraphResourceCollection resourceCollection,
+        private void CreateFromScenegraphComponents(IEnumerable<ScenegraphResourceCollection> resourceCollections,
             ResourceKey resourceAssetKey)
         {
             _resourceAssetKey = resourceAssetKey;
-            ResourceCollection = resourceCollection;
 
-            var firstResourceNode = ResourceCollection.Blocks.OfType<ResourceNodeBlock>().First();
+            foreach (var rCol in resourceCollections)
+            {
+                RenderScenegraphResourceCollection(rCol);
+            }
+
+            BindBonesInMeshes();
+            ComputeRelativeBoneAndBlendPaths();
+        }
+
+        private void RenderScenegraphResourceCollection(ScenegraphResourceCollection resourceCollection)
+        {
+            var firstResourceNode = resourceCollection.Blocks.OfType<ResourceNodeBlock>().First();
             name = firstResourceNode.ResourceName;
 
-            // Traverse the graph if present and render out any sub-resources.
+            // Traverse the graph if present and render out any sub-nodes.
             try
             {
                 if (firstResourceNode.Tree != null)
                 {
-                    RenderCompositionTree(gameObject, firstResourceNode.Tree);
+                    RenderCompositionTree(gameObject, resourceCollection, firstResourceNode.Tree);
                 }
-
-                BindBonesInMeshes();
-                ComputeRelativeBoneAndBlendPaths();
             }
             catch (Exception e)
             {
@@ -165,17 +185,17 @@ namespace OpenTS2.Components
             renderer.sharedMesh.bindposes = primitive.BindPoses;
         }
 
-        private void RenderCompositionTree(GameObject parent, CompositionTreeNodeBlock tree)
+        private void RenderCompositionTree(GameObject parent, ScenegraphResourceCollection rCol, CompositionTreeNodeBlock tree)
         {
             foreach (var reference in tree.References)
             {
                 switch (reference)
                 {
                     case InternalReference internalRef:
-                        RenderInternalCompositionTreeChild(parent, internalRef);
+                        RenderInternalCompositionTreeChild(parent, rCol, internalRef);
                         break;
                     case ExternalReference externalRef:
-                        RenderExternalCompositionTreeChild(parent, externalRef);
+                        RenderExternalCompositionTreeChild(parent, rCol, externalRef);
                         break;
                     case NullReference nullRef:
                         throw new ArgumentException("Got null reference in CompositionTree");
@@ -190,7 +210,7 @@ namespace OpenTS2.Components
                     throw new ArgumentException("Got non-internal reference for Extension in resource node");
                 }
 
-                var extension = ResourceCollection.Blocks[internalRef.BlockIndex];
+                var extension = rCol.Blocks[internalRef.BlockIndex];
                 switch (extension)
                 {
                     case DataListExtensionBlock extensionBlock:
@@ -205,7 +225,7 @@ namespace OpenTS2.Components
             }
         }
 
-        private void HandleExtension(GameObject parent, DataListExtensionBlock extension)
+        private static void HandleExtension(GameObject parent, DataListExtensionBlock extension)
         {
             // This is the only extension we care about right now.
             if (extension.Value.Name != "EffectsList")
@@ -243,31 +263,31 @@ namespace OpenTS2.Components
             }
         }
 
-        private void RenderInternalCompositionTreeChild(GameObject parent, InternalReference reference)
+        private void RenderInternalCompositionTreeChild(GameObject parent, ScenegraphResourceCollection rCol, InternalReference reference)
         {
-            var block = ResourceCollection.Blocks[reference.BlockIndex];
+            var block = rCol.Blocks[reference.BlockIndex];
             switch (block)
             {
                 case ShapeRefNodeBlock shapeRef:
-                    RenderShapeRefNode(parent, shapeRef);
+                    RenderShapeRefNode(parent, rCol, shapeRef);
                     break;
                 case TransformNodeBlock transformNode:
-                    RenderTransformNode(parent, transformNode);
+                    RenderTransformNode(parent, rCol, transformNode);
                     break;
                 case ResourceNodeBlock resourceNode:
-                    RenderResourceNode(parent, resourceNode);
+                    RenderResourceNode(parent, rCol, resourceNode);
                     break;
                 case LightRefNodeBlock lightRef:
-                    RenderLightRefNode(parent, lightRef);
+                    RenderLightRefNode(parent, rCol, lightRef);
                     break;
                 default:
                     throw new ArgumentException($"Unsupported block type in render composition tree {block}");
             }
         }
 
-        private void RenderExternalCompositionTreeChild(GameObject parent, ExternalReference reference)
+        private static void RenderExternalCompositionTreeChild(GameObject parent, ScenegraphResourceCollection rCol, ExternalReference reference)
         {
-            var resourceKey = ResourceCollection.FileLinks[reference.FileLinksIndex];
+            var resourceKey = rCol.FileLinks[reference.FileLinksIndex];
             switch (resourceKey.TypeID)
             {
                 default:
@@ -275,7 +295,7 @@ namespace OpenTS2.Components
             }
         }
 
-        private void RenderTransformNode(GameObject parent, TransformNodeBlock transformNode)
+        private void RenderTransformNode(GameObject parent, ScenegraphResourceCollection rCol, TransformNodeBlock transformNode)
         {
             var transformName = "transform";
 
@@ -284,8 +304,15 @@ namespace OpenTS2.Components
             {
                 transformName = transformTag;
             }
+            // If we've already rendered this transform node, just use that. Otherwise make a new unity GameObject for it.
+            if (transformTag != "" && _boneNamesToTransform.TryGetValue(transformName, out var existing))
+            {
+                RenderCompositionTree(existing.gameObject, rCol, transformNode.CompositionTree);
+                return;
+            }
+
             var transformObj = new GameObject(transformName, typeof(AssetReferenceComponent));
-            RenderCompositionTree(transformObj, transformNode.CompositionTree);
+            RenderCompositionTree(transformObj, rCol, transformNode.CompositionTree);
 
             transformObj.transform.localRotation = transformNode.Rotation;
             transformObj.transform.position = transformNode.Transform;
@@ -295,12 +322,12 @@ namespace OpenTS2.Components
             _boneNamesToTransform[transformName] = transformObj.transform;
         }
 
-        private void RenderResourceNode(GameObject parent, ResourceNodeBlock resource)
+        private static void RenderResourceNode(GameObject parent, ScenegraphResourceCollection rCol, ResourceNodeBlock resource)
         {
             // TODO: handle non-external resources, maybe merge with the `CreateRootGameObject` code.
             var resourceRef = resource.ResourceLocation;
             Debug.Assert(resourceRef is ExternalReference);
-            var key = ResourceCollection.FileLinks[((ExternalReference)resourceRef).FileLinksIndex];
+            var key = rCol.FileLinks[((ExternalReference)resourceRef).FileLinksIndex];
 
             var resourceAsset = ContentProvider.Get().GetAsset<ScenegraphResourceAsset>(key);
             if (resourceAsset == null)
@@ -312,11 +339,11 @@ namespace OpenTS2.Components
             resourceObject.transform.SetParent(parent.transform, worldPositionStays:false);
         }
 
-        private void RenderShapeRefNode(GameObject parent, ShapeRefNodeBlock shapeRef)
+        private void RenderShapeRefNode(GameObject parent, ScenegraphResourceCollection rCol, ShapeRefNodeBlock shapeRef)
         {
             var shapeTransform = shapeRef.Renderable.Bounded.Transform;
             // Render any sub-objects in the transform node.
-            RenderTransformNode(parent, shapeTransform);
+            RenderTransformNode(parent, rCol, shapeTransform);
 
             // TODO: handle multiple shapes here.
             if (shapeRef.Shapes.Length == 0)
@@ -324,7 +351,7 @@ namespace OpenTS2.Components
                 return;
             }
             Debug.Assert(shapeRef.Shapes[0] is ExternalReference);
-            var shapeKey = ResourceCollection.FileLinks[((ExternalReference) shapeRef.Shapes[0]).FileLinksIndex];
+            var shapeKey = rCol.FileLinks[((ExternalReference) shapeRef.Shapes[0]).FileLinksIndex];
 
             if (shapeKey.GroupID == GroupIDs.Local)
             {
@@ -405,14 +432,14 @@ namespace OpenTS2.Components
             }
         }
 
-        private void RenderLightRefNode(GameObject parent, LightRefNodeBlock lightRef)
+        private void RenderLightRefNode(GameObject parent, ScenegraphResourceCollection rCol, LightRefNodeBlock lightRef)
         {
             var shapeTransform = lightRef.Renderable.Bounded.Transform;
             // Render any sub-objects in the transform node.
-            RenderTransformNode(parent, shapeTransform);
+            RenderTransformNode(parent, rCol, shapeTransform);
 
             Debug.Assert(lightRef.Light is ExternalReference);
-            var lightKey = ResourceCollection.FileLinks[((ExternalReference) lightRef.Light).FileLinksIndex];
+            var lightKey = rCol.FileLinks[((ExternalReference) lightRef.Light).FileLinksIndex];
 
             if (lightKey.GroupID == GroupIDs.Local)
             {
