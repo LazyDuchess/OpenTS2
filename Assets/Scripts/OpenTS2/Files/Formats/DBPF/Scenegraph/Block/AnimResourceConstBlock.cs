@@ -52,10 +52,34 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             public int NumIkTargets;
             public Target[] IkTargets;
 
+            public uint NameCrc;
+            public uint NameMirrorCrc;
+            public uint BeginBoneCrc;
+            public uint BeginBoneMirrorCrc;
+            public IKStrategy IkStrategy;
+            public uint EndBoneCrc;
+            public uint EndBoneMirrorCrc;
+            public uint TwistVectorCrc;
+            public uint TwistVectorBoneCrc;
+            public uint TwistVectorMirrorBoneCRC;
+            public uint IkWeightCRC;
+
             public class Target
             {
-
+                public uint BoneCrc;
+                public uint BoneMirrorCrc;
+                public uint RotationCrc;
+                public uint Rotation2Crc;
+                public uint TranslationCrc;
+                public uint ContactCrc;
             }
+        }
+
+        public enum IKStrategy : uint
+        {
+            SevenDegreesOfFreedom = 0x48ee7a41,
+            LookAt = 0x9f9e87e,
+            LookAtDog = 0xfa99547,
         }
 
         /// <summary>
@@ -508,29 +532,29 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                     var animTargetIdx = reader.ReadUInt16();
                     ikChain.NumIkTargets = reader.ReadUInt16();
 
-                    var nameCRC = reader.ReadUInt32();
+                    ikChain.NameCrc = reader.ReadUInt32();
                     reader.ReadBytes(1); // ignored uint8
                     // (these are technically null terminators so the crc32 can be treated as a string in game.)
-                    var nameMirrorCRC = reader.ReadUInt32();
+                    ikChain.NameMirrorCrc = reader.ReadUInt32();
                     reader.ReadBytes(1); // ignored uint8
 
-                    var intRelatedToIkStrategy = reader.ReadUInt32();
+                    ikChain.IkStrategy = (AnimResourceConstBlock.IKStrategy) reader.ReadUInt32();
 
-                    var beginBoneCRC = reader.ReadUInt32();
+                    ikChain.BeginBoneCrc = reader.ReadUInt32();
                     reader.ReadBytes(1); // ignored uint8
-                    var beginBoneMirrorCRC = reader.ReadUInt32();
+                    ikChain.BeginBoneMirrorCrc = reader.ReadUInt32();
                     reader.ReadBytes(1); // ignored uint8
-                    var endBoneCRC = reader.ReadUInt32();
+                    ikChain.EndBoneCrc = reader.ReadUInt32();
                     reader.ReadBytes(1); // ignored uint8
-                    var endBoneMirrorCRC = reader.ReadUInt32();
+                    ikChain.EndBoneMirrorCrc = reader.ReadUInt32();
                     reader.ReadBytes(1); // ignored uint8
-                    var twistVectorNameCRC = reader.ReadUInt32();
+                    ikChain.TwistVectorCrc = reader.ReadUInt32();
                     reader.ReadBytes(1); // ignored uint8
-                    var twistVectorBoneCRC = reader.ReadUInt32();
+                    ikChain.TwistVectorBoneCrc = reader.ReadUInt32();
                     reader.ReadBytes(1); // ignored uint8
-                    var twistVectorMirrorBoneCRC = reader.ReadUInt32();
+                    ikChain.TwistVectorMirrorBoneCRC = reader.ReadUInt32();
                     reader.ReadBytes(1); // ignored uint8
-                    var ikWeightCRC = reader.ReadUInt32();
+                    ikChain.IkWeightCRC = reader.ReadUInt32();
                     reader.ReadBytes(1); // ignored uint8
                     reader.ReadUInt32(); // 1 ignored uint32
                 }
@@ -554,17 +578,17 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                         var ikChainIdx = reader.ReadUInt16();
                         var targetType = reader.ReadByte();
 
-                        var boneCRC = reader.ReadUInt32();
+                        target.BoneCrc = reader.ReadUInt32();
                         reader.ReadBytes(1); // ignored uint8
-                        var boneMirrorCRC = reader.ReadUInt32();
+                        target.BoneMirrorCrc = reader.ReadUInt32();
                         reader.ReadBytes(1); // ignored uint8
-                        var rotationCRC = reader.ReadUInt32();
+                        target.RotationCrc = reader.ReadUInt32();
                         reader.ReadBytes(1); // ignored uint8
-                        var rotation2CRC = reader.ReadUInt32();
+                        target.Rotation2Crc = reader.ReadUInt32();
                         reader.ReadBytes(1); // ignored uint8
-                        var translationCRC = reader.ReadUInt32();
+                        target.TranslationCrc = reader.ReadUInt32();
                         reader.ReadBytes(1); // ignored uint8
-                        var contactCRC = reader.ReadUInt32();
+                        target.ContactCrc = reader.ReadUInt32();
                         reader.ReadBytes(1); // ignored uint8
                     }
                 }

@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using OpenTS2.Common;
+using OpenTS2.Common.Utils;
 using OpenTS2.Content;
 using OpenTS2.Content.DBPF.Scenegraph;
 using OpenTS2.Files.Formats.DBPF;
@@ -96,7 +97,85 @@ public class ScenegraphAnimationCodecTest
         Assert.That(skeletonTarget.TagName, Is.EqualTo("auskel"));
 
         Assert.That(skeletonTarget.IKChains.Length, Is.EqualTo(4));
+
         var ikChain1 = skeletonTarget.IKChains[0];
+        Assert.That(ikChain1.IkStrategy, Is.EqualTo(AnimResourceConstBlock.IKStrategy.SevenDegreesOfFreedom));
+        Assert.That(ikChain1.BeginBoneCrc, Is.EqualTo(FileUtils.HighHash("r_thigh")));
+        Assert.That(ikChain1.BeginBoneMirrorCrc, Is.EqualTo(FileUtils.HighHash("l_thigh")));
+        Assert.That(ikChain1.EndBoneCrc, Is.EqualTo(FileUtils.HighHash("r_foot")));
+        Assert.That(ikChain1.EndBoneMirrorCrc, Is.EqualTo(FileUtils.HighHash("l_foot")));
+        Assert.That(ikChain1.TwistVectorCrc, Is.EqualTo(FileUtils.HighHash("r_foot_ikpole")));
+        Assert.That(ikChain1.TwistVectorBoneCrc, Is.EqualTo(0));
+        Assert.That(ikChain1.TwistVectorMirrorBoneCRC, Is.EqualTo(0));
+        Assert.That(ikChain1.IkWeightCRC, Is.EqualTo(0));
+
         Assert.That(ikChain1.IkTargets.Length, Is.EqualTo(1));
+        var ikTarget1 = ikChain1.IkTargets[0];
+        Assert.That(ikTarget1.BoneCrc, Is.EqualTo(0));
+        Assert.That(ikTarget1.BoneMirrorCrc, Is.EqualTo(0));
+        Assert.That(ikTarget1.RotationCrc, Is.EqualTo(FileUtils.HighHash("r_foot_ikctr")));
+        Assert.That(ikTarget1.Rotation2Crc, Is.EqualTo(0));
+        Assert.That(ikTarget1.TranslationCrc, Is.EqualTo(FileUtils.HighHash("r_foot_ikctr")));
+        Assert.That(ikTarget1.ContactCrc, Is.EqualTo(0));
+
+        var ikChain2 = skeletonTarget.IKChains[1];
+        Assert.That(ikChain2.IkStrategy, Is.EqualTo(AnimResourceConstBlock.IKStrategy.SevenDegreesOfFreedom));
+        Assert.That(ikChain2.BeginBoneCrc, Is.EqualTo(FileUtils.HighHash("l_thigh")));
+        Assert.That(ikChain2.BeginBoneMirrorCrc, Is.EqualTo(FileUtils.HighHash("r_thigh")));
+        Assert.That(ikChain2.EndBoneCrc, Is.EqualTo(FileUtils.HighHash("l_foot")));
+        Assert.That(ikChain2.EndBoneMirrorCrc, Is.EqualTo(FileUtils.HighHash("r_foot")));
+        Assert.That(ikChain2.TwistVectorCrc, Is.EqualTo(FileUtils.HighHash("l_foot_ikpole")));
+        Assert.That(ikChain2.TwistVectorBoneCrc, Is.EqualTo(0));
+        Assert.That(ikChain2.TwistVectorMirrorBoneCRC, Is.EqualTo(0));
+        Assert.That(ikChain2.IkWeightCRC, Is.EqualTo(0));
+
+        Assert.That(ikChain2.IkTargets.Length, Is.EqualTo(1));
+        ikTarget1 = ikChain2.IkTargets[0];
+        Assert.That(ikTarget1.BoneCrc, Is.EqualTo(0));
+        Assert.That(ikTarget1.BoneMirrorCrc, Is.EqualTo(0));
+        Assert.That(ikTarget1.RotationCrc, Is.EqualTo(FileUtils.HighHash("l_foot_ikctr")));
+        Assert.That(ikTarget1.Rotation2Crc, Is.EqualTo(0));
+        Assert.That(ikTarget1.TranslationCrc, Is.EqualTo(FileUtils.HighHash("l_foot_ikctr")));
+        Assert.That(ikTarget1.ContactCrc, Is.EqualTo(0));
+
+        var ikChain3 = skeletonTarget.IKChains[2];
+        Assert.That(ikChain3.IkStrategy, Is.EqualTo(AnimResourceConstBlock.IKStrategy.LookAt));
+        Assert.That(ikChain3.BeginBoneCrc, Is.EqualTo(FileUtils.HighHash("head")));
+        Assert.That(ikChain3.BeginBoneMirrorCrc, Is.EqualTo(FileUtils.HighHash("head")));
+        Assert.That(ikChain3.EndBoneCrc, Is.EqualTo(FileUtils.HighHash("head_grip")));
+        Assert.That(ikChain3.EndBoneMirrorCrc, Is.EqualTo(FileUtils.HighHash("head_grip")));
+        Assert.That(ikChain3.TwistVectorCrc, Is.EqualTo(FileUtils.HighHash("head_ikpole")));
+        Assert.That(ikChain3.TwistVectorBoneCrc, Is.EqualTo(0));
+        Assert.That(ikChain3.TwistVectorMirrorBoneCRC, Is.EqualTo(0));
+        Assert.That(ikChain3.IkWeightCRC, Is.EqualTo(0));
+
+        Assert.That(ikChain3.IkTargets.Length, Is.EqualTo(1));
+        ikTarget1 = ikChain3.IkTargets[0];
+        Assert.That(ikTarget1.BoneCrc, Is.EqualTo(0));
+        Assert.That(ikTarget1.BoneMirrorCrc, Is.EqualTo(0));
+        Assert.That(ikTarget1.RotationCrc, Is.EqualTo(0));
+        Assert.That(ikTarget1.Rotation2Crc, Is.EqualTo(0));
+        Assert.That(ikTarget1.TranslationCrc, Is.EqualTo(FileUtils.HighHash("head_ikctr")));
+        Assert.That(ikTarget1.ContactCrc, Is.EqualTo(0));
+
+        var ikChain4 = skeletonTarget.IKChains[3];
+        Assert.That(ikChain4.IkStrategy, Is.EqualTo(AnimResourceConstBlock.IKStrategy.SevenDegreesOfFreedom));
+        Assert.That(ikChain4.BeginBoneCrc, Is.EqualTo(FileUtils.HighHash("l_upperarm")));
+        Assert.That(ikChain4.BeginBoneMirrorCrc, Is.EqualTo(FileUtils.HighHash("r_upperarm")));
+        Assert.That(ikChain4.EndBoneCrc, Is.EqualTo(FileUtils.HighHash("l_hand")));
+        Assert.That(ikChain4.EndBoneMirrorCrc, Is.EqualTo(FileUtils.HighHash("r_hand")));
+        Assert.That(ikChain4.TwistVectorCrc, Is.EqualTo(FileUtils.HighHash("l_hand_ikpole")));
+        Assert.That(ikChain4.TwistVectorBoneCrc, Is.EqualTo(0));
+        Assert.That(ikChain4.TwistVectorMirrorBoneCRC, Is.EqualTo(0));
+        Assert.That(ikChain4.IkWeightCRC, Is.EqualTo(0x8633999E)); // TODO: figure out the name of this bone.
+
+        Assert.That(ikChain4.IkTargets.Length, Is.EqualTo(1));
+        ikTarget1 = ikChain4.IkTargets[0];
+        Assert.That(ikTarget1.BoneCrc, Is.EqualTo(0));
+        Assert.That(ikTarget1.BoneMirrorCrc, Is.EqualTo(0));
+        Assert.That(ikTarget1.RotationCrc, Is.EqualTo(0x8633999E)); // TODO: figure out the name of this bone.
+        Assert.That(ikTarget1.Rotation2Crc, Is.EqualTo(0x4F9FBDC2)); // TODO: figure out the name of this bone.
+        Assert.That(ikTarget1.TranslationCrc, Is.EqualTo(0x8633999E)); // TODO: figure out the name of this bone.
+        Assert.That(ikTarget1.ContactCrc, Is.EqualTo(0x63413D20)); // TODO: figure out the name of this bone.
     }
 }

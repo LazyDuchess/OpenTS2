@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using OpenTS2.Common;
+using OpenTS2.Common.Utils;
 using OpenTS2.Content;
 using OpenTS2.Content.DBPF.Scenegraph;
 using OpenTS2.Files.Formats.DBPF;
@@ -105,6 +106,10 @@ namespace OpenTS2.Components
         /// needs their relative paths for animations.
         /// </summary>
         public readonly Dictionary<string, string> BoneNamesToRelativePaths = new Dictionary<string, string>();
+        /// <summary>
+        /// A mapping of the CRC32 of bone names to their transforms.
+        /// </summary>
+        public readonly Dictionary<uint, Transform> BoneCRC32ToTransform = new Dictionary<uint, Transform>();
         private readonly Dictionary<string, Transform> _boneNamesToTransform = new Dictionary<string, Transform>();
         /// <summary>
         /// A mapping of blend shapes such as "recliningbend" and "slot_0_indent" to the paths relative to the
@@ -320,6 +325,10 @@ namespace OpenTS2.Components
             transformObj.transform.SetParent(parent.transform, worldPositionStays:false);
             _boneIdToTransform[transformNode.BoneId] = transformObj.transform;
             _boneNamesToTransform[transformName] = transformObj.transform;
+            if (transformTag != "")
+            {
+                BoneCRC32ToTransform[FileUtils.HighHash(transformTag)] = transformObj.transform;
+            }
         }
 
         private static void RenderResourceNode(GameObject parent, ScenegraphResourceCollection rCol, ResourceNodeBlock resource)
