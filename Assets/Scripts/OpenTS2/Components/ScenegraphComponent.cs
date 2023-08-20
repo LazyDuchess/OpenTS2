@@ -110,7 +110,7 @@ namespace OpenTS2.Components
         /// A mapping of the CRC32 of bone names to their transforms.
         /// </summary>
         public readonly Dictionary<uint, Transform> BoneCRC32ToTransform = new Dictionary<uint, Transform>();
-        private readonly Dictionary<string, Transform> _boneNamesToTransform = new Dictionary<string, Transform>();
+        public readonly Dictionary<string, Transform> BoneNamesToTransform = new Dictionary<string, Transform>();
         /// <summary>
         /// A mapping of blend shapes such as "recliningbend" and "slot_0_indent" to the paths relative to the
         /// scenegraph component "chair_living/fabric". This can include multiple components, hence the list of strings.
@@ -130,7 +130,7 @@ namespace OpenTS2.Components
 
         private void TraverseChildrenGameObjectsAndAddRelativeBonesAndPaths(string pathSoFar, Transform parentObj)
         {
-            if (_boneNamesToTransform.ContainsKey(parentObj.name))
+            if (BoneNamesToTransform.ContainsKey(parentObj.name))
             {
                 BoneNamesToRelativePaths[parentObj.name] = $"{pathSoFar}{parentObj.name}";
             }
@@ -310,7 +310,7 @@ namespace OpenTS2.Components
                 transformName = transformTag;
             }
             // If we've already rendered this transform node, just use that. Otherwise make a new unity GameObject for it.
-            if (transformTag != "" && _boneNamesToTransform.TryGetValue(transformName, out var existing))
+            if (transformTag != "" && BoneNamesToTransform.TryGetValue(transformName, out var existing))
             {
                 RenderCompositionTree(existing.gameObject, rCol, transformNode.CompositionTree);
                 return;
@@ -324,7 +324,7 @@ namespace OpenTS2.Components
 
             transformObj.transform.SetParent(parent.transform, worldPositionStays:false);
             _boneIdToTransform[transformNode.BoneId] = transformObj.transform;
-            _boneNamesToTransform[transformName] = transformObj.transform;
+            BoneNamesToTransform[transformName] = transformObj.transform;
             if (transformTag != "")
             {
                 BoneCRC32ToTransform[FileUtils.HighHash(transformTag)] = transformObj.transform;

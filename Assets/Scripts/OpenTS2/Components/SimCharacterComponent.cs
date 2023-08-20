@@ -1,9 +1,12 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using OpenTS2.Common;
 using OpenTS2.Content;
 using OpenTS2.Content.DBPF.Scenegraph;
 using OpenTS2.Files.Formats.DBPF;
 using UnityEngine;
+using UnityEngine.Animations.Rigging;
 
 namespace OpenTS2.Components
 {
@@ -15,7 +18,7 @@ namespace OpenTS2.Components
     {
         public static SimCharacterComponent CreateNakedBaseSim()
         {
-            const string bodyResourceName = "amBodyMadScientist_cres";
+            const string bodyResourceName = "amBodyNaked_cres";
             var bodyAsset = ContentProvider.Get().GetAsset<ScenegraphResourceAsset>(
                 new ResourceKey(bodyResourceName, GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_CRES));
 
@@ -27,26 +30,35 @@ namespace OpenTS2.Components
             var baseFaceAsset = ContentProvider.Get().GetAsset<ScenegraphResourceAsset>(
                 new ResourceKey(baseFaceResourceName, GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_CRES));
 
+            // Create a scenegraph with all 3 resources.
             var simsObject =
                 ScenegraphComponent.CreateRootScenegraph(new[] { bodyAsset, baldHairAsset, baseFaceAsset });
             var scenegraph = simsObject.GetComponentInChildren<ScenegraphComponent>();
 
-            AddIkComponents(scenegraph);
+            // Add a bone-renderer so we can visualize the sim's bones.
+            var boneRenderer = scenegraph.gameObject.AddComponent<BoneRenderer>();
+            var boneTransforms = new List<Transform>();
+            GetAllBoneTransformsForVisualization(scenegraph.BoneNamesToTransform["root_trans"], boneTransforms);
+            boneRenderer.transforms = boneTransforms.ToArray();
 
-            var gameObject = new GameObject("sim_character", typeof(SimCharacterComponent));
-            simsObject.transform.parent = gameObject.transform;
-            return gameObject.GetComponent<SimCharacterComponent>();
+            // Parent the scenegraph to the created SimCharacterComponent.
+            var simCharacterObject = new GameObject("sim_character", typeof(SimCharacterComponent));
+            simsObject.transform.parent = simCharacterObject.transform;
+            return simCharacterObject.GetComponent<SimCharacterComponent>();
         }
 
-        private static void AddIkComponents(ScenegraphComponent scene)
+        private static void GetAllBoneTransformsForVisualization(Transform rootBone, ICollection<Transform> bones)
         {
-            var animationAsset = ContentProvider.Get()
-                .GetAsset<ScenegraphAnimationAsset>(new ResourceKey("a-stairs-up-loop-L-sexy_anim", GroupIDs.Scenegraph,
-                    TypeIDs.SCENEGRAPH_ANIM));
-
-            foreach (var ikChain in animationAsset.AnimResource.AnimTargets[0].IKChains)
+            for (var i = 0; i < rootBone.childCount; i++)
             {
-                // TODO: add the proper rigging constraints here.
+                var bone = rootBone.GetChild(i);
+                // Ignore "surface" and "grip" transforms, they just make the skeleton look messy.
+                if (bone.name.Contains("surface") || bone.name.Contains("grip"))
+                {
+                    continue;
+                }
+                bones.Add(bone);
+                GetAllBoneTransformsForVisualization(bone, bones);
             }
         }
     }
