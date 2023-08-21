@@ -15,6 +15,7 @@ namespace OpenTS2.Components
     /// This component represents a rendered out sims character with their head, hair and body meshes in place under one
     /// scenegraph component.
     /// </summary>
+    [RequireComponent(typeof(AssetReferenceComponent))]
     public class SimCharacterComponent : MonoBehaviour
     {
         public static SimCharacterComponent CreateNakedBaseSim()
@@ -35,13 +36,15 @@ namespace OpenTS2.Components
 
             // Create a scenegraph with all 3 resources.
             var simsObject =
-                ScenegraphComponent.CreateRootScenegraph(new[]
-                    { skeletonAsset, bodyAsset, baldHairAsset, baseFaceAsset });
+                ScenegraphComponent.CreateRootScenegraph(skeletonAsset, bodyAsset, baldHairAsset, baseFaceAsset);
             var scenegraph = simsObject.GetComponentInChildren<ScenegraphComponent>();
 
             var simCharacterObject = new GameObject("sim_character", typeof(SimCharacterComponent));
             // Parent the scenegraph to the created SimCharacterComponent.
             simsObject.transform.parent = simCharacterObject.transform;
+
+            // Hold references to the scenegraph resources we use.
+            simCharacterObject.GetComponent<AssetReferenceComponent>().AddReference(skeletonAsset, bodyAsset, baldHairAsset, baseFaceAsset);
 
             var simsComponent = simCharacterObject.GetComponent<SimCharacterComponent>();
             simsComponent.SetupAnimationRig(scenegraph);
@@ -83,6 +86,12 @@ namespace OpenTS2.Components
             _animationRig = new GameObject("UnityAnimationRig", typeof(Rig));
             _animationRig.transform.SetParent(skeleton.transform, worldPositionStays: false);
 
+            // Add RigTransforms to the sim's root translation and rotation bones. This allows the unity rigging
+            // animation system to move the legs to the proper IK goals if the rest of the skeleton moves.
+            // TODO: this might need to be added to more bones in the skeleton.
+            Scenegraph.BoneNamesToTransform["root_trans"].gameObject.AddComponent<RigTransform>();
+            Scenegraph.BoneNamesToTransform["root_rot"].gameObject.AddComponent<RigTransform>();
+
             AddGizmosAroundInverseKinmaticsPositions();
 
             _rigBuilder.layers.Add(new RigLayer(_animationRig.GetComponent<Rig>()));
@@ -116,15 +125,7 @@ namespace OpenTS2.Components
 
         public void AddInverseKinematicsFromAnimation(AnimResourceConstBlock anim)
         {
-            AnimResourceConstBlock.AnimTarget auSkelTarget = null;
-            foreach (var target in anim.AnimTargets)
-            {
-                if (target.TagName.ToLower() == "auskel")
-                {
-                    auSkelTarget = target;
-                }
-            }
-
+            var auSkelTarget = anim.AnimTargets.FirstOrDefault(t => t.TagName.ToLower() == "auskel");
             if (auSkelTarget == null)
             {
                 return;
