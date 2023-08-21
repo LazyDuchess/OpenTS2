@@ -10,7 +10,13 @@ namespace OpenTS2.SimAntics
     {
         public ushort ID = 1;
         public short[] Temps = new short[20];
-        public VMStack Stack = new VMStack();
+        public VMStack Stack;
+        public VM VM;
+        public VMEntity(VM vm)
+        {
+            VM = vm;
+            Stack = new VMStack(this);
+        }
         public void Tick()
         {
             Stack.Tick();

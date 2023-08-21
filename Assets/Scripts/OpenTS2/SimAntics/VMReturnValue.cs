@@ -15,7 +15,7 @@ namespace OpenTS2.SimAntics
             Continue
         }
         public ExitCode Code;
-        public Func<ExitCode> ContinueCallback;
+        public Func<ExitCode> ContinueCallback = null;
         public static VMReturnValue ReturnTrue = new VMReturnValue { Code = ExitCode.GoToTrue };
         public static VMReturnValue ReturnFalse = new VMReturnValue { Code = ExitCode.GoToFalse };
         // TODO: would probably be a good idea to implement a scheduler for this.
@@ -26,7 +26,7 @@ namespace OpenTS2.SimAntics
             returnValue.Code = ExitCode.Continue;
             returnValue.ContinueCallback = () => {
                 {
-                    if (vm.CurrentTick == targetTick)
+                    if (vm.CurrentTick >= targetTick)
                         return ExitCode.GoToTrue;
                     return ExitCode.Continue;
                 }

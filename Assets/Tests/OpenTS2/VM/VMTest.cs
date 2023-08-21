@@ -34,7 +34,7 @@ public class VMTest
     public void TestRunBHAV()
     {
         var vm = new VM();
-        var entity = new VMEntity();
+        var entity = new VMEntity(vm);
         entity.ID = 1;
         vm.Entities.Add(entity);
         var bhav = ContentProvider.Get().GetAsset<BHAVAsset>(new ResourceKey(0x1001, _groupID, TypeIDs.BHAV));

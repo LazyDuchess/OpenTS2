@@ -8,6 +8,6 @@ namespace OpenTS2.SimAntics
 {
     public abstract class VMPrimitive
     {
-        public abstract VMReturnValue Execute();
+        public abstract VMReturnValue Execute(VMPrimitiveContext ctx);
     }
 }

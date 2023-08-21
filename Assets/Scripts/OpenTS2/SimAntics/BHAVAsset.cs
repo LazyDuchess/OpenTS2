@@ -23,6 +23,11 @@ namespace OpenTS2.SimAntics
             public ushort TrueTarget;
             public ushort FalseTarget;
             public byte[] Operands;
+
+            public ushort GetUInt16(int operand)
+            {
+                return BitConverter.ToUInt16(Operands, operand);
+            }
         }
     }
 }

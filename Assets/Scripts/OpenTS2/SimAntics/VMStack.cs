@@ -8,7 +8,12 @@ namespace OpenTS2.SimAntics
 {
     public class VMStack
     {
+        public VMEntity Entity;
         public Stack<VMStackFrame> Frames = new Stack<VMStackFrame>();
+        public VMStack(VMEntity entity)
+        {
+            Entity = entity;
+        }
         public void Tick()
         {
             var currentFrame = Frames.Peek();
