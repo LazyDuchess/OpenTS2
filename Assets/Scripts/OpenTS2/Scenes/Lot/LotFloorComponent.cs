@@ -218,9 +218,9 @@ namespace OpenTS2.Scenes.Lot
                         {
                             // Pattern is present.
                             float e0 = elevation[ei];
-                            float e1 = elevation[ei + 1];
+                            float e1 = elevation[ei + eHeight];
                             float e2 = elevation[ei + eHeight + 1];
-                            float e3 = elevation[ei + eHeight];
+                            float e3 = elevation[ei + 1];
 
                             tileVertices[0] = new Vector3(fx, e0, fy);
                             tileVertices[1] = new Vector3(fx + 1, e1, fy);
