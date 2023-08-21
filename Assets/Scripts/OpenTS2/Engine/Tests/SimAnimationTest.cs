@@ -21,7 +21,7 @@ namespace OpenTS2.Engine.Tests
 
             var sim = SimCharacterComponent.CreateNakedBaseSim();
 
-            var animationName = "a-male-stairsStraight-up-sexy_anim";
+            const string animationName = "a-pose-neutral-stand_anim";
             var anim = contentProvider.GetAsset<ScenegraphAnimationAsset>(
                 new ResourceKey(animationName, GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_ANIM));
             sim.AddInverseKinematicsFromAnimation(anim.AnimResource);

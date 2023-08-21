@@ -167,15 +167,15 @@ public class ScenegraphAnimationCodecTest
         Assert.That(ikChain4.TwistVectorCrc, Is.EqualTo(FileUtils.HighHash("l_hand_ikpole")));
         Assert.That(ikChain4.TwistVectorBoneCrc, Is.EqualTo(0));
         Assert.That(ikChain4.TwistVectorMirrorBoneCRC, Is.EqualTo(0));
-        Assert.That(ikChain4.IkWeightCRC, Is.EqualTo(0x8633999E)); // TODO: figure out the name of this bone.
+        Assert.That(ikChain4.IkWeightCRC, Is.EqualTo(FileUtils.HighHash("l_handcontrol0")));
 
         Assert.That(ikChain4.IkTargets.Length, Is.EqualTo(1));
         ikTarget1 = ikChain4.IkTargets[0];
         Assert.That(ikTarget1.BoneCrc, Is.EqualTo(0));
         Assert.That(ikTarget1.BoneMirrorCrc, Is.EqualTo(0));
-        Assert.That(ikTarget1.RotationCrc, Is.EqualTo(0x8633999E)); // TODO: figure out the name of this bone.
-        Assert.That(ikTarget1.Rotation2Crc, Is.EqualTo(0x4F9FBDC2)); // TODO: figure out the name of this bone.
-        Assert.That(ikTarget1.TranslationCrc, Is.EqualTo(0x8633999E)); // TODO: figure out the name of this bone.
-        Assert.That(ikTarget1.ContactCrc, Is.EqualTo(0x63413D20)); // TODO: figure out the name of this bone.
+        Assert.That(ikTarget1.RotationCrc, Is.EqualTo(FileUtils.HighHash("l_handcontrol0")));
+        Assert.That(ikTarget1.Rotation2Crc, Is.EqualTo(FileUtils.HighHash("l_handcontrol0rot")));
+        Assert.That(ikTarget1.TranslationCrc, Is.EqualTo(FileUtils.HighHash("l_handcontrol0")));
+        Assert.That(ikTarget1.ContactCrc, Is.EqualTo(FileUtils.HighHash("l_handcontrol0_a"))); // TODO: figure out the name of this bone.
     }
 }

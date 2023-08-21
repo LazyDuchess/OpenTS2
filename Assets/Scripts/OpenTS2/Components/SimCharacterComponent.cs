@@ -19,7 +19,10 @@ namespace OpenTS2.Components
     {
         public static SimCharacterComponent CreateNakedBaseSim()
         {
-            // Load the body, hair and face resources.
+            // Load the skeleton, body, hair and face resources.
+            const string skeletonResourceName = "auskel_cres";
+            var skeletonAsset = ContentProvider.Get().GetAsset<ScenegraphResourceAsset>(
+                new ResourceKey(skeletonResourceName, GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_CRES));
             const string bodyResourceName = "amBodyNaked_cres";
             var bodyAsset = ContentProvider.Get().GetAsset<ScenegraphResourceAsset>(
                 new ResourceKey(bodyResourceName, GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_CRES));
@@ -32,7 +35,7 @@ namespace OpenTS2.Components
 
             // Create a scenegraph with all 3 resources.
             var simsObject =
-                ScenegraphComponent.CreateRootScenegraph(new[] { bodyAsset, baldHairAsset, baseFaceAsset });
+                ScenegraphComponent.CreateRootScenegraph(new[] { skeletonAsset, bodyAsset, baldHairAsset, baseFaceAsset });
             var scenegraph = simsObject.GetComponentInChildren<ScenegraphComponent>();
 
             var simCharacterObject = new GameObject("sim_character", typeof(SimCharacterComponent));
@@ -164,8 +167,8 @@ namespace OpenTS2.Components
                     {
                         root = Scenegraph.BoneCRC32ToTransform[chain.BeginBoneCrc],
                         tip = Scenegraph.BoneCRC32ToTransform[chain.EndBoneCrc],
-                        chainRotationWeight = 1.0f,
-                        tipRotationWeight = 1.0f,
+                        chainRotationWeight = 0.5f,
+                        tipRotationWeight = 0.0f,
                         target = Scenegraph.BoneCRC32ToTransform[target.TranslationCrc],
                     };
                     ikChainObj.GetComponent<ChainIKConstraint>().data = chainConstraint;
