@@ -32,7 +32,7 @@ namespace OpenTS2.Engine.Tests
             animationObj.AddClip(clip, animationName);
 
             //const string testAnimation = "a-blowHorn_anim";
-            const string testAnimation = "a-male-stairsStraight-up-sexy_anim";
+            const string testAnimation = "a2o-punchingBag-punch-start_anim";
             anim = contentProvider.GetAsset<ScenegraphAnimationAsset>(
                 new ResourceKey(testAnimation, GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_ANIM));
             clip = anim.CreateClipFromResource(sim.Scenegraph.BoneNamesToRelativePaths, sim.Scenegraph.BlendNamesToRelativePaths);

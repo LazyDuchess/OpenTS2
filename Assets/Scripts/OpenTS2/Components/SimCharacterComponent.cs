@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using OpenTS2.Common;
+using OpenTS2.Common.Utils;
 using OpenTS2.Content;
 using OpenTS2.Content.DBPF.Scenegraph;
 using OpenTS2.Files.Formats.DBPF;
@@ -66,6 +67,15 @@ namespace OpenTS2.Components
         /// </summary>
         private readonly HashSet<uint> _appliedIKChains = new HashSet<uint>();
 
+        /// <summary>
+        /// These are basically parent bones of IK chains, this is needed so that if an animation updates the position
+        /// or rotation of these, unity's IK system responds and moves appropriately.
+        /// </summary>
+        private static readonly string[] BonesThatUpdateIK =
+        {
+            "root_trans", "root_rot", "pelvis", "spine0", "spine1", "spine2", "r_clavicle", "l_clavicle"
+        };
+
         private void SetupAnimationRig(ScenegraphComponent scene)
         {
             Scenegraph = scene;
@@ -88,9 +98,10 @@ namespace OpenTS2.Components
 
             // Add RigTransforms to the sim's root translation and rotation bones. This allows the unity rigging
             // animation system to move the legs to the proper IK goals if the rest of the skeleton moves.
-            // TODO: this might need to be added to more bones in the skeleton.
-            Scenegraph.BoneNamesToTransform["root_trans"].gameObject.AddComponent<RigTransform>();
-            Scenegraph.BoneNamesToTransform["root_rot"].gameObject.AddComponent<RigTransform>();
+            foreach (var ikUpdatingBone in BonesThatUpdateIK)
+            {
+                Scenegraph.BoneNamesToTransform[ikUpdatingBone].gameObject.AddComponent<RigTransform>();
+            }
 
             AddGizmosAroundInverseKinmaticsPositions();
 
@@ -117,9 +128,15 @@ namespace OpenTS2.Components
             _rigBuilder.AddEffector(Scenegraph.BoneNamesToTransform["l_handcontrol0"],
                 new RigEffectorData.Style()
                     { color = new Color(1.0f, 0.0f, 0.0f, 0.5f), size = 0.05f, shape = sphereMesh });
+            _rigBuilder.AddEffector(Scenegraph.BoneNamesToTransform["l_hand_ikpole"],
+                new RigEffectorData.Style()
+                    { color = new Color(0.7f, 0.2f, 0.0f, 0.5f), size = 0.04f, shape = sphereMesh });
             _rigBuilder.AddEffector(Scenegraph.BoneNamesToTransform["r_handcontrol0"],
                 new RigEffectorData.Style()
                     { color = new Color(0.0f, 1.0f, 0.0f, 0.5f), size = 0.05f, shape = sphereMesh });
+            _rigBuilder.AddEffector(Scenegraph.BoneNamesToTransform["r_hand_ikpole"],
+                new RigEffectorData.Style()
+                    { color = new Color(0.0f, 0.8f, 0.4f, 0.5f), size = 0.04f, shape = sphereMesh });
             Destroy(spherePrimitive);
         }
 
@@ -172,6 +189,14 @@ namespace OpenTS2.Components
                 {
                     chain.BeginBoneCrc = chain.BeginBoneMirrorCrc;
                     chain.EndBoneCrc = chain.EndBoneMirrorCrc;
+                    if (chain.TwistVectorCrc == FileUtils.HighHash("l_hand_ikpole"))
+                    {
+                        chain.TwistVectorCrc = FileUtils.HighHash("r_hand_ikpole");
+                    }
+                    else
+                    {
+                        chain.TwistVectorCrc = FileUtils.HighHash("l_hand_ikpole");
+                    }
                 }
 
                 var root = Scenegraph.BoneCRC32ToTransform[chain.BeginBoneCrc];
