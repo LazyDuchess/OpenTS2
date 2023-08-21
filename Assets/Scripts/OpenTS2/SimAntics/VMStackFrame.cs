@@ -75,6 +75,10 @@ namespace OpenTS2.SimAntics
                 if (prim != null)
                 {
                     var primReturn = prim.Execute(context);
+
+                    if (primReturn.Code == VMReturnValue.ExitCode.Continue)
+                        primReturn.Code = primReturn.ContinueCallback.Invoke();
+
                     if (primReturn.Code == VMReturnValue.ExitCode.Continue)
                     {
                         CurrentContinueCallback = primReturn.ContinueCallback;
