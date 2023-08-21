@@ -30,6 +30,13 @@ namespace OpenTS2.Engine.Tests
             var animationObj = sim.GetComponentInChildren<Animation>();
             var clip = anim.CreateClipFromResource(sim.Scenegraph.BoneNamesToRelativePaths, sim.Scenegraph.BlendNamesToRelativePaths);
             animationObj.AddClip(clip, animationName);
+
+            //const string testAnimation = "a-blowHorn_anim";
+            const string testAnimation = "a-drown-start_anim";
+            anim = contentProvider.GetAsset<ScenegraphAnimationAsset>(
+                new ResourceKey(testAnimation, GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_ANIM));
+            clip = anim.CreateClipFromResource(sim.Scenegraph.BoneNamesToRelativePaths, sim.Scenegraph.BlendNamesToRelativePaths);
+            animationObj.AddClip(clip, testAnimation);
         }
     }
 }

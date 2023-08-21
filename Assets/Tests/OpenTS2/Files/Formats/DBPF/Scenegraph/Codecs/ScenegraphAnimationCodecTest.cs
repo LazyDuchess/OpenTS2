@@ -176,6 +176,6 @@ public class ScenegraphAnimationCodecTest
         Assert.That(ikTarget1.RotationCrc, Is.EqualTo(FileUtils.HighHash("l_handcontrol0")));
         Assert.That(ikTarget1.Rotation2Crc, Is.EqualTo(FileUtils.HighHash("l_handcontrol0rot")));
         Assert.That(ikTarget1.TranslationCrc, Is.EqualTo(FileUtils.HighHash("l_handcontrol0")));
-        Assert.That(ikTarget1.ContactCrc, Is.EqualTo(FileUtils.HighHash("l_handcontrol0_a"))); // TODO: figure out the name of this bone.
+        Assert.That(ikTarget1.ContactCrc, Is.EqualTo(FileUtils.HighHash("l_handcontrol0_a")));
     }
 }

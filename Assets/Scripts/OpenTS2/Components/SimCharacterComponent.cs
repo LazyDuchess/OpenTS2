@@ -136,50 +136,67 @@ namespace OpenTS2.Components
 
                 var root = Scenegraph.BoneCRC32ToTransform[chain.BeginBoneCrc];
                 var tip = Scenegraph.BoneCRC32ToTransform[chain.EndBoneCrc];
+                // Find the mid bone between root and tip.
+                var middleBone = FindTransformInTheMiddleOf(tip, root);
 
-                GameObject ikChainObj;
-                if (tip.parent.parent == root)
+                var ikChainObj = new GameObject($"ikChain{chain.NameCrc:X}", typeof(TwoBoneIKConstraint));
+                var twoBoneConstraint = new TwoBoneIKConstraintData
                 {
-                    Debug.Assert(chain.TwistVectorCrc != 0, "Two bone ik chain without twist vector");
+                    root = root,
+                    mid = middleBone,
+                    tip = tip,
+                    target = Scenegraph.BoneCRC32ToTransform[target.TranslationCrc],
+                    targetPositionWeight = 1.0f,
+                    targetRotationWeight = 0.0f,
+                    hintWeight = 1.0f,
+                };
 
-                    ikChainObj = new GameObject($"ikChain{chain.NameCrc:X}", typeof(TwoBoneIKConstraint));
-                    var twoBoneConstraint = new TwoBoneIKConstraintData
-                    {
-                        root = root,
-                        mid = tip.parent,
-                        tip = tip,
-                        target = Scenegraph.BoneCRC32ToTransform[target.TranslationCrc],
-                        targetPositionWeight = 1.0f,
-                        targetRotationWeight = 0.0f,
-                        hintWeight = 1.0f,
-                    };
-
-                    if (chain.TwistVectorCrc != 0)
-                    {
-                        twoBoneConstraint.hint = Scenegraph.BoneCRC32ToTransform[chain.TwistVectorCrc];
-                    }
-                    ikChainObj.GetComponent<TwoBoneIKConstraint>().data = twoBoneConstraint;
-                }
-                else
+                if (chain.TwistVectorCrc != 0)
                 {
-                    ikChainObj = new GameObject($"ikChain{chain.NameCrc:X}", typeof(ChainIKConstraint));
-                    var chainConstraint = new ChainIKConstraintData
-                    {
-                        root = Scenegraph.BoneCRC32ToTransform[chain.BeginBoneCrc],
-                        tip = Scenegraph.BoneCRC32ToTransform[chain.EndBoneCrc],
-                        chainRotationWeight = 0.5f,
-                        tipRotationWeight = 0.0f,
-                        target = Scenegraph.BoneCRC32ToTransform[target.TranslationCrc],
-                    };
-                    ikChainObj.GetComponent<ChainIKConstraint>().data = chainConstraint;
+                    twoBoneConstraint.hint = Scenegraph.BoneCRC32ToTransform[chain.TwistVectorCrc];
                 }
+                ikChainObj.GetComponent<TwoBoneIKConstraint>().data = twoBoneConstraint;
 
+                if (target.Rotation2Crc != 0)
+                {
+                    var rotationConstraint =
+                        new GameObject($"ikChain{chain.NameCrc:X}-rotation", typeof(OverrideTransform));
+                    var rotationOverrideConstraint = new OverrideTransformData
+                    {
+                        constrainedObject = tip,
+                        sourceObject = Scenegraph.BoneCRC32ToTransform[target.Rotation2Crc],
+                        rotationWeight = 1.0f,
+                        positionWeight = 0.0f
+                    };
+                    rotationConstraint.GetComponent<OverrideTransform>().data = rotationOverrideConstraint;
+                    rotationConstraint.transform.parent = _animationRig.transform;
+                }
 
                 ikChainObj.transform.parent = _animationRig.transform;
                 _appliedIKChains.Add(chain.NameCrc);
             }
 
             _rigBuilder.Build();
+        }
+
+        private static Transform FindTransformInTheMiddleOf(Transform tip, Transform root)
+        {
+            var numBones = 0;
+            var boneFinder = tip;
+            while (boneFinder != root)
+            {
+                boneFinder = boneFinder.parent;
+                numBones++;
+            }
+
+            Debug.Assert(numBones > 1, $"No bone between {tip} and {root}");
+
+            var middle = tip;
+            for (var i = 0; i < numBones / 2; i++)
+            {
+                middle = middle.parent;
+            }
+            return middle;
         }
 
         private static void GetAllBoneTransformsForVisualization(Transform rootBone, ICollection<Transform> bones)
