@@ -134,8 +134,8 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                             GetTangentIn(i, component.KeyFrames), GetTangentOut(i, component.KeyFrames));
                         break;
                     case IKeyFrame.DiscontinuousKeyFrame keyFrame:
-                        unityKeyframes[i] = new Keyframe(ConvertTimeToSeconds(keyFrame.Time), keyFrame.Data /*,
-                            GetTangentIn(i, component.KeyFrames), GetTangentOut(i, component.KeyFrames)*/);
+                        unityKeyframes[i] = new Keyframe(ConvertTimeToSeconds(keyFrame.Time), keyFrame.Data,
+                            GetTangentIn(i, component.KeyFrames), GetTangentOut(i, component.KeyFrames));
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();

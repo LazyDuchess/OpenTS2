@@ -134,6 +134,13 @@ namespace OpenTS2.Components
                     continue;
                 }
 
+                // TODO: temporary hack that seems to fix hands. Might have to do something with mirroring animations.
+                if (Scenegraph.BoneCRC32ToTransform[chain.BeginBoneCrc].name.Contains("upperarm"))
+                {
+                    chain.BeginBoneCrc = chain.BeginBoneMirrorCrc;
+                    chain.EndBoneCrc = chain.EndBoneMirrorCrc;
+                }
+
                 var root = Scenegraph.BoneCRC32ToTransform[chain.BeginBoneCrc];
                 var tip = Scenegraph.BoneCRC32ToTransform[chain.EndBoneCrc];
                 // Find the mid bone between root and tip.
