@@ -23,6 +23,12 @@ namespace OpenTS2.Rendering
             RegisterMaterial<ImposterDualPackedSliceMaterial>();
             RegisterMaterial<ImposterRoofMaterial>();
 
+            RegisterMaterial<FloorMaterial>();
+            RegisterMaterial<FloorPoolMaterial>();
+            RegisterMaterial<WallpaperMaterial>();
+            RegisterMaterial<WallpaperBumpMaterial>();
+            RegisterMaterial<WallpaperPoolMaterial>();
+
             RegisterMaterial<TextureAlphaMaterial>();
             RegisterMaterial<VertexAlphaMaterial>();
             RegisterMaterial<PhongAlphaMaterial>();

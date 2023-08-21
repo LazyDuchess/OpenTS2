@@ -8,7 +8,7 @@ float _SeaLevel;
 float _AlphaMultiplier;
 
 float4 _DiffuseCoefficient;
-
+float4 _UVScale;
 
 struct Input
 {
@@ -35,7 +35,8 @@ float3 normalFromBumpMap(float2 coords, float intensity)
 void surf (Input IN, inout SurfaceOutput o)
 {
     fixed4 c = _DiffuseCoefficient;
-    c *= tex2D (_MainTex, IN.uv_MainTex);
+    float2 uv = IN.uv_MainTex * _UVScale.xy;
+    c *= tex2D (_MainTex, uv);
 
     c.a *= _AlphaMultiplier;
 
@@ -44,7 +45,7 @@ void surf (Input IN, inout SurfaceOutput o)
     fixed4 seaColor = fixed4(0, 0, 0, 1);
     c.rgb = lerp(c, seaColor, seaAmount).rgb;
 
-    float3 bumpNormal = normalFromBumpMap(IN.uv_MainTex, 5);
+    float3 bumpNormal = normalFromBumpMap(uv, 5);
 
     o.Normal = bumpNormal;
     o.Albedo = c.rgb;

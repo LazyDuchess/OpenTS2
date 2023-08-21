@@ -40,6 +40,9 @@ namespace OpenTS2.Rendering.Materials
 
             var material = new Material(shader);
             var bumpMapEnabled = false;
+            float alphaMul = 1f;
+            float untexturedAlpha = 1f;
+
             ScenegraphTextureAsset bumpMapTexture = null;
             // Adjust the material properties based on the corresponding keys.
             foreach (var property in definition.MaterialDefinition.MaterialProperties)
@@ -78,13 +81,23 @@ namespace OpenTS2.Rendering.Materials
                         material.mainTexture = texture.GetSelectedImageAsUnityTexture(ContentProvider.Get());
                         break;
                     case "stdMatAlphaMultiplier":
-                        material.SetFloat(AlphaMultiplier, float.Parse(property.Value));
+                        alphaMul = float.Parse(property.Value);
+                        break;
+                    case "stdMatUntexturedDiffAlpha":
+                        untexturedAlpha = float.Parse(property.Value);
                         break;
                     case "stdMatDiffCoef":
                         var coefficients = property.Value.Split(',').Select(float.Parse).ToArray();
                         material.SetColor(DiffuseCoefficient, new Color(coefficients[0], coefficients[1], coefficients[2]));
                         break;
                 }
+            }
+
+            float alpha = alphaMul * untexturedAlpha;
+
+            if (alpha != 1)
+            {
+                material.SetFloat(AlphaMultiplier, alpha);
             }
 
             if (bumpMapEnabled && bumpMapTexture != null)

@@ -30,6 +30,7 @@ namespace OpenTS2.Engine
             var contentProvider = new ContentProvider();
             var objectManager = new ObjectManager(contentProvider);
             var effectsManager = new EffectsManager(contentProvider);
+            var catalogManager = new CatalogManager(contentProvider);
             var luaManager = new LuaManager();
 
             TerrainManager.Initialize();

@@ -30,6 +30,9 @@ namespace OpenTS2.Files.Formats.XML
 
         public PropertySet(string xml)
         {
+            // Special characters are used without proper escaping in XMLs in TS2. & needs escaped.
+            xml = xml.Replace("&", "&amp;");
+
             var parsed = XElement.Parse(xml);
             if (parsed.Name.LocalName != "cGZPropertySetString")
             {

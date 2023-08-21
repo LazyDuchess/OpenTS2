@@ -35,6 +35,17 @@ namespace OpenTS2.Files.Formats.DBPF
         // cTSLotInfo in game / Lot Description in SimsPE.
         public const uint LOT_INFO = 0x0BF999E7;
         public const uint LOT_OBJECT = 0xFA1C39F7;
+        public const uint LOT_TERRAIN = 0x6B943B43;
+        public const uint LOT_TEXTURES = 0x4B58975B;
+        public const uint LOT_FENCEPOST = 0xAB4BA572;
+        public const uint LOT_POOL = 0x0C900FDB;
+        public const uint LOT_ROOF = 0xAB9406AA;
+        public const uint LOT_WALLGRAPH = 0x0A284D0B;
+        public const uint LOT_WALLLAYER = 0x8A84D7B0;
+        public const uint LOT_STRINGMAP = 0xCAC4FC40;
+        public const uint LOT_3ARY = 0x2A51171B;
+        public const uint CATALOG_OBJECT = 0xCCA8E925;
+        public const uint CATALOG_FENCE = 0x2CB230B8;
         public const uint STR = 0x53545223;
         public const uint IMG = 0x856DDBAC;
         public const uint IMG2 = 0x8C3CE95A;
