@@ -35,7 +35,8 @@ namespace OpenTS2.Components
 
             // Create a scenegraph with all 3 resources.
             var simsObject =
-                ScenegraphComponent.CreateRootScenegraph(new[] { skeletonAsset, bodyAsset, baldHairAsset, baseFaceAsset });
+                ScenegraphComponent.CreateRootScenegraph(new[]
+                    { skeletonAsset, bodyAsset, baldHairAsset, baseFaceAsset });
             var scenegraph = simsObject.GetComponentInChildren<ScenegraphComponent>();
 
             var simCharacterObject = new GameObject("sim_character", typeof(SimCharacterComponent));
@@ -54,7 +55,9 @@ namespace OpenTS2.Components
         /// This is the unity object that all the animation rigging constraints get placed into.
         /// </summary>
         private GameObject _animationRig;
+
         private RigBuilder _rigBuilder;
+
         /// <summary>
         /// Set of IK chains that have already been applied to this sim so they don't get re-applied.
         /// </summary>
@@ -78,11 +81,37 @@ namespace OpenTS2.Components
 
             // Add a child rig to the skeleton.
             _animationRig = new GameObject("UnityAnimationRig", typeof(Rig));
-            _animationRig.transform.SetParent(skeleton.transform, worldPositionStays:false);
+            _animationRig.transform.SetParent(skeleton.transform, worldPositionStays: false);
+
+            AddGizmosAroundInverseKinmaticsPositions();
 
             _rigBuilder.layers.Add(new RigLayer(_animationRig.GetComponent<Rig>()));
             _rigBuilder.layers[0].Initialize(animator);
             _rigBuilder.Build();
+        }
+
+        private void AddGizmosAroundInverseKinmaticsPositions()
+        {
+            // Add some effectors around the foot control points to see what animations should look like.
+            var cubePrimitive = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            var cubeMesh = cubePrimitive.GetComponent<MeshFilter>().sharedMesh;
+            _rigBuilder.AddEffector(Scenegraph.BoneNamesToTransform["l_foot_ikctr"],
+                new RigEffectorData.Style()
+                    { color = new Color(1.0f, 0.0f, 0.0f, 0.5f), size = 0.05f, shape = cubeMesh });
+            _rigBuilder.AddEffector(Scenegraph.BoneNamesToTransform["r_foot_ikctr"],
+                new RigEffectorData.Style()
+                    { color = new Color(0.0f, 1.0f, 0.0f, 0.5f), size = 0.05f, shape = cubeMesh });
+            Destroy(cubePrimitive);
+
+            var spherePrimitive = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            var sphereMesh = cubePrimitive.GetComponent<MeshFilter>().sharedMesh;
+            _rigBuilder.AddEffector(Scenegraph.BoneNamesToTransform["l_handcontrol0"],
+                new RigEffectorData.Style()
+                    { color = new Color(1.0f, 0.0f, 0.0f, 0.5f), size = 0.05f, shape = sphereMesh });
+            _rigBuilder.AddEffector(Scenegraph.BoneNamesToTransform["r_handcontrol0"],
+                new RigEffectorData.Style()
+                    { color = new Color(0.0f, 1.0f, 0.0f, 0.5f), size = 0.05f, shape = sphereMesh });
+            Destroy(spherePrimitive);
         }
 
         public void AddInverseKinematicsFromAnimation(AnimResourceConstBlock anim)
@@ -100,6 +129,7 @@ namespace OpenTS2.Components
             {
                 return;
             }
+
             AddInverseKinematicsFromIKChains(auSkelTarget.IKChains);
         }
 
@@ -119,6 +149,7 @@ namespace OpenTS2.Components
                     Debug.LogWarning($"begin bone crc from ik chain {chain.BeginBoneCrc:X} not found");
                     continue;
                 }
+
                 if (!Scenegraph.BoneCRC32ToTransform.ContainsKey(chain.EndBoneCrc))
                 {
                     Debug.LogWarning($"end bone crc from ik chain {chain.EndBoneCrc:X} not found");
@@ -127,7 +158,8 @@ namespace OpenTS2.Components
 
                 Debug.Assert(chain.NumIkTargets == 1, "ikChain with more than 1 target");
                 var target = chain.IkTargets[0];
-                Debug.Assert(target.TranslationCrc == target.RotationCrc, "ikTarget with different translation and rotation objects");
+                Debug.Assert(target.TranslationCrc == target.RotationCrc,
+                    "ikTarget with different translation and rotation objects");
                 if (!Scenegraph.BoneCRC32ToTransform.ContainsKey(target.TranslationCrc))
                 {
                     Debug.LogWarning($"ik target {target.TranslationCrc:X} not found");
@@ -162,6 +194,7 @@ namespace OpenTS2.Components
                 {
                     twoBoneConstraint.hint = Scenegraph.BoneCRC32ToTransform[chain.TwistVectorCrc];
                 }
+
                 ikChainObj.GetComponent<TwoBoneIKConstraint>().data = twoBoneConstraint;
 
                 if (target.Rotation2Crc != 0)
@@ -203,6 +236,7 @@ namespace OpenTS2.Components
             {
                 middle = middle.parent;
             }
+
             return middle;
         }
 
@@ -216,6 +250,7 @@ namespace OpenTS2.Components
                 {
                     continue;
                 }
+
                 bones.Add(bone);
                 GetAllBoneTransformsForVisualization(bone, bones);
             }

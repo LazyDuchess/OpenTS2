@@ -62,6 +62,9 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             public uint TwistVectorCrc;
             public uint TwistVectorBoneCrc;
             public uint TwistVectorMirrorBoneCRC;
+            /// <summary>
+            /// CRC of the channel name that determines the IK's weight.
+            /// </summary>
             public uint IkWeightCRC;
 
             public class Target
