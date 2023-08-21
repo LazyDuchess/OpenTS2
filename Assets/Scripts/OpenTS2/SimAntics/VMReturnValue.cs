@@ -10,14 +10,14 @@ namespace OpenTS2.SimAntics
     {
         public enum ExitCode : byte
         {
-            GoToTrue,
-            GoToFalse,
+            True,
+            False,
             Continue
         }
         public ExitCode Code;
         public Func<ExitCode> ContinueCallback = null;
-        public static VMReturnValue ReturnTrue = new VMReturnValue { Code = ExitCode.GoToTrue };
-        public static VMReturnValue ReturnFalse = new VMReturnValue { Code = ExitCode.GoToFalse };
+        public static VMReturnValue ReturnTrue = new VMReturnValue { Code = ExitCode.True };
+        public static VMReturnValue ReturnFalse = new VMReturnValue { Code = ExitCode.False };
         // TODO: would probably be a good idea to implement a scheduler for this.
         public static VMReturnValue Sleep(VM vm, uint ticks)
         {
@@ -27,7 +27,7 @@ namespace OpenTS2.SimAntics
             returnValue.ContinueCallback = () => {
                 {
                     if (vm.CurrentTick >= targetTick)
-                        return ExitCode.GoToTrue;
+                        return ExitCode.True;
                     return ExitCode.Continue;
                 }
             };

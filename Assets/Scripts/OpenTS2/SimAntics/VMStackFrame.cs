@@ -42,7 +42,7 @@ namespace OpenTS2.SimAntics
         {
             var currentNode = GetCurrentNode();
             ushort returnTarget = 0;
-            if (returnValue.Code == VMReturnValue.ExitCode.GoToTrue)
+            if (returnValue.Code == VMReturnValue.ExitCode.True)
                 returnTarget = currentNode.TrueTarget;
             else
                 returnTarget = currentNode.FalseTarget;
@@ -88,7 +88,7 @@ namespace OpenTS2.SimAntics
                     {
                         CurrentContinueCallback = null;
                         ushort returnTarget = 0;
-                        if (primReturn.Code == VMReturnValue.ExitCode.GoToTrue)
+                        if (primReturn.Code == VMReturnValue.ExitCode.True)
                             returnTarget = currentNode.TrueTarget;
                         else
                             returnTarget = currentNode.FalseTarget;

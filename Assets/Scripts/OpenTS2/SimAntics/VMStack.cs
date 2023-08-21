@@ -8,33 +8,37 @@ namespace OpenTS2.SimAntics
 {
     public class VMStack
     {
+        public bool CanYield = true;
         public VMEntity Entity;
         public Stack<VMStackFrame> Frames = new Stack<VMStackFrame>();
         public VMStack(VMEntity entity)
         {
             Entity = entity;
         }
-        public void Tick()
+        public VMReturnValue.ExitCode Tick()
         {
             if (Frames.Count == 0)
-                return;
+                return VMReturnValue.ExitCode.False;
             var currentFrame = Frames.Peek();
             var returnValue = currentFrame.Tick();
+            if (returnValue.Code == VMReturnValue.ExitCode.Continue && !CanYield)
+                throw new Exception("Attempted to yield in a non-yielding VMStack.");
             while (returnValue.Code != VMReturnValue.ExitCode.Continue)
             {
                 Frames.Pop();
                 if (Frames.Count == 0)
-                    return;
+                    return returnValue.Code;
                 currentFrame = Frames.Peek();
                 var currentNode = currentFrame.GetCurrentNode();
 
-                if (returnValue.Code == VMReturnValue.ExitCode.GoToTrue)
+                if (returnValue.Code == VMReturnValue.ExitCode.True)
                     currentFrame.CurrentNode = currentNode.TrueTarget;
                 else
                     currentFrame.CurrentNode = currentNode.FalseTarget;
 
                 returnValue = currentFrame.Tick();
             }
+            return returnValue.Code;
         }
     }
 }
