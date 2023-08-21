@@ -34,11 +34,20 @@ public class VMTest
     [Test]
     public void TestRunBHAV()
     {
+        var bhav = ContentProvider.Get().GetAsset<BHAVAsset>(new ResourceKey(0x1001, _groupID, TypeIDs.BHAV));
+
         var vm = new VM();
         var entity = new VMEntity(vm);
-        entity.ID = 1;
         vm.Entities.Add(entity);
-        var bhav = ContentProvider.Get().GetAsset<BHAVAsset>(new ResourceKey(0x1001, _groupID, TypeIDs.BHAV));
+        entity.ID = 1;
+        var stackFrame = new VMStackFrame(bhav, entity.Stack);
+        stackFrame.Arguments[0] = 10;
+        entity.Stack.Frames.Push(stackFrame);
+
+        vm.Tick();
+        Assert.That(entity.Temps[0], Is.EqualTo(20));
+        vm.Tick();
+        Assert.That(entity.Temps[0], Is.EqualTo(1200));
     }
 
     [Test]

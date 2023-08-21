@@ -16,16 +16,16 @@ namespace OpenTS2.SimAntics
         }
         public void Tick()
         {
-            var currentFrame = Frames.Peek();
-            if (currentFrame == null)
+            if (Frames.Count == 0)
                 return;
+            var currentFrame = Frames.Peek();
             var returnValue = currentFrame.Tick();
             while (returnValue.Code != VMReturnValue.ExitCode.Continue)
             {
                 Frames.Pop();
-                currentFrame = Frames.Peek();
-                if (currentFrame == null)
+                if (Frames.Count == 0)
                     return;
+                currentFrame = Frames.Peek();
                 var currentNode = currentFrame.GetCurrentNode();
 
                 if (returnValue.Code == VMReturnValue.ExitCode.GoToTrue)
