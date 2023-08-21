@@ -10,6 +10,8 @@ namespace OpenTS2.SimAntics
     public class BHAVAsset : AbstractAsset
     {
         public string FileName = "";
+        public int ArgumentCount = 0;
+        public int LocalCount = 0;
         public List<Node> Nodes = new List<Node>();
 
         public class Node

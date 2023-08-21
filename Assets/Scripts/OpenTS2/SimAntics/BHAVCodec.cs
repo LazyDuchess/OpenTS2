@@ -28,13 +28,18 @@ namespace OpenTS2.SimAntics
             Debug.Assert(magic <= 0x8009);
             var instructionCount = reader.ReadUInt16();
             var type = reader.ReadByte();
-            var args = reader.ReadByte();
-            var locals = reader.ReadByte();
+            asset.ArgumentCount = reader.ReadByte();
+            asset.LocalCount = reader.ReadByte();
             var flags = reader.ReadByte();
             var treeVersion = reader.ReadUInt32();
 
+            byte cacheFlags = 0;
+            // Sims wiki says cacheflags are at the end of each node, not in the header, which isn't correct.
+            if (magic >= 0x8009)
+                cacheFlags = reader.ReadByte();
+
             // Nodes
-            for(var i=0;i<instructionCount;i++)
+            for (var i=0;i<instructionCount;i++)
             {
                 ushort opcode, trueTarget, falseTarget;
                 byte[] operands;
@@ -61,14 +66,6 @@ namespace OpenTS2.SimAntics
                     var nodeVersion = reader.ReadByte();
                     operands = reader.ReadBytes(16);
                 }
-                else if (magic <= 0x8008)
-                {
-                    opcode = reader.ReadUInt16();
-                    trueTarget = reader.ReadUInt16();
-                    falseTarget = reader.ReadUInt16();
-                    var nodeVersion = reader.ReadByte();
-                    operands = reader.ReadBytes(16);
-                }
                 else
                 {
                     opcode = reader.ReadUInt16();
@@ -76,7 +73,6 @@ namespace OpenTS2.SimAntics
                     falseTarget = reader.ReadUInt16();
                     var nodeVersion = reader.ReadByte();
                     operands = reader.ReadBytes(16);
-                    var cacheFlags = reader.ReadByte();
                 }
 
                 // Convert from TS1 to TS2 format if necessary.
