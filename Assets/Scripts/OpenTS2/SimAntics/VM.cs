@@ -6,16 +6,6 @@ namespace OpenTS2.SimAntics
 {
     public class VM
     {
-        // Start is called before the first frame update
-        void Start()
-        {
-
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-
-        }
+        public List<VMEntity> Entities = new List<VMEntity>();
     }
 }

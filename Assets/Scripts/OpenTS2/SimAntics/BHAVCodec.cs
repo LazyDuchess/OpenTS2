@@ -104,13 +104,14 @@ namespace OpenTS2.SimAntics
                 {
                     // None / Error
                     case 0xFD:
-                        return 0xFFFC;
+                        return BHAVAsset.Node.ErrorReturnValue;
                     // True
                     case 0xFE:
-                        return 0xFFFD;
+                        return BHAVAsset.Node.TrueReturnValue;
                     // False
                     case 0xFF:
-                        return 0xFFFE;
+                        return BHAVAsset.Node.FalseReturnValue;
+                    // probably already an okay value
                     default:
                         return target;
                 }

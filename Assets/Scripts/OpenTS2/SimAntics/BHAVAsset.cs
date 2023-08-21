@@ -14,6 +14,9 @@ namespace OpenTS2.SimAntics
 
         public class Node
         {
+            public const ushort ErrorReturnValue = 0xFFFC;
+            public const ushort TrueReturnValue = 0xFFFD;
+            public const ushort FalseReturnValue = 0xFFFE;
             public ushort OpCode;
             public ushort TrueTarget;
             public ushort FalseTarget;
