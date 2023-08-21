@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace OpenTS2.SimAntics
 {
-    public enum VMDataSource : ushort
+    public enum VMDataSource : byte
     {
         MyObjectsAttributes,
         StackObjectsAttributes,
