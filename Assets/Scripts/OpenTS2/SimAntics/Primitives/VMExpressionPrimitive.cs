@@ -21,13 +21,13 @@ namespace OpenTS2.SimAntics.Primitives
             IsFlagSet,
             SetFlag,
             ClearFlag,
-            AddThenLessThan,
+            IncThenLessThan,
             Modulo,
             And,
             GreaterThanOrEqualTo,
             LessThanOrEqualTo,
             NotEqualTo,
-            SubtractThenGreaterThan,
+            DecThenGreaterThan,
             Or,
             Xor,
             Abs,
@@ -98,7 +98,7 @@ namespace OpenTS2.SimAntics.Primitives
                     var finalClear = (int)lhs & clearBitVal;
                     ctx.SetData(lhsSource, lhsData, (short)(finalClear));
                     return VMReturnValue.ReturnTrue;
-                case Operator.AddThenLessThan:
+                case Operator.IncThenLessThan:
                     lhs = ctx.GetData(lhsSource, lhsData);
                     rhs = ctx.GetData(rhsSource, rhsData);
                     var lhsAdded = lhs + 1;
@@ -126,7 +126,7 @@ namespace OpenTS2.SimAntics.Primitives
                 case Operator.NotEqualTo:
                     return ctx.GetData(lhsSource, lhsData) != ctx.GetData(rhsSource, rhsData) ?
                         VMReturnValue.ReturnTrue : VMReturnValue.ReturnFalse;
-                case Operator.SubtractThenGreaterThan:
+                case Operator.DecThenGreaterThan:
                     lhs = ctx.GetData(lhsSource, lhsData);
                     rhs = ctx.GetData(rhsSource, rhsData);
                     var lhsSubbed = lhs - 1;

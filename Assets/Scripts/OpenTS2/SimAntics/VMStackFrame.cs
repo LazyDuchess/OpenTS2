@@ -53,7 +53,7 @@ namespace OpenTS2.SimAntics
                 case BHAVAsset.Node.TrueReturnValue:
                     return VMReturnValue.ReturnTrue;
                 case BHAVAsset.Node.ErrorReturnValue:
-                    throw new Exception("SimAntics error goto.");
+                    throw new Exception("Jumped to Error.");
                 default:
                     SetCurrentNode(returnTarget);
                     return RunCurrentFrame();
@@ -99,7 +99,7 @@ namespace OpenTS2.SimAntics
                             case BHAVAsset.Node.TrueReturnValue:
                                 return VMReturnValue.ReturnTrue;
                             case BHAVAsset.Node.ErrorReturnValue:
-                                throw new Exception("SimAntics error goto.");
+                                throw new Exception("Jumped to Error.");
                             default:
                                 SetCurrentNode(returnTarget);
                                 return RunCurrentFrame();
