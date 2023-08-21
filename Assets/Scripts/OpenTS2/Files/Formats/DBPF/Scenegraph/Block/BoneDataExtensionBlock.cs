@@ -10,8 +10,21 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
         public const string BLOCK_NAME = "cBoneDataExtension";
         public override string BlockName => BLOCK_NAME;
 
-        public BoneDataExtensionBlock(PersistTypeInfo blockTypeInfo) : base(blockTypeInfo)
+        public int HeadingOffsetAxis { get; }
+        public int MirrorAxis { get; }
+        public int StretchAxis { get; }
+        public float StretchFactor { get; }
+        public Quaternion JointOrientation { get; }
+
+
+        public BoneDataExtensionBlock(PersistTypeInfo blockTypeInfo, int headingOffsetAxis, int mirrorAxis,
+            int stretchAxis, float stretchFactor, Quaternion jointOrientation) : base(blockTypeInfo)
         {
+            HeadingOffsetAxis = headingOffsetAxis;
+            MirrorAxis = mirrorAxis;
+            StretchAxis = stretchAxis;
+            StretchFactor = stretchFactor;
+            JointOrientation = jointOrientation;
         }
     }
 
@@ -21,19 +34,22 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
         {
             // Starts with a cExtension.
             var extensionBlockTypeInfo = PersistTypeInfo.Deserialize(reader);
-            Debug.Assert(extensionBlockTypeInfo.Name == "cExtension", "First block in cBoneDataExtension was not cExtension");
+            Debug.Assert(extensionBlockTypeInfo.Name == "cExtension",
+                "First block in cBoneDataExtension was not cExtension");
 
             var headingOffsetAxis = reader.ReadInt32();
             var mirrorAxis = reader.ReadInt32();
             var stretchAxis = reader.ReadInt32();
             var stretchFactor = reader.ReadFloat();
 
+            Quaternion jointOrientation = Quaternion.identity;
             if (blockTypeInfo.Version > 3)
             {
-                var jointOrientation = QuaterionSerialzier.Deserialize(reader);
+                jointOrientation = QuaterionSerialzier.Deserialize(reader);
             }
 
-            return new BoneDataExtensionBlock(blockTypeInfo);
+            return new BoneDataExtensionBlock(blockTypeInfo, headingOffsetAxis, mirrorAxis, stretchAxis, stretchFactor,
+                jointOrientation);
         }
     }
 }
