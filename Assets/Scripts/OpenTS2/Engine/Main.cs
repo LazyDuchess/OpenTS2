@@ -5,6 +5,7 @@ using OpenTS2.Diagnostic;
 using OpenTS2.Files;
 using OpenTS2.Files.Formats.DBPF;
 using OpenTS2.Rendering;
+using OpenTS2.SimAntics.Primitives;
 using UnityEngine;
 
 namespace OpenTS2.Engine
@@ -34,6 +35,7 @@ namespace OpenTS2.Engine
             Filesystem.Initialize(new JSONPathProvider(), epManager);
             CodecAttribute.Initialize();
             CheatSystem.Initialize();
+            VMPrimitiveRegistry.Initialize();
             //Initialize the game assembly, do all reflection things.
             AssemblyHelper.InitializeLoadedAssemblies();
             s_initialized = true;

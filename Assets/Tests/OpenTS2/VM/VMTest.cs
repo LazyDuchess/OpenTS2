@@ -8,6 +8,7 @@ using OpenTS2.Content;
 using OpenTS2.SimAntics;
 using OpenTS2.Common;
 using OpenTS2.Files.Formats.DBPF;
+using OpenTS2.SimAntics.Primitives;
 
 public class VMTest
 {
@@ -38,5 +39,12 @@ public class VMTest
         entity.ID = 1;
         vm.Entities.Add(entity);
         var bhav = ContentProvider.Get().GetAsset<BHAVAsset>(new ResourceKey(0x1001, _groupID, TypeIDs.BHAV));
+    }
+
+    [Test]
+    public void TestPrimitiveRegistry()
+    {
+        var vmExpressionPrim = VMPrimitiveRegistry.GetPrimitive(0x2);
+        Assert.That(vmExpressionPrim, Is.TypeOf(typeof(VMExpressionPrimitive)));
     }
 }
