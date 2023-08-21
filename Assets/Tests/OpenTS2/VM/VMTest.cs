@@ -41,8 +41,11 @@ public class VMTest
         vm.Entities.Add(entity);
         entity.ID = 1;
         var stackFrame = new VMStackFrame(bhav, entity.Stack);
-        stackFrame.Arguments[0] = 10;
         entity.Stack.Frames.Push(stackFrame);
+
+        // The test BHAV multiplies Param0 by 2, stores it in Temp0, sleeps for a single tick, then sets Temp0 to 1200
+
+        stackFrame.Arguments[0] = 10;
 
         vm.Tick();
         Assert.That(entity.Temps[0], Is.EqualTo(20));
