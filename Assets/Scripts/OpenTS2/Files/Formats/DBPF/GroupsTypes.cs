@@ -60,5 +60,6 @@ namespace OpenTS2.Files.Formats.DBPF
         public const uint DIR = 0xE86B1EEF;
         public const uint Scenegraph = 0x1C0532FA;
         public const uint Effects = 0xEA5118B1;
+        public const uint Global = 0x7FD46CD0;
     }
 }

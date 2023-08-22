@@ -23,6 +23,7 @@ namespace OpenTS2.SimAntics
             Locals = new short[BHAV.LocalCount];
             Arguments = new short[BHAV.ArgumentCount];
         }
+
         public VMReturnValue Tick()
         {
             if (CurrentContinueCallback != null)
@@ -32,13 +33,13 @@ namespace OpenTS2.SimAntics
                     return primReturn;
                 else
                 {
-                    return AdvanceFrame(primReturn);
+                    return AdvanceNodeAndRunTick(primReturn);
                 }
             }
-            return RunCurrentFrame();
+            return RunCurrentTick();
         }
 
-        VMReturnValue AdvanceFrame(VMReturnValue returnValue)
+        VMReturnValue AdvanceNodeAndRunTick(VMReturnValue returnValue)
         {
             var currentNode = GetCurrentNode();
             ushort returnTarget = 0;
@@ -56,11 +57,11 @@ namespace OpenTS2.SimAntics
                     throw new Exception("Jumped to Error.");
                 default:
                     SetCurrentNode(returnTarget);
-                    return RunCurrentFrame();
+                    return RunCurrentTick();
             }
         }
 
-        VMReturnValue RunCurrentFrame()
+        VMReturnValue RunCurrentTick()
         {
             var currentNode = GetCurrentNode();
             if (currentNode != null)
@@ -102,7 +103,7 @@ namespace OpenTS2.SimAntics
                                 throw new Exception("Jumped to Error.");
                             default:
                                 SetCurrentNode(returnTarget);
-                                return RunCurrentFrame();
+                                return RunCurrentTick();
                         }
                     }
                 }
