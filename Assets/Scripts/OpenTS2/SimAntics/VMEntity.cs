@@ -19,6 +19,7 @@ namespace OpenTS2.SimAntics
         {
             VM = vm;
             Stack = new VMStack(this);
+            ID = vm.GetUniqueID();
         }
         public void Tick()
         {

@@ -15,6 +15,9 @@ namespace OpenTS2.SimAntics
     {
         public List<VMEntity> Entities = new List<VMEntity>();
         public uint CurrentTick = 0;
+
+        private Dictionary<short, VMEntity> _entitiesByID = new Dictionary<short, VMEntity>();
+
         public void Tick()
         {
             foreach(var entity in Entities)
@@ -35,6 +38,20 @@ namespace OpenTS2.SimAntics
             if (ents.Count == 0)
                 return null;
             return ents[0];
+        }
+
+        public void AddEntity(VMEntity entity)
+        {
+            Entities.Add(entity);
+            _entitiesByID[entity.ID] = entity;
+        }
+
+        public short GetUniqueID()
+        {
+            short resultID = 1;
+            while (_entitiesByID.TryGetValue(resultID, out VMEntity _))
+                resultID++;
+            return resultID;
         }
     }
 }
