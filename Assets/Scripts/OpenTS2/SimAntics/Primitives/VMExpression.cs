@@ -9,7 +9,7 @@ namespace OpenTS2.SimAntics.Primitives
     /// <summary>
     /// Expression Primitive, handles variable assignation, retrieval, math.
     /// </summary>
-    public class VMExpressionPrimitive : VMPrimitive
+    public class VMExpression : VMPrimitive
     {
         public enum Operator : byte
         {

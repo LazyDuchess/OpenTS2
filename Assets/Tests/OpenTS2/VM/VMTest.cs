@@ -57,6 +57,6 @@ public class VMTest
     public void TestPrimitiveRegistry()
     {
         var vmExpressionPrim = VMPrimitiveRegistry.GetPrimitive(0x2);
-        Assert.That(vmExpressionPrim, Is.TypeOf(typeof(VMExpressionPrimitive)));
+        Assert.That(vmExpressionPrim, Is.TypeOf(typeof(VMExpression)));
     }
 }

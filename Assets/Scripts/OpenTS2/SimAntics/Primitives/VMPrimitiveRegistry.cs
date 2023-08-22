@@ -12,8 +12,8 @@ namespace OpenTS2.SimAntics.Primitives
         
         public static void Initialize()
         {
-            RegisterPrimitive<VMSleepPrimitive>(0x0);
-            RegisterPrimitive<VMExpressionPrimitive>(0x2);
+            RegisterPrimitive<VMSleep>(0x0);
+            RegisterPrimitive<VMExpression>(0x2);
         }
         
         public static void RegisterPrimitive<T>(ushort opcode) where T : VMPrimitive
