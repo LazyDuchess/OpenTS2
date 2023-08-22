@@ -11,9 +11,7 @@ namespace OpenTS2.SimAntics
     /// </summary>
     public class VMStack
     {
-        public bool Interrupted => _interrupt == true && Entity.VM.CurrentTick >= _interruptTick;
-        private bool _interrupt = false;
-        private uint _interruptTick = 0;
+        public bool Interrupt = false;
         // For check trees and other things that should execute and return immediately we should set this to false.
         public bool CanYield = true;
         public VMEntity Entity;
@@ -59,22 +57,8 @@ namespace OpenTS2.SimAntics
         public VMExitCode Tick()
         {
             var returnValue = TickInternal();
-            HandleInterrupt();
+            Interrupt = false;
             return returnValue;
-        }
-
-        void HandleInterrupt()
-        {
-            _interrupt = false;
-            _interruptTick = 0;
-        }
-
-        public void Interrupt()
-        {
-            if (_interrupt)
-                return;
-            _interrupt = true;
-            _interruptTick = Entity.VM.CurrentTick + 1;
         }
     }
 }
