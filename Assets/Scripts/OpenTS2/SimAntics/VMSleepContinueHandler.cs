@@ -11,7 +11,7 @@ namespace OpenTS2.SimAntics
         public uint TargetTick = 0;
         VMStack _stack;
 
-        public VMSleepContinueHandler(VMStack stack, uint ticks, bool allowPush = false)
+        public VMSleepContinueHandler(VMStack stack, uint ticks)
         {
             _stack = stack;
             var vm = _stack.Entity.VM;
