@@ -30,7 +30,7 @@ namespace OpenTS2.SimAntics
             return Frames.Peek();
         }
 
-        public VMExitCode Tick()
+        VMExitCode TickInternal()
         {
             var currentFrame = GetCurrentFrame();
             if (currentFrame == null)
@@ -53,6 +53,12 @@ namespace OpenTS2.SimAntics
 
                 returnValue = currentFrame.Tick();
             }
+            return returnValue;
+        }
+
+        public VMExitCode Tick()
+        {
+            var returnValue = TickInternal();
             HandleInterrupt();
             return returnValue;
         }
