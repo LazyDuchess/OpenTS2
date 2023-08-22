@@ -121,6 +121,7 @@ namespace OpenTS2.SimAntics
                 return null;
 
             var newStackFrame = new VMStackFrame(bhav, Stack);
+            newStackFrame.StackObjectID = ctx.StackFrame.StackObjectID;
 
             GoSubFormat format = GoSubFormat.PassTemps;
 
