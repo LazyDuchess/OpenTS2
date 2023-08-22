@@ -146,22 +146,27 @@ namespace OpenTS2.SimAntics
                 }
             }
 
+            var argAmount = 0;
+
             switch(format)
             {
                 case GoSubFormat.PassTemps:
-                    for(var i=0;i<Stack.Entity.Temps.Length;i++)
+                    argAmount = Math.Min(newStackFrame.Arguments.Length, Stack.Entity.Temps.Length);
+                    for (var i=0;i<argAmount;i++)
                     {
                         newStackFrame.TrySetArgument(i, Stack.Entity.Temps[i]);
                     }
                     break;
                 case GoSubFormat.TS1:
-                    for(var i=0;i<8;i++)
+                    argAmount = Math.Min(newStackFrame.Arguments.Length, 8);
+                    for(var i=0;i<argAmount;i++)
                     {
                         newStackFrame.TrySetArgument(i, ctx.Node.GetInt16(i*2));
                     }
                     break;
                 case GoSubFormat.TS2:
-                    for(var i=0;i<4;i++)
+                    argAmount = Math.Min(newStackFrame.Arguments.Length, 4);
+                    for(var i=0;i<argAmount;i++)
                     {
                         var dataSourceIndex = i * 3;
                         var dataValueIndex = dataSourceIndex + 1;
@@ -175,7 +180,8 @@ namespace OpenTS2.SimAntics
                     }
                     break;
                 case GoSubFormat.CallerParams:
-                    for(var i=0;i<ctx.StackFrame.Arguments.Length;i++)
+                    argAmount = Math.Min(newStackFrame.Arguments.Length, ctx.StackFrame.Arguments.Length);
+                    for (var i=0;i<argAmount;i++)
                     {
                         newStackFrame.TrySetArgument(i, ctx.StackFrame.Arguments[i]);
                     }
