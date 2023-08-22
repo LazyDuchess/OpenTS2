@@ -23,6 +23,12 @@ namespace OpenTS2.SimAntics
         public VMContinueHandler CurrentContinueHandler = null;
         public short[] Locals;
         public short[] Arguments;
+
+        // TODO - Return proper Group IDs. Private should come from the entity's OBJD, semiglobal from the entity's global resource.
+        private uint PrivateGroupID => BHAV.GlobalTGI.GroupID;
+        private uint SemiGlobalGroupID => 0x0;
+        private uint GlobalGroupID => GroupIDs.Global;
+
         public VMStackFrame(BHAVAsset bhav, VMStack stack)
         {
             BHAV = bhav;
@@ -205,19 +211,15 @@ namespace OpenTS2.SimAntics
 
         BHAVAsset GetBHAVForOpCode(ushort opCode)
         {
+            // 0x0XXX is global scope, 0x1XXX is private scope and 0x2XXX is semiglobal scope.
+            var groupid = SemiGlobalGroupID;
+
             if (opCode < 0x1000)
-            {
-                return VM.GetBHAV(opCode, GroupIDs.Global);
-            }
+                groupid = GlobalGroupID;
             else if (opCode < 0x2000)
-            {
-                return VM.GetBHAV(opCode, BHAV.GlobalTGI.GroupID);
-            }
-            else
-            {
-                // TODO: Return Semi-Global BHAVs here.
-                return null;
-            }
+                groupid = PrivateGroupID;
+
+            return VM.GetBHAV(opCode, groupid);
         }
 
         public void SetCurrentNode(int nodeIndex)
