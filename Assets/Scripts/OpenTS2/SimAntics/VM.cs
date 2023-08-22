@@ -3,6 +3,7 @@ using OpenTS2.Content;
 using OpenTS2.Files.Formats.DBPF;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace OpenTS2.SimAntics
@@ -26,6 +27,14 @@ namespace OpenTS2.SimAntics
         public static BHAVAsset GetBHAV(ushort id, uint groupID)
         {
             return ContentProvider.Get().GetAsset<BHAVAsset>(new ResourceKey(id, groupID, TypeIDs.BHAV));
+        }
+
+        public VMEntity GetEntityByID(ushort id)
+        {
+            var ents = Entities.Where((ent) => ent.ID == id ).ToList();
+            if (ents.Count == 0)
+                return null;
+            return ents[0];
         }
     }
 }

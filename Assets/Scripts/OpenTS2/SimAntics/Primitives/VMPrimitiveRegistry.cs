@@ -14,6 +14,7 @@ namespace OpenTS2.SimAntics.Primitives
         {
             RegisterPrimitive<VMSleep>(0x0);
             RegisterPrimitive<VMExpression>(0x2);
+            RegisterPrimitive<VMNotifyStackObjectOutOfIdle>(0x31);
         }
         
         public static void RegisterPrimitive<T>(ushort opcode) where T : VMPrimitive
