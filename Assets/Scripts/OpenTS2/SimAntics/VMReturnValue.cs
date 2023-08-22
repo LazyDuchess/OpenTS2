@@ -6,16 +6,17 @@ using System.Threading.Tasks;
 
 namespace OpenTS2.SimAntics
 {
-    public class VMReturnValue
+    public struct VMReturnValue
     {
         public VMExitCode Code;
-        public VMContinueHandler ContinueHandler = null;
+        public VMContinueHandler ContinueHandler;
         public static VMReturnValue ReturnTrue = new VMReturnValue(VMExitCode.True);
         public static VMReturnValue ReturnFalse = new VMReturnValue(VMExitCode.False);
         
         public VMReturnValue(VMExitCode exitCode)
         {
             Code = exitCode;
+            ContinueHandler = null;
         }
         
         public VMReturnValue(VMContinueHandler continueHandler)
