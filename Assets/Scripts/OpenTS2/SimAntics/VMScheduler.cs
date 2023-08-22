@@ -21,6 +21,7 @@ namespace OpenTS2.SimAntics
             _postTickEvents.AddEvent(new VMEvent(func, onlyOnce, targetTick));
         }
 
+        // TODO - Right now the way this works is that once an entity has been notified out of idle/interrupted, the first idle that gets executed on the next tick (or that continues to run if there is one already running) won't actually sleep. If no idles are ran then the interrupt is just discarded. Verify this is okay!
         public void ScheduleInterrupt(VMStack stack)
         {
             ScheduleOnBeginTick(() =>

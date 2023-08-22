@@ -21,7 +21,11 @@ namespace OpenTS2.SimAntics
         public override VMExitCode Tick()
         {
             if (_stack.Interrupt)
+            {
+                // Handled!
+                _stack.Interrupt = false;
                 return VMExitCode.True;
+            }
             if (_stack.Entity.VM.CurrentTick >= TargetTick)
                 return VMExitCode.True;
             return VMExitCode.Continue;

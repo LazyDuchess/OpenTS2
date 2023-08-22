@@ -37,10 +37,9 @@ namespace OpenTS2.SimAntics
 
         public VMEntity GetEntityByID(short id)
         {
-            var ents = Entities.Where((ent) => ent.ID == id ).ToList();
-            if (ents.Count == 0)
-                return null;
-            return ents[0];
+            if (_entitiesByID.TryGetValue(id, out VMEntity result))
+                return result;
+            return null;
         }
 
         public void AddEntity(VMEntity entity)
