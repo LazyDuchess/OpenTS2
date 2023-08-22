@@ -19,30 +19,30 @@ namespace OpenTS2.SimAntics
         {
             Entity = entity;
         }
-        public VMReturnValue.ExitCode Tick()
+        public VMExitCode Tick()
         {
             if (Frames.Count == 0)
-                return VMReturnValue.ExitCode.False;
+                return VMExitCode.False;
             var currentFrame = Frames.Peek();
             var returnValue = currentFrame.Tick();
-            if (returnValue.Code == VMReturnValue.ExitCode.Continue && !CanYield)
+            if (returnValue == VMExitCode.Continue && !CanYield)
                 throw new Exception("Attempted to yield in a non-yielding VMStack.");
-            while (returnValue.Code != VMReturnValue.ExitCode.Continue)
+            while (returnValue != VMExitCode.Continue)
             {
                 Frames.Pop();
                 if (Frames.Count == 0)
-                    return returnValue.Code;
+                    return returnValue;
                 currentFrame = Frames.Peek();
                 var currentNode = currentFrame.GetCurrentNode();
 
-                if (returnValue.Code == VMReturnValue.ExitCode.True)
+                if (returnValue == VMExitCode.True)
                     currentFrame.CurrentNode = currentNode.TrueTarget;
                 else
                     currentFrame.CurrentNode = currentNode.FalseTarget;
 
                 returnValue = currentFrame.Tick();
             }
-            return returnValue.Code;
+            return returnValue;
         }
     }
 }

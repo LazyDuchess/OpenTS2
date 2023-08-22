@@ -15,7 +15,7 @@ namespace OpenTS2.SimAntics.Primitives
         {
             var argumentIndex = ctx.Node.GetUInt16(0);
             var sleepTicks = ctx.StackFrame.Arguments[argumentIndex];
-            return VMReturnValue.Sleep(ctx.VM, (uint)sleepTicks);
+            return new VMReturnValue(new VMSleepContinueHandler(ctx.VM, (uint)sleepTicks));
         }
     }
 }

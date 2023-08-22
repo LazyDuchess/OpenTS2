@@ -17,7 +17,10 @@ namespace OpenTS2.SimAntics
         public BHAVAsset BHAV;
         public ushort StackObjectID = 0;
         public int CurrentNode = 0;
-        public Func<VMReturnValue.ExitCode> CurrentContinueCallback = null;
+        /// <summary>
+        /// Current blocking behavior. As long as this variable's Tick() returns Continue this thread won't move.
+        /// </summary>
+        public VMContinueHandler CurrentContinueHandler = null;
         public short[] Locals;
         public short[] Arguments;
         public VMStackFrame(BHAVAsset bhav, VMStack stack)
@@ -28,35 +31,35 @@ namespace OpenTS2.SimAntics
             Arguments = new short[BHAV.ArgumentCount];
         }
 
-        public VMReturnValue Tick()
+        public VMExitCode Tick()
         {
-            if (CurrentContinueCallback != null)
+            if (CurrentContinueHandler != null)
             {
-                var primReturn = new VMReturnValue { Code = CurrentContinueCallback.Invoke() };
-                if (primReturn.Code == VMReturnValue.ExitCode.Continue)
-                    return primReturn;
+                var returnCode = CurrentContinueHandler.Tick();
+                if (returnCode == VMExitCode.Continue)
+                    return returnCode;
                 else
                 {
-                    return AdvanceNodeAndRunTick(primReturn);
+                    return AdvanceNodeAndRunTick(returnCode);
                 }
             }
             return RunCurrentTick();
         }
 
-        VMReturnValue AdvanceNodeAndRunTick(VMReturnValue returnValue)
+        VMExitCode AdvanceNodeAndRunTick(VMExitCode exitCode)
         {
             var currentNode = GetCurrentNode();
             ushort returnTarget = 0;
-            if (returnValue.Code == VMReturnValue.ExitCode.True)
+            if (exitCode == VMExitCode.True)
                 returnTarget = currentNode.TrueTarget;
             else
                 returnTarget = currentNode.FalseTarget;
             switch (returnTarget)
             {
                 case BHAVAsset.Node.FalseReturnValue:
-                    return VMReturnValue.ReturnFalse;
+                    return VMExitCode.False;
                 case BHAVAsset.Node.TrueReturnValue:
-                    return VMReturnValue.ReturnTrue;
+                    return VMExitCode.True;
                 case BHAVAsset.Node.ErrorReturnValue:
                     throw new Exception("Jumped to Error.");
                 default:
@@ -65,7 +68,7 @@ namespace OpenTS2.SimAntics
             }
         }
 
-        VMReturnValue RunCurrentTick()
+        VMExitCode RunCurrentTick()
         {
             var currentNode = GetCurrentNode();
             if (currentNode != null)
@@ -81,18 +84,18 @@ namespace OpenTS2.SimAntics
                 {
                     var primReturn = prim.Execute(context);
 
-                    if (primReturn.Code == VMReturnValue.ExitCode.Continue)
-                        primReturn.Code = primReturn.ContinueCallback.Invoke();
+                    if (primReturn.Code == VMExitCode.Continue)
+                        primReturn.Code = primReturn.ContinueHandler.Tick();
 
-                    if (primReturn.Code == VMReturnValue.ExitCode.Continue)
+                    if (primReturn.Code == VMExitCode.Continue)
                     {
-                        CurrentContinueCallback = primReturn.ContinueCallback;
-                        return primReturn;
+                        CurrentContinueHandler = primReturn.ContinueHandler;
+                        return primReturn.Code;
                     }
                     else
                     {
-                        CurrentContinueCallback = null;
-                        return AdvanceNodeAndRunTick(primReturn);
+                        CurrentContinueHandler = null;
+                        return AdvanceNodeAndRunTick(primReturn.Code);
                     }
                 }
                 else
@@ -105,7 +108,7 @@ namespace OpenTS2.SimAntics
                     }
                 }
             }
-            return VMReturnValue.ReturnFalse;
+            return VMExitCode.False;
         }
 
         enum GoSubFormat
@@ -220,7 +223,7 @@ namespace OpenTS2.SimAntics
         public void SetCurrentNode(int nodeIndex)
         {
             CurrentNode = nodeIndex;
-            CurrentContinueCallback = null;
+            CurrentContinueHandler = null;
         }
         public BHAVAsset.Node GetCurrentNode()
         {
