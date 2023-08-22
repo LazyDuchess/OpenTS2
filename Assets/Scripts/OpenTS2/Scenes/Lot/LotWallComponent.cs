@@ -508,6 +508,7 @@ namespace OpenTS2.Scenes.Lot
 
             Vector3[] wallVertices = new Vector3[4];
             Vector3[] wallVertices2 = new Vector3[4];
+            Vector3[] endVertices = new Vector3[4];
             Vector2[] wallUVs = new Vector2[4];
 
             Vector3[] thicknessVerts = new Vector3[6];
@@ -620,7 +621,7 @@ namespace OpenTS2.Scenes.Lot
 
                     for (int j = 0; j < 6; j++)
                     {
-                        thicknessUVs[j] = new Vector2(thicknessVerts[j].x, 0);
+                        thicknessUVs[j] = new Vector2(0, thicknessVerts[j].z);
                     }
 
                     int thicknessBase = thicknessComp.GetVertexIndex();
@@ -660,6 +661,11 @@ namespace OpenTS2.Scenes.Lot
 
                 if (rPattern != null)
                 {
+                    wallUVs[0].x = 1;
+                    wallUVs[1].x = 0;
+                    wallUVs[2].x = 0;
+                    wallUVs[3].x = 1;
+
                     var rVertStart = rPattern.GetVertexIndex();
                     rPattern.AddVertices(isThick ? wallVertices2 : wallVertices, wallUVs);
 
@@ -670,6 +676,59 @@ namespace OpenTS2.Scenes.Lot
                     rPattern.AddIndex(rVertStart + 2);
                     rPattern.AddIndex(rVertStart + 3);
                     rPattern.AddIndex(rVertStart);
+                }
+
+                // Cap off wall ends.
+                if (toI.Simple && toI.IncomingLines.Count == 1)
+                {
+                    float bottomV = (wallVertices[2].y - wallVertices[1].y) / WallHeight;
+
+                    endVertices[0] = wallVertices[1];
+                    endVertices[1] = wallVertices2[1];
+                    endVertices[2] = wallVertices2[2];
+                    endVertices[3] = wallVertices[2];
+
+                    wallUVs[0] = new Vector2(1 - Thickness * 2, bottomV);
+                    wallUVs[1] = new Vector2(1, bottomV);
+                    wallUVs[2] = new Vector2(1, 0);
+                    wallUVs[3] = new Vector2(1 - Thickness * 2, 0);
+
+                    var rVertStart = rPattern.GetVertexIndex();
+                    rPattern.AddVertices(endVertices, wallUVs);
+
+                    rPattern.AddIndex(rVertStart);
+                    rPattern.AddIndex(rVertStart + 3);
+                    rPattern.AddIndex(rVertStart + 2);
+
+                    rPattern.AddIndex(rVertStart + 2);
+                    rPattern.AddIndex(rVertStart + 1);
+                    rPattern.AddIndex(rVertStart + 0);
+                }
+
+                if (fromI.Simple && fromI.IncomingLines.Count == 1)
+                {
+                    float bottomV = (wallVertices[3].y - wallVertices[0].y) / WallHeight;
+
+                    endVertices[0] = wallVertices2[0];
+                    endVertices[1] = wallVertices[0];
+                    endVertices[2] = wallVertices[3];
+                    endVertices[3] = wallVertices2[3];
+
+                    wallUVs[0] = new Vector2(1 - Thickness * 2, bottomV);
+                    wallUVs[1] = new Vector2(1, bottomV);
+                    wallUVs[2] = new Vector2(1, 0);
+                    wallUVs[3] = new Vector2(1 - Thickness * 2, 0);
+
+                    var lVertStart = lPattern.GetVertexIndex();
+                    lPattern.AddVertices(endVertices, wallUVs);
+
+                    lPattern.AddIndex(lVertStart);
+                    lPattern.AddIndex(lVertStart + 3);
+                    lPattern.AddIndex(lVertStart + 2);
+
+                    lPattern.AddIndex(lVertStart + 2);
+                    lPattern.AddIndex(lVertStart + 1);
+                    lPattern.AddIndex(lVertStart + 0);
                 }
             }
 
