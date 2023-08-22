@@ -8,21 +8,23 @@ namespace OpenTS2.SimAntics
 {
     public class VMSleepContinueHandler : VMContinueHandler
     {
-        public bool AllowPush = false;
         public uint TargetTick = 0;
-        VM _vm;
+        VMStack _stack;
 
-        public VMSleepContinueHandler(VM vm, uint ticks, bool allowPush = false)
+        public VMSleepContinueHandler(VMStack stack, uint ticks, bool allowPush = false)
         {
-            _vm = vm;
+            _stack = stack;
+            var vm = _stack.Entity.VM;
             TargetTick = vm.CurrentTick + ticks;
-            AllowPush = allowPush;
         }
 
-        protected override void Handle()
+        public override VMExitCode Tick()
         {
-            if (_vm.CurrentTick >= TargetTick)
-                ExitCode = VMExitCode.True;
+            if (_stack.Interrupted)
+                return VMExitCode.True;
+            if (_stack.Entity.VM.CurrentTick >= TargetTick)
+                return VMExitCode.True;
+            return VMExitCode.Continue;
         }
     }
 }

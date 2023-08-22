@@ -13,13 +13,7 @@ namespace OpenTS2.SimAntics.Primitives
             var stackObject = ctx.VM.GetEntityByID(ctx.StackFrame.StackObjectID);
             if (stackObject == null)
                 throw new KeyNotFoundException($"Couldn't find Object with ID {ctx.StackFrame.StackObjectID}");
-            var stackFrame = stackObject.Stack.GetCurrentFrame();
-            if (stackFrame != null)
-            {
-                var currentContinueHandler = stackFrame.CurrentContinueHandler as VMSleepContinueHandler;
-                if (currentContinueHandler != null)
-                    currentContinueHandler.ExitCode = VMExitCode.True;
-            }
+            stackObject.Stack.Interrupt();
             return VMReturnValue.ReturnTrue;
         }
     }

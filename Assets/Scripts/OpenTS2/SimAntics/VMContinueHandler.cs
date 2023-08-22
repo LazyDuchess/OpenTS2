@@ -6,17 +6,8 @@ using System.Threading.Tasks;
 
 namespace OpenTS2.SimAntics
 {
-    public class VMContinueHandler
+    public abstract class VMContinueHandler
     {
-        public VMExitCode ExitCode = VMExitCode.Continue;
-        public VMExitCode Tick()
-        {
-            Handle();
-            return ExitCode;
-        }
-        protected virtual void Handle()
-        {
-
-        }
+        public abstract VMExitCode Tick();
     }
 }
