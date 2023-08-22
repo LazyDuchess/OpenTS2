@@ -13,6 +13,7 @@ namespace OpenTS2.SimAntics
     /// </summary>
     public class VM
     {
+        public VMScheduler Scheduler = new VMScheduler();
         public List<VMEntity> Entities = new List<VMEntity>();
         public uint CurrentTick = 0;
 
@@ -20,10 +21,12 @@ namespace OpenTS2.SimAntics
 
         public void Tick()
         {
+            Scheduler.OnBeginTick(this);
             foreach(var entity in Entities)
             {
                 entity.Tick();
             }
+            Scheduler.OnEndTick(this);
             CurrentTick++;
         }
 

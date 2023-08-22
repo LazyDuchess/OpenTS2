@@ -24,7 +24,7 @@ public class VMTest
     [Test]
     public void TestLoadsBHAV()
     {
-        var bhav = ContentProvider.Get().GetAsset<BHAVAsset>(new ResourceKey(0x1001, _groupID, TypeIDs.BHAV));
+        var bhav = VM.GetBHAV(0x1001, _groupID);
 
         Assert.That(bhav.FileName, Is.EqualTo("OpenTS2 BHAV Test"));
         Assert.That(bhav.ArgumentCount, Is.EqualTo(1));
@@ -34,7 +34,7 @@ public class VMTest
     [Test]
     public void TestRunBHAV()
     {
-        var bhav = ContentProvider.Get().GetAsset<BHAVAsset>(new ResourceKey(0x1001, _groupID, TypeIDs.BHAV));
+        var bhav = VM.GetBHAV(0x1001, _groupID);
 
         var vm = new VM();
         var entity = new VMEntity(vm);
@@ -56,7 +56,7 @@ public class VMTest
         vm.Tick();
         Assert.That(entity.Temps[0], Is.EqualTo(1200));
         // Interrupt idle here, so that it doesn't sleep for 20000 ticks.
-        entity.Stack.Interrupt = true;
+        vm.Scheduler.ScheduleInterrupt(entity.Stack);
         vm.Tick();
         Assert.That(entity.Temps[0], Is.EqualTo(0));
 

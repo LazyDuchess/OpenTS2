@@ -13,7 +13,7 @@ namespace OpenTS2.SimAntics.Primitives
             var stackObject = ctx.VM.GetEntityByID(ctx.StackFrame.StackObjectID);
             if (stackObject == null)
                 throw new KeyNotFoundException($"Couldn't find Object with ID {ctx.StackFrame.StackObjectID}");
-            stackObject.Stack.Interrupt = true;
+            ctx.VM.Scheduler.ScheduleInterrupt(ctx.StackObjectEntity.Stack);
             return VMReturnValue.ReturnTrue;
         }
     }
