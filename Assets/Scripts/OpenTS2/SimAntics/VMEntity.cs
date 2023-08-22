@@ -11,7 +11,7 @@ namespace OpenTS2.SimAntics
     /// </summary>
     public class VMEntity
     {
-        public ushort ID = 1;
+        public short ID = 1;
         public short[] Temps = new short[20];
         public VMStack Stack;
         public VM VM;

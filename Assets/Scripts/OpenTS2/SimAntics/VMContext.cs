@@ -15,6 +15,7 @@ namespace OpenTS2.SimAntics
         public BHAVAsset.Node Node;
         public VMStack Stack => StackFrame.Stack;
         public VMEntity Entity => StackFrame.Stack.Entity;
+        public VMEntity StackObjectEntity => VM.GetEntityByID(StackFrame.StackObjectID);
         public VM VM => Entity.VM;
 
         // TODO - still super incomplete, just enough to run basic scripts.
@@ -25,6 +26,11 @@ namespace OpenTS2.SimAntics
                 VMDataSource.Literal => (short)dataIndex,
                 VMDataSource.Temps => Entity.Temps[dataIndex],
                 VMDataSource.Params => StackFrame.Arguments[dataIndex],
+                VMDataSource.StackObjectID => StackFrame.StackObjectID,
+                // TODO - unconfirmed.
+                VMDataSource.TempByTempIndex => Entity.Temps[Entity.Temps[dataIndex]],
+                VMDataSource.StackObjectsTemp => StackObjectEntity.Temps[dataIndex],
+                VMDataSource.Local => StackFrame.Locals[dataIndex],
                 _ => throw new ArgumentOutOfRangeException("SimAntics data source out of range!")
             };
         }
@@ -38,6 +44,18 @@ namespace OpenTS2.SimAntics
                     return;
                 case VMDataSource.Params:
                     StackFrame.Arguments[dataIndex] = value;
+                    return;
+                case VMDataSource.StackObjectID:
+                    StackFrame.StackObjectID = value;
+                    return;
+                case VMDataSource.TempByTempIndex:
+                    Entity.Temps[Entity.Temps[dataIndex]] = value;
+                    return;
+                case VMDataSource.StackObjectsTemp:
+                    StackObjectEntity.Temps[dataIndex] = value;
+                    return;
+                case VMDataSource.Local:
+                    StackFrame.Locals[dataIndex] = value;
                     return;
             }
             throw new ArgumentOutOfRangeException("SimAntics data source out of range!");

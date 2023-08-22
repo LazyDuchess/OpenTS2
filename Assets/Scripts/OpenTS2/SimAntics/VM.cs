@@ -29,7 +29,7 @@ namespace OpenTS2.SimAntics
             return ContentProvider.Get().GetAsset<BHAVAsset>(new ResourceKey(id, groupID, TypeIDs.BHAV));
         }
 
-        public VMEntity GetEntityByID(ushort id)
+        public VMEntity GetEntityByID(short id)
         {
             var ents = Entities.Where((ent) => ent.ID == id ).ToList();
             if (ents.Count == 0)

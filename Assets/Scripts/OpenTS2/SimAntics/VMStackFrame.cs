@@ -15,7 +15,7 @@ namespace OpenTS2.SimAntics
     {
         public VMStack Stack;
         public BHAVAsset BHAV;
-        public ushort StackObjectID = 0;
+        public short StackObjectID = 0;
         public int CurrentNode = 0;
         /// <summary>
         /// Current blocking behavior. As long as this variable's Tick() returns Continue this thread won't move.
