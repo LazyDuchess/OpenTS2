@@ -7,6 +7,9 @@ using OpenTS2.Content;
 
 namespace OpenTS2.SimAntics
 {
+    /// <summary>
+    /// Script in the SimAntics language. Handles most of the simulation.
+    /// </summary>
     public class BHAVAsset : AbstractAsset
     {
         public string FileName = "";

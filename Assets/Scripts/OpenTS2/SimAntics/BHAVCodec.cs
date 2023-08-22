@@ -12,6 +12,10 @@ using UnityEngine;
 
 namespace OpenTS2.SimAntics
 {
+    /// <summary>
+    /// Parses a BHAV resource into an asset.
+    /// </summary>
+    /// https://modthesims.info/wiki.php?title=42484156
     [Codec(TypeIDs.BHAV)]
     public class BHAVCodec : AbstractCodec
     {

@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace OpenTS2.SimAntics
 {
+    /// <summary>
+    /// SimAntics virtual machine context to be sent to primitives and such.
+    /// </summary>
     public struct VMContext
     {
         public VMStackFrame StackFrame;

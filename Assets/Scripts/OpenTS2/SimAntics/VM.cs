@@ -7,6 +7,9 @@ using UnityEngine;
 
 namespace OpenTS2.SimAntics
 {
+    /// <summary>
+    /// SimAntics virtual machine.
+    /// </summary>
     public class VM
     {
         public List<VMEntity> Entities = new List<VMEntity>();

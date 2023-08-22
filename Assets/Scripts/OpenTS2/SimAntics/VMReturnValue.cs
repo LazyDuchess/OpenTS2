@@ -15,6 +15,9 @@ namespace OpenTS2.SimAntics
             Continue
         }
         public ExitCode Code;
+        /// <summary>
+        /// This callback will be invoked every tick if the ExitCode is Continue until it returns something other than Continue.
+        /// </summary>
         public Func<ExitCode> ContinueCallback = null;
         public static VMReturnValue ReturnTrue = new VMReturnValue { Code = ExitCode.True };
         public static VMReturnValue ReturnFalse = new VMReturnValue { Code = ExitCode.False };

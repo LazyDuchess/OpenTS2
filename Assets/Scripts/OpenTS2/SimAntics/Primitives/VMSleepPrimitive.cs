@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace OpenTS2.SimAntics.Primitives
 {
+    /// <summary>
+    /// Sleeps the current thread for a number of ticks.
+    /// </summary>
     public class VMSleepPrimitive : VMPrimitive
     {
         public override VMReturnValue Execute(VMContext ctx)

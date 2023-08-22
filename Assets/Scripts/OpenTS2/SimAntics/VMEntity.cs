@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace OpenTS2.SimAntics
 {
+    /// <summary>
+    /// This is a process or thread running in the SimAntics virtual machine, with its own stack and temp variables.
+    /// </summary>
     public class VMEntity
     {
         public ushort ID = 1;

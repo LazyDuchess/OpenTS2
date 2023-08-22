@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace OpenTS2.SimAntics
 {
+    /// <summary>
+    /// Stack of scripts to run on a SimAntics entity/thread.
+    /// </summary>
     public class VMStack
     {
         // For check trees and other things that should execute and return immediately we should set this to false.

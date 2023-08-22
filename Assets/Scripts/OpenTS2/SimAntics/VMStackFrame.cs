@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace OpenTS2.SimAntics
 {
+    /// <summary>
+    /// A frame in a SimAntics stack.
+    /// </summary>
     public class VMStackFrame
     {
         public VMStack Stack;
