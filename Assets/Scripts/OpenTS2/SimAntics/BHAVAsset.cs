@@ -23,10 +23,36 @@ namespace OpenTS2.SimAntics
             public ushort TrueTarget;
             public ushort FalseTarget;
             public byte[] Operands;
+            public byte Version;
+
+            public byte GetOperand(int index)
+            {
+                if (index < 0)
+                    return 0;
+                if (index >= Operands.Length)
+                    return 0;
+                return Operands[index];
+            }
+
+            public byte[] GetOperands(int index, int length)
+            {
+                var array = new byte[length];
+                for(var i=0;i<length;i++)
+                {
+                    var ind = index + i;
+                    array[i] = GetOperand(ind);
+                }
+                return array;
+            }
 
             public ushort GetUInt16(int operand)
             {
-                return BitConverter.ToUInt16(Operands, operand);
+                return BitConverter.ToUInt16(GetOperands(operand,2), 0);
+            }
+
+            public short GetInt16(int operand)
+            {
+                return BitConverter.ToInt16(GetOperands(operand, 2), 0);
             }
         }
     }

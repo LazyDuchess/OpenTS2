@@ -33,7 +33,7 @@ namespace OpenTS2.SimAntics.Primitives
             Abs,
             Assign32BitValue
         }
-        public override VMReturnValue Execute(VMPrimitiveContext ctx)
+        public override VMReturnValue Execute(VMContext ctx)
         {
             var lhsData = ctx.Node.GetUInt16(0);
             var rhsData = ctx.Node.GetUInt16(2);

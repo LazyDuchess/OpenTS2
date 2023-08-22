@@ -20,9 +20,9 @@ namespace OpenTS2.SimAntics
             CurrentTick++;
         }
 
-        public BHAVAsset GetGlobalBHAV(ushort id)
+        public static BHAVAsset GetBHAV(ushort id, uint groupID)
         {
-            return ContentProvider.Get().GetAsset<BHAVAsset>(new ResourceKey((uint)id, GroupIDs.Global, TypeIDs.BHAV));
+            return ContentProvider.Get().GetAsset<BHAVAsset>(new ResourceKey(id, groupID, TypeIDs.BHAV));
         }
     }
 }

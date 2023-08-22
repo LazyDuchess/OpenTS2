@@ -8,7 +8,7 @@ namespace OpenTS2.SimAntics.Primitives
 {
     public class VMSleepPrimitive : VMPrimitive
     {
-        public override VMReturnValue Execute(VMPrimitiveContext ctx)
+        public override VMReturnValue Execute(VMContext ctx)
         {
             var argumentIndex = ctx.Node.GetUInt16(0);
             var sleepTicks = ctx.StackFrame.Arguments[argumentIndex];

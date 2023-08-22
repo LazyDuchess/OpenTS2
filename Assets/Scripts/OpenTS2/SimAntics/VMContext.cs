@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace OpenTS2.SimAntics
 {
-    public struct VMPrimitiveContext
+    public struct VMContext
     {
         public VMStackFrame StackFrame;
         public BHAVAsset.Node Node;

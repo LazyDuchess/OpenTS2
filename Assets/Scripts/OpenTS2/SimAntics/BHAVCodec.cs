@@ -41,6 +41,7 @@ namespace OpenTS2.SimAntics
             // Nodes
             for (var i=0;i<instructionCount;i++)
             {
+                byte nodeVersion = 0;
                 ushort opcode, trueTarget, falseTarget;
                 byte[] operands;
 
@@ -63,7 +64,7 @@ namespace OpenTS2.SimAntics
                     opcode = reader.ReadUInt16();
                     trueTarget = reader.ReadByte();
                     falseTarget = reader.ReadByte();
-                    var nodeVersion = reader.ReadByte();
+                    nodeVersion = reader.ReadByte();
                     operands = reader.ReadBytes(16);
                 }
                 else
@@ -71,7 +72,7 @@ namespace OpenTS2.SimAntics
                     opcode = reader.ReadUInt16();
                     trueTarget = reader.ReadUInt16();
                     falseTarget = reader.ReadUInt16();
-                    var nodeVersion = reader.ReadByte();
+                    nodeVersion = reader.ReadByte();
                     operands = reader.ReadBytes(16);
                 }
 
@@ -84,7 +85,8 @@ namespace OpenTS2.SimAntics
                     OpCode = opcode,
                     TrueTarget = trueTarget,
                     FalseTarget = falseTarget,
-                    Operands = operands
+                    Operands = operands,
+                    Version = nodeVersion
                 };
 
                 asset.Nodes.Add(node);
