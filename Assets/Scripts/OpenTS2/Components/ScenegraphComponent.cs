@@ -29,7 +29,7 @@ namespace OpenTS2.Components
             return CreateRootScenegraph(new []{ resourceAsset });
         }
 
-        public static GameObject CreateRootScenegraph(ScenegraphResourceAsset[] resourceAssets)
+        public static GameObject CreateRootScenegraph(params ScenegraphResourceAsset[] resourceAssets)
         {
             var scenegraph = CreateScenegraphComponent(resourceAssets);
             var simsTransform = new GameObject(scenegraph.name + "_transform");

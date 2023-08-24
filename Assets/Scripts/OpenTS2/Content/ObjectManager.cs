@@ -17,7 +17,7 @@ namespace OpenTS2.Content
         }
         
         static ObjectManager s_instance;
-        public List<TSObject> Objects
+        public List<ObjectDefinitionAsset> Objects
         {
             get
             {
@@ -25,7 +25,7 @@ namespace OpenTS2.Content
             }
         }
 
-        Dictionary<uint, TSObject> _objectByGUID = new Dictionary<uint, TSObject>();
+        Dictionary<uint, ObjectDefinitionAsset> _objectByGUID = new Dictionary<uint, ObjectDefinitionAsset>();
         readonly ContentProvider _provider;
 
         public ObjectManager(ContentProvider provider)
@@ -36,25 +36,17 @@ namespace OpenTS2.Content
 
         public void Initialize()
         {
-            _objectByGUID = new Dictionary<uint, TSObject>();
+            _objectByGUID = new Dictionary<uint, ObjectDefinitionAsset>();
             var objectList = _provider.GetAssetsOfType<ObjectDefinitionAsset>(TypeIDs.OBJD); 
             foreach(ObjectDefinitionAsset element in objectList)
             {
                 RegisterObject(element);
             }
-            //Listeners could be useful in the future or for IDE stuff but not for now.
-            /*
-            var listener = new AssetListener<ObjectDefinitionAsset>(TypeIDs.OBJD);
-            listener.Attach(provider);
-            listener.OnUpdateEventHandler += InternalRegister;
-            listener.OnRemoveEventHandler += InternalRemove;*/
         }
 
-        TSObject RegisterObject(ObjectDefinitionAsset objd)
+        void RegisterObject(ObjectDefinitionAsset objd)
         {
-            var tsObject = new TSObject(objd);
-            _objectByGUID[objd.GUID] = tsObject;
-            return tsObject;
+            _objectByGUID[objd.GUID] = objd;
         }
     }
 }

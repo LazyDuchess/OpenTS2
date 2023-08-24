@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using OpenTS2.Common;
+using OpenTS2.Common.Utils;
 using OpenTS2.Content;
 using OpenTS2.Content.DBPF.Scenegraph;
 using OpenTS2.Files.Formats.DBPF;
 using OpenTS2.Files.Formats.DBPF.Scenegraph.Block;
 using UnityEngine;
+using UnityEngine.Animations;
 using UnityEngine.Animations.Rigging;
 
 namespace OpenTS2.Components
@@ -15,6 +17,7 @@ namespace OpenTS2.Components
     /// This component represents a rendered out sims character with their head, hair and body meshes in place under one
     /// scenegraph component.
     /// </summary>
+    [RequireComponent(typeof(AssetReferenceComponent))]
     public class SimCharacterComponent : MonoBehaviour
     {
         public static SimCharacterComponent CreateNakedBaseSim()
@@ -35,12 +38,15 @@ namespace OpenTS2.Components
 
             // Create a scenegraph with all 3 resources.
             var simsObject =
-                ScenegraphComponent.CreateRootScenegraph(new[] { skeletonAsset, bodyAsset, baldHairAsset, baseFaceAsset });
+                ScenegraphComponent.CreateRootScenegraph(skeletonAsset, bodyAsset, baldHairAsset, baseFaceAsset);
             var scenegraph = simsObject.GetComponentInChildren<ScenegraphComponent>();
 
             var simCharacterObject = new GameObject("sim_character", typeof(SimCharacterComponent));
             // Parent the scenegraph to the created SimCharacterComponent.
             simsObject.transform.parent = simCharacterObject.transform;
+
+            // Hold references to the scenegraph resources we use.
+            simCharacterObject.GetComponent<AssetReferenceComponent>().AddReference(skeletonAsset, bodyAsset, baldHairAsset, baseFaceAsset);
 
             var simsComponent = simCharacterObject.GetComponent<SimCharacterComponent>();
             simsComponent.SetupAnimationRig(scenegraph);
@@ -54,11 +60,23 @@ namespace OpenTS2.Components
         /// This is the unity object that all the animation rigging constraints get placed into.
         /// </summary>
         private GameObject _animationRig;
+
         private RigBuilder _rigBuilder;
+
         /// <summary>
         /// Set of IK chains that have already been applied to this sim so they don't get re-applied.
         /// </summary>
         private readonly HashSet<uint> _appliedIKChains = new HashSet<uint>();
+
+        /// <summary>
+        /// These are basically parent bones of IK chains, this is needed so that if an animation updates the position
+        /// or rotation of these, unity's IK system responds and moves appropriately.
+        /// </summary>
+        private static readonly string[] BonesThatUpdateIK =
+        {
+            "root_trans", "root_rot", "pelvis", "spine0", "spine1", "spine2", "r_clavicle", "l_clavicle",
+            "l_handcontrol0", "r_handcontrol0"
+        };
 
         private void SetupAnimationRig(ScenegraphComponent scene)
         {
@@ -78,28 +96,73 @@ namespace OpenTS2.Components
 
             // Add a child rig to the skeleton.
             _animationRig = new GameObject("UnityAnimationRig", typeof(Rig));
-            _animationRig.transform.SetParent(skeleton.transform, worldPositionStays:false);
+            _animationRig.transform.SetParent(skeleton.transform, worldPositionStays: false);
+
+            // HACK: In the auskel model, for some reason the bones that represent the IK goals for the hands are
+            // parented to the root_trans of the skeleton. This is done even though in animations the IK goal bones
+            // get moved relative to the model root, NOT root_trans.
+            //
+            // We re-parent them here to the base model to avoid this issue.
+            Scenegraph.BoneNamesToTransform["l_handcontrol0"].SetParent(skeleton.transform, worldPositionStays:true);
+            Scenegraph.BoneNamesToTransform["r_handcontrol0"].SetParent(skeleton.transform, worldPositionStays:true);
+            Scenegraph.BoneNamesToRelativePaths["l_handcontrol0"]    = "auskel/l_handcontrol0";
+            Scenegraph.BoneNamesToRelativePaths["l_handcontrol0rot"] = "auskel/l_handcontrol0/l_handcontrol0rot";
+            Scenegraph.BoneNamesToRelativePaths["r_handcontrol0"]    = "auskel/r_handcontrol0";
+            Scenegraph.BoneNamesToRelativePaths["r_handcontrol0rot"] = "auskel/r_handcontrol0/r_handcontrol0rot";
+            // HACK.
+
+            // Add RigTransforms to the sim's root translation and rotation bones. This allows the unity rigging
+            // animation system to move the legs to the proper IK goals if the rest of the skeleton moves.
+            foreach (var ikUpdatingBone in BonesThatUpdateIK)
+            {
+                Scenegraph.BoneNamesToTransform[ikUpdatingBone].gameObject.AddComponent<RigTransform>();
+            }
+
+            AddGizmosAroundInverseKinmaticsPositions();
 
             _rigBuilder.layers.Add(new RigLayer(_animationRig.GetComponent<Rig>()));
             _rigBuilder.layers[0].Initialize(animator);
             _rigBuilder.Build();
         }
 
+        private void AddGizmosAroundInverseKinmaticsPositions()
+        {
+            // Add some effectors around the foot control points to see what animations should look like.
+            var cubePrimitive = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            var cubeMesh = cubePrimitive.GetComponent<MeshFilter>().sharedMesh;
+            _rigBuilder.AddEffector(Scenegraph.BoneNamesToTransform["l_foot_ikctr"],
+                new RigEffectorData.Style()
+                    { color = new Color(1.0f, 0.0f, 0.0f, 0.5f), size = 0.05f, shape = cubeMesh });
+            _rigBuilder.AddEffector(Scenegraph.BoneNamesToTransform["r_foot_ikctr"],
+                new RigEffectorData.Style()
+                    { color = new Color(0.0f, 1.0f, 0.0f, 0.5f), size = 0.05f, shape = cubeMesh });
+            Destroy(cubePrimitive);
+
+            var spherePrimitive = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            var sphereMesh = cubePrimitive.GetComponent<MeshFilter>().sharedMesh;
+            _rigBuilder.AddEffector(Scenegraph.BoneNamesToTransform["l_handcontrol0"],
+                new RigEffectorData.Style()
+                    { color = new Color(1.0f, 0.0f, 0.0f, 0.5f), size = 0.05f, shape = sphereMesh });
+            _rigBuilder.AddEffector(Scenegraph.BoneNamesToTransform["l_hand_ikpole"],
+                new RigEffectorData.Style()
+                    { color = new Color(0.7f, 0.2f, 0.0f, 0.5f), size = 0.04f, shape = sphereMesh });
+            _rigBuilder.AddEffector(Scenegraph.BoneNamesToTransform["r_handcontrol0"],
+                new RigEffectorData.Style()
+                    { color = new Color(0.0f, 1.0f, 0.0f, 0.5f), size = 0.05f, shape = sphereMesh });
+            _rigBuilder.AddEffector(Scenegraph.BoneNamesToTransform["r_hand_ikpole"],
+                new RigEffectorData.Style()
+                    { color = new Color(0.0f, 0.8f, 0.4f, 0.5f), size = 0.04f, shape = sphereMesh });
+            Destroy(spherePrimitive);
+        }
+
         public void AddInverseKinematicsFromAnimation(AnimResourceConstBlock anim)
         {
-            AnimResourceConstBlock.AnimTarget auSkelTarget = null;
-            foreach (var target in anim.AnimTargets)
-            {
-                if (target.TagName.ToLower() == "auskel")
-                {
-                    auSkelTarget = target;
-                }
-            }
-
+            var auSkelTarget = anim.AnimTargets.FirstOrDefault(t => t.TagName.ToLower() == "auskel");
             if (auSkelTarget == null)
             {
                 return;
             }
+
             AddInverseKinematicsFromIKChains(auSkelTarget.IKChains);
         }
 
@@ -119,6 +182,7 @@ namespace OpenTS2.Components
                     Debug.LogWarning($"begin bone crc from ik chain {chain.BeginBoneCrc:X} not found");
                     continue;
                 }
+
                 if (!Scenegraph.BoneCRC32ToTransform.ContainsKey(chain.EndBoneCrc))
                 {
                     Debug.LogWarning($"end bone crc from ik chain {chain.EndBoneCrc:X} not found");
@@ -127,18 +191,12 @@ namespace OpenTS2.Components
 
                 Debug.Assert(chain.NumIkTargets == 1, "ikChain with more than 1 target");
                 var target = chain.IkTargets[0];
-                Debug.Assert(target.TranslationCrc == target.RotationCrc, "ikTarget with different translation and rotation objects");
+                Debug.Assert(target.TranslationCrc == target.RotationCrc,
+                    "ikTarget with different translation and rotation objects");
                 if (!Scenegraph.BoneCRC32ToTransform.ContainsKey(target.TranslationCrc))
                 {
                     Debug.LogWarning($"ik target {target.TranslationCrc:X} not found");
                     continue;
-                }
-
-                // TODO: temporary hack that seems to fix hands. Might have to do something with mirroring animations.
-                if (Scenegraph.BoneCRC32ToTransform[chain.BeginBoneCrc].name.Contains("upperarm"))
-                {
-                    chain.BeginBoneCrc = chain.BeginBoneMirrorCrc;
-                    chain.EndBoneCrc = chain.EndBoneMirrorCrc;
                 }
 
                 var root = Scenegraph.BoneCRC32ToTransform[chain.BeginBoneCrc];
@@ -162,7 +220,9 @@ namespace OpenTS2.Components
                 {
                     twoBoneConstraint.hint = Scenegraph.BoneCRC32ToTransform[chain.TwistVectorCrc];
                 }
+
                 ikChainObj.GetComponent<TwoBoneIKConstraint>().data = twoBoneConstraint;
+                ikChainObj.transform.parent = _animationRig.transform;
 
                 if (target.Rotation2Crc != 0)
                 {
@@ -173,13 +233,13 @@ namespace OpenTS2.Components
                         constrainedObject = tip,
                         sourceObject = Scenegraph.BoneCRC32ToTransform[target.Rotation2Crc],
                         rotationWeight = 1.0f,
-                        positionWeight = 0.0f
+                        positionWeight = 0.0f,
+                        space = OverrideTransformData.Space.Local,
                     };
                     rotationConstraint.GetComponent<OverrideTransform>().data = rotationOverrideConstraint;
                     rotationConstraint.transform.parent = _animationRig.transform;
                 }
 
-                ikChainObj.transform.parent = _animationRig.transform;
                 _appliedIKChains.Add(chain.NameCrc);
             }
 
@@ -203,6 +263,7 @@ namespace OpenTS2.Components
             {
                 middle = middle.parent;
             }
+
             return middle;
         }
 
@@ -216,6 +277,7 @@ namespace OpenTS2.Components
                 {
                     continue;
                 }
+
                 bones.Add(bone);
                 GetAllBoneTransformsForVisualization(bone, bones);
             }

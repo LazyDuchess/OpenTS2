@@ -62,6 +62,9 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             public uint TwistVectorCrc;
             public uint TwistVectorBoneCrc;
             public uint TwistVectorMirrorBoneCRC;
+            /// <summary>
+            /// CRC of the channel name that determines the IK's weight.
+            /// </summary>
             public uint IkWeightCRC;
 
             public class Target
@@ -98,11 +101,15 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                 ? (ChannelType)ChannelTypeBits
                 : throw new InvalidCastException($"Channel type has invalid value: {ChannelTypeBits}");
 
-            // Calculated from the top 8 bits of the most-significant byte of ChannelFlags.
+            // Calculated from the top 3 bits of the most-significant byte of ChannelFlags.
             public uint NumComponents => (ChannelFlags >> 29) & 0b111;
 
             // Bottom 15 bits give the channel duration.
             public uint DurationTicks => ChannelFlags & 0x7FFF;
+
+            // Bits 1 to 5 of the most-significant byte are the ik chain idx for this channel.
+            private uint IKChainIdxBits => (ChannelFlags >> 25) & 0b1111;
+            public int IKChainIdx => IKChainIdxBits == 0b1111 ? -1 : (int)IKChainIdxBits;
 
             public ChannelComponent[] Components;
         }
