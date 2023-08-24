@@ -64,7 +64,6 @@ public class SimAnticsTest
         vm.Scheduler.ScheduleInterrupt(entity.Stack);
         vm.Tick();
         Assert.That(entity.Temps[0], Is.EqualTo(0));
-
     }
 
     [Test]
@@ -72,5 +71,27 @@ public class SimAnticsTest
     {
         var vmExpressionPrim = VMPrimitiveRegistry.GetPrimitive(0x2);
         Assert.That(vmExpressionPrim, Is.TypeOf(typeof(VMExpression)));
+    }
+
+    [Test]
+    public void TestBHAVThrowsOnInfiniteLoop()
+    {
+        // VM Entities need to be attached to an OBJD to be aware of private/semiglobal scope.
+        var testObjectDefinition = new ObjectDefinitionAsset();
+        testObjectDefinition.TGI = new ResourceKey(1, _groupID, TypeIDs.OBJD);
+
+        var bhav = VM.GetBHAV(0x1003, _groupID);
+
+        var vm = new VM();
+        var entity = new VMEntity(testObjectDefinition);
+        vm.AddEntity(entity);
+
+        var stackFrame = new VMStackFrame(bhav, entity.Stack);
+        entity.Stack.Frames.Push(stackFrame);
+
+        Assert.Throws<SimAnticsException>(() =>
+        {
+            vm.Tick();
+        });
     }
 }

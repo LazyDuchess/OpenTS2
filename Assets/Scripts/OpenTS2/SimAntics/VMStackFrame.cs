@@ -23,6 +23,7 @@ namespace OpenTS2.SimAntics
         public VMContinueHandler CurrentContinueHandler = null;
         public short[] Locals;
         public short[] Arguments;
+        private static int MaxIterations = 500000;
 
         public VMStackFrame(BHAVAsset bhav, VMStack stack)
         {
@@ -34,52 +35,70 @@ namespace OpenTS2.SimAntics
 
         public VMExitCode Tick()
         {
+            var currentIterations = 0;
+            var nodeExecuted = false;
+            VMExitCode result = VMExitCode.Continue;
+
             if (CurrentContinueHandler != null)
             {
-                var returnCode = CurrentContinueHandler.Tick();
-                if (returnCode == VMExitCode.Continue)
-                    return returnCode;
-                else
-                {
-                    return AdvanceNodeAndRunTick(returnCode);
-                }
+                result = CurrentContinueHandler.Tick();
+                if (result == VMExitCode.Continue)
+                    return result;
+                // This tells the following code to just transition to the next node, as we already ran this node.
+                nodeExecuted = true;
             }
-            return RunCurrentTick();
+
+            var currentNode = GetCurrentNode();
+            if (!nodeExecuted)
+                result = ExecuteNode(currentNode);
+            if (result == VMExitCode.Continue)
+                return result;
+            var returnTarget = GetNodeReturnTarget(currentNode, result);
+
+            while (returnTarget != BHAVAsset.Node.ErrorReturnValue && returnTarget != BHAVAsset.Node.TrueReturnValue && returnTarget != BHAVAsset.Node.FalseReturnValue)
+            {
+                currentIterations++;
+                if (currentIterations > MaxIterations && MaxIterations > 0)
+                {
+                    throw new SimAnticsException($"Thread entered infinite loop! ( >{MaxIterations} primitives )", this);
+                }
+                SetCurrentNode(returnTarget);
+                currentNode = GetCurrentNode();
+                result = ExecuteNode(currentNode);
+                if (result == VMExitCode.Continue)
+                    return result;
+                returnTarget = GetNodeReturnTarget(currentNode, result);
+            }
+
+            if (returnTarget == BHAVAsset.Node.ErrorReturnValue)
+                throw new SimAnticsException("Attempted to transition to error.", this);
+
+            if (returnTarget == BHAVAsset.Node.TrueReturnValue)
+                return VMExitCode.True;
+
+            return VMExitCode.False;
         }
 
-        VMExitCode AdvanceNodeAndRunTick(VMExitCode exitCode)
+        ushort GetNodeReturnTarget(BHAVAsset.Node node, VMExitCode exitCode)
         {
-            var currentNode = GetCurrentNode();
             ushort returnTarget;
             if (exitCode == VMExitCode.True)
-                returnTarget = currentNode.TrueTarget;
+                returnTarget = node.TrueTarget;
             else
-                returnTarget = currentNode.FalseTarget;
-            switch (returnTarget)
-            {
-                case BHAVAsset.Node.FalseReturnValue:
-                    return VMExitCode.False;
-                case BHAVAsset.Node.TrueReturnValue:
-                    return VMExitCode.True;
-                case BHAVAsset.Node.ErrorReturnValue:
-                    throw new SimAnticsException("Attempted to go to error.", this);
-                default:
-                    SetCurrentNode(returnTarget);
-                    return RunCurrentTick();
-            }
+                returnTarget = node.FalseTarget;
+            return returnTarget;
         }
 
-        VMExitCode RunCurrentTick()
+        VMExitCode ExecuteNode(BHAVAsset.Node node)
         {
-            var currentNode = GetCurrentNode();
-            if (currentNode != null)
+            if (node != null)
             {
                 var context = new VMContext
                 {
                     StackFrame = this,
-                    Node = currentNode
+                    Node = node
                 };
-                var opcode = currentNode.OpCode;
+                var opcode = node.OpCode;
                 var prim = VMPrimitiveRegistry.GetPrimitive(opcode);
                 if (prim != null)
                 {
@@ -96,7 +115,7 @@ namespace OpenTS2.SimAntics
                     else
                     {
                         CurrentContinueHandler = null;
-                        return AdvanceNodeAndRunTick(primReturn.Code);
+                        return primReturn.Code;
                     }
                 }
                 else
@@ -150,7 +169,7 @@ namespace OpenTS2.SimAntics
                 }
             }
 
-            var argAmount = 0;
+            int argAmount;
 
             switch(format)
             {
