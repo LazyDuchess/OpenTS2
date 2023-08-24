@@ -19,6 +19,9 @@ namespace OpenTS2.SimAntics
 
         private Dictionary<short, VMEntity> _entitiesByID = new Dictionary<short, VMEntity>();
 
+        /// <summary>
+        /// Ticks all entities and advances the Simulation by 1 tick.
+        /// </summary>
         public void Tick()
         {
             Scheduler.OnBeginTick(this);
@@ -30,6 +33,9 @@ namespace OpenTS2.SimAntics
             CurrentTick++;
         }
 
+        /// <summary>
+        /// Retrieves a BHAV Asset from the content system.
+        /// </summary>
         public static BHAVAsset GetBHAV(ushort id, uint groupID)
         {
             return ContentProvider.Get().GetAsset<BHAVAsset>(new ResourceKey(id, groupID, TypeIDs.BHAV));
@@ -48,6 +54,9 @@ namespace OpenTS2.SimAntics
             _entitiesByID[entity.ID] = entity;
         }
 
+        /// <summary>
+        /// Returns a free unused entity ID.
+        /// </summary>
         public short GetUniqueID()
         {
             short resultID = 1;

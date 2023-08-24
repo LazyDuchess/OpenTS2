@@ -10,7 +10,7 @@ using OpenTS2.Common;
 using OpenTS2.Files.Formats.DBPF;
 using OpenTS2.SimAntics.Primitives;
 
-public class VMTest
+public class SimAnticsTest
 {
     private uint _groupID;
 
