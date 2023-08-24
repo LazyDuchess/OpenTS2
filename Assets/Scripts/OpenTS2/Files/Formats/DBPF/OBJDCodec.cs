@@ -34,15 +34,12 @@ namespace OpenTS2.Files.Formats.DBPF
 
             reader.Seek(SeekOrigin.Begin, 64);
 
-            var assetType = typeof(ObjectDefinitionAsset);
-
-            foreach (var field in ObjectDefinitionAsset.Fields)
+            for(var i=0;i<(int)ObjectDefinitionAsset.FieldNames.FIELD_COUNT;i++)
             {
                 var value = reader.ReadUInt16();
-                if (field == "unused")
-                    continue;
-                assetType.GetProperty(field).SetValue(asset, value);
+                asset.Fields[i] = value;
             }
+
             return asset;
         }
     }

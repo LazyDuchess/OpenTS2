@@ -50,6 +50,7 @@ namespace OpenTS2.Files.Formats.DBPF
         public const uint CTSS = 0x43545353;
         public const uint UI = 0x0;
         public const uint BHAV = 0x42484156;
+        public const uint SEMIGLOBAL = 0x7F8D70BF;
     }
     public static class GroupIDs
     {

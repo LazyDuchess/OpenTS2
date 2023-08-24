@@ -270,6 +270,16 @@ namespace OpenTS2.Files.Utils
         }
 
         /// <summary>
+        /// Reads a string whose length is prefixed by a byte.
+        /// </summary>
+        /// <returns>A string.</returns>
+        public string ReadBytePrefixedString()
+        {
+            var length = ReadByte();
+            return Encoding.ASCII.GetString(Reader.ReadBytes(length));
+        }
+
+        /// <summary>
         /// Reads a C string from the current stream.
         /// </summary>
         /// <returns>A string.</returns>
