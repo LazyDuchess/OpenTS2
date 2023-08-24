@@ -23,6 +23,8 @@ namespace OpenTS2.SimAntics
         public VMContinueHandler CurrentContinueHandler = null;
         public short[] Locals;
         public short[] Arguments;
+        bool _halted = false;
+        VMExitCode _haltedCode;
 
         public VMStackFrame(BHAVAsset bhav, VMStack stack)
         {
@@ -34,6 +36,8 @@ namespace OpenTS2.SimAntics
 
         public VMExitCode Tick()
         {
+            if (_halted)
+                return _haltedCode;
             if (CurrentContinueHandler != null)
             {
                 var returnCode = CurrentContinueHandler.Tick();
@@ -84,6 +88,13 @@ namespace OpenTS2.SimAntics
                 if (prim != null)
                 {
                     var primReturn = prim.Execute(context);
+
+                    if (primReturn.Halt)
+                    {
+                        _halted = true;
+                        _haltedCode = primReturn.Code;
+                        return primReturn.Code;
+                    }
 
                     if (primReturn.Code == VMExitCode.Continue)
                         primReturn.Code = primReturn.ContinueHandler.Tick();

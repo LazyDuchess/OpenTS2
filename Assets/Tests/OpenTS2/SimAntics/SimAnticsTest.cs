@@ -19,7 +19,7 @@ public class SimAnticsTest
     public void SetUp()
     {
         TestMain.Initialize();
-        _groupID = ContentProvider.Get().AddPackage("TestAssets/VM/bhav.package").GroupID;
+        _groupID = ContentProvider.Get().AddPackage("TestAssets/SimAntics/bhav.package").GroupID;
     }
 
     [Test]

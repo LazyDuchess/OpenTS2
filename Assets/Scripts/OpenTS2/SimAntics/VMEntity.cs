@@ -12,6 +12,7 @@ namespace OpenTS2.SimAntics
     /// </summary>
     public class VMEntity
     {
+        public bool PendingDeletion = false;
         public short ID = 1;
         public short[] Temps = new short[20];
         public VMStack Stack;
@@ -42,6 +43,18 @@ namespace OpenTS2.SimAntics
         public void Tick()
         {
             Stack.Tick();
+        }
+
+        public void Delete()
+        {
+            if (VM.Scheduler.RunningTick)
+            {
+                if (PendingDeletion)
+                    return;
+                VM.Scheduler.ScheduleDeletion(this);
+                return;
+            }
+            VM.RemoveEntity(ID);
         }
     }
 }

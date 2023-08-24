@@ -60,6 +60,14 @@ namespace OpenTS2.SimAntics
             _entitiesByID[entity.ID] = entity;
         }
 
+        public void RemoveEntity(short id)
+        {
+            if (!_entitiesByID.TryGetValue(id, out VMEntity result))
+                return;
+            _entitiesByID.Remove(id);
+            Entities.Remove(result);
+        }
+
         /// <summary>
         /// Returns a free unused entity ID.
         /// </summary>

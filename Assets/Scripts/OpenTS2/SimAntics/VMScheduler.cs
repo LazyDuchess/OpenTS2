@@ -52,6 +52,15 @@ namespace OpenTS2.SimAntics
             });
         }
 
+        public void ScheduleDeletion(VMEntity entity)
+        {
+            ScheduleWhenPossible(() =>
+            {
+                entity.Delete(); 
+            });
+            entity.PendingDeletion = true;
+        }
+
         public void OnBeginTick(VM vm)
         {
             _preTickEvents.Run(vm);
