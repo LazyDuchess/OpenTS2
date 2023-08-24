@@ -35,26 +35,22 @@ namespace OpenTS2.SimAntics
 
         public VMExitCode Tick()
         {
-            // This can probably be cleaned up, had to make some changes to fix the stack overflowing cause i'm kinda dumb.
-
             var currentIterations = 0;
-            var nodeExecuted = false;
-            VMExitCode result = VMExitCode.Continue;
+            VMExitCode result;
+            var currentNode = GetCurrentNode();
 
             if (CurrentContinueHandler != null)
             {
                 result = CurrentContinueHandler.Tick();
                 if (result == VMExitCode.Continue)
                     return result;
-                // This tells the following code to just transition to the next node, as we already ran this node.
-                nodeExecuted = true;
             }
-
-            var currentNode = GetCurrentNode();
-            if (!nodeExecuted)
+            else
                 result = ExecuteNode(currentNode);
+
             if (result == VMExitCode.Continue)
                 return result;
+
             var returnTarget = GetNodeReturnTarget(currentNode, result);
 
             while (returnTarget != BHAVAsset.Node.ErrorReturnValue && returnTarget != BHAVAsset.Node.TrueReturnValue && returnTarget != BHAVAsset.Node.FalseReturnValue)
