@@ -35,6 +35,8 @@ namespace OpenTS2.SimAntics
 
         public VMExitCode Tick()
         {
+            // This can probably be cleaned up, had to make some changes to fix the stack overflowing cause i'm kinda dumb.
+
             var currentIterations = 0;
             var nodeExecuted = false;
             VMExitCode result = VMExitCode.Continue;
@@ -71,7 +73,7 @@ namespace OpenTS2.SimAntics
             }
 
             if (returnTarget == BHAVAsset.Node.ErrorReturnValue)
-                throw new SimAnticsException("Attempted to transition to error.", this);
+                throw new SimAnticsException("Node transitioned to Error.", this);
 
             if (returnTarget == BHAVAsset.Node.TrueReturnValue)
                 return VMExitCode.True;
@@ -139,6 +141,7 @@ namespace OpenTS2.SimAntics
             CallerParams
         }
 
+        // Creates a new stack frame, to push onto the stack to run other scripts.
         VMStackFrame CreateStackFrameForNode(VMContext ctx)
         {
             var bhav = GetBHAVForOpCode(ctx.Node.OpCode);
@@ -238,9 +241,14 @@ namespace OpenTS2.SimAntics
 
         public void SetCurrentNode(int nodeIndex)
         {
+            if (nodeIndex > BHAV.Nodes.Count || nodeIndex < 0)
+            {
+                throw new SimAnticsException("Attempted to transition to node out of range.", this);
+            }
             CurrentNode = nodeIndex;
             CurrentContinueHandler = null;
         }
+
         public BHAVAsset.Node GetCurrentNode()
         {
             return BHAV.Nodes[CurrentNode];
