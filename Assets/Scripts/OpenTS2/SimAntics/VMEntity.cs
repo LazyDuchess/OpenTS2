@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenTS2.Content.DBPF;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,12 +16,29 @@ namespace OpenTS2.SimAntics
         public short[] Temps = new short[20];
         public VMStack Stack;
         public VM VM;
-        public VMEntity(VM vm)
+        public ObjectDefinitionAsset ObjectDefinition;
+        public uint PrivateGroupID => ObjectDefinition.GlobalTGI.GroupID;
+        public uint SemiGlobalGroupID
         {
-            VM = vm;
-            Stack = new VMStack(this);
-            ID = vm.GetUniqueID();
+            get
+            {
+                var semiGlobal = ObjectDefinition.SemiGlobal;
+                if (semiGlobal == null)
+                    return 0;
+                return semiGlobal.SemiGlobalGroupID;
+            }
         }
+
+        protected VMEntity()
+        {
+            Stack = new VMStack(this);
+        }
+
+        public VMEntity(ObjectDefinitionAsset objectDefinition) : this()
+        {
+            ObjectDefinition = objectDefinition;
+        }
+
         public void Tick()
         {
             Stack.Tick();

@@ -48,8 +48,14 @@ namespace OpenTS2.SimAntics
             return null;
         }
 
+        /// <summary>
+        /// Adds an entity to the simulator, and assigns a unique ID to it.
+        /// </summary>
+        /// <param name="entity"></param>
         public void AddEntity(VMEntity entity)
         {
+            entity.VM = this;
+            entity.ID = GetUniqueID();
             Entities.Add(entity);
             _entitiesByID[entity.ID] = entity;
         }

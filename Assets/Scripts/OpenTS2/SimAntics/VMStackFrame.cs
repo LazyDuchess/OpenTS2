@@ -24,11 +24,6 @@ namespace OpenTS2.SimAntics
         public short[] Locals;
         public short[] Arguments;
 
-        // TODO - Return proper Group IDs. Private should come from the entity's OBJD, semiglobal from the entity's global resource.
-        private uint PrivateGroupID => BHAV.GlobalTGI.GroupID;
-        private uint SemiGlobalGroupID => 0x0;
-        private uint GlobalGroupID => GroupIDs.Global;
-
         public VMStackFrame(BHAVAsset bhav, VMStack stack)
         {
             BHAV = bhav;
@@ -181,7 +176,7 @@ namespace OpenTS2.SimAntics
                         var dataValueIndex = dataSourceIndex + 1;
 
                         var dataSource = (VMDataSource)ctx.Node.GetOperand(dataSourceIndex);
-                        var dataValue = ctx.Node.GetUInt16Operand(dataValueIndex);
+                        var dataValue = ctx.Node.GetInt16Operand(dataValueIndex);
 
                         var data = ctx.GetData(dataSource, dataValue);
 
@@ -212,12 +207,12 @@ namespace OpenTS2.SimAntics
         BHAVAsset GetBHAVForOpCode(ushort opCode)
         {
             // 0x0XXX is global scope, 0x1XXX is private scope and 0x2XXX is semiglobal scope.
-            var groupid = SemiGlobalGroupID;
+            var groupid = Stack.Entity.SemiGlobalGroupID;
 
             if (opCode < 0x1000)
-                groupid = GlobalGroupID;
+                groupid = GroupIDs.Global;
             else if (opCode < 0x2000)
-                groupid = PrivateGroupID;
+                groupid = Stack.Entity.PrivateGroupID;
 
             return VM.GetBHAV(opCode, groupid);
         }

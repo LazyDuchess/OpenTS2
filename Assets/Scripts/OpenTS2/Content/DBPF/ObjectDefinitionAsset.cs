@@ -1,4 +1,6 @@
-﻿using System;
+﻿using OpenTS2.Common;
+using OpenTS2.Files.Formats.DBPF;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +10,7 @@ namespace OpenTS2.Content.DBPF
 {
     public class ObjectDefinitionAsset : AbstractAsset
     {
+        public SemiGlobalAsset SemiGlobal => ContentProvider.Get().GetAsset<SemiGlobalAsset>(new ResourceKey(1, GlobalTGI.GroupID, TypeIDs.SEMIGLOBAL));
         public string FileName;
 
         public enum FieldNames

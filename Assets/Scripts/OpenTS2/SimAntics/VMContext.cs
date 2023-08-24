@@ -19,23 +19,23 @@ namespace OpenTS2.SimAntics
         public VM VM => Entity.VM;
 
         // TODO - still super incomplete, just enough to run basic scripts.
-        public short GetData(VMDataSource source, ushort dataIndex)
+        public short GetData(VMDataSource source, short dataIndex)
         {
             return source switch
             {
-                VMDataSource.Literal => (short)dataIndex,
+                VMDataSource.Literal => dataIndex,
                 VMDataSource.Temps => Entity.Temps[dataIndex],
                 VMDataSource.Params => StackFrame.Arguments[dataIndex],
                 VMDataSource.StackObjectID => StackFrame.StackObjectID,
-                // TODO - unconfirmed.
                 VMDataSource.TempByTempIndex => Entity.Temps[Entity.Temps[dataIndex]],
                 VMDataSource.StackObjectsTemp => StackObjectEntity.Temps[dataIndex],
                 VMDataSource.Local => StackFrame.Locals[dataIndex],
+                VMDataSource.StackObjectsDefinition => (short)StackObjectEntity.ObjectDefinition.Fields[dataIndex],
                 _ => throw new ArgumentOutOfRangeException("SimAntics data source out of range!")
             };
         }
 
-        public void SetData(VMDataSource source, ushort dataIndex, short value)
+        public void SetData(VMDataSource source, short dataIndex, short value)
         {
             switch(source)
             {
