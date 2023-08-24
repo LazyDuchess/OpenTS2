@@ -38,8 +38,8 @@ namespace OpenTS2.SimAntics.Primitives
         }
         public override VMReturnValue Execute(VMContext ctx)
         {
-            var lhsData = ctx.Node.GetUInt16(0);
-            var rhsData = ctx.Node.GetUInt16(2);
+            var lhsData = ctx.Node.GetUInt16Operand(0);
+            var rhsData = ctx.Node.GetUInt16Operand(2);
             var signedFlag = ctx.Node.Operands[4];
             var op = (Operator)ctx.Node.Operands[5];
             var lhsSource = (VMDataSource)ctx.Node.Operands[6];

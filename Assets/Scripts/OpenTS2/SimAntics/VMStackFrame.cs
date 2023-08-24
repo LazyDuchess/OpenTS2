@@ -170,7 +170,7 @@ namespace OpenTS2.SimAntics
                     argAmount = Math.Min(newStackFrame.Arguments.Length, 8);
                     for(var i=0;i<argAmount;i++)
                     {
-                        newStackFrame.TrySetArgument(i, ctx.Node.GetInt16(i*2));
+                        newStackFrame.TrySetArgument(i, ctx.Node.GetInt16Operand(i*2));
                     }
                     break;
                 case GoSubFormat.TS2:
@@ -181,7 +181,7 @@ namespace OpenTS2.SimAntics
                         var dataValueIndex = dataSourceIndex + 1;
 
                         var dataSource = (VMDataSource)ctx.Node.GetOperand(dataSourceIndex);
-                        var dataValue = ctx.Node.GetUInt16(dataValueIndex);
+                        var dataValue = ctx.Node.GetUInt16Operand(dataValueIndex);
 
                         var data = ctx.GetData(dataSource, dataValue);
 

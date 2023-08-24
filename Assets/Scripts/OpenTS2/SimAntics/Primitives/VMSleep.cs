@@ -13,7 +13,7 @@ namespace OpenTS2.SimAntics.Primitives
     {
         public override VMReturnValue Execute(VMContext ctx)
         {
-            var argumentIndex = ctx.Node.GetUInt16(0);
+            var argumentIndex = ctx.Node.GetUInt16Operand(0);
             var sleepTicks = (uint)Math.Max(0,(int)ctx.StackFrame.Arguments[argumentIndex]);
             return new VMReturnValue(new ContinueHandler(ctx.Stack, sleepTicks));
         }

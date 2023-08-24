@@ -28,6 +28,10 @@ namespace OpenTS2.SimAntics
             public byte[] Operands;
             public byte Version;
 
+            /// <summary>
+            /// Retrieves the operand at index.
+            /// </summary>
+            /// <returns>Operand byte value, or 0 if the index is out of range.</returns>
             public byte GetOperand(int index)
             {
                 if (index < 0)
@@ -37,6 +41,10 @@ namespace OpenTS2.SimAntics
                 return Operands[index];
             }
 
+            /// <summary>
+            /// Retrieves an operand byte array starting at index and of the specified length.
+            /// </summary>
+            /// <returns>Operand bytes, bytes out of range return 0.</returns>
             public byte[] GetOperands(int index, int length)
             {
                 var array = new byte[length];
@@ -48,14 +56,20 @@ namespace OpenTS2.SimAntics
                 return array;
             }
 
-            public ushort GetUInt16(int operand)
+            /// <summary>
+            /// Retrieves an ushort from the operand array, starting at index.
+            /// </summary>
+            public ushort GetUInt16Operand(int index)
             {
-                return BitConverter.ToUInt16(GetOperands(operand,2), 0);
+                return BitConverter.ToUInt16(GetOperands(index,2), 0);
             }
 
-            public short GetInt16(int operand)
+            /// <summary>
+            /// Retrieves a short from the operand array, starting at index.
+            /// </summary>
+            public short GetInt16Operand(int index)
             {
-                return BitConverter.ToInt16(GetOperands(operand, 2), 0);
+                return BitConverter.ToInt16(GetOperands(index, 2), 0);
             }
         }
     }
