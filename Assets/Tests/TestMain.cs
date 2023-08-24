@@ -3,6 +3,7 @@ using OpenTS2.Client;
 using OpenTS2.Content;
 using OpenTS2.Files;
 using OpenTS2.Files.Formats.DBPF;
+using OpenTS2.SimAntics.Primitives;
 
 /// <summary>
 /// Main initialization class for OpenTS2 unit testing.
@@ -28,6 +29,7 @@ public static class TestMain
         Filesystem.Initialize(new TestPathProvider(), epManager);
         CodecAttribute.Initialize();
         AssemblyHelper.InitializeLoadedAssemblies();
+        VMPrimitiveRegistry.Initialize();
         s_initialized = true;
     }
 
