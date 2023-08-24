@@ -8,23 +8,45 @@ namespace OpenTS2.SimAntics
 {
     public class VMScheduler
     {
+        public bool RunningTick => _runningTick;
+        private bool _runningTick = false;
+
         private VMScheduledEvents _preTickEvents = new VMScheduledEvents();
         private VMScheduledEvents _postTickEvents = new VMScheduledEvents();
 
-        public void ScheduleOnBeginTick(Action func, bool onlyOnce = true, uint targetTick = 0)
+        /// <summary>
+        /// Runs a function immediately if the VM is not currently in a tick, otherwise schedules it to run at the end of the current tick.
+        /// </summary>
+        public void ScheduleWhenPossible(Action func)
         {
-            _preTickEvents.AddEvent(new VMEvent(func, onlyOnce, targetTick));
+            if (!RunningTick)
+            {
+                func.Invoke();
+                return;
+            }
+            ScheduleOnEndTick(func);
         }
 
-        public void ScheduleOnEndTick(Action func, bool onlyOnce = true, uint targetTick = 0)
+        /// <summary>
+        /// Schedules a function to run once the VM begins a tick.
+        /// </summary>
+        public void ScheduleOnBeginTick(Action func, uint targetTick = 0)
         {
-            _postTickEvents.AddEvent(new VMEvent(func, onlyOnce, targetTick));
+            _preTickEvents.AddEvent(new VMEvent(func, targetTick));
+        }
+
+        /// <summary>
+        /// Schedules a function to run once the VM is done with a tick.
+        /// </summary>
+        public void ScheduleOnEndTick(Action func, uint targetTick = 0)
+        {
+            _postTickEvents.AddEvent(new VMEvent(func, targetTick));
         }
 
         // TODO - Right now the way this works is that once an entity has been notified out of idle/interrupted, the first idle that gets executed on the next tick (or that continues to run if there is one already running) won't actually sleep. If no idles are ran then the interrupt is just discarded. Verify this is okay!
         public void ScheduleInterrupt(VMStack stack)
         {
-            ScheduleOnBeginTick(() =>
+            ScheduleWhenPossible(() =>
             {
                 stack.Interrupt = true;
             });
@@ -33,23 +55,23 @@ namespace OpenTS2.SimAntics
         public void OnBeginTick(VM vm)
         {
             _preTickEvents.Run(vm);
+            _runningTick = true;
         }
 
         public void OnEndTick(VM vm)
         {
+            _runningTick = false;
             _postTickEvents.Run(vm);
         }
 
         public class VMEvent
         {
             public Action Event;
-            public bool OnlyOnce = true;
             public uint TargetTick = 0;
 
-            public VMEvent(Action func, bool onlyOnce = true, uint targetTick = 0)
+            public VMEvent(Action func, uint targetTick = 0)
             {
                 Event = func;
-                OnlyOnce = onlyOnce;
                 TargetTick = targetTick;
             }
         }
@@ -65,8 +87,6 @@ namespace OpenTS2.SimAntics
                     if (vm.CurrentTick >= ev.TargetTick)
                     {
                         ev.Event?.Invoke();
-                        if (!ev.OnlyOnce)
-                            newEvList.Add(ev);
                     }
                     else
                         newEvList.Add(ev);

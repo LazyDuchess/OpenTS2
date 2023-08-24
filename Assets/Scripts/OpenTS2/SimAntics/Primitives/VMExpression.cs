@@ -152,7 +152,7 @@ namespace OpenTS2.SimAntics.Primitives
                     rhs = ctx.GetData(rhsSource, rhsData);
                     ctx.SetData(lhsSource, lhsData, Math.Abs(rhs));
                     return VMReturnValue.ReturnTrue;
-                // Check this as it's new in TS2.
+                // TODO: This is new in TS2 so I'm not sure if this is correct.
                 case Operator.Assign32BitValue:
                     rhs = ctx.GetData(rhsSource, rhsData);
                     var rhs2 = ctx.GetData(rhsSource, (short)(rhsData+1));
