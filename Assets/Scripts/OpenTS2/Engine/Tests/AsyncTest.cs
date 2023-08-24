@@ -65,7 +65,7 @@ namespace OpenTS2.Engine.Tests
                 if (i >= oMgr.Objects.Count)
                     break;
                 var element = oMgr.Objects[(oMgr.Objects.Count-1)-i];
-                objectStr += element.Definition.FileName + " (" + "0x"+element.GUID.ToString("X8") + ")" + System.Environment.NewLine;
+                objectStr += element.FileName + " (" + "0x"+element.GUID.ToString("X8") + ")" + System.Environment.NewLine;
             }
             ObjectsText.text = objectStr;
             PopupBackgroundImage.texture = contentProvider.GetAsset<TextureAsset>(new ResourceKey(0xA9600400, 0x499DB772, 0x856DDBAC)).Texture;
