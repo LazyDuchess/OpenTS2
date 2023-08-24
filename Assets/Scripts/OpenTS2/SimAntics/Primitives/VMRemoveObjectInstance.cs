@@ -16,7 +16,7 @@ namespace OpenTS2.SimAntics.Primitives
             var cleanUpAll = ((ctx.Node.GetOperand(2) & 2) != 2);
 
             var entityToRemove = ctx.Node.GetOperand(0) > 0 ? ctx.StackObjectEntity : ctx.Entity;
-            entityToRemove.Delete();
+            entityToRemove?.Delete();
 
             // FreeSO yields 1 tick in the case of self deletion, preventing further execution of the script, so we also do that.
             // TS2 BHAVs tend to remove themselves -> idle for a few ticks -> loop back to remove prim.

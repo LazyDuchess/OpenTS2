@@ -31,7 +31,7 @@ namespace OpenTS2.SimAntics
                 VMDataSource.StackObjectsTemp => StackObjectEntity.Temps[dataIndex],
                 VMDataSource.Local => StackFrame.Locals[dataIndex],
                 VMDataSource.StackObjectsDefinition => (short)StackObjectEntity.ObjectDefinition.Fields[dataIndex],
-                _ => throw new ArgumentOutOfRangeException("SimAntics data source out of range!")
+                _ => throw new SimAnticsException("Attempted to retrieve a variable from an unknown data source.", StackFrame)
             };
         }
 
@@ -58,7 +58,7 @@ namespace OpenTS2.SimAntics
                     StackFrame.Locals[dataIndex] = value;
                     return;
             }
-            throw new ArgumentOutOfRangeException("SimAntics data source out of range!");
+            throw new SimAnticsException("Attempted to modify a variable from an unknown data source.", StackFrame);
         }
     }
 }

@@ -62,7 +62,7 @@ namespace OpenTS2.SimAntics
                 case BHAVAsset.Node.TrueReturnValue:
                     return VMExitCode.True;
                 case BHAVAsset.Node.ErrorReturnValue:
-                    throw new Exception("Jumped to Error.");
+                    throw new SimAnticsException("Attempted to go to error.", this);
                 default:
                     SetCurrentNode(returnTarget);
                     return RunCurrentTick();

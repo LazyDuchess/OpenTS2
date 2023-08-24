@@ -35,7 +35,7 @@ namespace OpenTS2.SimAntics
                 return VMExitCode.False;
             var returnValue = currentFrame.Tick();
             if (returnValue == VMExitCode.Continue && !CanYield)
-                throw new Exception("Attempted to yield in a non-yielding VMStack.");
+                throw new SimAnticsException("Attempted to yield in a non-yielding thread.", currentFrame);
             while (returnValue != VMExitCode.Continue)
             {
                 Frames.Pop();
