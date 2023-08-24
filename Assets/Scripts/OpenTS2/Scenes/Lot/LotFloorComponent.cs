@@ -21,7 +21,7 @@ namespace OpenTS2.Scenes.Lot
     {
         private const string ThicknessTexture = "floor-edge";
         private const string FallbackMaterial = "floor-grid";
-        private const float Thickness = 0.1f;
+        private const float Thickness = 0.15f;
 
         private StringMapAsset _patternMap;
         private _3DArrayAsset<float> _elevationData;
@@ -168,13 +168,8 @@ namespace OpenTS2.Scenes.Lot
                 thickComp.AddVertex(toV, new Vector2(1, 0));
                 thickComp.AddVertex(fromV, new Vector2(0, 0));
 
-                thickComp.AddIndex(baseVert);
-                thickComp.AddIndex(baseVert + 1);
-                thickComp.AddIndex(baseVert + 2);
-
-                thickComp.AddIndex(baseVert + 2);
-                thickComp.AddIndex(baseVert + 3);
-                thickComp.AddIndex(baseVert);
+                thickComp.AddTriangle(baseVert, 0, 1, 2);
+                thickComp.AddTriangle(baseVert, 2, 3, 0);
             }
 
             for (int i = 0; i < _patternData.Depth; i++)
@@ -228,10 +223,7 @@ namespace OpenTS2.Scenes.Lot
                                 m1Base = comp.GetVertexIndex();
 
                                 comp.AddVertices(tileVertices, tileUVs);
-
-                                comp.AddIndex(m1Base + 1);
-                                comp.AddIndex(m1Base);
-                                comp.AddIndex(m1Base + 4);
+                                comp.AddTriangle(m1Base, 1, 0, 4);
                             }
 
                             PatternMesh mesh2 = _patterns[p.z];
@@ -251,9 +243,7 @@ namespace OpenTS2.Scenes.Lot
                                     comp.AddVertices(tileVertices, tileUVs);
                                 }
 
-                                comp.AddIndex(m2Base + 2);
-                                comp.AddIndex(m2Base + 1);
-                                comp.AddIndex(m2Base + 4);
+                                comp.AddTriangle(m2Base, 2, 1, 4);
                             }
 
                             PatternMesh mesh3 = _patterns[p.y];
@@ -277,9 +267,7 @@ namespace OpenTS2.Scenes.Lot
                                     comp.AddVertices(tileVertices, tileUVs);
                                 }
 
-                                comp.AddIndex(m3Base + 3);
-                                comp.AddIndex(m3Base + 2);
-                                comp.AddIndex(m3Base + 4);
+                                comp.AddTriangle(m3Base, 3, 2, 4);
                             }
 
                             PatternMesh mesh4 = _patterns[p.x];
@@ -307,9 +295,7 @@ namespace OpenTS2.Scenes.Lot
                                     comp.AddVertices(tileVertices, tileUVs);
                                 }
 
-                                comp.AddIndex(m4Base);
-                                comp.AddIndex(m4Base + 3);
-                                comp.AddIndex(m4Base + 4);
+                                comp.AddTriangle(m4Base, 0, 3, 4);
                             }
 
                             if (i > -_baseLevel)

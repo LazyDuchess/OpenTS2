@@ -45,6 +45,13 @@ namespace OpenTS2.Scenes.Lot
             _vertexUvBuilder.AddRange(uvs);
         }
 
+        public void AddTriangle(int baseVertex, int a, int b, int c)
+        {
+            _indexBuilder.Add(baseVertex + a);
+            _indexBuilder.Add(baseVertex + b);
+            _indexBuilder.Add(baseVertex + c);
+        }
+
         public void AddIndex(int index)
         {
             _indexBuilder.Add(index);

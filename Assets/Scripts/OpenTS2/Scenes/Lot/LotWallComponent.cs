@@ -35,7 +35,7 @@ namespace OpenTS2.Scenes.Lot
         private const float HalfWallHeight = 1f;
         private const float WallHeight = 3f;
         private const float Thickness = 0.075f;
-        private const float RoofOffset = 0.15f;
+        private const float RoofOffset = Thickness * 2.5f;
 
         private class FenceCollection
         {
@@ -366,8 +366,23 @@ namespace OpenTS2.Scenes.Lot
 
         private static float GetElevationInterp(float[] elevation, int width, int height, float x, float y)
         {
-            // TODO
-            return 0f;
+            int wm1 = width - 1;
+            int hm1 = height - 1;
+
+            float i0 = elevation[CalculateElevationIndex(height, (int)x, (int)y)];
+            float i1 = elevation[CalculateElevationIndex(height, Math.Min(wm1, (int)x + 1), (int)y)];
+            float j0 = elevation[CalculateElevationIndex(height, (int)x, Math.Min(hm1, (int)y + 1))];
+            float j1 = elevation[CalculateElevationIndex(height, Math.Min(wm1, (int)x + 1), Math.Min(hm1, (int)y + 1))];
+
+            float xi = x % 1;
+            float yi = y % 1;
+
+            return Mathf.Lerp(Mathf.Lerp(i0, i1, xi), Mathf.Lerp(j0, j1, xi), yi);
+        }
+
+        private static float GetElevationInterpUpper(float[] elevation, int width, int height, float x, float y, float previous)
+        {
+            return elevation == null ? previous + WallHeight : GetElevationInterp(elevation, width, height, x, y);
         }
 
         private WallIntersection GetOrAddIntersection(int id)
@@ -499,13 +514,14 @@ namespace OpenTS2.Scenes.Lot
             float[] currentFloorElevation = _elevationData.Data[currentFloor];
             float[] nextFloorElevation = _elevationData.Data[currentFloor + 1];
 
-            Vector3[] wallVertices = new Vector3[4];
-            Vector3[] wallVertices2 = new Vector3[4];
+            Vector3[] wallVertices = new Vector3[6];
+            Vector3[] wallVertices2 = new Vector3[6];
             Vector3[] endVertices = new Vector3[4];
-            Vector2[] wallUVs = new Vector2[4];
+            Vector2[] endUVs = new Vector2[4];
+            Vector2[] wallUVs = new Vector2[6];
 
-            Vector3[] thicknessVerts = new Vector3[6];
-            Vector2[] thicknessUVs = new Vector2[6];
+            Vector3[] thicknessVerts = new Vector3[8];
+            Vector2[] thicknessUVs = new Vector2[8];
 
             var thicknessComp = _thickness.Component;
 
@@ -560,28 +576,44 @@ namespace OpenTS2.Scenes.Lot
                 LotFloorPatternComponent lPattern = (layerElem.Pattern1 == 65535 ? null : _patterns[layerElem.Pattern1]?.Component);// ?? _thickness?.Component;
                 LotFloorPatternComponent rPattern = (layerElem.Pattern2 == 65535 ? null : _patterns[layerElem.Pattern2]?.Component);// ?? _thickness?.Component;
 
+                float midX = (from.XPos + to.XPos) / 2;
+                float midY = (from.YPos + to.YPos) / 2;
+
                 float floorFrom = GetElevationInt(currentFloorElevation, width, height, from.XPos, from.YPos);
+                float floorMid = GetElevationInterp(currentFloorElevation, width, height, midX, midY);
                 float floorTo = GetElevationInt(currentFloorElevation, width, height, to.XPos, to.YPos);
 
                 wallVertices[0] = new Vector3(from.XPos, floorFrom, from.YPos);
-                wallVertices[1] = new Vector3(to.XPos, floorTo, to.YPos);
+                wallVertices[1] = new Vector3(midX, floorMid, midY);
+                wallVertices[2] = new Vector3(to.XPos, floorTo, to.YPos);
 
-                float heightTo = GetElevationIntUpper(nextFloorElevation, width, height, to.XPos, to.YPos, wallVertices[1].y);
+                float heightTo = GetElevationIntUpper(nextFloorElevation, width, height, to.XPos, to.YPos, wallVertices[2].y);
+                float heightMid = GetElevationInterpUpper(nextFloorElevation, width, height, midX, midY, wallVertices[1].y);
                 float heightFrom = GetElevationIntUpper(nextFloorElevation, width, height, from.XPos, from.YPos, wallVertices[0].y);
 
-                if (layerElem.WallType == WallType.Roof)
+                bool roofWall = layerElem.WallType == WallType.Roof;
+
+                if (roofWall)
                 {
                     heightTo = Mathf.Clamp(_roofs.GetHeightAt(to.XPos, to.YPos) - RoofOffset, floorTo, heightTo);
+                    heightMid = Mathf.Clamp(_roofs.GetHeightAt(midX, midY) - RoofOffset, floorMid, heightMid);
                     heightFrom = Mathf.Clamp(_roofs.GetHeightAt(from.XPos, from.YPos) - RoofOffset, floorFrom, heightFrom);
                 }
 
-                wallVertices[2] = new Vector3(to.XPos, heightTo, to.YPos);
-                wallVertices[3] = new Vector3(from.XPos, heightFrom, from.YPos);
+                wallVertices[3] = new Vector3(to.XPos, heightTo, to.YPos);
+                wallVertices[4] = new Vector3(midX, heightMid, midY);
+                wallVertices[5] = new Vector3(from.XPos, heightFrom, from.YPos);
 
-                wallUVs[0] = new Vector2(0, (wallVertices[3].y - wallVertices[0].y) / WallHeight);
-                wallUVs[1] = new Vector2(1, (wallVertices[2].y - wallVertices[1].y) / WallHeight);
-                wallUVs[2] = new Vector2(1, 0);
-                wallUVs[3] = new Vector2(0, 0);
+                float startUV = (wallVertices[5].y - wallVertices[0].y) / WallHeight;
+                float midUV = (wallVertices[4].y - wallVertices[1].y) / WallHeight;
+                float endUV = (wallVertices[3].y - wallVertices[2].y) / WallHeight;
+
+                wallUVs[0] = new Vector2(0, roofWall ? 1 : startUV);
+                wallUVs[1] = new Vector2(0.5f, roofWall ? 1 : midUV);
+                wallUVs[2] = new Vector2(1, roofWall ? 1 : endUV);
+                wallUVs[3] = new Vector2(1, roofWall ? (1 - endUV) : 0);
+                wallUVs[4] = new Vector2(0.5f, roofWall ? (1 - midUV) : 0);
+                wallUVs[5] = new Vector2(0, roofWall ? (1 - startUV) : 0);
 
                 bool isThick = IsWallThick(layerElem.WallType);
 
@@ -606,27 +638,33 @@ namespace OpenTS2.Scenes.Lot
                     var offsetLEnd = offsetL + new Vector3(wallVec.x * toMember.LeftExtent, 0, wallVec.y * toMember.LeftExtent);
                     var offsetREnd = offsetR + new Vector3(wallVec.x * toMember.RightExtent, 0, wallVec.y * toMember.RightExtent);
 
-                    thicknessVerts[4] = wallVertices[3]; // Center Start
-                    thicknessVerts[5] = wallVertices[2]; // Center End
+                    thicknessVerts[6] = wallVertices[5]; // Center Start
+                    thicknessVerts[7] = wallVertices[3]; // Center End
                     
                     wallVertices2[0] = wallVertices[0] + offsetRStart;
-                    wallVertices2[1] = wallVertices[1] + offsetREnd;
+                    wallVertices2[1] = wallVertices[1] + offsetR;
                     wallVertices2[2] = wallVertices[2] + offsetREnd;
-                    wallVertices2[3] = wallVertices[3] + offsetRStart;
+                    wallVertices2[3] = wallVertices[3] + offsetREnd;
+                    wallVertices2[4] = wallVertices[4] + offsetR;
+                    wallVertices2[5] = wallVertices[5] + offsetRStart;
 
                     wallVertices[0] += offsetLStart;
-                    wallVertices[1] += offsetLEnd;
+                    wallVertices[1] += offsetL;
                     wallVertices[2] += offsetLEnd;
-                    wallVertices[3] += offsetLStart;
+                    wallVertices[3] += offsetLEnd;
+                    wallVertices[4] += offsetL;
+                    wallVertices[5] += offsetLStart;
 
                     // Add wall thickness
+                    
+                    thicknessVerts[0] = wallVertices[5]; // L top start
+                    thicknessVerts[1] = wallVertices[4]; // L top mid
+                    thicknessVerts[2] = wallVertices[3]; // L top end
+                    thicknessVerts[3] = wallVertices2[3]; // R top end
+                    thicknessVerts[4] = wallVertices2[4]; // R top mid
+                    thicknessVerts[5] = wallVertices2[5]; // R top start
 
-                    thicknessVerts[0] = wallVertices[3]; // L top start
-                    thicknessVerts[1] = wallVertices[2]; // L top end
-                    thicknessVerts[2] = wallVertices2[2]; // R top end
-                    thicknessVerts[3] = wallVertices2[3]; // R top start
-
-                    for (int j = 0; j < 6; j++)
+                    for (int j = 0; j < 8; j++)
                     {
                         thicknessUVs[j] = new Vector2(0, thicknessVerts[j].z);
                     }
@@ -634,22 +672,17 @@ namespace OpenTS2.Scenes.Lot
                     int thicknessBase = thicknessComp.GetVertexIndex();
                     thicknessComp.AddVertices(thicknessVerts, thicknessUVs);
 
-                    thicknessComp.AddIndex(thicknessBase + 1);
-                    thicknessComp.AddIndex(thicknessBase);
-                    thicknessComp.AddIndex(thicknessBase + 2);
+                    // Start to Mid
+                    thicknessComp.AddTriangle(thicknessBase, 1, 0, 4);
+                    thicknessComp.AddTriangle(thicknessBase, 5, 4, 0);
 
-                    thicknessComp.AddIndex(thicknessBase + 3);
-                    thicknessComp.AddIndex(thicknessBase + 2);
-                    thicknessComp.AddIndex(thicknessBase);
+                    // Mid to End
+                    thicknessComp.AddTriangle(thicknessBase, 2, 1, 3);
+                    thicknessComp.AddTriangle(thicknessBase, 4, 3, 1);
 
                     // Ends
-                    thicknessComp.AddIndex(thicknessBase + 5);
-                    thicknessComp.AddIndex(thicknessBase + 1);
-                    thicknessComp.AddIndex(thicknessBase + 2);
-
-                    thicknessComp.AddIndex(thicknessBase + 4);
-                    thicknessComp.AddIndex(thicknessBase + 3);
-                    thicknessComp.AddIndex(thicknessBase);
+                    thicknessComp.AddTriangle(thicknessBase, 7, 2, 3);
+                    thicknessComp.AddTriangle(thicknessBase, 6, 5, 0);
                 }
 
                 if (lPattern != null)
@@ -657,85 +690,75 @@ namespace OpenTS2.Scenes.Lot
                     var lVertStart = lPattern.GetVertexIndex();
                     lPattern.AddVertices(wallVertices, wallUVs);
 
-                    lPattern.AddIndex(lVertStart);
-                    lPattern.AddIndex(lVertStart + 3);
-                    lPattern.AddIndex(lVertStart + 2);
+                    // Start to Mid
+                    lPattern.AddTriangle(lVertStart, 0, 5, 4);
+                    lPattern.AddTriangle(lVertStart, 4, 1, 0);
 
-                    lPattern.AddIndex(lVertStart + 2);
-                    lPattern.AddIndex(lVertStart + 1);
-                    lPattern.AddIndex(lVertStart + 0);
+                    // Mid to End
+                    lPattern.AddTriangle(lVertStart, 1, 4, 3);
+                    lPattern.AddTriangle(lVertStart, 3, 2, 1);
                 }
 
                 if (rPattern != null)
                 {
                     wallUVs[0].x = 1;
-                    wallUVs[1].x = 0;
                     wallUVs[2].x = 0;
-                    wallUVs[3].x = 1;
+                    wallUVs[3].x = 0;
+                    wallUVs[5].x = 1;
 
                     var rVertStart = rPattern.GetVertexIndex();
                     rPattern.AddVertices(isThick ? wallVertices2 : wallVertices, wallUVs);
 
-                    rPattern.AddIndex(rVertStart);
-                    rPattern.AddIndex(rVertStart + 1);
-                    rPattern.AddIndex(rVertStart + 2);
+                    // Start to Mid
+                    rPattern.AddTriangle(rVertStart, 0, 1, 4);
+                    rPattern.AddTriangle(rVertStart, 4, 5, 0);
 
-                    rPattern.AddIndex(rVertStart + 2);
-                    rPattern.AddIndex(rVertStart + 3);
-                    rPattern.AddIndex(rVertStart);
+                    // Mid to End
+                    rPattern.AddTriangle(rVertStart, 1, 2, 3);
+                    rPattern.AddTriangle(rVertStart, 3, 4, 1);
                 }
 
                 // Cap off wall ends.
                 if (toI.Simple && toI.IncomingLines.Count == 1 && rPattern != null)
                 {
-                    float bottomV = (wallVertices[2].y - wallVertices[1].y) / WallHeight;
+                    float bottomV = (wallVertices[3].y - wallVertices[2].y) / WallHeight;
 
-                    endVertices[0] = wallVertices[1];
-                    endVertices[1] = wallVertices2[1];
-                    endVertices[2] = wallVertices2[2];
-                    endVertices[3] = wallVertices[2];
+                    endVertices[0] = wallVertices[2];
+                    endVertices[1] = wallVertices2[2];
+                    endVertices[2] = wallVertices2[3];
+                    endVertices[3] = wallVertices[3];
 
-                    wallUVs[0] = new Vector2(1 - Thickness * 2, bottomV);
-                    wallUVs[1] = new Vector2(1, bottomV);
-                    wallUVs[2] = new Vector2(1, 0);
-                    wallUVs[3] = new Vector2(1 - Thickness * 2, 0);
+                    endUVs[0] = new Vector2(1 - Thickness * 2, bottomV);
+                    endUVs[1] = new Vector2(1, bottomV);
+                    endUVs[2] = new Vector2(1, 0);
+                    endUVs[3] = new Vector2(1 - Thickness * 2, 0);
 
                     var rVertStart = rPattern.GetVertexIndex();
-                    rPattern.AddVertices(endVertices, wallUVs);
+                    rPattern.AddVertices(endVertices, endUVs);
 
-                    rPattern.AddIndex(rVertStart);
-                    rPattern.AddIndex(rVertStart + 3);
-                    rPattern.AddIndex(rVertStart + 2);
-
-                    rPattern.AddIndex(rVertStart + 2);
-                    rPattern.AddIndex(rVertStart + 1);
-                    rPattern.AddIndex(rVertStart + 0);
+                    rPattern.AddTriangle(rVertStart, 0, 3, 2);
+                    rPattern.AddTriangle(rVertStart, 2, 1, 0);
                 }
 
                 if (fromI.Simple && fromI.IncomingLines.Count == 1 && lPattern != null)
                 {
-                    float bottomV = (wallVertices[3].y - wallVertices[0].y) / WallHeight;
+                    float bottomV = (wallVertices[5].y - wallVertices[0].y) / WallHeight;
 
                     endVertices[0] = wallVertices2[0];
                     endVertices[1] = wallVertices[0];
-                    endVertices[2] = wallVertices[3];
-                    endVertices[3] = wallVertices2[3];
+                    endVertices[2] = wallVertices[5];
+                    endVertices[3] = wallVertices2[5];
 
-                    wallUVs[0] = new Vector2(1 - Thickness * 2, bottomV);
-                    wallUVs[1] = new Vector2(1, bottomV);
-                    wallUVs[2] = new Vector2(1, 0);
-                    wallUVs[3] = new Vector2(1 - Thickness * 2, 0);
+                    endUVs[0] = new Vector2(1 - Thickness * 2, bottomV);
+                    endUVs[1] = new Vector2(1, bottomV);
+                    endUVs[2] = new Vector2(1, 0);
+                    endUVs[3] = new Vector2(1 - Thickness * 2, 0);
 
                     var lVertStart = lPattern.GetVertexIndex();
-                    lPattern.AddVertices(endVertices, wallUVs);
+                    lPattern.AddVertices(endVertices, endUVs);
 
-                    lPattern.AddIndex(lVertStart);
-                    lPattern.AddIndex(lVertStart + 3);
-                    lPattern.AddIndex(lVertStart + 2);
-
-                    lPattern.AddIndex(lVertStart + 2);
-                    lPattern.AddIndex(lVertStart + 1);
-                    lPattern.AddIndex(lVertStart + 0);
+                    lPattern.AddTriangle(lVertStart, 0, 3, 2);
+                    lPattern.AddTriangle(lVertStart, 2, 1, 0);
                 }
             }
 

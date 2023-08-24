@@ -46,14 +46,16 @@ namespace OpenTS2.Scenes.Lot.Roof
 
             Vector2 c1 = corners[dir];
             Vector2 c2 = corners[(dir + 1) % 4];
+            Vector2 c3 = corners[(dir + 2) % 4];
+            Vector2 c4 = corners[(dir + 3) % 4];
 
             float slope = entry.RoofAngle;
 
             Edges = new RoofEdge[]
             {
-                new RoofEdge(height, slope, corners[(dir + 3) % 4], c1, c2 - towardsTop, c1 - towardsTop, true, false),
+                new RoofEdge(height, slope, c4, c1, c1 - towardsTop, c4 - towardsTop, true, false),
                 new RoofEdge(height, slope, c1, c2, c2 + towardsDirection, c1 + towardsDirection),
-                new RoofEdge(height, slope, c2, corners[(dir + 2) % 4], c2 + towardsTop, c1 + towardsTop, false, true),
+                new RoofEdge(height, slope, c2, c3, c3 + towardsTop, c2 + towardsTop, false, true),
             };
         }
     }
