@@ -7,7 +7,10 @@ using OpenTS2.Content.DBPF;
 using OpenTS2.Content.DBPF.Scenegraph;
 using OpenTS2.Files;
 using OpenTS2.Files.Formats.DBPF;
+using OpenTS2.Files.Formats.DBPF.Scenegraph;
+using OpenTS2.Files.Formats.DBPF.Scenegraph.Block;
 using OpenTS2.Scenes.Lot;
+using OpenTS2.Scenes.Lot.Roof;
 using UnityEngine;
 
 namespace OpenTS2.Engine.Tests
@@ -20,7 +23,7 @@ namespace OpenTS2.Engine.Tests
 
         private void Start()
         {
-            LotID = 82;
+            LotID = 80;
             var contentProvider = ContentProvider.Get();
             var lotsFolderPath = Path.Combine(Filesystem.GetUserPath(), $"Neighborhoods/{NeighborhoodPrefix}/Lots");
             var lotFilename = $"{NeighborhoodPrefix}_Lot{LotID}.package";
@@ -63,6 +66,24 @@ namespace OpenTS2.Engine.Tests
                     var model = resource.CreateRootGameObject();
                     model.transform.GetChild(0).localPosition = lotObject.Object.Position;
                     model.transform.GetChild(0).localRotation = lotObject.Object.Rotation;
+
+                    // Object wall cuts
+                    // This would probably normally be evaluated by iterating subtile parts to get x/y, then wall placement flags in OBJD.
+                    // But we don't access that right now, so get wall masks corresponding to light resources in the cres.
+
+                    /*
+                    var lights = resource.ResourceCollection.Blocks.Select(block => {
+                        if (block is LightRefNodeBlock light)
+                        {
+                            return contentProvider.GetAsset<ScenegraphResourceAsset>(resource.ResourceCollection.FileLinks[((ExternalReference)light.Light).FileLinksIndex]);
+                        }
+                    }).ToArray();
+
+                    if (lights.Length > 0)
+                    {
+
+                    }
+                    */
                 }
                 catch (Exception e)
                 {
@@ -83,6 +104,13 @@ namespace OpenTS2.Engine.Tests
             var pool = lotPackage.GetAssetByTGI<PoolAsset>(new ResourceKey(0, uint.MaxValue, TypeIDs.LOT_POOL));
             var roof = lotPackage.GetAssetByTGI<RoofAsset>(new ResourceKey(0, uint.MaxValue, TypeIDs.LOT_ROOF));
 
+            var roofs = new RoofCollection(roof.Entries, floorElevation);
+
+            // Roofs
+
+            var roofObj = new GameObject("roof", typeof(LotRoofComponent));
+            roofObj.GetComponent<LotRoofComponent>().CreateFromLotAssets(roof.Entries.FirstOrDefault().Pattern, roofs);
+
             // Walls
 
             var wallLayer = lotPackage.GetAssetByTGI<WallLayerAsset>(new ResourceKey(4, uint.MaxValue, TypeIDs.LOT_WALLLAYER));
@@ -91,7 +119,7 @@ namespace OpenTS2.Engine.Tests
             var fencePosts = lotPackage.GetAssetByTGI<FencePostLayerAsset>(new ResourceKey(0x11, uint.MaxValue, TypeIDs.LOT_FENCEPOST));
 
             var wall = new GameObject("wall", typeof(LotWallComponent));
-            wall.GetComponent<LotWallComponent>().CreateFromLotAssets(wallStyles, wallLayer, wallGraphR, fencePosts, floorElevation);
+            wall.GetComponent<LotWallComponent>().CreateFromLotAssets(wallStyles, wallLayer, wallGraphR, fencePosts, floorElevation, roofs);
 
             // Floors
 

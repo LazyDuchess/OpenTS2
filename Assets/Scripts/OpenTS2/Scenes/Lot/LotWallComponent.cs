@@ -1,16 +1,14 @@
-using Codice.Client.BaseCommands.BranchExplorer;
 using OpenTS2.Common;
 using OpenTS2.Components;
 using OpenTS2.Content;
 using OpenTS2.Content.DBPF;
 using OpenTS2.Content.DBPF.Scenegraph;
-using OpenTS2.Diagnostic;
 using OpenTS2.Files.Formats.DBPF;
+using OpenTS2.Scenes.Lot.Roof;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Reflection;
 using UnityEngine;
 
 namespace OpenTS2.Scenes.Lot
@@ -37,21 +35,7 @@ namespace OpenTS2.Scenes.Lot
         private const float HalfWallHeight = 1f;
         private const float WallHeight = 3f;
         private const float Thickness = 0.075f;
-
-        private class PatternMesh
-        {
-            public GameObject Object;
-            public LotFloorPatternComponent Component;
-
-            public PatternMesh(GameObject parent, string name, Material material)
-            {
-                Object = new GameObject(name, typeof(LotFloorPatternComponent));
-                Component = Object.GetComponent<LotFloorPatternComponent>();
-
-                Object.transform.SetParent(parent.transform);
-                Component.Initialize(material);
-            }
-        }
+        private const float RoofOffset = 0.15f;
 
         private class FenceCollection
         {
@@ -245,6 +229,7 @@ namespace OpenTS2.Scenes.Lot
         private WallGraphAsset _wallGraph;
         private FencePostLayerAsset _fencePosts;
         private _3DArrayAsset<float> _elevationData;
+        private RoofCollection _roofs;
 
         private PatternMesh _thickness;
         private PatternMesh[] _patterns;
@@ -252,13 +237,21 @@ namespace OpenTS2.Scenes.Lot
         private Dictionary<int, WallIntersection> _intersections;
         private Dictionary<uint, FenceCollection> _fenceByGuid;
 
-        public void CreateFromLotAssets(StringMapAsset patternMap, WallLayerAsset wallLayer, WallGraphAsset wallGraph, FencePostLayerAsset fencePosts, _3DArrayAsset<float> elevationData)
+        public void CreateFromLotAssets(
+            StringMapAsset patternMap,
+            WallLayerAsset wallLayer,
+            WallGraphAsset wallGraph,
+            FencePostLayerAsset fencePosts,
+            _3DArrayAsset<float> elevationData,
+            RoofCollection roofs)
         {
             _patternMap = patternMap;
             _wallLayer = wallLayer;
             _wallGraph = wallGraph;
             _fencePosts = fencePosts;
             _elevationData = elevationData;
+            _roofs = roofs;
+
             _fenceByGuid = new Dictionary<uint, FenceCollection>();
 
             if (wallGraph.Floors != elevationData.Depth)
@@ -560,16 +553,30 @@ namespace OpenTS2.Scenes.Lot
                         to.YPos,
                         GetElevationInt(currentFloorElevation, width, height, from.XPos, from.YPos),
                         GetElevationInt(currentFloorElevation, width, height, to.XPos, to.YPos));
+
+                    continue;
                 }
 
                 LotFloorPatternComponent lPattern = (layerElem.Pattern1 == 65535 ? null : _patterns[layerElem.Pattern1]?.Component);// ?? _thickness?.Component;
                 LotFloorPatternComponent rPattern = (layerElem.Pattern2 == 65535 ? null : _patterns[layerElem.Pattern2]?.Component);// ?? _thickness?.Component;
 
-                wallVertices[0] = new Vector3(from.XPos, GetElevationInt(currentFloorElevation, width, height, from.XPos, from.YPos), from.YPos);
-                wallVertices[1] = new Vector3(to.XPos, GetElevationInt(currentFloorElevation, width, height, to.XPos, to.YPos), to.YPos);
+                float floorFrom = GetElevationInt(currentFloorElevation, width, height, from.XPos, from.YPos);
+                float floorTo = GetElevationInt(currentFloorElevation, width, height, to.XPos, to.YPos);
 
-                wallVertices[2] = new Vector3(to.XPos, GetElevationIntUpper(nextFloorElevation, width, height, to.XPos, to.YPos, wallVertices[1].y), to.YPos);
-                wallVertices[3] = new Vector3(from.XPos, GetElevationIntUpper(nextFloorElevation, width, height, from.XPos, from.YPos, wallVertices[0].y), from.YPos);
+                wallVertices[0] = new Vector3(from.XPos, floorFrom, from.YPos);
+                wallVertices[1] = new Vector3(to.XPos, floorTo, to.YPos);
+
+                float heightTo = GetElevationIntUpper(nextFloorElevation, width, height, to.XPos, to.YPos, wallVertices[1].y);
+                float heightFrom = GetElevationIntUpper(nextFloorElevation, width, height, from.XPos, from.YPos, wallVertices[0].y);
+
+                if (layerElem.WallType == WallType.Roof)
+                {
+                    heightTo = Mathf.Clamp(_roofs.GetHeightAt(to.XPos, to.YPos) - RoofOffset, floorTo, heightTo);
+                    heightFrom = Mathf.Clamp(_roofs.GetHeightAt(from.XPos, from.YPos) - RoofOffset, floorFrom, heightFrom);
+                }
+
+                wallVertices[2] = new Vector3(to.XPos, heightTo, to.YPos);
+                wallVertices[3] = new Vector3(from.XPos, heightFrom, from.YPos);
 
                 wallUVs[0] = new Vector2(0, (wallVertices[3].y - wallVertices[0].y) / WallHeight);
                 wallUVs[1] = new Vector2(1, (wallVertices[2].y - wallVertices[1].y) / WallHeight);
@@ -679,7 +686,7 @@ namespace OpenTS2.Scenes.Lot
                 }
 
                 // Cap off wall ends.
-                if (toI.Simple && toI.IncomingLines.Count == 1)
+                if (toI.Simple && toI.IncomingLines.Count == 1 && rPattern != null)
                 {
                     float bottomV = (wallVertices[2].y - wallVertices[1].y) / WallHeight;
 
@@ -705,7 +712,7 @@ namespace OpenTS2.Scenes.Lot
                     rPattern.AddIndex(rVertStart + 0);
                 }
 
-                if (fromI.Simple && fromI.IncomingLines.Count == 1)
+                if (fromI.Simple && fromI.IncomingLines.Count == 1 && lPattern != null)
                 {
                     float bottomV = (wallVertices[3].y - wallVertices[0].y) / WallHeight;
 

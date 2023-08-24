@@ -31,6 +31,7 @@ namespace OpenTS2.Content
 
         Dictionary<uint, CatalogObjectAsset> _entryByGUID = new Dictionary<uint, CatalogObjectAsset>();
         Dictionary<uint, CatalogFenceAsset> _fenceByGUID = new Dictionary<uint, CatalogFenceAsset>();
+        Dictionary<uint, CatalogRoofAsset> _roofByGUID = new Dictionary<uint, CatalogRoofAsset>();
         readonly ContentProvider _provider;
 
         public CatalogManager(ContentProvider provider)
@@ -43,6 +44,7 @@ namespace OpenTS2.Content
         {
             _entryByGUID = new Dictionary<uint, CatalogObjectAsset>();
             _fenceByGUID = new Dictionary<uint, CatalogFenceAsset>();
+            _roofByGUID = new Dictionary<uint, CatalogRoofAsset>();
 
             var objectList = _provider.GetAssetsOfType<CatalogObjectAsset>(TypeIDs.CATALOG_OBJECT);
             foreach (CatalogObjectAsset element in objectList)
@@ -54,6 +56,12 @@ namespace OpenTS2.Content
             foreach (CatalogFenceAsset element in fenceList)
             {
                 RegisterFence(element);
+            }
+
+            var roofList = _provider.GetAssetsOfType<CatalogRoofAsset>(TypeIDs.CATALOG_ROOF);
+            foreach (CatalogRoofAsset element in roofList)
+            {
+                RegisterRoof(element);
             }
         }
 
@@ -84,6 +92,23 @@ namespace OpenTS2.Content
         public CatalogFenceAsset GetFenceById(uint guid)
         {
             if (_fenceByGUID.TryGetValue(guid, out var obj))
+            {
+                return obj;
+            }
+
+            return null;
+        }
+
+        private void RegisterRoof(CatalogRoofAsset catObj)
+        {
+            // TODO: Follow string set for localization.
+
+            _roofByGUID[catObj.Guid] = catObj;
+        }
+
+        public CatalogRoofAsset GetRoofById(uint guid)
+        {
+            if (_roofByGUID.TryGetValue(guid, out var obj))
             {
                 return obj;
             }

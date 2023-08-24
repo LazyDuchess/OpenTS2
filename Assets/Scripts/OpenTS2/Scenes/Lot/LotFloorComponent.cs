@@ -23,21 +23,6 @@ namespace OpenTS2.Scenes.Lot
         private const string FallbackMaterial = "floor-grid";
         private const float Thickness = 0.1f;
 
-        private class PatternMesh
-        {
-            public GameObject Object;
-            public LotFloorPatternComponent Component;
-
-            public PatternMesh(GameObject parent, string name, Material material)
-            {
-                Object = new GameObject(name, typeof(LotFloorPatternComponent));
-                Component = Object.GetComponent<LotFloorPatternComponent>();
-
-                Object.transform.SetParent(parent.transform);
-                Component.Initialize(material);
-            }
-        }
-
         private StringMapAsset _patternMap;
         private _3DArrayAsset<float> _elevationData;
         private _3DArrayAsset<Vector4<ushort>> _patternData;

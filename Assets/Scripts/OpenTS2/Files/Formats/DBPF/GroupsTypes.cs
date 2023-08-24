@@ -46,6 +46,7 @@ namespace OpenTS2.Files.Formats.DBPF
         public const uint LOT_3ARY = 0x2A51171B;
         public const uint CATALOG_OBJECT = 0xCCA8E925;
         public const uint CATALOG_FENCE = 0x2CB230B8;
+        public const uint CATALOG_ROOF = 0xACA8EA06;
         public const uint STR = 0x53545223;
         public const uint IMG = 0x856DDBAC;
         public const uint IMG2 = 0x8C3CE95A;

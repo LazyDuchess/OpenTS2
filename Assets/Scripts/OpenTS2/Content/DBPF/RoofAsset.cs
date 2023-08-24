@@ -7,7 +7,12 @@ namespace OpenTS2.Content.DBPF
         ShortGable = 3,
         LongGable = 4,
         Hip = 5,
-        Mansard = 6
+        Mansard = 6, // This becomes Hip if the roof is too small?
+        Cone = 7,
+        Dome = 8,
+        Octogonal = 9,
+
+        // Diagonals next.
 
         // DiagonalLongGable
 
@@ -32,7 +37,7 @@ namespace OpenTS2.Content.DBPF
         public float YTo;
         public int LevelTo;
         public RoofType Type;
-        public int Pattern;
+        public uint Pattern;
 
         // Version 2
         public float RoofAngle;

@@ -49,7 +49,7 @@ namespace OpenTS2.Files.Formats.DBPF
                     YTo = reader.ReadFloat(),
                     LevelTo = reader.ReadInt32(),
                     Type = (RoofType)reader.ReadInt32(),
-                    Pattern = reader.ReadInt32(),
+                    Pattern = reader.ReadUInt32(),
 
                     RoofAngle = version >= 2 ? reader.ReadFloat() : 0.5f,
                     RoofStyleExtended = version >= 3 ? reader.ReadInt32() : 0 // 3 for gable roof on an example?
