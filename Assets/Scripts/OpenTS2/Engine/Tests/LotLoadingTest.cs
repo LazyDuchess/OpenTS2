@@ -100,11 +100,13 @@ namespace OpenTS2.Engine.Tests
 
             // Shared
 
+            var wallLayer = lotPackage.GetAssetByTGI<WallLayerAsset>(new ResourceKey(4, uint.MaxValue, TypeIDs.LOT_WALLLAYER));
+            var wallGraph = lotPackage.GetAssetByTGI<WallGraphAsset>(new ResourceKey(0x18, uint.MaxValue, TypeIDs.LOT_WALLGRAPH));
             var floorElevation = lotPackage.GetAssetByTGI<_3DArrayAsset<float>>(new ResourceKey(1, uint.MaxValue, TypeIDs.LOT_3ARY));
             var pool = lotPackage.GetAssetByTGI<PoolAsset>(new ResourceKey(0, uint.MaxValue, TypeIDs.LOT_POOL));
             var roof = lotPackage.GetAssetByTGI<RoofAsset>(new ResourceKey(0, uint.MaxValue, TypeIDs.LOT_ROOF));
 
-            var roofs = new RoofCollection(roof.Entries, floorElevation);
+            var roofs = new RoofCollection(roof.Entries, floorElevation, wallGraph.BaseFloor);
 
             // Roofs
 
@@ -113,8 +115,6 @@ namespace OpenTS2.Engine.Tests
 
             // Walls
 
-            var wallLayer = lotPackage.GetAssetByTGI<WallLayerAsset>(new ResourceKey(4, uint.MaxValue, TypeIDs.LOT_WALLLAYER));
-            var wallGraph = lotPackage.GetAssetByTGI<WallGraphAsset>(new ResourceKey(0x18, uint.MaxValue, TypeIDs.LOT_WALLGRAPH));
             var wallGraphR = wallGraph;
             var fencePosts = lotPackage.GetAssetByTGI<FencePostLayerAsset>(new ResourceKey(0x11, uint.MaxValue, TypeIDs.LOT_FENCEPOST));
 
