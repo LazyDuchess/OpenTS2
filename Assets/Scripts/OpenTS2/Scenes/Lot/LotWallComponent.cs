@@ -318,12 +318,14 @@ namespace OpenTS2.Scenes.Lot
 
                 var material = LoadMaterial(contentProvider, materialName);
 
-                if (material == null)
+                try
                 {
-
+                    _patterns[entry.Id] = material == null ? null : new PatternMesh(gameObject, materialName, material?.GetAsUnityMaterial());
                 }
-
-                _patterns[entry.Id] = material == null ? null : new PatternMesh(gameObject, materialName, material?.GetAsUnityMaterial());
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                }
             }
 
             _thickness = new PatternMesh(gameObject, ThicknessTexture, LoadMaterial(contentProvider, ThicknessTexture).GetAsUnityMaterial());

@@ -8,11 +8,13 @@ namespace OpenTS2.Scenes.Lot.Roof
     {
         private List<IRoofType> _roofs;
         private _3DArrayAsset<float> _elevation;
+        private int _baseFloor;
         
-        public RoofCollection(RoofEntry[] entries, _3DArrayAsset<float> elevation)
+        public RoofCollection(RoofEntry[] entries, _3DArrayAsset<float> elevation, int baseFloor)
         {
             _roofs = new List<IRoofType>();
             _elevation = elevation;
+            _baseFloor = baseFloor;
 
             foreach (var entry in entries)
             {
@@ -27,7 +29,7 @@ namespace OpenTS2.Scenes.Lot.Roof
 
         private float InterpHeight(float x, float y, int level)
         {
-            float[] data = _elevation.Data[Mathf.Clamp(level, 0, _elevation.Depth - 1)];
+            float[] data = _elevation.Data[Mathf.Clamp(level - _baseFloor, 0, _elevation.Depth - 1)];
 
             float i0 = data[CalculateElevationIndex((int)x, (int)y)];
             float i1 = data[CalculateElevationIndex((int)x + 1, (int)y)];
@@ -71,8 +73,12 @@ namespace OpenTS2.Scenes.Lot.Roof
                     return;
             }
 
+            foreach (var existing in _roofs)
+            {
+                //existing.Intersect(roof);
+            }
+
             _roofs.Add(roof);
-            // TODO: add intersections and tile removals for other roofs.
         }
 
         public float GetHeightAt(float x, float y)

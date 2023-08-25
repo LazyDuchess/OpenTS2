@@ -43,7 +43,7 @@ namespace OpenTS2.Scenes.Lot.Roof
             // Normal = 0,
             new AtlasIndex[]
             {
-                new AtlasIndex(0), // None = 0,
+                new AtlasIndex(9), // None = 0,
                 new AtlasIndex(15, true), // SmallLeft = 1,
                 new AtlasIndex(15), // SmallRight = 2,
                 new AtlasIndex(13), // Bottom = 3,
@@ -120,7 +120,7 @@ namespace OpenTS2.Scenes.Lot.Roof
             // RightEdge = 7,
             new AtlasIndex[]
             {
-                new AtlasIndex(24), // None = 0,
+                new AtlasIndex(1), // None = 0,
                 new AtlasIndex(-1), // SmallLeft = 1,
                 new AtlasIndex(-1), // SmallRight = 2,
                 new AtlasIndex(12, true), // Bottom = 3,
@@ -165,6 +165,33 @@ namespace OpenTS2.Scenes.Lot.Roof
         public AtlasIndex GetAtlasIndex()
         {
             return BAndIToAtlasIndex[(int)_base][(int)_intersection];
+        }
+
+        public int CutDir()
+        {
+            switch (_base)
+            {
+                case RoofTileBase.LeftEdge:
+                    return -1;
+                case RoofTileBase.RightEdge:
+                    return 1;
+                default:
+                    return 0;
+            }
+        }
+
+        public int OverlapPriority()
+        {
+            switch (_base)
+            {
+                case RoofTileBase.Normal:
+                    return 2;
+                case RoofTileBase.SmallLeftEdge:
+                case RoofTileBase.SmallRightEdge:
+                    return 1;
+                default:
+                    return 0;
+            }
         }
     }
 }

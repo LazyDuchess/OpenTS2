@@ -15,7 +15,7 @@ namespace OpenTS2.Scenes.Lot.Roof
                 case 2:
                     return new Vector2(-vec.x, -vec.y);
                 case 3:
-                    return new Vector2(vec.x, -vec.y);
+                    return new Vector2(vec.y, -vec.x);
             }
 
             return vec;

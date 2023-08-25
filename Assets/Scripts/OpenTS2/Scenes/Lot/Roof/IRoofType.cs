@@ -9,5 +9,7 @@ namespace OpenTS2.Scenes.Lot.Roof
         float GetHeightAt(float x, float y);
 
         void GenerateGeometry(RoofGeometryCollection geo);
+
+        public void Intersect(IRoofType other);
     }
 }

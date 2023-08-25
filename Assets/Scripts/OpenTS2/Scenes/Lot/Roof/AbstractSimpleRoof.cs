@@ -57,5 +57,30 @@ namespace OpenTS2.Scenes.Lot.Roof
                 return vec.y > 0 ? 1 : 3;
             }
         }
+
+        public void Intersect(IRoofType other)
+        {
+            if ((other is AbstractSimpleRoof roof))
+            {
+                foreach (var edge in Edges)
+                {
+                    foreach (var oedge in roof.Edges)
+                    {
+                        if (!edge.Intersect(oedge))
+                        {
+                            edge.RemoveTilesUnder(other);
+                            oedge.RemoveTilesUnder(this);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                foreach (var edge in Edges)
+                {
+                    edge.RemoveTilesUnder(other);
+                }
+            }
+        }
     }
 }
