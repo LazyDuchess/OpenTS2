@@ -7,16 +7,16 @@ using System.Threading.Tasks;
 namespace OpenTS2.SimAntics
 {
     /// <summary>
-    /// Stack of scripts to run on a SimAntics entity/thread.
+    /// Thread running in a VM Entity.
     /// </summary>
-    public class VMStack
+    public class VMThread
     {
         public bool Interrupt = false;
         // For check trees and other things that should execute and return immediately we should set this to false.
         public bool CanYield = true;
         public VMEntity Entity;
         public Stack<VMStackFrame> Frames = new Stack<VMStackFrame>();
-        public VMStack(VMEntity entity)
+        public VMThread(VMEntity entity)
         {
             Entity = entity;
         }

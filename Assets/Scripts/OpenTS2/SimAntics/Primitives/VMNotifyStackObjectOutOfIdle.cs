@@ -12,7 +12,7 @@ namespace OpenTS2.SimAntics.Primitives
         {
             var stackObj = ctx.StackObjectEntity;
             if (stackObj != null)
-                ctx.VM.Scheduler.ScheduleInterrupt(stackObj.Stack);
+                ctx.VM.Scheduler.ScheduleInterrupt(stackObj.MainThread);
             return VMReturnValue.ReturnTrue;
         }
     }

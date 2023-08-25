@@ -45,8 +45,8 @@ public class SimAnticsTest
         var entity = new VMEntity(testObjectDefinition);
         vm.AddEntity(entity);
 
-        var stackFrame = new VMStackFrame(bhav, entity.Stack);
-        entity.Stack.Frames.Push(stackFrame);
+        var stackFrame = new VMStackFrame(bhav, entity.MainThread);
+        entity.MainThread.Frames.Push(stackFrame);
 
         // Test BHAV:
         // Multiplies Param0 by 2, stores it in Temp0
@@ -61,7 +61,7 @@ public class SimAnticsTest
         vm.Tick();
         Assert.That(entity.Temps[0], Is.EqualTo(1200));
         // Interrupt idle here, so that it doesn't sleep for 20000 ticks.
-        vm.Scheduler.ScheduleInterrupt(entity.Stack);
+        vm.Scheduler.ScheduleInterrupt(entity.MainThread);
         vm.Tick();
         Assert.That(entity.Temps[0], Is.EqualTo(0));
     }
@@ -86,8 +86,8 @@ public class SimAnticsTest
         var entity = new VMEntity(testObjectDefinition);
         vm.AddEntity(entity);
 
-        var stackFrame = new VMStackFrame(bhav, entity.Stack);
-        entity.Stack.Frames.Push(stackFrame);
+        var stackFrame = new VMStackFrame(bhav, entity.MainThread);
+        entity.MainThread.Frames.Push(stackFrame);
 
         Assert.Throws<SimAnticsException>(() =>
         {

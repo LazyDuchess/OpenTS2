@@ -13,7 +13,7 @@ namespace OpenTS2.SimAntics
     /// </summary>
     public class VMStackFrame
     {
-        public VMStack Stack;
+        public VMThread Thread;
         public BHAVAsset BHAV;
         public short StackObjectID = 0;
         public int CurrentNode = 0;
@@ -25,10 +25,10 @@ namespace OpenTS2.SimAntics
         public short[] Arguments;
         private static int MaxIterations = 500000;
 
-        public VMStackFrame(BHAVAsset bhav, VMStack stack)
+        public VMStackFrame(BHAVAsset bhav, VMThread thread)
         {
             BHAV = bhav;
-            Stack = stack;
+            Thread = thread;
             Locals = new short[BHAV.LocalCount];
             Arguments = new short[BHAV.ArgumentCount];
         }
@@ -119,7 +119,7 @@ namespace OpenTS2.SimAntics
                     var newStackFrame = CreateStackFrameForNode(context);
                     if (newStackFrame != null)
                     {
-                        Stack.Frames.Push(newStackFrame);
+                        Thread.Frames.Push(newStackFrame);
                         return newStackFrame.Tick();
                     }
                     else
@@ -145,7 +145,7 @@ namespace OpenTS2.SimAntics
             if (bhav == null)
                 return null;
 
-            var newStackFrame = new VMStackFrame(bhav, Stack);
+            var newStackFrame = new VMStackFrame(bhav, Thread);
             newStackFrame.StackObjectID = ctx.StackFrame.StackObjectID;
 
             GoSubFormat format = GoSubFormat.PassTemps;
@@ -173,10 +173,10 @@ namespace OpenTS2.SimAntics
             switch(format)
             {
                 case GoSubFormat.PassTemps:
-                    argAmount = Math.Min(newStackFrame.Arguments.Length, Stack.Entity.Temps.Length);
+                    argAmount = Math.Min(newStackFrame.Arguments.Length, Thread.Entity.Temps.Length);
                     for (var i=0;i<argAmount;i++)
                     {
-                        newStackFrame.TrySetArgument(i, Stack.Entity.Temps[i]);
+                        newStackFrame.TrySetArgument(i, Thread.Entity.Temps[i]);
                     }
                     break;
                 case GoSubFormat.TS1:
@@ -225,12 +225,12 @@ namespace OpenTS2.SimAntics
         BHAVAsset GetBHAVForOpCode(ushort opCode)
         {
             // 0x0XXX is global scope, 0x1XXX is private scope and 0x2XXX is semiglobal scope.
-            var groupid = Stack.Entity.SemiGlobalGroupID;
+            var groupid = Thread.Entity.SemiGlobalGroupID;
 
             if (opCode < 0x1000)
                 groupid = GroupIDs.Global;
             else if (opCode < 0x2000)
-                groupid = Stack.Entity.PrivateGroupID;
+                groupid = Thread.Entity.PrivateGroupID;
 
             return VM.GetBHAV(opCode, groupid);
         }

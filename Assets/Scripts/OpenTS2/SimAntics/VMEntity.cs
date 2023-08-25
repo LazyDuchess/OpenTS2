@@ -8,14 +8,15 @@ using System.Threading.Tasks;
 namespace OpenTS2.SimAntics
 {
     /// <summary>
-    /// This is a process or thread running in the SimAntics virtual machine, with its own stack and temp variables.
+    /// This is a process running in the SimAntics virtual machine.
     /// </summary>
     public class VMEntity
     {
         public bool PendingDeletion = false;
         public short ID = 1;
         public short[] Temps = new short[20];
-        public VMStack Stack;
+        // Main thread the VM will tick.
+        public VMThread MainThread;
         public VM VM;
         public ObjectDefinitionAsset ObjectDefinition;
         public uint PrivateGroupID => ObjectDefinition.GlobalTGI.GroupID;
@@ -32,7 +33,7 @@ namespace OpenTS2.SimAntics
 
         protected VMEntity()
         {
-            Stack = new VMStack(this);
+            MainThread = new VMThread(this);
         }
 
         public VMEntity(ObjectDefinitionAsset objectDefinition) : this()
@@ -42,7 +43,7 @@ namespace OpenTS2.SimAntics
 
         public void Tick()
         {
-            Stack.Tick();
+            MainThread.Tick();
         }
 
         public void Delete()

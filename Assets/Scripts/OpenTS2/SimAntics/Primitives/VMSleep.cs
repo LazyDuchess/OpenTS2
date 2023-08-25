@@ -15,7 +15,7 @@ namespace OpenTS2.SimAntics.Primitives
         {
             var argumentIndex = ctx.Node.GetUInt16Operand(0);
             var sleepTicks = (uint)Math.Max(0,(int)ctx.StackFrame.Arguments[argumentIndex]);
-            return new VMReturnValue(new ContinueHandler(ctx.Stack, sleepTicks));
+            return new VMReturnValue(new ContinueHandler(ctx.Thread, sleepTicks));
         }
 
         /// <summary>
@@ -24,24 +24,24 @@ namespace OpenTS2.SimAntics.Primitives
         public class ContinueHandler : VMContinueHandler
         {
             public uint TargetTick = 0;
-            VMStack _stack;
+            VMThread _thread;
 
-            public ContinueHandler(VMStack stack, uint ticks)
+            public ContinueHandler(VMThread thread, uint ticks)
             {
-                _stack = stack;
-                var vm = _stack.Entity.VM;
+                _thread = thread;
+                var vm = _thread.Entity.VM;
                 TargetTick = vm.CurrentTick + ticks;
             }
 
             public override VMExitCode Tick()
             {
-                if (_stack.Interrupt)
+                if (_thread.Interrupt)
                 {
                     // Handled!
-                    _stack.Interrupt = false;
+                    _thread.Interrupt = false;
                     return VMExitCode.True;
                 }
-                if (_stack.Entity.VM.CurrentTick >= TargetTick)
+                if (_thread.Entity.VM.CurrentTick >= TargetTick)
                     return VMExitCode.True;
                 return VMExitCode.Continue;
             }

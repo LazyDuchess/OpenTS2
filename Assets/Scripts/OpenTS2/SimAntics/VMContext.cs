@@ -13,8 +13,8 @@ namespace OpenTS2.SimAntics
     {
         public VMStackFrame StackFrame;
         public BHAVAsset.Node Node;
-        public VMStack Stack => StackFrame.Stack;
-        public VMEntity Entity => StackFrame.Stack.Entity;
+        public VMThread Thread => StackFrame.Thread;
+        public VMEntity Entity => StackFrame.Thread.Entity;
         public VMEntity StackObjectEntity => VM.GetEntityByID(StackFrame.StackObjectID);
         public VM VM => Entity.VM;
 
