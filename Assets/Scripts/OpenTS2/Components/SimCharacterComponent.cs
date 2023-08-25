@@ -57,16 +57,16 @@ namespace OpenTS2.Components
         public ScenegraphComponent Scenegraph { get; private set; }
 
         /// <summary>
-        /// This is the unity object that all the animation rigging constraints get placed into.
+        /// This is the unity object that all the animation rigs get placed into.
         /// </summary>
-        private GameObject _animationRig;
-
+        private GameObject _animationRigs;
+        private Animator _animator;
         private RigBuilder _rigBuilder;
 
         /// <summary>
         /// Set of IK chains that have already been applied to this sim so they don't get re-applied.
         /// </summary>
-        private readonly HashSet<uint> _appliedIKChains = new HashSet<uint>();
+        private readonly Dictionary<uint, RigLayer> _appliedIKChains = new Dictionary<uint, RigLayer>();
 
         /// <summary>
         /// These are basically parent bones of IK chains, this is needed so that if an animation updates the position
@@ -90,13 +90,13 @@ namespace OpenTS2.Components
             boneRenderer.transforms = boneTransforms.ToArray();
 
             // Add an animator component to the auskel.
-            var animator = skeleton.AddComponent<Animator>();
+            _animator = skeleton.AddComponent<Animator>();
             // Add a rig builder.
             _rigBuilder = skeleton.AddComponent<RigBuilder>();
 
             // Add a child rig to the skeleton.
-            _animationRig = new GameObject("UnityAnimationRig", typeof(Rig));
-            _animationRig.transform.SetParent(skeleton.transform, worldPositionStays: false);
+            _animationRigs = new GameObject("UnityAnimationRigs");
+            _animationRigs.transform.SetParent(skeleton.transform, worldPositionStays: false);
 
             // HACK: In the auskel model, for some reason the bones that represent the IK goals for the hands are
             // parented to the root_trans of the skeleton. This is done even though in animations the IK goal bones
@@ -120,8 +120,8 @@ namespace OpenTS2.Components
 
             AddGizmosAroundInverseKinmaticsPositions();
 
-            _rigBuilder.layers.Add(new RigLayer(_animationRig.GetComponent<Rig>()));
-            _rigBuilder.layers[0].Initialize(animator);
+            //_rigBuilder.layers.Add(new RigLayer(_animationRig.GetComponent<Rig>()));
+            //_rigBuilder.layers[0].Initialize(animator);
             _rigBuilder.Build();
         }
 
@@ -155,14 +155,35 @@ namespace OpenTS2.Components
             Destroy(spherePrimitive);
         }
 
-        public void AddInverseKinematicsFromAnimation(AnimResourceConstBlock anim)
+        public void AdjustInverseKinematicWeightsForAnimation(AnimResourceConstBlock anim)
         {
+            // TODO: This should eventually live in the animation controller for the sim. This is here for easy testing
+            // for now.
             var auSkelTarget = anim.AnimTargets.FirstOrDefault(t => t.TagName.ToLower() == "auskel");
             if (auSkelTarget == null)
             {
                 return;
             }
+            AddInverseKinematicsFromAnimation(auSkelTarget);
 
+            // Disable all current rigs.
+            foreach (var rigLayer in _appliedIKChains.Values)
+            {
+                rigLayer.active = false;
+            }
+            // Activate the ones present in the current animation.
+            foreach (var chain in auSkelTarget.IKChains)
+            {
+                if (!_appliedIKChains.TryGetValue(chain.NameCrc, out var rigLayer))
+                {
+                    continue;
+                }
+                rigLayer.active = true;
+            }
+        }
+
+        private void AddInverseKinematicsFromAnimation(AnimResourceConstBlock.AnimTarget auSkelTarget)
+        {
             AddInverseKinematicsFromIKChains(auSkelTarget.IKChains);
         }
 
@@ -170,10 +191,13 @@ namespace OpenTS2.Components
         {
             foreach (var chain in ikChains)
             {
-                if (_appliedIKChains.Contains(chain.NameCrc))
+                if (_appliedIKChains.ContainsKey(chain.NameCrc))
                 {
                     continue;
                 }
+                var rigObject = new GameObject($"ik-rig-{chain.NameCrc:X}", typeof(Rig));
+                rigObject.transform.SetParent(_animationRigs.transform);
+                var rig = rigObject.GetComponent<Rig>();
 
                 Debug.Assert(chain.BeginBoneCrc != 0, "ikChain without a beginning bone");
                 Debug.Assert(chain.EndBoneCrc != 0, "ikChain without an end bone");
@@ -222,7 +246,7 @@ namespace OpenTS2.Components
                 }
 
                 ikChainObj.GetComponent<TwoBoneIKConstraint>().data = twoBoneConstraint;
-                ikChainObj.transform.parent = _animationRig.transform;
+                ikChainObj.transform.parent = rigObject.transform;
 
                 if (target.Rotation2Crc != 0)
                 {
@@ -237,10 +261,13 @@ namespace OpenTS2.Components
                         space = OverrideTransformData.Space.Local,
                     };
                     rotationConstraint.GetComponent<OverrideTransform>().data = rotationOverrideConstraint;
-                    rotationConstraint.transform.parent = _animationRig.transform;
+                    rotationConstraint.transform.parent = rigObject.transform;
                 }
 
-                _appliedIKChains.Add(chain.NameCrc);
+                var rigLayer = new RigLayer(rig);
+                _rigBuilder.layers.Add(rigLayer);
+                rigLayer.Initialize(_animator);
+                _appliedIKChains[chain.NameCrc] = rigLayer;
             }
 
             _rigBuilder.Build();
