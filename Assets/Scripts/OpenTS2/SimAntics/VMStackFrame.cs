@@ -42,8 +42,6 @@ namespace OpenTS2.SimAntics
             if (CurrentContinueHandler != null)
             {
                 result = CurrentContinueHandler.Tick();
-                if (result == VMExitCode.Continue)
-                    return result;
             }
             else
                 result = ExecuteNode(currentNode);
@@ -124,6 +122,8 @@ namespace OpenTS2.SimAntics
                         Stack.Frames.Push(newStackFrame);
                         return newStackFrame.Tick();
                     }
+                    else
+                        throw new SimAnticsException("Attempted to GoSub to invalid tree, or called unknown primitive.", this);
                 }
             }
             return VMExitCode.False;
@@ -237,7 +237,7 @@ namespace OpenTS2.SimAntics
 
         public void SetCurrentNode(int nodeIndex)
         {
-            if (nodeIndex > BHAV.Nodes.Count || nodeIndex < 0)
+            if (nodeIndex >= BHAV.Nodes.Count || nodeIndex < 0)
             {
                 throw new SimAnticsException("Attempted to transition to node out of range.", this);
             }
