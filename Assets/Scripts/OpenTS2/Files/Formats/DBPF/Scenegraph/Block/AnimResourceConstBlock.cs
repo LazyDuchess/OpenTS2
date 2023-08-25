@@ -22,10 +22,14 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
         /// </summary>
         public const double FramesPerTick = 0.03;
 
+        public ScenegraphResource ScenegraphResource;
+
         public AnimTarget[] AnimTargets;
 
-        public AnimResourceConstBlock(PersistTypeInfo blockTypeInfo, AnimTarget[] animTargets) : base(blockTypeInfo)
+        public AnimResourceConstBlock(PersistTypeInfo blockTypeInfo, ScenegraphResource scenegraphResource,
+            AnimTarget[] animTargets) : base(blockTypeInfo)
         {
+            ScenegraphResource = scenegraphResource;
             AnimTargets = animTargets;
         }
 
@@ -639,7 +643,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             }
             */
 
-            return new AnimResourceConstBlock(blockTypeInfo, animTargets);
+            return new AnimResourceConstBlock(blockTypeInfo, resource, animTargets);
         }
 
         // For some reason this format pads to 4-byte boundaries sometimes...we deal with that here.
