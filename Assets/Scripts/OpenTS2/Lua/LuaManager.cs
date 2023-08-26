@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -29,20 +30,30 @@ namespace OpenTS2.Lua
             RegisterGlobals();
         }
 
-        public VMExitCode RunStringAsPrimitive(string lua, short param0, short param1, short param2, VMContext ctx)
+        void PrepGlobalsForPrimitive(short param0, short param1, short param2, VMContext ctx)
         {
             _primitiveParameters[0] = param0;
             _primitiveParameters[1] = param1;
             _primitiveParameters[2] = param2;
             Context = ctx;
             ExitCode = VMExitCode.True;
+        }
+
+        void ThrowLuaPrimitiveException(ScriptRuntimeException exception)
+        {
+            throw new SimAnticsException($"Problem executing Lua script:{Environment.NewLine}{exception}", Context.StackFrame);
+        }
+
+        public VMExitCode RunStringAsPrimitive(string lua, short param0, short param1, short param2, VMContext ctx)
+        {
+            PrepGlobalsForPrimitive(param0, param1, param2, ctx);
             try
             {
                 _script.DoString(lua);
             }
             catch(ScriptRuntimeException e)
             {
-                throw new SimAnticsException($"Problem executing Lua script:{Environment.NewLine}{e}", ctx.StackFrame);
+                ThrowLuaPrimitiveException(e);
             }
             return ExitCode;
         }
