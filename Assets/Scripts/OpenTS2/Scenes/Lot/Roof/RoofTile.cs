@@ -1,3 +1,5 @@
+using System;
+
 namespace OpenTS2.Scenes.Lot.Roof
 {
     public enum RoofTileBase : byte
@@ -22,6 +24,24 @@ namespace OpenTS2.Scenes.Lot.Roof
         Bottom = 3,
         Left = 4,
         Right = 5
+    }
+
+    [Flags]
+    public enum RoofCut : byte
+    {
+        None = 0,
+
+        Top = 1,
+        Right = 2,
+        Bottom = 4,
+        Left = 8,
+
+        TopRight = Top | Right,
+        TopLeft = Top | Left,
+        BottomRight = Bottom | Right,
+        BottomLeft = Bottom | Left,
+
+        All = TopLeft | BottomRight
     }
 
     public struct AtlasIndex
@@ -142,10 +162,13 @@ namespace OpenTS2.Scenes.Lot.Roof
 
         private RoofTileBase _base;
         private RoofTileIntersection _intersection;
+        private RoofCut _cut;
 
         public RoofTile(RoofTileBase baseTile)
         {
             _base = baseTile;
+            _cut = GetBaseCut(baseTile);
+
             _intersection = RoofTileIntersection.None;
         }
 
@@ -159,12 +182,59 @@ namespace OpenTS2.Scenes.Lot.Roof
 
         public void Delete()
         {
-            _base = RoofTileBase.Empty;
+            _cut = RoofCut.All;
+        }
+
+        private static RoofCut RotateCut(RoofCut cut, int dir)
+        {
+            if (dir == 0)
+            {
+                return cut;
+            }
+
+            return (RoofCut)(((int)cut >> dir) | (((int)cut << (4 - dir)) & (int)RoofCut.All));
+        }
+
+        public RoofCut Cut(RoofTile cutWith, int dir)
+        {
+            _cut |= RoofCut.All ^ RotateCut(cutWith._cut, dir);
+
+            return _cut;
+        }
+
+        public RoofCut Cut(RoofCut cutWith, int dir)
+        {
+            _cut |= RoofCut.All ^ RotateCut(cutWith, dir);
+
+            return _cut;
         }
 
         public AtlasIndex GetAtlasIndex()
         {
             return BAndIToAtlasIndex[(int)_base][(int)_intersection];
+        }
+
+        private static RoofCut GetBaseCut(RoofTileBase baseTile)
+        {
+            switch (baseTile)
+            {
+                case RoofTileBase.LeftEdge:
+                    return RoofCut.TopLeft;
+                case RoofTileBase.RightEdge:
+                    return RoofCut.TopRight;
+                default:
+                    return 0;
+            }
+        }
+
+        public RoofCut GetBaseCut()
+        {
+            return GetBaseCut(this._base);
+        }
+
+        public RoofCut Cuts()
+        {
+            return _cut;
         }
 
         public int CutDir()
@@ -182,15 +252,30 @@ namespace OpenTS2.Scenes.Lot.Roof
 
         public int OverlapPriority()
         {
+            if (_cut == RoofCut.All)
+            {
+                return -1;
+            }
+
             switch (_base)
             {
                 case RoofTileBase.Normal:
-                    return 2;
+                    return 4;
                 case RoofTileBase.SmallLeftEdge:
                 case RoofTileBase.SmallRightEdge:
-                    return 1;
+                    return 3;
+                case RoofTileBase.Top:
+                    return 2;
                 default:
                     return 0;
+            }
+        }
+
+        public void AddIntersectionsFrom(in RoofTile tile)
+        {
+            if (tile._intersection != RoofTileIntersection.None)
+            {
+                AddIntersection(tile._intersection);
             }
         }
     }

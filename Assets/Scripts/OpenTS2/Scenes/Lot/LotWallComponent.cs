@@ -293,7 +293,7 @@ namespace OpenTS2.Scenes.Lot
             var contentProvider = ContentProvider.Get();
             var catalogManager = CatalogManager.Get();
 
-            ushort highestId = _patternMap.Map.Keys.Max();
+            ushort highestId = _patternMap.Map.Count == 0 ? (ushort)0 : _patternMap.Map.Keys.Max();
             _patterns = new PatternMesh[highestId + 1];
 
             foreach (StringMapEntry entry in _patternMap.Map.Values)
@@ -597,9 +597,9 @@ namespace OpenTS2.Scenes.Lot
 
                 if (roofWall)
                 {
-                    heightTo = Mathf.Clamp(_roofs.GetHeightAt(to.XPos, to.YPos) - RoofOffset, floorTo, heightTo);
-                    heightMid = Mathf.Clamp(_roofs.GetHeightAt(midX, midY) - RoofOffset, floorMid, heightMid);
-                    heightFrom = Mathf.Clamp(_roofs.GetHeightAt(from.XPos, from.YPos) - RoofOffset, floorFrom, heightFrom);
+                    heightTo = Mathf.Max(_roofs.GetHeightAt(to.XPos, to.YPos, heightTo) - RoofOffset, floorTo);
+                    heightMid = Mathf.Max(_roofs.GetHeightAt(midX, midY, heightTo) - RoofOffset, floorMid);
+                    heightFrom = Mathf.Max(_roofs.GetHeightAt(from.XPos, from.YPos, heightTo) - RoofOffset, floorFrom);
                 }
 
                 wallVertices[3] = new Vector3(to.XPos, heightTo, to.YPos);

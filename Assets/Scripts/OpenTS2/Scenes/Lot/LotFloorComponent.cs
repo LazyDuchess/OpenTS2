@@ -100,7 +100,7 @@ namespace OpenTS2.Scenes.Lot
             var contentProvider = ContentProvider.Get();
             var catalogManager = CatalogManager.Get();
 
-            ushort highestId = _patternMap.Map.Keys.Max();
+            ushort highestId = _patternMap.Map.Count == 0 ? (ushort)0 : _patternMap.Map.Keys.Max();
             _patterns = new PatternMesh[highestId + 1];
 
             foreach (StringMapEntry entry in _patternMap.Map.Values)

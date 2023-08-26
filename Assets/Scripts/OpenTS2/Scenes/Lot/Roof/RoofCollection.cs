@@ -75,27 +75,29 @@ namespace OpenTS2.Scenes.Lot.Roof
 
             foreach (var existing in _roofs)
             {
-                //existing.Intersect(roof);
+                existing.Intersect(roof);
             }
 
             _roofs.Add(roof);
         }
 
-        public float GetHeightAt(float x, float y)
+        public float GetHeightAt(float x, float y, float fallback = float.PositiveInfinity)
         {
             // TODO: fast elimination based on roof rectangle/height?
+
+            float bestHeight = float.NegativeInfinity;
 
             foreach (var roof in _roofs)
             {
                 float result = roof.GetHeightAt(x, y);
 
-                if (result != float.PositiveInfinity)
+                if (result != float.PositiveInfinity && result > bestHeight)
                 {
-                    return result;
+                    bestHeight = result;
                 }
             }
 
-            return float.PositiveInfinity;
+            return bestHeight == float.NegativeInfinity ? fallback : bestHeight;
         }
 
         public void GenerateGeometry(RoofGeometryCollection geo)

@@ -14,7 +14,7 @@ Shader "OpenTS2/StandardMaterial/AlphaBlended"
     SubShader
     {
         ZWrite Off
-        Tags { "RenderType"="Transparent" "Queue"="Transparent" }
+        Tags { "RenderType"="Transparent" "Queue"="Transparent" "ForceNoShadowCasting"="True" }
 
         CGPROGRAM
         #pragma surface surf Lambert fullforwardshadows alpha:blend
