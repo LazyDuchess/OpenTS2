@@ -3,6 +3,7 @@ using OpenTS2.Client;
 using OpenTS2.Content;
 using OpenTS2.Files;
 using OpenTS2.Files.Formats.DBPF;
+using OpenTS2.Lua;
 using OpenTS2.SimAntics.Primitives;
 
 /// <summary>
@@ -26,6 +27,7 @@ public static class TestMain
         };
         var epManager = new EPManager((int)ProductFlags.BaseGame);
         var contentProvider = new ContentProvider();
+        var luaManager = new LuaManager();
         Filesystem.Initialize(new TestPathProvider(), epManager);
         CodecAttribute.Initialize();
         AssemblyHelper.InitializeLoadedAssemblies();

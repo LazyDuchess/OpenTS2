@@ -17,6 +17,7 @@ namespace OpenTS2.SimAntics.Primitives
             RegisterPrimitive<VMRandomNumber>(0x8);
             RegisterPrimitive<VMRemoveObjectInstance>(0x12);
             RegisterPrimitive<VMNotifyStackObjectOutOfIdle>(0x31);
+            RegisterPrimitive<VMLua>(0x7E);
         }
         
         public static void RegisterPrimitive<T>(ushort opcode) where T : VMPrimitive

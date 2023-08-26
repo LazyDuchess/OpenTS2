@@ -56,6 +56,18 @@ namespace OpenTS2.Content.DBPF
             return languageStr[id].Value;
         }
 
+        public string GetDescription(int id, Languages language)
+        {
+            if (!Strings.ContainsKey(language))
+                language = Languages.USEnglish;
+            if (!Strings.ContainsKey(language))
+                return "";
+            var languageStr = Strings[language];
+            if (id >= languageStr.Count)
+                return "";
+            return languageStr[id].Description;
+        }
+
         /// <summary>
         /// Check if the StringSet is localized to a specific language.
         /// </summary>
@@ -111,6 +123,11 @@ namespace OpenTS2.Content.DBPF
         public string GetString(int id)
         {
             return _stringData.GetString(id, Settings.Get().Language);
+        }
+
+        public string GetDescription(int id)
+        {
+            return _stringData.GetDescription(id, Settings.Get().Language);
         }
 
         /// <summary>
