@@ -6,6 +6,7 @@ using OpenTS2.Files;
 using OpenTS2.Files.Formats.DBPF;
 using OpenTS2.Rendering;
 using OpenTS2.SimAntics.Primitives;
+using OpenTS2.Lua;
 using UnityEngine;
 
 namespace OpenTS2.Engine
@@ -29,6 +30,7 @@ namespace OpenTS2.Engine
             var contentProvider = new ContentProvider();
             var objectManager = new ObjectManager(contentProvider);
             var effectsManager = new EffectsManager(contentProvider);
+            var luaManager = new LuaManager();
 
             TerrainManager.Initialize();
             MaterialManager.Initialize();
