@@ -66,24 +66,6 @@ namespace OpenTS2.Engine.Tests
                     var model = resource.CreateRootGameObject();
                     model.transform.GetChild(0).localPosition = lotObject.Object.Position;
                     model.transform.GetChild(0).localRotation = lotObject.Object.Rotation;
-
-                    // Object wall cuts
-                    // This would probably normally be evaluated by iterating subtile parts to get x/y, then wall placement flags in OBJD.
-                    // But we don't access that right now, so get wall masks corresponding to light resources in the cres.
-
-                    /*
-                    var lights = resource.ResourceCollection.Blocks.Select(block => {
-                        if (block is LightRefNodeBlock light)
-                        {
-                            return contentProvider.GetAsset<ScenegraphResourceAsset>(resource.ResourceCollection.FileLinks[((ExternalReference)light.Light).FileLinksIndex]);
-                        }
-                    }).ToArray();
-
-                    if (lights.Length > 0)
-                    {
-
-                    }
-                    */
                 }
                 catch (Exception e)
                 {
