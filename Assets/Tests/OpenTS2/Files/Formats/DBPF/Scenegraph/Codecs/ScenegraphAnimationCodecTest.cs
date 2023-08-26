@@ -178,4 +178,42 @@ public class ScenegraphAnimationCodecTest
         Assert.That(ikTarget1.TranslationCrc, Is.EqualTo(FileUtils.HighHash("l_handcontrol0")));
         Assert.That(ikTarget1.ContactCrc, Is.EqualTo(FileUtils.HighHash("l_handcontrol0_a")));
     }
+
+    [Test]
+    public void LoadsInverseKinematicChainsWithMultipleTargets()
+    {
+        var animationAsset = ContentProvider.Get()
+            .GetAsset<ScenegraphAnimationAsset>(new ResourceKey("a2o-exerciseMachine-benchPress-start_anim", GroupIDs.Scenegraph,
+                TypeIDs.SCENEGRAPH_ANIM));
+
+        var skeletonTarget = animationAsset.AnimResource.AnimTargets[0];
+        Assert.That(skeletonTarget.TagName, Is.EqualTo("auskel"));
+
+        Assert.That(skeletonTarget.IKChains.Length, Is.EqualTo(4));
+
+        var ikChain3 = skeletonTarget.IKChains[2];
+        Assert.That(ikChain3.IkStrategy, Is.EqualTo(AnimResourceConstBlock.IKStrategy.SevenDegreesOfFreedom));
+        Assert.That(ikChain3.IkTargets.Length, Is.EqualTo(2));
+        Assert.That(ikChain3.BeginBoneCrc, Is.EqualTo(FileUtils.HighHash("r_upperarm")));
+
+        var ikTarget1 = ikChain3.IkTargets[0];
+        Assert.That(ikTarget1.TranslationCrc, Is.EqualTo(FileUtils.HighHash("r_handcontrol0")));
+        Assert.That(ikTarget1.ContactCrc, Is.EqualTo(FileUtils.HighHash("r_handcontrol0_a")));
+        var ikTarget2 = ikChain3.IkTargets[1];
+        Assert.That(ikTarget2.TranslationCrc, Is.EqualTo(FileUtils.HighHash("r_handcontrol1_noxyzoffset")));
+        Assert.That(ikTarget2.ContactCrc, Is.EqualTo(FileUtils.HighHash("r_handcontrol1_b")));
+
+
+        var ikChain4 = skeletonTarget.IKChains[3];
+        Assert.That(ikChain4.IkStrategy, Is.EqualTo(AnimResourceConstBlock.IKStrategy.SevenDegreesOfFreedom));
+        Assert.That(ikChain4.IkTargets.Length, Is.EqualTo(2));
+        Assert.That(ikChain4.BeginBoneCrc, Is.EqualTo(FileUtils.HighHash("l_upperarm")));
+
+        ikTarget1 = ikChain4.IkTargets[0];
+        Assert.That(ikTarget1.TranslationCrc, Is.EqualTo(FileUtils.HighHash("l_handcontrol0")));
+        Assert.That(ikTarget1.ContactCrc, Is.EqualTo(FileUtils.HighHash("l_handcontrol0_a")));
+        ikTarget2 = ikChain4.IkTargets[1];
+        Assert.That(ikTarget2.TranslationCrc, Is.EqualTo(FileUtils.HighHash("l_handcontrol1_noxyzoffset")));
+        Assert.That(ikTarget2.ContactCrc, Is.EqualTo(FileUtils.HighHash("l_handcontrol1_b")));
+    }
 }
