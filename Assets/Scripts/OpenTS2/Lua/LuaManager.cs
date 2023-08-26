@@ -44,6 +44,11 @@ namespace OpenTS2.Lua
             throw new SimAnticsException($"Problem executing Lua script:{Environment.NewLine}{exception}", Context.StackFrame);
         }
 
+        public void RunGlobalScript(string lua)
+        {
+            _script.DoString(lua);
+        }
+
         public VMExitCode RunStringAsPrimitive(string lua, short param0, short param1, short param2, VMContext ctx)
         {
             PrepGlobalsForPrimitive(param0, param1, param2, ctx);
