@@ -43,6 +43,8 @@ public class ScenegraphAnimationCodecTest
         var translationChannel = animTarget.Channels[2];
         Assert.That(translationChannel.ChannelName, Is.EqualTo("body_trans"));
         Assert.That(translationChannel.Type, Is.EqualTo(AnimResourceConstBlock.ChannelType.TransformXYZ));
+        Assert.That(translationChannel.IKChainIdx, Is.EqualTo(-1)); // No ik chain for this channel.
+        Assert.That(translationChannel.AnimatedAttribute, Is.EqualTo(AnimResourceConstBlock.AnimatedAttribute.Transform));
         // Since we have an XYZ animation, there should be one component per axis.
         Assert.That(translationChannel.Components.Length, Is.EqualTo(3));
         Assert.That(translationChannel.DurationTicks, Is.EqualTo(286));
@@ -72,6 +74,8 @@ public class ScenegraphAnimationCodecTest
         var bodyRotation = animTarget.Channels[3];
         Assert.That(bodyRotation.ChannelName, Is.EqualTo("body_rot"));
         Assert.That(bodyRotation.Type, Is.EqualTo(AnimResourceConstBlock.ChannelType.EulerRotation));
+        Assert.That(bodyRotation.IKChainIdx, Is.EqualTo(-1)); // No ik chain for this channel.
+        Assert.That(bodyRotation.AnimatedAttribute, Is.EqualTo(AnimResourceConstBlock.AnimatedAttribute.Rotation));
         // One component per axis: roll, pitch, yaw.
         Assert.That(bodyRotation.Components.Length, Is.EqualTo(3));
         Assert.That(bodyRotation.DurationTicks, Is.EqualTo(286));
