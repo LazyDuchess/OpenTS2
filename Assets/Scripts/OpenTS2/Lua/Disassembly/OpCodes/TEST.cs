@@ -16,7 +16,7 @@ namespace OpenTS2.Lua.Disassembly.OpCodes
             context.Code.Indentation--;
             context.Code.WriteElse();
             context.Code.Indentation++;
-            var jLabel = context.MakeRelativeJump(1);
+            var jLabel = context.MakeRelativeJump(2);
             context.Code.WriteGoto(jLabel);
             context.Code.Indentation--;
             context.Code.WriteEnd();

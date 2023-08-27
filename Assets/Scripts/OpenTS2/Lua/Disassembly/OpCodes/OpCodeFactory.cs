@@ -11,17 +11,17 @@ namespace OpenTS2.Lua.Disassembly.OpCodes
 		private static readonly Type[] OpCodeMap = new Type[]
 		{
 			typeof(MOVE), //MOVE
-			typeof(LuaC50.OpCode), //LOADK
+			typeof(LOADK), //LOADK
 			typeof(LOADBOOL), //LOADBOOL
 			typeof(LuaC50.OpCode), //LOADNIL
 			typeof(LuaC50.OpCode), //GETUPVAL
 			typeof(GETGLOBAL), //GETGLOBAL
-			typeof(LuaC50.OpCode), //GETTABLE
+			typeof(GETTABLE), //GETTABLE
 			typeof(SETGLOBAL), //SETGLOBAL
 			typeof(LuaC50.OpCode), //SETUPVAL
 			typeof(SETTABLE), //SETTABLE
 			typeof(NEWTABLE), //NEWTABLE
-			typeof(LuaC50.OpCode), //SELF
+			typeof(SELF), //SELF
 			typeof(LuaC50.OpCode), //ADD
 			typeof(LuaC50.OpCode), //SUB
 			typeof(LuaC50.OpCode), //MUL
@@ -35,11 +35,11 @@ namespace OpenTS2.Lua.Disassembly.OpCodes
 			typeof(LT), //LT
 			typeof(LuaC50.OpCode), //LE
 			typeof(TEST), //TEST
-			typeof(LuaC50.OpCode), //CALL
+			typeof(CALL), //CALL
 			typeof(LuaC50.OpCode), //TAILCALL
 			typeof(RETURN), //RETURN
 			typeof(LuaC50.OpCode), //FORLOOP
-			typeof(LuaC50.OpCode), //TFORLOOP
+			typeof(TFORLOOP), //TFORLOOP
 			typeof(LuaC50.OpCode), //TFORREP
 			typeof(LuaC50.OpCode), //SETLIST
 			typeof(LuaC50.OpCode), //SETLISTO

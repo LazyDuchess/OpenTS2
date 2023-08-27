@@ -15,7 +15,7 @@ namespace OpenTS2.Lua.Disassembly.OpCodes
             else
                 context.Code.WriteLine($"if ({context.RKAsString(B)} ~= {context.RKAsString(C)}) then");
             context.Code.Indentation++;
-            var targetLabel = context.MakeRelativeJump(1);
+            var targetLabel = context.MakeRelativeJump(2);
             context.Code.WriteGoto(targetLabel);
             context.Code.Indentation--;
             context.Code.WriteEnd();

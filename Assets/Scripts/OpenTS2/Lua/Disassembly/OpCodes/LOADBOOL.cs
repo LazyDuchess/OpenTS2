@@ -13,7 +13,7 @@ namespace OpenTS2.Lua.Disassembly.OpCodes
             context.Code.WriteLine(context.R(A) + " = " + GetLuaBool(GetBool(B)));
             if (GetBool(C))
             {
-                var jump = context.MakeRelativeJump(1);
+                var jump = context.MakeRelativeJump(2);
                 context.Code.WriteGoto(jump);
             }
         }

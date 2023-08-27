@@ -237,7 +237,7 @@ namespace OpenTS2.Lua.Disassembly
                     var operands = reader.ReadUInt32();
 
                     var op = OpCodeFactory.GetOpCode(operands, this);
-
+                    op.PC = OpCodes.Count;
                     OpCodes.Add(op);
                 }
             }
@@ -272,6 +272,13 @@ namespace OpenTS2.Lua.Disassembly
 
             void DisassembleInternal(Context context)
             {
+                for (var i = 0; i < OpCodes.Count; i++)
+                {
+                    context.PC = i;
+                    var opCode = OpCodes[i];
+                    context.OpCode = opCode;
+                    opCode.PreProcess(context);
+                }
                 for (var i = 0; i < OpCodes.Count; i++)
                 {
                     context.PC = i;
@@ -359,6 +366,7 @@ namespace OpenTS2.Lua.Disassembly
 
         public class OpCode
         {
+            public int PC;
             public uint Operands;
             public Function Function;
             public ushort A
@@ -405,6 +413,11 @@ namespace OpenTS2.Lua.Disassembly
             public int sBx
             {
                 get { return (int)((long)Bx - Function.Owner.Bias); }
+            }
+
+            public virtual void PreProcess(Context context)
+            {
+
             }
 
             public virtual void Disassemble(Context context)
@@ -465,8 +478,16 @@ namespace OpenTS2.Lua.Disassembly
 
             public JumpLabel MakeRelativeJump(int offset)
             {
+                return MakeAbsoluteJump(PC + offset);
+            }
+
+            public JumpLabel MakeAbsoluteJump(int pc)
+            {
+                var jLabels = GetJumpLabelsHere(pc);
+                if (jLabels.Count > 0)
+                    return jLabels[0];
                 var jumpLabelID = JumpLabels.Count;
-                var jumpLabel = new JumpLabel(jumpLabelID, PC + 1 + (int)offset);
+                var jumpLabel = new JumpLabel(jumpLabelID, pc);
                 JumpLabels.Add(jumpLabel);
                 return jumpLabel;
             }
