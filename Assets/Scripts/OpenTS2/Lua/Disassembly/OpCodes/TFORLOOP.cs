@@ -12,18 +12,23 @@ namespace OpenTS2.Lua.Disassembly.OpCodes
         {
             var start = A + 2;
             var end = A + 2 + C;
-            var loopValues = "";
+            var retValues = "";
             for (var i = start; i <= end; i++)
             {
                 if (i > start)
-                    loopValues += ", ";
-                loopValues += context.R((ushort)i);
+                    retValues += ", ";
+                retValues += context.R((ushort)i);
 
                 // Probably don't need to do this
-                context.Code.WriteLine(context.R((ushort)i) + " = nil");
+                //context.Code.WriteLine(context.R((ushort)i) + " = nil");
             }
-
-            context.Code.WriteLine("for " + loopValues + " in " + context.R((ushort)(A)) + ", " + context.R((ushort)(A + 1)) + " do");
+            context.Code.WriteLine(retValues + " = " + context.R(A) + "("+context.R((ushort)(A+1))+", "+context.R((ushort)(A+2))+")");
+            context.Code.WriteLine("if " + context.R((ushort)(A + 2)) + " ~= nil then");
+            context.Code.Indentation++;
+            context.Code.WriteGoto(context.MakeRelativeJump(2));
+            context.Code.Indentation--;
+            context.Code.WriteEnd();
+            //context.Code.WriteLine("for " + loopValues + " in " + context.R((ushort)(A)) + ", " + context.R((ushort)(A + 1)) + " do");
         }
     }
 }

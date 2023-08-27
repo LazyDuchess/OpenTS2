@@ -11,9 +11,9 @@ namespace OpenTS2.Lua.Disassembly.OpCodes
         public override void Disassemble(LuaC50.Context context)
         {
             if (GetBool(A))
-                context.Code.WriteLine($"if ({context.RKAsString(B)} < {context.RKAsString(C)}) then");
-            else
                 context.Code.WriteLine($"if ({context.RKAsString(B)} >= {context.RKAsString(C)}) then");
+            else
+                context.Code.WriteLine($"if ({context.RKAsString(B)} < {context.RKAsString(C)}) then");
             context.Code.Indentation++;
             var targetLabel = context.MakeRelativeJump(2);
             context.Code.WriteGoto(targetLabel);

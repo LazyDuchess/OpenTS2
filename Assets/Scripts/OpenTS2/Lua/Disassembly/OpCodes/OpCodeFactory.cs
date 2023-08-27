@@ -40,7 +40,7 @@ namespace OpenTS2.Lua.Disassembly.OpCodes
 			typeof(RETURN), //RETURN
 			typeof(LuaC50.OpCode), //FORLOOP
 			typeof(TFORLOOP), //TFORLOOP
-			typeof(LuaC50.OpCode), //TFORREP
+			typeof(TFORPREP), //TFORPREP
 			typeof(LuaC50.OpCode), //SETLIST
 			typeof(LuaC50.OpCode), //SETLISTO
 			typeof(LuaC50.OpCode), //CLOSE

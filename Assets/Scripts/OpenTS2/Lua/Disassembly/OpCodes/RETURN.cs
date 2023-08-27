@@ -8,6 +8,19 @@ namespace OpenTS2.Lua.Disassembly.OpCodes
 {
     public class RETURN : LuaC50.OpCode
     {
+        public override int GetPCForJumpTarget()
+        {
+            if (!ValidReturnToDisassemble())
+            {
+                var aboveMe = PC - 1;
+                if (aboveMe >= 0)
+                {
+                    if (Function.OpCodes[aboveMe] is RETURN)
+                        return Function.OpCodes[aboveMe].PC;
+                }
+            }
+            return PC;
+        }
         public override void Disassemble(LuaC50.Context context)
         {
             if (!ValidReturnToDisassemble())

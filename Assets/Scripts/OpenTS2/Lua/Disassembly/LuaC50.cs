@@ -415,6 +415,11 @@ namespace OpenTS2.Lua.Disassembly
                 get { return (int)((long)Bx - Function.Owner.Bias); }
             }
 
+            public virtual int GetPCForJumpTarget()
+            {
+                return PC;
+            }
+
             public virtual void PreProcess(Context context)
             {
 
@@ -483,6 +488,8 @@ namespace OpenTS2.Lua.Disassembly
 
             public JumpLabel MakeAbsoluteJump(int pc)
             {
+                var opCodeAtPC = Function.OpCodes[pc];
+                pc = opCodeAtPC.GetPCForJumpTarget();
                 var jLabels = GetJumpLabelsHere(pc);
                 if (jLabels.Count > 0)
                     return jLabels[0];

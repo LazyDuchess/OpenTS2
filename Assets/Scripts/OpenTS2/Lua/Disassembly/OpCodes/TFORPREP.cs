@@ -6,16 +6,17 @@ using System.Threading.Tasks;
 
 namespace OpenTS2.Lua.Disassembly.OpCodes
 {
-    public class JMP : LuaC50.OpCode
+    public class TFORPREP : LuaC50.OpCode
     {
         public override void PreProcess(LuaC50.Context context)
         {
-            context.MakeRelativeJump(sBx+1);
+            context.MakeRelativeJump(sBx + 1);
         }
         public override void Disassemble(LuaC50.Context context)
         {
-            var jumpLabel = context.MakeRelativeJump(sBx+1);
-            context.Code.WriteGoto(jumpLabel);
+            context.Code.WriteLine(context.R((ushort)(A + 1)) + " = " + context.R(A)+ " -- tforprep...");
+            var jmp = context.MakeRelativeJump(sBx + 1);
+            context.Code.WriteGoto(jmp);
         }
     }
 }

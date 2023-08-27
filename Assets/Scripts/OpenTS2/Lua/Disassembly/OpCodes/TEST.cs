@@ -10,7 +10,7 @@ namespace OpenTS2.Lua.Disassembly.OpCodes
     {
         public override void Disassemble(LuaC50.Context context)
         {
-            context.Code.WriteLine($"if ({context.R(B)} ~= {C}) then");
+            context.Code.WriteLine($"if ({context.R(B)} == {C}) then");
             context.Code.Indentation++;
             context.Code.WriteLine($"{context.R(A)} = {context.R(B)}");
             context.Code.Indentation--;
