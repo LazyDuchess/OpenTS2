@@ -25,6 +25,9 @@ public class ScenegraphAnimationCodecTest
             .GetAsset<ScenegraphAnimationAsset>(new ResourceKey("a2o-pinball-play-lose_anim", GroupIDs.Scenegraph,
                 TypeIDs.SCENEGRAPH_ANIM));
         Assert.IsNotNull(animationAsset);
+
+        Assert.That(animationAsset.AnimResource.HeadingOffset, Is.EqualTo(0.0));
+        Assert.That(animationAsset.AnimResource.TurnRotation, Is.EqualTo(0.0));
     }
 
     [Test]
@@ -111,6 +114,9 @@ public class ScenegraphAnimationCodecTest
         var animationAsset = ContentProvider.Get()
             .GetAsset<ScenegraphAnimationAsset>(new ResourceKey("a2o-exerciseMachine-benchPress-start_anim", GroupIDs.Scenegraph,
                 TypeIDs.SCENEGRAPH_ANIM));
+
+        Assert.That(animationAsset.AnimResource.HeadingOffset, Is.EqualTo(-1.570).Within(0.001));
+        Assert.That(animationAsset.AnimResource.TurnRotation, Is.EqualTo(0.0));
 
         var skeletonTarget = animationAsset.AnimResource.AnimTargets[0];
         Assert.That(skeletonTarget.TagName, Is.EqualTo("auskel"));

@@ -24,12 +24,18 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
 
         public ScenegraphResource ScenegraphResource;
 
+        public float HeadingOffset { get; }
+        public float TurnRotation { get; }
+
         public AnimTarget[] AnimTargets;
 
         public AnimResourceConstBlock(PersistTypeInfo blockTypeInfo, ScenegraphResource scenegraphResource,
+            float headingOffset, float turnRotation,
             AnimTarget[] animTargets) : base(blockTypeInfo)
         {
             ScenegraphResource = scenegraphResource;
+            HeadingOffset = headingOffset;
+            TurnRotation = turnRotation;
             AnimTargets = animTargets;
         }
 
@@ -151,10 +157,10 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             WeightIk = 4,    // E9C7F1AD
             Unknown5 = 5,    // 6B312A30
             MaterialFloat1 = 6, // 09F5FDB0
-            Unknown7 = 7,    // 09F5FDB6
+            MaterialFloat2 = 7, // 09F5FDB6
             Unknown8 = 8,    // 09F5FDBC
             Unknown9 = 9,    // 09F5FDC0
-            Unknown10 = 10,  // 8C798726
+            ShapeColor = 10, // 8C798726
             Unknown11 = 11,  // E9D24D51
             Unknown12 = 12,  // 69DE427A
             Unknown13 = 13,  // 29DE3049
@@ -673,7 +679,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             }
             */
 
-            return new AnimResourceConstBlock(blockTypeInfo, resource, animTargets);
+            return new AnimResourceConstBlock(blockTypeInfo, resource, headingOffset, turnRotation, animTargets);
         }
 
         // For some reason this format pads to 4-byte boundaries sometimes...we deal with that here.
