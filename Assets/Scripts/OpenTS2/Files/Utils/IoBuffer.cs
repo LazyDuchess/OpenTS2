@@ -343,6 +343,16 @@ namespace OpenTS2.Files.Utils
             return result;
         }
 
+        public float ReadSingle()
+        {
+            return Reader.ReadSingle();
+        }
+
+        public double ReadDouble()
+        {
+            return Reader.ReadDouble();
+        }
+
         /// <summary>
         /// Sets a mark at the current position in the stream.
         /// </summary>
