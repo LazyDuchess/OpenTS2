@@ -110,7 +110,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             ///
             /// For IK channels, this can be more complicated such as the IK weight, the IK rotation etc.
             /// </summary>
-            public AnimatedAttribute AnimatedAttribute => Enum.IsDefined(typeof(ChannelType), AnimatedAttributeIdx)
+            public AnimatedAttribute AnimatedAttribute => Enum.IsDefined(typeof(AnimatedAttribute), AnimatedAttributeIdx)
                 ? (AnimatedAttribute)AnimatedAttributeIdx
                 : throw new InvalidCastException($"Animated attribute idx has invalid value: {AnimatedAttributeIdx}");
 
@@ -145,12 +145,12 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
         {
             // Attribute names and their GUIDs.
             Rotation = 0,    // 9B5B3506 - cTransformNode rotation
-            Transform = 1,    // FB5B3383 - cTransformNode transform
+            Transform = 1,   // FB5B3383 - cTransformNode transform
             MorphWeight = 2, // 69C7EB40 - kMorphWeight
-            Unknown3 = 3,    // E9C7F1A6
-            Unknown4 = 4,    // E9C7F1AD
+            ContactIk = 3,   // E9C7F1A6
+            WeightIk = 4,    // E9C7F1AD
             Unknown5 = 5,    // 6B312A30
-            Unknown6 = 6,    // 09F5FDB0
+            MaterialFloat1 = 6, // 09F5FDB0
             Unknown7 = 7,    // 09F5FDB6
             Unknown8 = 8,    // 09F5FDBC
             Unknown9 = 9,    // 09F5FDC0

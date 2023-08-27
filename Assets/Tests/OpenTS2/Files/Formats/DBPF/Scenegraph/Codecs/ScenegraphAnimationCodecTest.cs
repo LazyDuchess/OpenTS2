@@ -1,10 +1,13 @@
-﻿using NUnit.Framework;
+﻿using System.Collections.Generic;
+using System.Linq;
+using NUnit.Framework;
 using OpenTS2.Common;
 using OpenTS2.Common.Utils;
 using OpenTS2.Content;
 using OpenTS2.Content.DBPF.Scenegraph;
 using OpenTS2.Files.Formats.DBPF;
 using OpenTS2.Files.Formats.DBPF.Scenegraph.Block;
+using UnityEngine;
 
 public class ScenegraphAnimationCodecTest
 {
@@ -88,6 +91,51 @@ public class ScenegraphAnimationCodecTest
         Assert.That(bodyRotation.Components[2].TangentCurveType,
             Is.EqualTo(AnimResourceConstBlock.ChannelComponent.CurveType.BakedTangents));
         Assert.That(bodyRotation.Components[2].KeyFrames.Length, Is.EqualTo(1));
+    }
+
+    private static AnimResourceConstBlock.SharedChannel[] GetChannelsByName(AnimResourceConstBlock.AnimTarget target, string name)
+    {
+        var channels = target.Channels.Where(c => c.ChannelName == name).ToArray();
+
+        if (channels.Length == 0)
+        {
+            throw new KeyNotFoundException($"Channel {name} not found");
+        }
+
+        return channels;
+    }
+
+    [Test]
+    public void TestInverseKinematicChainChannelsAreCorrect()
+    {
+        var animationAsset = ContentProvider.Get()
+            .GetAsset<ScenegraphAnimationAsset>(new ResourceKey("a2o-exerciseMachine-benchPress-start_anim", GroupIDs.Scenegraph,
+                TypeIDs.SCENEGRAPH_ANIM));
+
+        var skeletonTarget = animationAsset.AnimResource.AnimTargets[0];
+        Assert.That(skeletonTarget.TagName, Is.EqualTo("auskel"));
+
+        var leftHandChannels = GetChannelsByName(skeletonTarget, "l_handcontrol0");
+        Assert.That(leftHandChannels.Length, Is.EqualTo(2));
+        Assert.That(leftHandChannels[0].AnimatedAttribute, Is.EqualTo(AnimResourceConstBlock.AnimatedAttribute.Rotation));
+        Assert.That(leftHandChannels[0].Type, Is.EqualTo(AnimResourceConstBlock.ChannelType.EulerRotation));
+        Assert.That(leftHandChannels[1].AnimatedAttribute, Is.EqualTo(AnimResourceConstBlock.AnimatedAttribute.Transform));
+        Assert.That(leftHandChannels[1].Type, Is.EqualTo(AnimResourceConstBlock.ChannelType.TransformXYZ));
+
+        var leftHandContactChannels = GetChannelsByName(skeletonTarget, "l_handcontrol0_a");
+        Assert.That(leftHandContactChannels.Length, Is.EqualTo(1));
+        Assert.That(leftHandContactChannels[0].AnimatedAttribute, Is.EqualTo(AnimResourceConstBlock.AnimatedAttribute.ContactIk));
+        Assert.That(leftHandContactChannels[0].Type, Is.EqualTo(AnimResourceConstBlock.ChannelType.Float1));
+
+        var leftHandSecondContactChannels = GetChannelsByName(skeletonTarget, "l_handcontrol1_b");
+        Assert.That(leftHandSecondContactChannels.Length, Is.EqualTo(1));
+        Assert.That(leftHandSecondContactChannels[0].AnimatedAttribute, Is.EqualTo(AnimResourceConstBlock.AnimatedAttribute.ContactIk));
+        Assert.That(leftHandSecondContactChannels[0].Type, Is.EqualTo(AnimResourceConstBlock.ChannelType.Float1));
+
+        var leftHandChannelsNoOffset = GetChannelsByName(skeletonTarget, "l_handcontrol1_noxyzoffset");
+        Assert.That(leftHandChannelsNoOffset.Length, Is.EqualTo(1));
+        Assert.That(leftHandChannelsNoOffset[0].AnimatedAttribute, Is.EqualTo(AnimResourceConstBlock.AnimatedAttribute.Transform));
+        Assert.That(leftHandChannelsNoOffset[0].Type, Is.EqualTo(AnimResourceConstBlock.ChannelType.TransformXYZ));
     }
 
     [Test]
