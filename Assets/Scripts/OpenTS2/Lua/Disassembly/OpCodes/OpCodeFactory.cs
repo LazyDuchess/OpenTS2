@@ -36,7 +36,7 @@ namespace OpenTS2.Lua.Disassembly.OpCodes
 			typeof(LE), //LE
 			typeof(TEST), //TEST
 			typeof(CALL), //CALL
-			typeof(TAILCALL), //TAILCALL - TODO
+			typeof(TAILCALL), //TAILCALL
 			typeof(RETURN), //RETURN
 			typeof(FORLOOP), //FORLOOP
 			typeof(TFORLOOP), //TFORLOOP
@@ -44,7 +44,7 @@ namespace OpenTS2.Lua.Disassembly.OpCodes
 			typeof(SETLIST), //SETLIST
 			// TODO: I think this is the same??? Idk double check.
 			typeof(SETLIST), //SETLISTO
-			typeof(CLOSE), //CLOSE - TODO
+			typeof(CLOSE), //CLOSE - TODO?
 			typeof(CLOSURE) //CLOSURE
 		};
 

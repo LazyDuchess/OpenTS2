@@ -8,6 +8,7 @@ namespace OpenTS2.Lua.Disassembly
 {
     public class CodeBuilder
     {
+        public int Position => _stringBuilder.Length;
         public int Indentation = 0;
         private StringBuilder _stringBuilder = new StringBuilder();
 
@@ -17,6 +18,11 @@ namespace OpenTS2.Lua.Disassembly
             {
                 _stringBuilder.Append('\t');
             }
+        }
+
+        public void Insert(int index, string value)
+        {
+            _stringBuilder.Insert(index, value);
         }
 
         public void NewLine()

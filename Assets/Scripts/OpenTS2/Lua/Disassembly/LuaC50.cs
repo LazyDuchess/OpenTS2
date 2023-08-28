@@ -262,7 +262,8 @@ namespace OpenTS2.Lua.Disassembly
                     if (i > 0) paramList += ", ";
                     paramList += context.R((ushort)i);
                 }
-                context.Code.WriteLine("function " + inheritedContext.R(inheritedContext.OpCode.A) + "("+paramList+")");
+
+                context.Code.WriteLine("function " + inheritedContext.R(inheritedContext.OpCode.A) + "(" + paramList + ")");
                 context.Code.Indentation++;
                 DisassembleInternal(context);
                 context.Code.Indentation--;
@@ -276,6 +277,8 @@ namespace OpenTS2.Lua.Disassembly
 
             void DisassembleInternal(Context context)
             {
+                context.Code.NewLine();
+                var localsLocation = context.Code.Position;
                 for (var i = OpCodes.Count - 1; i >= 0; i--)
                 {
                     var returnOpCode = OpCodes[i] as RETURN;
@@ -309,6 +312,15 @@ namespace OpenTS2.Lua.Disassembly
                     context.OpCode = opCode;
                     opCode.Disassemble(context);
                 }
+                var localVar = "";
+                for(var i=0;i<context.Locals.Count;i++)
+                {
+                    if (i > 0)
+                        localVar += ", ";
+                    localVar += context.R((ushort)context.Locals.ElementAt(i));
+                }
+                if (localVar != "")
+                    context.Code.Insert(localsLocation, "local " + localVar);
             }
 
             public CodeBuilder Disassemble()
@@ -499,6 +511,7 @@ namespace OpenTS2.Lua.Disassembly
             public RETURN ReturnOpCode;
             public int Level = 0;
             public Context Parent;
+            public HashSet<int> Locals = new HashSet<int>();
             /// <summary>
             /// Program Counter
             /// </summary>
@@ -557,6 +570,10 @@ namespace OpenTS2.Lua.Disassembly
                 var prefix = "Reg";
                 if (Function.ArgumentCount > value)
                     prefix = "Arg";
+                else
+                {
+                    Locals.Add(value);
+                }
                 return $"{prefix}_{value}_{Level}";
             }
 
