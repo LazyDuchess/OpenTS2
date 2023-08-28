@@ -312,11 +312,10 @@ namespace OpenTS2.Lua.Disassembly
                     context.OpCode = opCode;
                     opCode.Disassemble(context);
                 }
-                var localVar = "";
+                var localVar = context.ReturnTable;
                 for(var i=0;i<context.Locals.Count;i++)
                 {
-                    if (i > 0)
-                        localVar += ", ";
+                    localVar += ", ";
                     localVar += context.R((ushort)context.Locals.ElementAt(i));
                 }
                 if (localVar != "")
