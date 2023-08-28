@@ -14,88 +14,29 @@ namespace OpenTS2.Engine.Tests
 {
     public class LuaTestController : MonoBehaviour
     {
-        public string ScriptToRun = "GameMessages";
-        // Start is called before the first frame update
         void Start()
         {
             var objectScripts = Filesystem.GetLatestFilePath("Res/ObjectScripts/ObjectScripts.package");
+            Debug.Log($"Reading scripts from {objectScripts}");
             var dbpf = new DBPFFile(objectScripts);
-            LuaAsset luaAsset = null;
             foreach (var entry in dbpf.Entries)
             {
-                
+                if (entry.GlobalTGI.TypeID != TypeIDs.LUA_GLOBAL)
+                    continue;
+                var luaAsset = entry.GetAsset<LuaAsset>();
+                File.WriteAllText($"TestFiles/{luaAsset.FileName}.lua", luaAsset.Source);
                 try
                 {
-                    var thisLuaAsset = entry.GetAsset<LuaAsset>();
-                    if (thisLuaAsset.FileName == ScriptToRun)
-                    {
-                        Debug.Log(thisLuaAsset.FileName);
-                        try
-                        {
-                            luaAsset = thisLuaAsset;
-                            File.WriteAllText($"TestFiles/{ScriptToRun}.lua", thisLuaAsset.Source);
-                        }
-                        catch(Exception e)
-                        {
-                            Debug.Log(e);
-                        }
-                    }
+                    LuaManager.Get().RunGlobalScript(luaAsset.Source);
                 }
                 catch(Exception e)
                 {
-                    Debug.Log(e);
+                    var msg = e.ToString();
+                    if (e is InterpreterException)
+                        msg = (e as InterpreterException).DecoratedMessage;
+                    Debug.LogError($"Problem running {luaAsset.FileName}:{msg}");
                 }
-                
             }
-            try
-            {
-                LuaManager.Get().RunGlobalScript(luaAsset.Source);
-            }
-            catch(InterpreterException e)
-            {
-                Debug.LogError(e.DecoratedMessage);
-            }
-            /*
-            LuaManager.Get().RunGlobalScript(@"R_0 = {}
-Math = R_0
-R_0 = Math
-
-function R_1(R_0, R_1, R_2, R_3)
-		if (R_3 ~= 0) then 
-	R_3 = R_3
-
-			if (R_0 == R_2) then
-			R_4 = true
-			return R_4
-		end
-			if (R_1 == R_2) then
-			R_4 = true
-			return R_4
-		end
-	end
-		if (R_2 < R_0) then
-			if (R_2 < R_1) then
-			R_4 = false
-			return R_4
-		end
-		R_4 = true
-		return R_4
-	else
-			if (R_1 < R_2) then
-			R_4 = false
-			return R_4
-		end
-		R_4 = true
-		return R_4
-	end
-end
-
-
-R_0["+"\"InRange\""+ @"] = R_1
-");
-            var luaMgr = LuaManager.Get();
-            UnityEngine.Debug.Log(luaMgr._script.Call(luaMgr._script.Globals["R_1"], 2, 4, 2, 1));}
-        */
         }
     }
 }
