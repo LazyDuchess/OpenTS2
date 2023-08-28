@@ -10,7 +10,7 @@ namespace OpenTS2.Lua.Disassembly.OpCodes
     {
         public override void Disassemble(LuaC50.Context context)
         {
-            context.Code.WriteLine(context.R(A) + " = !" + context.R(B));
+            context.Code.WriteLine(context.R(A) + " = not " + context.R(B));
         }
     }
 }

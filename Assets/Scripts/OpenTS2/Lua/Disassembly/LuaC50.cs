@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace OpenTS2.Lua.Disassembly
@@ -272,6 +273,15 @@ namespace OpenTS2.Lua.Disassembly
 
             void DisassembleInternal(Context context)
             {
+                for (var i = OpCodes.Count - 1; i >= 0; i--)
+                {
+                    var returnOpCode = OpCodes[i] as RETURN;
+                    if (returnOpCode != null)
+                    {
+                        context.ReturnOpCode = returnOpCode;
+                        break;
+                    }
+                }
                 for (var i = 0; i < OpCodes.Count; i++)
                 {
                     context.PC = i;
@@ -483,6 +493,7 @@ namespace OpenTS2.Lua.Disassembly
             public Function Function;
             public List<JumpLabel> JumpLabels = new List<JumpLabel>();
             public List<BeginFORLOOP> ForLoops = new List<BeginFORLOOP>();
+            public RETURN ReturnOpCode;
             /// <summary>
             /// Program Counter
             /// </summary>
@@ -548,11 +559,16 @@ namespace OpenTS2.Lua.Disassembly
                     case Constant.Type.Empty:
                         return "nil";
                     case Constant.Type.String:
-                        return PutQuotesIfAppropriate(cnst.String);
+                        return PutQuotesIfAppropriate(EscapeString(cnst.String));
                     case Constant.Type.Number:
                         return cnst.Number.ToString(CultureInfo.InvariantCulture);
                 }
                 return "nil";
+            }
+
+            public string EscapeString(string str)
+            {
+                return Regex.Replace(str, @"\r\n?|\n", @"\n");
             }
 
             public string KAsString(uint value)
@@ -563,7 +579,7 @@ namespace OpenTS2.Lua.Disassembly
                     case Constant.Type.Empty:
                         return "nil";
                     case Constant.Type.String:
-                        return $"\"{cnst.String}\"";
+                        return $"\"{EscapeString(cnst.String)}\"";
                     case Constant.Type.Number:
                         return cnst.Number.ToString(CultureInfo.InvariantCulture);
                 }

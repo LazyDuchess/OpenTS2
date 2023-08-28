@@ -19,30 +19,14 @@ namespace OpenTS2.Lua.Disassembly.OpCodes
                     callValues += ", ";
                 callValues += context.R((ushort)i);
             }
-
-            var similarReturn = FindSimilarReturnToGoTo();
-            if (similarReturn == null)
+            var funcReturn = context.ReturnOpCode;
+            if (funcReturn == null)
                 context.Code.WriteLine("return "+context.R(A)+"("+callValues+")");
             else
             {
-                //context.Code.WriteLine(context.R((ushort)(i - (A - similarReturn.A))) + " = " + context.R(i));
-                context.Code.WriteLine(context.R(similarReturn.A) + " = " + context.R(A) + "(" + callValues + ")");
-                var jumpLabel = context.MakeAbsoluteJump(similarReturn.PC);
-                context.Code.WriteGoto(jumpLabel);
+                context.Code.WriteLine("ReturnTable = {" + context.R(A) + "(" + callValues + ")}");
+                context.Code.WriteGoto("returnLabel");
             }
-        }
-
-        RETURN FindSimilarReturnToGoTo()
-        {
-            for (var i = Function.OpCodes.Count - 1; i >= 0; i--)
-            {
-                var ret = Function.OpCodes[i] as RETURN;
-                if (ret == null)
-                    continue;
-                if (ret.GetReturnValueCount() == 1)
-                    return ret;
-            }
-            return null;
         }
     }
 }
