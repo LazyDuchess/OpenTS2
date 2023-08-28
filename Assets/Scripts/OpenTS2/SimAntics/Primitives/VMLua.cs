@@ -36,9 +36,6 @@ namespace OpenTS2.SimAntics.Primitives
             if (semiGlobalScope)
                 stringGroupID = ctx.Entity.SemiGlobalGroupID;
 
-            if (useFile)
-                throw new SimAnticsException("Attempted to call a script from ObjectScripts in Lua primitive - not implemented yet!", ctx.StackFrame);
-
             short param0 = 0;
             short param1 = 0;
             short param2 = 0;
@@ -63,9 +60,18 @@ namespace OpenTS2.SimAntics.Primitives
             var scriptName = luaStringSet.StringData.GetString(stringIndex, Languages.USEnglish);
             var scriptDesc = luaStringSet.StringData.GetDescription(stringIndex, Languages.USEnglish);
 
+            var scriptSource = scriptDesc;
+
             var luaManager = LuaManager.Get();
 
-            var luaResult = luaManager.RunScriptPrimitive(scriptDesc, param0, param1, param2, ctx);
+            if (useFile)
+            {
+                scriptSource = luaManager.GetObjectScript(scriptName);
+                if (scriptSource == null)
+                    throw new SimAnticsException($"Can't find Lua object script named {scriptName}", ctx.StackFrame);
+            }
+
+            var luaResult = luaManager.RunScriptPrimitive(scriptSource, param0, param1, param2, ctx);
 
             return new VMReturnValue(luaResult);
         }

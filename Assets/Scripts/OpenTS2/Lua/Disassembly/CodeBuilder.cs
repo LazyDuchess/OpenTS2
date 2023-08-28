@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace OpenTS2.Lua.Disassembly
 {
+    /// <summary>
+    /// Wrapper around StringBuilder for writing Lua code.
+    /// </summary>
     public class CodeBuilder
     {
         public int Position => _stringBuilder.Length;

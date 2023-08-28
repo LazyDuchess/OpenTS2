@@ -16,30 +16,12 @@ namespace OpenTS2.Engine.Tests
     {
         void Start()
         {
-            LuaManager.Get().RegisterAPI(new LuaTestAPI());
+            // Initialize lua engine, register a test API so that we can use UnityLog and hook GetSimulatorGlobal to return 27 as day of the month, 8 as month and 2023 as year.
+            var luaManager = LuaManager.Get();
+            luaManager.RegisterAPI(new LuaTestAPI());
+            luaManager.InitializeObjectScripts();
 
-            var objectScripts = Filesystem.GetLatestFilePath("Res/ObjectScripts/ObjectScripts.package");
-            Debug.Log($"Reading scripts from {objectScripts}");
-            var dbpf = new DBPFFile(objectScripts);
-            foreach (var entry in dbpf.Entries)
-            {
-                if (entry.GlobalTGI.TypeID != TypeIDs.LUA_GLOBAL)
-                    continue;
-                var luaAsset = entry.GetAsset<LuaAsset>();
-                File.WriteAllText($"TestFiles/{luaAsset.FileName}.lua", luaAsset.Source);
-                try
-                {
-                    LuaManager.Get().RunScript(luaAsset.Source);
-                }
-                catch(Exception e)
-                {
-                    var msg = e.ToString();
-                    if (e is InterpreterException)
-                        msg = (e as InterpreterException).DecoratedMessage;
-                    Debug.LogError($"Problem running {luaAsset.FileName}:{msg}");
-                }
-            }
-
+            // nTime is defined in the game's "Time" global Lua script.
             try
             {
                 LuaManager.Get().RunScript(@"local time = nTime.Now()

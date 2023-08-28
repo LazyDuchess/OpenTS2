@@ -11,6 +11,9 @@ using System.Threading.Tasks;
 
 namespace OpenTS2.Lua.Disassembly
 {
+    /// <summary>
+    /// Represents a compiled Lua 5.0 binary file.
+    /// </summary>
     public class LuaC50
     {
         private Function _mainFunction;
@@ -98,6 +101,9 @@ namespace OpenTS2.Lua.Disassembly
         }
         private byte _numberSize = 8;
 
+        /// <summary>
+        /// Deserializes a Lua 5.0 compiled script.
+        /// </summary>
         public LuaC50(IoBuffer reader)
         {
             Deserialize(reader);
@@ -114,6 +120,9 @@ namespace OpenTS2.Lua.Disassembly
             return str;
         }
 
+        /// <summary>
+        /// Decompiles this script and returns the resulting source code.
+        /// </summary>
         public string Disassemble()
         {
             return _mainFunction.Disassemble().ToString();

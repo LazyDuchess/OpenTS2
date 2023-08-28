@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace OpenTS2.Lua
 {
+    /// <summary>
+    /// Represents a disassembled Lua 5.0 script, as can be found in ObjectScripts.
+    /// </summary>
     public class LuaAsset : AbstractAsset
     {
         public string FileName;
