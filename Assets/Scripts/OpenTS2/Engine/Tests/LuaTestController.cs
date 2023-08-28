@@ -27,7 +27,7 @@ namespace OpenTS2.Engine.Tests
                 File.WriteAllText($"TestFiles/{luaAsset.FileName}.lua", luaAsset.Source);
                 try
                 {
-                    LuaManager.Get().RunGlobalScript(luaAsset.Source);
+                    LuaManager.Get().RunScript(luaAsset.Source);
                 }
                 catch(Exception e)
                 {

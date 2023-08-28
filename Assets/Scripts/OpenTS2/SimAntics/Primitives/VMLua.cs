@@ -65,7 +65,7 @@ namespace OpenTS2.SimAntics.Primitives
 
             var luaManager = LuaManager.Get();
 
-            var luaResult = luaManager.RunStringAsPrimitive(scriptDesc, param0, param1, param2, ctx);
+            var luaResult = luaManager.RunScriptPrimitive(scriptDesc, param0, param1, param2, ctx);
 
             return new VMReturnValue(luaResult);
         }

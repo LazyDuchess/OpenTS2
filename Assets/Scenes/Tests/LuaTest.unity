@@ -152,7 +152,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92dfc4d4b94749b45ac6cb9cb181b281, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ScriptToRun: BusinessLotsController
 --- !u!4 &971228090
 Transform:
   m_ObjectHideFlags: 0

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MoonSharp.Interpreter;
+using OpenTS2.Lua.API;
 using OpenTS2.SimAntics;
 
 namespace OpenTS2.Lua
@@ -18,6 +19,8 @@ namespace OpenTS2.Lua
         private Script _script;
         private int[] _primitiveParameters = new int[3];
 
+        private List<LuaAPI> _apis = new List<LuaAPI>();
+
         public static LuaManager Get()
         {
             return _instance;
@@ -27,16 +30,15 @@ namespace OpenTS2.Lua
         {
             _instance = this;
             _script = new Script();
-            RegisterGlobals();
+            LoadAPIs();
         }
 
         void PrepGlobalsForPrimitive(short param0, short param1, short param2, VMContext ctx)
         {
-            _primitiveParameters[0] = param0;
-            _primitiveParameters[1] = param1;
-            _primitiveParameters[2] = param2;
             Context = ctx;
             ExitCode = VMExitCode.True;
+            foreach (var api in _apis)
+                api.PrepareLuaPrimitive(param0, param1, param2);
         }
 
         void ThrowLuaPrimitiveException(ScriptRuntimeException exception)
@@ -44,12 +46,12 @@ namespace OpenTS2.Lua
             throw new SimAnticsException($"Problem executing Lua script:{Environment.NewLine}{exception}", Context.StackFrame);
         }
 
-        public void RunGlobalScript(string lua)
+        public void RunScript(string lua)
         {
             _script.DoString(lua);
         }
 
-        public VMExitCode RunStringAsPrimitive(string lua, short param0, short param1, short param2, VMContext ctx)
+        public VMExitCode RunScriptPrimitive(string lua, short param0, short param1, short param2, VMContext ctx)
         {
             PrepGlobalsForPrimitive(param0, param1, param2, ctx);
             try
@@ -63,29 +65,16 @@ namespace OpenTS2.Lua
             return ExitCode;
         }
 
-        private int Lua_GetPrimitiveParameter(int param)
+        void LoadAPIs()
         {
-            return _primitiveParameters[param];
+            RegisterAPI(new MainAPI());
         }
 
-        private void Lua_SetTemp(int temp, int value)
+        public void RegisterAPI(LuaAPI api)
         {
-            Context.Entity.Temps[temp] = (short)value;
-        }
-
-        private void Lua_SetScriptReturnValue(bool returnValue)
-        {
-            if (returnValue)
-                ExitCode = VMExitCode.True;
-            else
-                ExitCode = VMExitCode.False;
-        }
-
-        void RegisterGlobals()
-        {
-            _script.Globals["GetPrimitiveParameter"] = (Func<int,int>)Lua_GetPrimitiveParameter;
-            _script.Globals["SetTemp"] = (Action<int, int>)Lua_SetTemp;
-            _script.Globals["SetScriptReturnValue"] = (Action<bool>)Lua_SetScriptReturnValue;
+            _apis.Add(api);
+            api.Manager = this;
+            api.OnRegister(_script);
         }
     }
 }
