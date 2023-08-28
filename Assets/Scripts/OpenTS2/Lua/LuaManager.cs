@@ -64,6 +64,11 @@ namespace OpenTS2.Lua
         public void InitializeObjectScripts()
         {
             var objectScripts = Filesystem.GetLatestFilePath("Res/ObjectScripts/ObjectScripts.package");
+            if (objectScripts == null)
+            {
+                Debug.Log("LuaManager: No object scripts in current product.");
+                return;
+            }
             var objectScriptsFile = new DBPFFile(objectScripts);
 
             foreach(var entry in objectScriptsFile.Entries)
