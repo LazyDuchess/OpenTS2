@@ -42,7 +42,10 @@ namespace OpenTS2.Engine.Tests
 
             try
             {
-                LuaManager.Get().RunScript(@"WhatIsTheTime = nTime.Now()");
+                LuaManager.Get().RunScript(@"local time = nTime.Now()
+                                            UnityLog('Lua Year is ' .. time.mYears)
+                                            UnityLog('Lua Month is ' .. time.mMonths)
+                                            UnityLog('Lua Day is ' .. time.mDays)");
             }
             catch (Exception e)
             {

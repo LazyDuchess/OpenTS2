@@ -13,20 +13,20 @@ namespace OpenTS2.Lua.Disassembly.OpCodes
             var start = A;
             var end = A + B - 2;
 
-            context.Code.WriteLine("ReturnTable = {}");
+            context.Code.WriteLine(context.ReturnTable + " = {}");
 
             if (end >= start)
             {
                 for (var i = start; i <= end; i++)
                 {
-                    context.Code.WriteLine($"table.insert(ReturnTable, {context.R(i)})");
+                    context.Code.WriteLine($"table.insert({context.ReturnTable}, {context.R(i)})");
                 }
             }
 
             if (context.ReturnOpCode == this)
             {
                 context.Code.WriteLabel("returnLabel");
-                context.Code.WriteLine("return unpack(ReturnTable)");
+                context.Code.WriteLine($"return unpack({context.ReturnTable})");
             }
             else
                 context.Code.WriteGoto("returnLabel");

@@ -24,7 +24,7 @@ namespace OpenTS2.Lua.Disassembly.OpCodes
                 context.Code.WriteLine("return "+context.R(A)+"("+callValues+")");
             else
             {
-                context.Code.WriteLine("ReturnTable = {" + context.R(A) + "(" + callValues + ")}");
+                context.Code.WriteLine(context.ReturnTable+" = {" + context.R(A) + "(" + callValues + ")}");
                 context.Code.WriteGoto("returnLabel");
             }
         }

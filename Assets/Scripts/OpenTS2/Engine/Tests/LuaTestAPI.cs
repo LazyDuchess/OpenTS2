@@ -12,11 +12,28 @@ namespace OpenTS2.Engine.Tests
     {
         int GetSimulatorGlobal(int global)
         {
-            return 5;
+            switch(global)
+            {
+                //Year
+                case 8:
+                    return 2023;
+                //Month
+                case 7:
+                    return 8;
+                //Day
+                case 1:
+                    return 27;
+            }
+            return 0;
+        }
+        void Log(string log)
+        {
+            UnityEngine.Debug.Log(log);
         }
         public override void OnRegister(Script script)
         {
             script.Globals["GetSimulatorGlobal"] = (Func<int, int>)GetSimulatorGlobal;
+            script.Globals["UnityLog"] = (Action<string>)Log;
         }
     }
 }

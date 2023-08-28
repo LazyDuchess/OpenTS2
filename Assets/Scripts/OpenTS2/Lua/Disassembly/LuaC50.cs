@@ -169,6 +169,7 @@ namespace OpenTS2.Lua.Disassembly
             public List<Constant> Constants = new List<Constant>();
             public List<Function> Functions = new List<Function>();
             public List<OpCode> OpCodes = new List<OpCode>();
+            public byte ArgumentCount => _argumentCount;
 
             public Function(IoBuffer reader, LuaC50 lua)
             {
@@ -248,6 +249,8 @@ namespace OpenTS2.Lua.Disassembly
                 var inheritedContext = context;
 
                 context = new Context();
+                context.Parent = inheritedContext;
+                context.Level = inheritedContext.Level + 1;
                 context.Code = new CodeBuilder();
                 context.Code.Indentation = inheritedContext.Code.Indentation;
                 context.PC = 0;
@@ -494,10 +497,13 @@ namespace OpenTS2.Lua.Disassembly
             public List<JumpLabel> JumpLabels = new List<JumpLabel>();
             public List<BeginFORLOOP> ForLoops = new List<BeginFORLOOP>();
             public RETURN ReturnOpCode;
+            public int Level = 0;
+            public Context Parent;
             /// <summary>
             /// Program Counter
             /// </summary>
             public int PC;
+            public string ReturnTable => $"ReturnTable_{Level}";
             private static readonly int RK_OFFSET = 250;
 
             public List<JumpLabel> GetJumpLabelsHere(int pc)
@@ -548,7 +554,10 @@ namespace OpenTS2.Lua.Disassembly
 
             public string R(ushort value)
             {
-                return $"R_{value}";
+                var prefix = "Reg";
+                if (Function.ArgumentCount > value)
+                    prefix = "Arg";
+                return $"{prefix}_{value}_{Level}";
             }
 
             public string K(uint value)
@@ -595,6 +604,10 @@ namespace OpenTS2.Lua.Disassembly
 
             public string U(ushort value)
             {
+                if (Parent != null)
+                {
+                    return Parent.R(value);
+                }
                 if (value >= Function.UpValues.Count)
                     return "0";
                 return Function.UpValues[value].ToString();
