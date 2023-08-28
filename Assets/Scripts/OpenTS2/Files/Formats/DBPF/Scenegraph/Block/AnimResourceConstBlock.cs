@@ -24,12 +24,18 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
 
         public ScenegraphResource ScenegraphResource;
 
+        public float HeadingOffset { get; }
+        public float TurnRotation { get; }
+
         public AnimTarget[] AnimTargets;
 
         public AnimResourceConstBlock(PersistTypeInfo blockTypeInfo, ScenegraphResource scenegraphResource,
+            float headingOffset, float turnRotation,
             AnimTarget[] animTargets) : base(blockTypeInfo)
         {
             ScenegraphResource = scenegraphResource;
+            HeadingOffset = headingOffset;
+            TurnRotation = turnRotation;
             AnimTargets = animTargets;
         }
 
@@ -97,34 +103,39 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             public string ChannelName;
 
             public uint BoneHash;
+
+            #region ChannelFlagsAndDerivedProperties
             public uint ChannelFlags;
 
-            private uint ChannelTypeBits => (ChannelFlags >> 22) & 0b111;
+
+            public uint DurationTicks => ChannelFlags & 0x7FFF; // Bottom 15 bits give the channel duration.
+
+            private uint AnimatedAttributeIdx => (ChannelFlags >> 17) & 0b11111; // Bits 1 to 6 of the 3rd byte.
+            /// <summary>
+            /// Which attribute of the bone this channel animates, e.g the translation or the rotation.
+            ///
+            /// For IK channels, this can be more complicated such as the IK weight, the IK rotation etc.
+            /// </summary>
+            public AnimatedAttribute AnimatedAttribute => Enum.IsDefined(typeof(AnimatedAttribute), AnimatedAttributeIdx)
+                ? (AnimatedAttribute)AnimatedAttributeIdx
+                : throw new InvalidCastException($"Animated attribute idx has invalid value: {AnimatedAttributeIdx}");
+
+            private uint ChannelTypeBits => (ChannelFlags >> 22) & 0b111; // Top 2 bits of 3rd byte and 1st bit of 4th byte.
             // What type of data this channel carries.
             public ChannelType Type => Enum.IsDefined(typeof(ChannelType), ChannelTypeBits)
                 ? (ChannelType)ChannelTypeBits
                 : throw new InvalidCastException($"Channel type has invalid value: {ChannelTypeBits}");
 
-            // Calculated from the top 3 bits of the most-significant byte of ChannelFlags.
-            public uint NumComponents => (ChannelFlags >> 29) & 0b111;
-
-            // Bottom 15 bits give the channel duration.
-            public uint DurationTicks => ChannelFlags & 0x7FFF;
-
-            // Bits 1 to 5 of the most-significant byte are the ik chain idx for this channel.
-            private uint IKChainIdxBits => (ChannelFlags >> 25) & 0b1111;
+            private uint IKChainIdxBits => (ChannelFlags >> 25) & 0b1111; // Bits 1 to 5 of the most-significant byte.
             public int IKChainIdx => IKChainIdxBits == 0b1111 ? -1 : (int)IKChainIdxBits;
+
+            public uint NumComponents => (ChannelFlags >> 29) & 0b111; // Top 3 bits of the most-significant byte.
+
+            #endregion
 
             public ChannelComponent[] Components;
         }
 
-        // Channel types and their order:
-        //   ChannelTypeF1
-        //   ChannelTypeF3
-        //   ChannelTypeF4
-        //   ChannelTypeQ
-        //   ChannelTypeXYZ
-        //   ChannelTypeF2
         public enum ChannelType : uint
         {
             Float1 = 0,
@@ -134,6 +145,31 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             EulerRotation = 3,
             TransformXYZ = 4,
             Float2 = 5,
+        }
+
+        public enum AnimatedAttribute : uint
+        {
+            // Attribute names and their GUIDs.
+            Rotation = 0,    // 9B5B3506 - cTransformNode rotation
+            Transform = 1,   // FB5B3383 - cTransformNode transform
+            MorphWeight = 2, // 69C7EB40 - kMorphWeight
+            ContactIk = 3,   // E9C7F1A6
+            WeightIk = 4,    // E9C7F1AD
+            Unknown5 = 5,    // 6B312A30
+            MaterialFloat1 = 6, // 09F5FDB0
+            MaterialFloat2 = 7, // 09F5FDB6
+            Unknown8 = 8,    // 09F5FDBC
+            Unknown9 = 9,    // 09F5FDC0
+            ShapeColor = 10, // 8C798726
+            Unknown11 = 11,  // E9D24D51
+            Unknown12 = 12,  // 69DE427A
+            Unknown13 = 13,  // 29DE3049
+            Unknown14 = 14,  // 49DE5331
+            Unknown15 = 15,  // 29DE5328
+            Unknown16 = 16,  // 4D40C014
+            Unknown17 = 17,  // 4D40C00F
+            Unknown18 = 18,  // 49E37821
+            Unknown19 = 19,  // B73235D7
         }
 
         /// <summary>
@@ -643,7 +679,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             }
             */
 
-            return new AnimResourceConstBlock(blockTypeInfo, resource, animTargets);
+            return new AnimResourceConstBlock(blockTypeInfo, resource, headingOffset, turnRotation, animTargets);
         }
 
         // For some reason this format pads to 4-byte boundaries sometimes...we deal with that here.

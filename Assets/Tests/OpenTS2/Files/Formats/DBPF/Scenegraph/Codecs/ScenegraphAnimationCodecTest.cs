@@ -1,10 +1,13 @@
-﻿using NUnit.Framework;
+﻿using System.Collections.Generic;
+using System.Linq;
+using NUnit.Framework;
 using OpenTS2.Common;
 using OpenTS2.Common.Utils;
 using OpenTS2.Content;
 using OpenTS2.Content.DBPF.Scenegraph;
 using OpenTS2.Files.Formats.DBPF;
 using OpenTS2.Files.Formats.DBPF.Scenegraph.Block;
+using UnityEngine;
 
 public class ScenegraphAnimationCodecTest
 {
@@ -22,6 +25,9 @@ public class ScenegraphAnimationCodecTest
             .GetAsset<ScenegraphAnimationAsset>(new ResourceKey("a2o-pinball-play-lose_anim", GroupIDs.Scenegraph,
                 TypeIDs.SCENEGRAPH_ANIM));
         Assert.IsNotNull(animationAsset);
+
+        Assert.That(animationAsset.AnimResource.HeadingOffset, Is.EqualTo(0.0));
+        Assert.That(animationAsset.AnimResource.TurnRotation, Is.EqualTo(0.0));
     }
 
     [Test]
@@ -43,6 +49,8 @@ public class ScenegraphAnimationCodecTest
         var translationChannel = animTarget.Channels[2];
         Assert.That(translationChannel.ChannelName, Is.EqualTo("body_trans"));
         Assert.That(translationChannel.Type, Is.EqualTo(AnimResourceConstBlock.ChannelType.TransformXYZ));
+        Assert.That(translationChannel.IKChainIdx, Is.EqualTo(-1)); // No ik chain for this channel.
+        Assert.That(translationChannel.AnimatedAttribute, Is.EqualTo(AnimResourceConstBlock.AnimatedAttribute.Transform));
         // Since we have an XYZ animation, there should be one component per axis.
         Assert.That(translationChannel.Components.Length, Is.EqualTo(3));
         Assert.That(translationChannel.DurationTicks, Is.EqualTo(286));
@@ -72,6 +80,8 @@ public class ScenegraphAnimationCodecTest
         var bodyRotation = animTarget.Channels[3];
         Assert.That(bodyRotation.ChannelName, Is.EqualTo("body_rot"));
         Assert.That(bodyRotation.Type, Is.EqualTo(AnimResourceConstBlock.ChannelType.EulerRotation));
+        Assert.That(bodyRotation.IKChainIdx, Is.EqualTo(-1)); // No ik chain for this channel.
+        Assert.That(bodyRotation.AnimatedAttribute, Is.EqualTo(AnimResourceConstBlock.AnimatedAttribute.Rotation));
         // One component per axis: roll, pitch, yaw.
         Assert.That(bodyRotation.Components.Length, Is.EqualTo(3));
         Assert.That(bodyRotation.DurationTicks, Is.EqualTo(286));
@@ -84,6 +94,54 @@ public class ScenegraphAnimationCodecTest
         Assert.That(bodyRotation.Components[2].TangentCurveType,
             Is.EqualTo(AnimResourceConstBlock.ChannelComponent.CurveType.BakedTangents));
         Assert.That(bodyRotation.Components[2].KeyFrames.Length, Is.EqualTo(1));
+    }
+
+    private static AnimResourceConstBlock.SharedChannel[] GetChannelsByName(AnimResourceConstBlock.AnimTarget target, string name)
+    {
+        var channels = target.Channels.Where(c => c.ChannelName == name).ToArray();
+
+        if (channels.Length == 0)
+        {
+            throw new KeyNotFoundException($"Channel {name} not found");
+        }
+
+        return channels;
+    }
+
+    [Test]
+    public void TestInverseKinematicChainChannelsAreCorrect()
+    {
+        var animationAsset = ContentProvider.Get()
+            .GetAsset<ScenegraphAnimationAsset>(new ResourceKey("a2o-exerciseMachine-benchPress-start_anim", GroupIDs.Scenegraph,
+                TypeIDs.SCENEGRAPH_ANIM));
+
+        Assert.That(animationAsset.AnimResource.HeadingOffset, Is.EqualTo(-1.570).Within(0.001));
+        Assert.That(animationAsset.AnimResource.TurnRotation, Is.EqualTo(0.0));
+
+        var skeletonTarget = animationAsset.AnimResource.AnimTargets[0];
+        Assert.That(skeletonTarget.TagName, Is.EqualTo("auskel"));
+
+        var leftHandChannels = GetChannelsByName(skeletonTarget, "l_handcontrol0");
+        Assert.That(leftHandChannels.Length, Is.EqualTo(2));
+        Assert.That(leftHandChannels[0].AnimatedAttribute, Is.EqualTo(AnimResourceConstBlock.AnimatedAttribute.Rotation));
+        Assert.That(leftHandChannels[0].Type, Is.EqualTo(AnimResourceConstBlock.ChannelType.EulerRotation));
+        Assert.That(leftHandChannels[1].AnimatedAttribute, Is.EqualTo(AnimResourceConstBlock.AnimatedAttribute.Transform));
+        Assert.That(leftHandChannels[1].Type, Is.EqualTo(AnimResourceConstBlock.ChannelType.TransformXYZ));
+
+        var leftHandContactChannels = GetChannelsByName(skeletonTarget, "l_handcontrol0_a");
+        Assert.That(leftHandContactChannels.Length, Is.EqualTo(1));
+        Assert.That(leftHandContactChannels[0].AnimatedAttribute, Is.EqualTo(AnimResourceConstBlock.AnimatedAttribute.ContactIk));
+        Assert.That(leftHandContactChannels[0].Type, Is.EqualTo(AnimResourceConstBlock.ChannelType.Float1));
+
+        var leftHandSecondContactChannels = GetChannelsByName(skeletonTarget, "l_handcontrol1_b");
+        Assert.That(leftHandSecondContactChannels.Length, Is.EqualTo(1));
+        Assert.That(leftHandSecondContactChannels[0].AnimatedAttribute, Is.EqualTo(AnimResourceConstBlock.AnimatedAttribute.ContactIk));
+        Assert.That(leftHandSecondContactChannels[0].Type, Is.EqualTo(AnimResourceConstBlock.ChannelType.Float1));
+
+        var leftHandChannelsNoOffset = GetChannelsByName(skeletonTarget, "l_handcontrol1_noxyzoffset");
+        Assert.That(leftHandChannelsNoOffset.Length, Is.EqualTo(1));
+        Assert.That(leftHandChannelsNoOffset[0].AnimatedAttribute, Is.EqualTo(AnimResourceConstBlock.AnimatedAttribute.Transform));
+        Assert.That(leftHandChannelsNoOffset[0].Type, Is.EqualTo(AnimResourceConstBlock.ChannelType.TransformXYZ));
     }
 
     [Test]
@@ -177,5 +235,43 @@ public class ScenegraphAnimationCodecTest
         Assert.That(ikTarget1.Rotation2Crc, Is.EqualTo(FileUtils.HighHash("l_handcontrol0rot")));
         Assert.That(ikTarget1.TranslationCrc, Is.EqualTo(FileUtils.HighHash("l_handcontrol0")));
         Assert.That(ikTarget1.ContactCrc, Is.EqualTo(FileUtils.HighHash("l_handcontrol0_a")));
+    }
+
+    [Test]
+    public void LoadsInverseKinematicChainsWithMultipleTargets()
+    {
+        var animationAsset = ContentProvider.Get()
+            .GetAsset<ScenegraphAnimationAsset>(new ResourceKey("a2o-exerciseMachine-benchPress-start_anim", GroupIDs.Scenegraph,
+                TypeIDs.SCENEGRAPH_ANIM));
+
+        var skeletonTarget = animationAsset.AnimResource.AnimTargets[0];
+        Assert.That(skeletonTarget.TagName, Is.EqualTo("auskel"));
+
+        Assert.That(skeletonTarget.IKChains.Length, Is.EqualTo(4));
+
+        var ikChain3 = skeletonTarget.IKChains[2];
+        Assert.That(ikChain3.IkStrategy, Is.EqualTo(AnimResourceConstBlock.IKStrategy.SevenDegreesOfFreedom));
+        Assert.That(ikChain3.IkTargets.Length, Is.EqualTo(2));
+        Assert.That(ikChain3.BeginBoneCrc, Is.EqualTo(FileUtils.HighHash("r_upperarm")));
+
+        var ikTarget1 = ikChain3.IkTargets[0];
+        Assert.That(ikTarget1.TranslationCrc, Is.EqualTo(FileUtils.HighHash("r_handcontrol0")));
+        Assert.That(ikTarget1.ContactCrc, Is.EqualTo(FileUtils.HighHash("r_handcontrol0_a")));
+        var ikTarget2 = ikChain3.IkTargets[1];
+        Assert.That(ikTarget2.TranslationCrc, Is.EqualTo(FileUtils.HighHash("r_handcontrol1_noxyzoffset")));
+        Assert.That(ikTarget2.ContactCrc, Is.EqualTo(FileUtils.HighHash("r_handcontrol1_b")));
+
+
+        var ikChain4 = skeletonTarget.IKChains[3];
+        Assert.That(ikChain4.IkStrategy, Is.EqualTo(AnimResourceConstBlock.IKStrategy.SevenDegreesOfFreedom));
+        Assert.That(ikChain4.IkTargets.Length, Is.EqualTo(2));
+        Assert.That(ikChain4.BeginBoneCrc, Is.EqualTo(FileUtils.HighHash("l_upperarm")));
+
+        ikTarget1 = ikChain4.IkTargets[0];
+        Assert.That(ikTarget1.TranslationCrc, Is.EqualTo(FileUtils.HighHash("l_handcontrol0")));
+        Assert.That(ikTarget1.ContactCrc, Is.EqualTo(FileUtils.HighHash("l_handcontrol0_a")));
+        ikTarget2 = ikChain4.IkTargets[1];
+        Assert.That(ikTarget2.TranslationCrc, Is.EqualTo(FileUtils.HighHash("l_handcontrol1_noxyzoffset")));
+        Assert.That(ikTarget2.ContactCrc, Is.EqualTo(FileUtils.HighHash("l_handcontrol1_b")));
     }
 }
