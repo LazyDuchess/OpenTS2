@@ -16,6 +16,8 @@ namespace OpenTS2.Engine.Tests
     {
         void Start()
         {
+            LuaManager.Get().RegisterAPI(new LuaTestAPI());
+
             var objectScripts = Filesystem.GetLatestFilePath("Res/ObjectScripts/ObjectScripts.package");
             Debug.Log($"Reading scripts from {objectScripts}");
             var dbpf = new DBPFFile(objectScripts);
@@ -37,6 +39,18 @@ namespace OpenTS2.Engine.Tests
                     Debug.LogError($"Problem running {luaAsset.FileName}:{msg}");
                 }
             }
-        }
+
+            try
+            {
+                LuaManager.Get().RunScript(@"WhatIsTheTime = nTime.Now()");
+            }
+            catch (Exception e)
+            {
+                var msg = e.ToString();
+                if (e is InterpreterException)
+                    msg = (e as InterpreterException).DecoratedMessage;
+                Debug.LogError($"Problem running:{msg}");
+            }
+}
     }
 }
