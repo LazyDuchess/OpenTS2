@@ -2,7 +2,6 @@
 using OpenTS2.Content;
 using OpenTS2.Files.Formats.DBPF;
 using OpenTS2.Files.Utils;
-using OpenTS2.Lua.Decompiler;
 using OpenTS2.Lua.Disassembly;
 using System;
 using System.Collections.Generic;

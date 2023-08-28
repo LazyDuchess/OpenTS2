@@ -21,6 +21,18 @@ namespace OpenTS2.Lua.Disassembly.OpCodes
             }
             return PC;
         }
+
+        bool TailCallAboveMe()
+        {
+            var aboveMe = PC - 1;
+            if (aboveMe >= 0)
+            {
+                if (Function.OpCodes[aboveMe] is TAILCALL)
+                    return true;
+            }
+            return false;
+        }
+
         public override void Disassemble(LuaC50.Context context)
         {
             if (!ValidReturnToDisassemble())
@@ -29,6 +41,8 @@ namespace OpenTS2.Lua.Disassembly.OpCodes
                 if (aboveMe >= 0)
                 {
                     if (Function.OpCodes[aboveMe] is RETURN)
+                        return;
+                    if (Function.OpCodes[aboveMe] is TAILCALL)
                         return;
                 }
             }
@@ -82,6 +96,8 @@ namespace OpenTS2.Lua.Disassembly.OpCodes
             var start = A;
             var end = A + B - 2;
             if (end < start && PC >= Function.OpCodes.Count - 1)
+                return false;
+            if (end < start && TailCallAboveMe())
                 return false;
             return true;
         }

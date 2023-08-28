@@ -282,10 +282,15 @@ namespace OpenTS2.Lua.Disassembly
                 for (var i = 0; i < OpCodes.Count; i++)
                 {
                     context.PC = i;
+                    foreach(var forloop in context.ForLoops)
+                    {
+                        if (forloop.PC == context.PC)
+                            forloop.ForLoop.DisassembleBegin(context, forloop);
+                    }
                     var jumpLabels = context.GetJumpLabelsHere(context.PC);
                     foreach(var jumpLabel in jumpLabels)
                     {
-                        context.Code.WriteLine($"::{jumpLabel.Label}::");
+                        context.Code.WriteLabel(jumpLabel);
                     }
                     var opCode = OpCodes[i];
                     context.OpCode = opCode;
@@ -366,6 +371,7 @@ namespace OpenTS2.Lua.Disassembly
 
         public class OpCode
         {
+            public static readonly int FPF = 50;
             public int PC;
             public uint Operands;
             public Function Function;
@@ -427,6 +433,7 @@ namespace OpenTS2.Lua.Disassembly
 
             public virtual void Disassemble(Context context)
             {
+                UnityEngine.Debug.Log("Tried to use unimplemented opcode.");
                 context.Code.WriteLine("-- Not implemented.");
             }
 
@@ -457,17 +464,29 @@ namespace OpenTS2.Lua.Disassembly
             }
         }
 
+        public class BeginFORLOOP
+        {
+            public int PC;
+            public FORLOOP ForLoop;
+
+            public BeginFORLOOP(int pc, FORLOOP forLoop)
+            {
+                PC = pc;
+                ForLoop = forLoop;
+            }
+        }
+
         public class Context
         {
             public OpCode OpCode;
             public CodeBuilder Code;
             public Function Function;
             public List<JumpLabel> JumpLabels = new List<JumpLabel>();
+            public List<BeginFORLOOP> ForLoops = new List<BeginFORLOOP>();
             /// <summary>
             /// Program Counter
             /// </summary>
             public int PC;
-
             private static readonly int RK_OFFSET = 250;
 
             public List<JumpLabel> GetJumpLabelsHere(int pc)
@@ -560,6 +579,8 @@ namespace OpenTS2.Lua.Disassembly
 
             public string U(ushort value)
             {
+                if (value >= Function.UpValues.Count)
+                    return "0";
                 return Function.UpValues[value].ToString();
             }
 

@@ -8,8 +8,19 @@ namespace OpenTS2.Lua.Disassembly.OpCodes
 {
     public class TFORLOOP : LuaC50.OpCode
     {
+        public TFORPREP Begin;
+        public override void PreProcess(LuaC50.Context context)
+        {
+            var jmp = Function.OpCodes[PC + 1] as JMP;
+            if (jmp != null)
+                jmp.Cancel();
+        }
+
         public override void Disassemble(LuaC50.Context context)
         {
+            context.Code.Indentation--;
+            context.Code.WriteEnd();
+            /*
             var start = A + 2;
             var end = A + 2 + C;
             var retValues = "";
@@ -27,7 +38,7 @@ namespace OpenTS2.Lua.Disassembly.OpCodes
             context.Code.Indentation++;
             context.Code.WriteGoto(context.MakeRelativeJump(2));
             context.Code.Indentation--;
-            context.Code.WriteEnd();
+            context.Code.WriteEnd();*/
             //context.Code.WriteLine("for " + loopValues + " in " + context.R((ushort)(A)) + ", " + context.R((ushort)(A + 1)) + " do");
         }
     }

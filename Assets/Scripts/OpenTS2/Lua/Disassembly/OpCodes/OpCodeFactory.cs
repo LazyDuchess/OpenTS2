@@ -13,37 +13,38 @@ namespace OpenTS2.Lua.Disassembly.OpCodes
 			typeof(MOVE), //MOVE
 			typeof(LOADK), //LOADK
 			typeof(LOADBOOL), //LOADBOOL
-			typeof(LuaC50.OpCode), //LOADNIL
-			typeof(LuaC50.OpCode), //GETUPVAL
+			typeof(LOADNIL), //LOADNIL
+			typeof(GETUPVAL), //GETUPVAL
 			typeof(GETGLOBAL), //GETGLOBAL
 			typeof(GETTABLE), //GETTABLE
 			typeof(SETGLOBAL), //SETGLOBAL
-			typeof(LuaC50.OpCode), //SETUPVAL
+			typeof(SETUPVAL), //SETUPVAL
 			typeof(SETTABLE), //SETTABLE
 			typeof(NEWTABLE), //NEWTABLE
 			typeof(SELF), //SELF
-			typeof(LuaC50.OpCode), //ADD
-			typeof(LuaC50.OpCode), //SUB
-			typeof(LuaC50.OpCode), //MUL
-			typeof(LuaC50.OpCode), //DIV
-			typeof(LuaC50.OpCode), //POW
-			typeof(LuaC50.OpCode), //UNM
-			typeof(LuaC50.OpCode), //NOT
-			typeof(LuaC50.OpCode), //CONCAT
+			typeof(ADD), //ADD
+			typeof(SUB), //SUB
+			typeof(MUL), //MUL
+			typeof(DIV), //DIV
+			typeof(POW), //POW
+			typeof(UNM), //UNM
+			typeof(NOT), //NOT
+			typeof(CONCAT), //CONCAT
 			typeof(JMP), //JMP
 			typeof(EQ), //EQ
 			typeof(LT), //LT
-			typeof(LuaC50.OpCode), //LE
+			typeof(LE), //LE
 			typeof(TEST), //TEST
 			typeof(CALL), //CALL
-			typeof(LuaC50.OpCode), //TAILCALL
+			typeof(TAILCALL), //TAILCALL - TODO
 			typeof(RETURN), //RETURN
-			typeof(LuaC50.OpCode), //FORLOOP
+			typeof(FORLOOP), //FORLOOP
 			typeof(TFORLOOP), //TFORLOOP
 			typeof(TFORPREP), //TFORPREP
-			typeof(LuaC50.OpCode), //SETLIST
-			typeof(LuaC50.OpCode), //SETLISTO
-			typeof(LuaC50.OpCode), //CLOSE
+			typeof(SETLIST), //SETLIST
+			// TODO: I think this is the same??? Idk double check.
+			typeof(SETLIST), //SETLISTO
+			typeof(CLOSE), //CLOSE - TODO
 			typeof(CLOSURE) //CLOSURE
 		};
 
