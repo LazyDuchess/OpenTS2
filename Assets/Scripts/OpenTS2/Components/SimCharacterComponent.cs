@@ -213,55 +213,15 @@ namespace OpenTS2.Components
                     continue;
                 }
 
-                Debug.Assert(chain.NumIkTargets == 1, "ikChain with more than 1 target");
-                var target = chain.IkTargets[0];
-                Debug.Assert(target.TranslationCrc == target.RotationCrc,
-                    "ikTarget with different translation and rotation objects");
-                if (!Scenegraph.BoneCRC32ToTransform.ContainsKey(target.TranslationCrc))
-                {
-                    Debug.LogWarning($"ik target {target.TranslationCrc:X} not found");
-                    continue;
-                }
-
                 var root = Scenegraph.BoneCRC32ToTransform[chain.BeginBoneCrc];
                 var tip = Scenegraph.BoneCRC32ToTransform[chain.EndBoneCrc];
                 // Find the mid bone between root and tip.
                 var middleBone = FindTransformInTheMiddleOf(tip, root);
 
-                var ikChainObj = new GameObject($"ikChain{chain.NameCrc:X}", typeof(TwoBoneIKConstraint));
-                var twoBoneConstraint = new TwoBoneIKConstraintData
+                for (var i = 0; i < chain.IkTargets.Length; i++)
                 {
-                    root = root,
-                    mid = middleBone,
-                    tip = tip,
-                    target = Scenegraph.BoneCRC32ToTransform[target.TranslationCrc],
-                    targetPositionWeight = 1.0f,
-                    targetRotationWeight = 0.0f,
-                    hintWeight = 1.0f,
-                };
-
-                if (chain.TwistVectorCrc != 0)
-                {
-                    twoBoneConstraint.hint = Scenegraph.BoneCRC32ToTransform[chain.TwistVectorCrc];
-                }
-
-                ikChainObj.GetComponent<TwoBoneIKConstraint>().data = twoBoneConstraint;
-                ikChainObj.transform.parent = rigObject.transform;
-
-                if (target.Rotation2Crc != 0)
-                {
-                    var rotationConstraint =
-                        new GameObject($"ikChain{chain.NameCrc:X}-rotation", typeof(OverrideTransform));
-                    var rotationOverrideConstraint = new OverrideTransformData
-                    {
-                        constrainedObject = tip,
-                        sourceObject = Scenegraph.BoneCRC32ToTransform[target.Rotation2Crc],
-                        rotationWeight = 1.0f,
-                        positionWeight = 0.0f,
-                        space = OverrideTransformData.Space.Local,
-                    };
-                    rotationConstraint.GetComponent<OverrideTransform>().data = rotationOverrideConstraint;
-                    rotationConstraint.transform.parent = rigObject.transform;
+                    var target = chain.IkTargets[i];
+                    CreateIKConstraintsFromTarget(i, rigObject, target, chain, root, middleBone, tip);
                 }
 
                 var rigLayer = new RigLayer(rig);
@@ -271,6 +231,67 @@ namespace OpenTS2.Components
             }
 
             _rigBuilder.Build();
+        }
+
+        private void CreateIKConstraintsFromTarget(int i, GameObject rigObject,
+            AnimResourceConstBlock.IKChain.Target target,
+            AnimResourceConstBlock.IKChain chain, Transform root, Transform middleBone, Transform tip)
+        {
+            Debug.Assert(target.TranslationCrc == target.RotationCrc,
+                "ikTarget with different translation and rotation objects");
+
+            // TODO: if there's more of these we should make a mapping instead of just hard-coding these two here..
+            if (target.TranslationCrc == FileUtils.HighHash("l_handcontrol1_noxyzoffset"))
+            {
+                Scenegraph.BoneCRC32ToTransform[target.TranslationCrc] = Scenegraph.BoneNamesToTransform["l_handcontrol1"];
+                Scenegraph.BoneNamesToRelativePaths["l_handcontrol1_noxyzoffset"] = "auskel/root_trans/l_handcontrol1";
+            } else if (target.TranslationCrc == FileUtils.HighHash("r_handcontrol1_noxyzoffset"))
+            {
+                Scenegraph.BoneCRC32ToTransform[target.TranslationCrc] = Scenegraph.BoneNamesToTransform["r_handcontrol1"];
+                Scenegraph.BoneNamesToRelativePaths["r_handcontrol1_noxyzoffset"] = "auskel/root_trans/r_handcontrol1";
+            }
+
+            if (!Scenegraph.BoneCRC32ToTransform.ContainsKey(target.TranslationCrc))
+            {
+                Debug.LogWarning($"ik target {target.TranslationCrc:X} not found");
+                return;
+            }
+
+            var ikChainObj = new GameObject($"ikChain-{chain.NameCrc:X}-{i}", typeof(TwoBoneIKConstraint));
+            var twoBoneConstraint = new TwoBoneIKConstraintData
+            {
+                root = root,
+                mid = middleBone,
+                tip = tip,
+                target = Scenegraph.BoneCRC32ToTransform[target.TranslationCrc],
+                targetPositionWeight = 1.0f,
+                targetRotationWeight = 0.0f,
+                hintWeight = 1.0f,
+            };
+
+            if (chain.TwistVectorCrc != 0)
+            {
+                twoBoneConstraint.hint = Scenegraph.BoneCRC32ToTransform[chain.TwistVectorCrc];
+            }
+
+            ikChainObj.GetComponent<TwoBoneIKConstraint>().data = twoBoneConstraint;
+            ikChainObj.transform.parent = rigObject.transform;
+
+            if (target.Rotation2Crc != 0)
+            {
+                var rotationConstraint =
+                    new GameObject($"ikChain{chain.NameCrc:X}-rotation-{i}", typeof(OverrideTransform));
+                var rotationOverrideConstraint = new OverrideTransformData
+                {
+                    constrainedObject = tip,
+                    sourceObject = Scenegraph.BoneCRC32ToTransform[target.Rotation2Crc],
+                    rotationWeight = 1.0f,
+                    positionWeight = 0.0f,
+                    space = OverrideTransformData.Space.Local,
+                };
+                rotationConstraint.GetComponent<OverrideTransform>().data = rotationOverrideConstraint;
+                rotationConstraint.transform.parent = rigObject.transform;
+            }
         }
 
         private static Transform FindTransformInTheMiddleOf(Transform tip, Transform root)

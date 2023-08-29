@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using OpenTS2.Common.Utils;
 using OpenTS2.Files.Formats.DBPF.Scenegraph.Block;
 using UnityEngine;
+using UnityEngine.Animations.Rigging;
 
 namespace OpenTS2.Content.DBPF.Scenegraph
 {
@@ -25,7 +27,12 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             {
                 foreach (var channel in target.Channels)
                 {
-                    if (bonesToRelativePaths.TryGetValue(channel.ChannelName, out var relativePathToBone))
+                    if (channel.AnimatedAttribute == AnimResourceConstBlock.AnimatedAttribute.ContactIk)
+                    {
+                        // This is called "contact" but it controls ik weight.
+                        CreateBlendCurveForIkWeight(clip, channel);
+                    }
+                    else if (bonesToRelativePaths.TryGetValue(channel.ChannelName, out var relativePathToBone))
                     {
                         CreateBoneCurvesForChannel(clip, channel, relativePathToBone);
                     }
@@ -44,6 +51,28 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             }
 
             return clip;
+        }
+
+        private static void CreateBlendCurveForIkWeight(AnimationClip clip, AnimResourceConstBlock.SharedChannel channel)
+        {
+            if (channel.Type != AnimResourceConstBlock.ChannelType.Float1)
+            {
+                throw new ArgumentException("Invalid channel type for ik weight");
+            }
+
+            // TODO: Create a mapping in SimsComponent for the rig name.
+            string rigPath = channel.ChannelName switch
+            {
+                "r_handcontrol0_a" => "ik-rig-4736ACCE/ikChain-4736ACCE-0",
+                "r_handcontrol1_b" => "ik-rig-4736ACCE/ikChain-4736ACCE-1",
+                "l_handcontrol0_a" => "ik-rig-D0C343C9/ikChain-D0C343C9-0",
+                "l_handcontrol1_b" => "ik-rig-D0C343C9/ikChain-D0C343C9-1",
+                _ => channel.ChannelName
+            };
+
+            var curve = new AnimationCurve(CreateKeyFramesForComponent(channel.DurationTicks, channel.Components[0]));
+            var property = $"auskel/UnityAnimationRigs/{rigPath}";
+            clip.SetCurve(property, typeof(TwoBoneIKConstraint), "m_Data.m_TargetPositionWeight", curve);
         }
 
         private static void CreateBlendCurveForChannel(AnimationClip clip, AnimResourceConstBlock.SharedChannel channel,
