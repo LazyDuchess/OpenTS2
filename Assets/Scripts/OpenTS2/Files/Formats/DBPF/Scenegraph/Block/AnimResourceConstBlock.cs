@@ -27,16 +27,25 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
         public float HeadingOffset { get; }
         public float TurnRotation { get; }
 
+        public float LocomotionDistance { get; }
+
+        /// <summary>
+        /// Units are likely meters per tick.
+        /// </summary>
+        public float Velocity { get; }
+
         public AnimTarget[] AnimTargets;
 
         public AnimResourceConstBlock(PersistTypeInfo blockTypeInfo, ScenegraphResource scenegraphResource,
-            float headingOffset, float turnRotation,
+            float headingOffset, float locomotionDistance, float velocity, float turnRotation,
             AnimTarget[] animTargets) : base(blockTypeInfo)
         {
             ScenegraphResource = scenegraphResource;
             HeadingOffset = headingOffset;
             TurnRotation = turnRotation;
             AnimTargets = animTargets;
+            Velocity = velocity;
+            LocomotionDistance = locomotionDistance;
         }
 
         /// <summary>
@@ -657,29 +666,8 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                 var eventDataString = reader.ReadNullTerminatedString();
             }
 
-            // Debugging print.
-            /*
-            Debug.Log($"durationTicks: {durationTicks}");
-            foreach (var target in animTargets)
-            {
-                Debug.Log($"AnimTarget {target.TagName}");
-                foreach (var channel in target.Channels)
-                {
-                    Debug.Log($"  channel name: {channel.ChannelName}, bonehash: {channel.BoneHash:X}, type: {channel.Type}, duration: {channel.DurationTicks}, components: {channel.Components.Length}");
-
-                    foreach (var component in channel.Components)
-                    {
-                        Debug.Log($"    numKeyFrames: {component.NumKeyFrames}, type: {component.Type}, tangentType: {component.TangentCurveType}");
-                        foreach (var keyframe in component.KeyFrames)
-                        {
-                            Debug.Log($"      {keyframe}");
-                        }
-                    }
-                }
-            }
-            */
-
-            return new AnimResourceConstBlock(blockTypeInfo, resource, headingOffset, turnRotation, animTargets);
+            return new AnimResourceConstBlock(blockTypeInfo, resource, headingOffset, locomotionDistance,
+                velocityMPT, turnRotation, animTargets);
         }
 
         // For some reason this format pads to 4-byte boundaries sometimes...we deal with that here.

@@ -28,6 +28,8 @@ public class ScenegraphAnimationCodecTest
 
         Assert.That(animationAsset.AnimResource.HeadingOffset, Is.EqualTo(0.0));
         Assert.That(animationAsset.AnimResource.TurnRotation, Is.EqualTo(0.0));
+        Assert.That(animationAsset.AnimResource.LocomotionDistance, Is.EqualTo(0.0));
+        Assert.That(animationAsset.AnimResource.Velocity, Is.EqualTo(0.0));
     }
 
     [Test]
@@ -117,6 +119,8 @@ public class ScenegraphAnimationCodecTest
 
         Assert.That(animationAsset.AnimResource.HeadingOffset, Is.EqualTo(-1.570).Within(0.001));
         Assert.That(animationAsset.AnimResource.TurnRotation, Is.EqualTo(0.0));
+        Assert.That(animationAsset.AnimResource.LocomotionDistance, Is.EqualTo(0.0));
+        Assert.That(animationAsset.AnimResource.Velocity, Is.EqualTo(0.0));
 
         var skeletonTarget = animationAsset.AnimResource.AnimTargets[0];
         Assert.That(skeletonTarget.TagName, Is.EqualTo("auskel"));
