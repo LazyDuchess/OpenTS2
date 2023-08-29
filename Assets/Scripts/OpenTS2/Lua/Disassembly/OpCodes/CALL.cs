@@ -8,10 +8,23 @@ namespace OpenTS2.Lua.Disassembly.OpCodes
 {
     public class CALL : LuaC50.OpCode
     {
+        // This is really dumb but idk what lua does here and it's not documented.
+        static int WorkaroundMagicNumber = 8;
         public override void Disassemble(LuaC50.Context context)
         {
             var start = A;
             var end = A + C - 2;
+
+            if (start > end+1 && WorkaroundMagicNumber > 0)
+            {
+                context.Code.WriteLine("-- HACK: CALL instruction had invalid start and end for return values.");
+                context.Code.WriteLine($"-- Return Start: {start}");
+                context.Code.WriteLine($"-- Return End: {end}");
+                context.Code.WriteLine($"-- Return Diff: {Math.Abs(start - end)}");
+                context.Code.WriteLine($"-- A = {A} | B = {B} | C = {C}");
+                end = start + WorkaroundMagicNumber;
+            }
+
             var retValues = "";
             for (var i = start; i <= end; i++)
             {
@@ -22,6 +35,17 @@ namespace OpenTS2.Lua.Disassembly.OpCodes
 
             start = (ushort)(A + 1);
             end = A + B - 1;
+
+            if (start > end+1 && WorkaroundMagicNumber > 0)
+            {
+                context.Code.WriteLine("-- HACK: CALL instruction had invalid start and end for arg values.");
+                context.Code.WriteLine($"-- Arg Start: {start}");
+                context.Code.WriteLine($"-- Arg End: {end}");
+                context.Code.WriteLine($"-- Arg Diff: {Math.Abs(start - end)}");
+                context.Code.WriteLine($"-- A = {A} | B = {B} | C = {C}");
+                end = start + WorkaroundMagicNumber;
+            }
+
             var callValues = "";
             for (var i = start; i <= end; i++)
             {
