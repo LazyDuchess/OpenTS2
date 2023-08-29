@@ -14,6 +14,7 @@ namespace OpenTS2.Engine.Tests
 {
     public class LuaTestController : MonoBehaviour
     {
+        public bool DumpLuaScripts = true;
         void Start()
         {
             // Initialize lua engine, register a test API so that we can use UnityLog and hook GetSimulatorGlobal to return 27 as day of the month, 8 as month and 2023 as year.
@@ -35,6 +36,29 @@ namespace OpenTS2.Engine.Tests
                 if (e is InterpreterException)
                     msg = (e as InterpreterException).DecoratedMessage;
                 Debug.LogError($"Problem running:{msg}");
+            }
+
+            if (DumpLuaScripts)
+            {
+                var objectScriptsPath = Filesystem.GetLatestFilePath("Res/ObjectScripts/ObjectScripts.package");
+                var objectScriptsFile = new DBPFFile(objectScriptsPath);
+
+                foreach(var entry in objectScriptsFile.Entries)
+                {
+                    if (entry.TGI.TypeID != TypeIDs.LUA_GLOBAL && entry.TGI.TypeID != TypeIDs.LUA_LOCAL)
+                        continue;
+                    var targetPath = "TestFiles/Lua/Global";
+                    if (entry.TGI.TypeID == TypeIDs.LUA_LOCAL)
+                        targetPath = "TestFiles/Lua/Local";
+                    if (!Directory.Exists(targetPath))
+                        Directory.CreateDirectory(targetPath);
+                    try
+                    {
+                        var asset = entry.GetAsset<LuaAsset>();
+                        File.WriteAllText(Path.Combine(targetPath, $"{asset.FileName}.lua"), asset.Source);
+                    }
+                    catch (Exception) { }
+                }
             }
 }
     }
