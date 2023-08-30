@@ -12,14 +12,14 @@ namespace OpenTS2.Lua.API
     [MoonSharpUserData]
     class GlobalObjManager
     {
-        public int isValidObjectGUID(GlobalObjManager manager, uint guid)
+        public bool isValidObjectGUID(uint guid)
         {
             var objManager = ObjectManager.Get();
             if (objManager == null)
                 throw new NullReferenceException("ObjectManager has not been constructed!");
             if (objManager.GetObjectByGUID(guid) != null)
-                return 1;
-            return 0;
+                return true;
+            return false;
         }
     }
     public class ObjectAPI : LuaAPI

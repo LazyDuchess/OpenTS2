@@ -516,6 +516,7 @@ namespace OpenTS2.Lua.Disassembly
             public Function Function;
             public List<JumpLabel> JumpLabels = new List<JumpLabel>();
             public List<BeginFORLOOP> ForLoops = new List<BeginFORLOOP>();
+            public HashSet<ushort> ThisCallRegisters = new HashSet<ushort>();
             public RETURN ReturnOpCode;
             public int Level = 0;
             public Context Parent;
@@ -526,6 +527,21 @@ namespace OpenTS2.Lua.Disassembly
             public int PC;
             public string ReturnTable => $"ReturnTable_{Level}";
             private static readonly int RK_OFFSET = 250;
+
+            public void UnmarkThisCall(ushort register)
+            {
+                ThisCallRegisters.Remove(register);
+            }
+
+            public void MarkThisCall(ushort register)
+            {
+                ThisCallRegisters.Add(register);
+            }
+
+            public bool IsThisCall(ushort register)
+            {
+                return ThisCallRegisters.Contains(register);
+            }
 
             public List<JumpLabel> GetJumpLabelsHere(int pc)
             {
