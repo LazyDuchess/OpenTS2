@@ -140,7 +140,7 @@ namespace OpenTS2.SimAntics
         // Creates a new stack frame, to push onto the stack to run other scripts.
         VMStackFrame CreateStackFrameForNode(VMContext ctx)
         {
-            var bhav = GetBHAVForOpCode(ctx.Node.OpCode);
+            var bhav = Thread.Entity.GetBHAV(ctx.Node.OpCode);
 
             if (bhav == null)
                 return null;

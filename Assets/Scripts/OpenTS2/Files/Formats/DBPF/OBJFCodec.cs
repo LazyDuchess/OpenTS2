@@ -6,27 +6,17 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace OpenTS2.Files.Formats.DBPF
 {
-    /// <summary>
-    /// Codec for Object Definitions.
-    /// </summary>
-    [Codec(TypeIDs.OBJD)]
-    public class OBJDCodec : AbstractCodec
+    [Codec(TypeIDs.OBJF)]
+    public class OBJFCodec : AbstractCodec
     {
-        //File Spec: https://modthesims.info/wiki.php?title=4F424A44
-
-        /// <summary>
-        /// Parses OBJD from an array of bytes.
-        /// </summary>
-        /// <param name="bytes">Bytes to parse</param>
         public override AbstractAsset Deserialize(byte[] bytes, ResourceKey tgi, DBPFFile sourceFile)
         {
-            var asset = new ObjectDefinitionAsset();
+            var asset = new ObjectFunctionsAsset();
             var stream = new MemoryStream(bytes);
             var reader = IoBuffer.FromStream(stream, ByteOrder.LITTLE_ENDIAN);
 
@@ -34,10 +24,24 @@ namespace OpenTS2.Files.Formats.DBPF
 
             reader.Seek(SeekOrigin.Begin, 64);
 
-            for(var i=0;i<(int)ObjectDefinitionAsset.FieldNames.FIELD_COUNT;i++)
+            var unk = reader.ReadBytes(8);
+
+            var magic = reader.ReadBytes(4);
+
+            if (magic[0] != 'f' || magic[1] != 'J' || magic[2] != 'B' || magic[3] != 'O')
+                throw new IOException("Invalid magic for OBJF resource");
+
+            var entryAmount = reader.ReadUInt32();
+
+            asset.Functions = new ObjectFunction[entryAmount];
+
+            for(var i=0;i<entryAmount;i++)
             {
-                var value = reader.ReadUInt16();
-                asset.Fields[i] = value;
+                var checkTree = reader.ReadUInt16();
+                var action = reader.ReadUInt16();
+                var func = new ObjectFunction(action, checkTree);
+
+                asset.Functions[i] = func;
             }
 
             stream.Dispose();

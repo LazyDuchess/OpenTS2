@@ -12,6 +12,7 @@ namespace OpenTS2.Content.DBPF
     {
         // TODO: Person and Template object types seem to use 0x80 as the SG instance id for some reason.
         public SemiGlobalAsset SemiGlobal => ContentProvider.Get().GetAsset<SemiGlobalAsset>(new ResourceKey(1, GlobalTGI.GroupID, TypeIDs.SEMIGLOBAL));
+        public ObjectFunctionsAsset Functions => ContentProvider.Get().GetAsset<ObjectFunctionsAsset>(new ResourceKey(GlobalTGI.InstanceID, GlobalTGI.GroupID, TypeIDs.OBJF));
         public string FileName;
 
         public enum FieldNames

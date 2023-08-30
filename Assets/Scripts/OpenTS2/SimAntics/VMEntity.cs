@@ -1,4 +1,5 @@
 ﻿using OpenTS2.Content.DBPF;
+using OpenTS2.Files.Formats.DBPF;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,6 +57,32 @@ namespace OpenTS2.SimAntics
                 return;
             }
             VM.RemoveEntity(ID);
+        }
+
+        public BHAVAsset GetBHAV(ushort treeID)
+        {
+            // 0x0XXX is global scope, 0x1XXX is private scope and 0x2XXX is semiglobal scope.
+            var groupid = SemiGlobalGroupID;
+
+            if (treeID < 0x1000)
+                groupid = GroupIDs.Global;
+            else if (treeID < 0x2000)
+                groupid = PrivateGroupID;
+
+            return VM.GetBHAV(treeID, groupid);
+        }
+
+        public VMExitCode RunTreeImmediately(ushort treeID)
+        {
+            var thread = new VMThread(this);
+            thread.CanYield = false;
+
+            var bhav = GetBHAV(treeID);
+
+            var stackFrame = new VMStackFrame(bhav, thread);
+            thread.Frames.Push(stackFrame);
+
+            return thread.Tick();
         }
     }
 }

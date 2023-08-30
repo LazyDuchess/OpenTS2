@@ -1376,7 +1376,7 @@ MonoBehaviour:
   InitialLoadScreenReiaPlayer: {fileID: 1690878381}
   EnableReia: 1
   LoadObjects: 1
-  StreamReia: 0
+  StreamReia: 1
 --- !u!1 &1690878377
 GameObject:
   m_ObjectHideFlags: 0
