@@ -15,6 +15,7 @@ using OpenTS2.Common.Utils;
 using OpenTS2.Content;
 using OpenTS2.Content.DBPF;
 using UnityEngine;
+using DBPFSharp;
 
 namespace OpenTS2.Files.Formats.DBPF
 {
@@ -540,7 +541,7 @@ namespace OpenTS2.Files.Formats.DBPF
                     var entryData = entry.GetBytes();
                     if (dirAsset != null && dirAsset.GetUncompressedSize(entry.TGI) != 0)
                     {
-                        entryData = DBPFCompression.Compress(entryData);
+                        entryData = QfsCompression.Compress(entryData, true);
                         var lastPosition = wStream.Position;
                         wStream.Position = entryOffset[i] + 4;
                         writer.Write(entryData.Length);
@@ -604,7 +605,7 @@ namespace OpenTS2.Files.Formats.DBPF
             var uncompressedSize = InternalGetUncompressedSize(entry);
             if (uncompressedSize > 0)
             {
-                return DBPFCompression.Decompress(fileBytes, uncompressedSize);
+                return QfsCompression.Decompress(fileBytes);
             }
             return fileBytes;
         }

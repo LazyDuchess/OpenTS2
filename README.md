@@ -11,6 +11,8 @@ Currently a basic main menu with a neighborhood chooser is implemented. Neighbor
 * [TGA Image Reader](https://www.codeproject.com/Articles/31702/NET-Targa-Image-Reader)
 * [Hardware Cursor Plugin](https://forum.unity.com/threads/hardware-cursor-plugin.70163/)
 * [MoonSharp](https://github.com/moonsharp-devs/moonsharp/)
+* [FreeSO](https://github.com/RHY3756547/FreeSO)
+* [DBPFSharp] (https://github.com/0xC0000054/DBPFSharp/blob/main/src/DBPFSharp)
 
 ## Similar Projects
 * [FreeSO](https://github.com/RHY3756547/FreeSO) - Open Source reimplementation of The Sims Online using C# and Monogame. OpenTS2 borrows a lot of code and structure from this project.
