@@ -8,15 +8,16 @@ namespace OpenTS2.Content.DBPF
         LongGable = 4,
         Hip = 5,
         Mansard = 6, // This becomes Hip if the roof is too small?
+
         Cone = 7,
         Dome = 8,
         Octogonal = 9,
 
-        // Diagonals next.
-
-        // DiagonalLongGable
-
-        // Then all the stupid ones
+        DiagonalLongGable = 10,
+        DiagonalShortGable = 11,
+        DiagonalHip = 12,
+        DiagonalShedGable = 13,
+        DiagonalShedHip = 14,
 
         // Straight roofs with the same slope support:
         // - Combined gabled edge that can make a jagged appearing line (cuts out lines that go under other roofs)

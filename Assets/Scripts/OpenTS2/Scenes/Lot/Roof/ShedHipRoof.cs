@@ -53,9 +53,9 @@ namespace OpenTS2.Scenes.Lot.Roof
 
             Edges = new RoofEdge[]
             {
-                new RoofEdge(height, slope, c4, c1, c1 - towardsTop, c4 - towardsTop, true, false),
+                new RoofEdge(height, slope, c4, c1, c1 - towardsTop, c4 - towardsTop, RoofEdgeEnd.FlatShort, RoofEdgeEnd.Normal),
                 new RoofEdge(height, slope, c1, c2, c2 + towardsDirection, c1 + towardsDirection),
-                new RoofEdge(height, slope, c2, c3, c3 + towardsTop, c2 + towardsTop, false, true),
+                new RoofEdge(height, slope, c2, c3, c3 + towardsTop, c2 + towardsTop, RoofEdgeEnd.Normal, RoofEdgeEnd.FlatShort),
             };
         }
     }

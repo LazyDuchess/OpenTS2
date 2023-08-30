@@ -69,6 +69,10 @@ namespace OpenTS2.Scenes.Lot.Roof
                     roof = new HipRoof(entry, height);
                     break;
 
+                case RoofType.Mansard:
+                    roof = new MansardRoof(entry, height);
+                    break;
+
                 default:
                     return;
             }
@@ -81,7 +85,7 @@ namespace OpenTS2.Scenes.Lot.Roof
             _roofs.Add(roof);
         }
 
-        public float GetHeightAt(float x, float y, float fallback = float.PositiveInfinity)
+        public float GetHeightAt(float x, float y, float fallback = float.PositiveInfinity, float offset = 0)
         {
             // TODO: fast elimination based on roof rectangle/height?
 
@@ -97,7 +101,7 @@ namespace OpenTS2.Scenes.Lot.Roof
                 }
             }
 
-            return bestHeight == float.NegativeInfinity ? fallback : bestHeight;
+            return bestHeight == float.NegativeInfinity ? fallback : bestHeight - offset;
         }
 
         public void GenerateGeometry(RoofGeometryCollection geo)

@@ -7,6 +7,13 @@ using UnityEngine.WSA;
 
 namespace OpenTS2.Scenes.Lot.Roof
 {
+    public enum RoofEdgeEnd
+    {
+        Normal,
+        Flat,
+        FlatShort
+    }
+
     /// <summary>
     /// A roof edge describes one side of a roof.
     /// This keeps track of an "intersection line" which represents the
@@ -41,8 +48,8 @@ namespace OpenTS2.Scenes.Lot.Roof
         private float _tPc;
         private float _lPc;
 
-        private bool _lFlat;
-        private bool _rFlat;
+        private RoofEdgeEnd _lEnd;
+        private RoofEdgeEnd _rEnd;
 
         // Roof Tiles
         private RoofTile[] _tiles;
@@ -60,7 +67,15 @@ namespace OpenTS2.Scenes.Lot.Roof
         private Vector3[] _underVertices;
         private Vector2[] _underUVs;
 
-        public RoofEdge(float height, float slope, Vector2 bl, Vector2 br, Vector2 tr, Vector2 tl, bool lFlat = false, bool rFlat = false)
+        public RoofEdge(
+            float height,
+            float slope,
+            Vector2 bl,
+            Vector2 br,
+            Vector2 tr,
+            Vector2 tl,
+            RoofEdgeEnd lEnd = RoofEdgeEnd.Normal,
+            RoofEdgeEnd rEnd = RoofEdgeEnd.Normal)
         {
             _intersectionLine = new List<Vector2>();
 
@@ -86,8 +101,8 @@ namespace OpenTS2.Scenes.Lot.Roof
             _tPc = Vector2.Dot(_yNormal, tr);
             _lPc = Vector2.Dot(_xNormal, tl);
 
-            _lFlat = lFlat;
-            _rFlat = rFlat;
+            _lEnd = lEnd;
+            _rEnd = rEnd;
 
             _vertices = new Vector3[5];
             _uvs = new Vector2[5];
@@ -111,7 +126,7 @@ namespace OpenTS2.Scenes.Lot.Roof
                 new Vector2(0.5f, 0.5f),
             };
 
-            _tileWidth = Mathf.RoundToInt(xDist / TileSize) + 2;
+            _tileWidth = Mathf.RoundToInt(xDist / TileSize) + (_lEnd == RoofEdgeEnd.FlatShort ? 0 : 1) + (_rEnd == RoofEdgeEnd.FlatShort ? 0 : 1);
             _tileHeight = Mathf.RoundToInt(yDist / TileSize) + 1;
             _tiles = new RoofTile[_tileWidth * _tileHeight];
 
@@ -122,11 +137,11 @@ namespace OpenTS2.Scenes.Lot.Roof
         {
             int mid = 0;
 
-            if (!_rFlat && !_lFlat)
+            if (_rEnd == RoofEdgeEnd.Normal && _lEnd == RoofEdgeEnd.Normal)
             {
                 mid = _tileWidth / 2;
             }
-            else if (!_lFlat)
+            else if (_lEnd == RoofEdgeEnd.Normal)
             {
                 mid = _tileWidth;
             }
@@ -141,7 +156,7 @@ namespace OpenTS2.Scenes.Lot.Roof
                     int side = x + y;
                     int oside = ((_tileWidth - 1) - x) + y;
 
-                    if (!_lFlat && x < mid)
+                    if (_lEnd == RoofEdgeEnd.Normal && x < mid)
                     {
                         if (side <= _tileHeight)
                         {
@@ -162,7 +177,7 @@ namespace OpenTS2.Scenes.Lot.Roof
                         }
                     }
 
-                    if (!_rFlat && x >= mid)
+                    if (_rEnd == RoofEdgeEnd.Normal && x >= mid)
                     {
                         if (oside <= _tileHeight)
                         {
@@ -241,7 +256,10 @@ namespace OpenTS2.Scenes.Lot.Roof
             Vector3 xTile = new Vector3(_xNormal.x * TileSize, 0, _xNormal.y * TileSize);
             Vector3 yTile = new Vector3(_yNormal.x * -TileSize, -_slope, _yNormal.y * -TileSize);
 
-            basePos -= xTile;
+            if (_lEnd != RoofEdgeEnd.FlatShort)
+            {
+                basePos -= xTile;
+            }
 
             int i = 0;
             for (int y = 0; y < _tileHeight; y++)
@@ -332,13 +350,13 @@ namespace OpenTS2.Scenes.Lot.Roof
                         DrawTrim(trimComp, edgeComp, _vertices[3], _vertices[2]);
                     }
 
-                    if (_lFlat && x == 0 && (cut & RoofCut.Left) == 0)
+                    if (_lEnd != RoofEdgeEnd.Normal && x == 0 && (cut & RoofCut.Left) == 0)
                     {
                         // Draw left edge
                         DrawTrim(trimComp, edgeComp, _vertices[0], _vertices[3]);
                     }
 
-                    if (_rFlat && x == _tileWidth - 1 && (cut & RoofCut.Right) == 0)
+                    if (_rEnd != RoofEdgeEnd.Normal && x == _tileWidth - 1 && (cut & RoofCut.Right) == 0)
                     {
                         // Draw right edge
                         DrawTrim(trimComp, edgeComp, _vertices[2], _vertices[1]);
@@ -361,7 +379,7 @@ namespace OpenTS2.Scenes.Lot.Roof
 
             float yDist = dotY - _bPc;
 
-            if ((!_lFlat && dotX - _lPc < yDist) || (!_rFlat && _rPc - dotX < yDist))
+            if ((_lEnd == RoofEdgeEnd.Normal && dotX - _lPc < yDist) || (_rEnd == RoofEdgeEnd.Normal && _rPc - dotX < yDist))
             {
                 // If the edges are not flat, also cut off top 45 degrees from left and right.
                 return float.PositiveInfinity;
@@ -378,7 +396,7 @@ namespace OpenTS2.Scenes.Lot.Roof
 
             // Does this remove an overhang?
 
-            if (x == 1 && (cut & RoofCut.Left) != 0)
+            if (x == 1 && (cut & RoofCut.Left) != 0 && _lEnd != RoofEdgeEnd.FlatShort)
             {
                 // Removes left overhang
                 _tiles[y * _tileWidth].Delete();
@@ -392,7 +410,7 @@ namespace OpenTS2.Scenes.Lot.Roof
                     _tiles[(y + 1) * _tileWidth].Delete();
                 }
             }
-            else if (x == _tileWidth - 2 && (cut & RoofCut.Right) != 0)
+            else if (x == _tileWidth - 2 && (cut & RoofCut.Right) != 0 && _rEnd != RoofEdgeEnd.FlatShort)
             {
                 // Removes right overhang
                 _tiles[y * _tileWidth + x + 1].Delete();
@@ -412,7 +430,7 @@ namespace OpenTS2.Scenes.Lot.Roof
 
         private bool IsOverhang(int x, int y)
         {
-            return x == 0 || x == _tileWidth - 1 || y == _tileHeight - 1;
+            return (x == 0 && _lEnd != RoofEdgeEnd.FlatShort) || (x == _tileWidth - 1 && _rEnd != RoofEdgeEnd.FlatShort) || y == _tileHeight - 1;
         }
 
         public bool Intersect(RoofEdge other)
@@ -455,6 +473,8 @@ namespace OpenTS2.Scenes.Lot.Roof
                     {
                         // Roofs are parallel. If one roof is entirely over the other, remove the lower tiles.
                         // If the two roofs occupy the same space, select tiles that best represent both roofs and delete the tile on the other
+
+                        xTO += (_lEnd == RoofEdgeEnd.FlatShort ? 0 : 1) - (other._lEnd == RoofEdgeEnd.FlatShort ? 0 : 1); // Account for left extents
 
                         int heightOffsetTiles = yTO + (_tileHeight - other._tileHeight);  // yTO difference at base
 
@@ -542,8 +562,8 @@ namespace OpenTS2.Scenes.Lot.Roof
                         RoofEdge left = (dirDiff == 3) ? other : this;
                         RoofEdge right = (dirDiff == 3) ? this : other;
 
-                        xTO += 1; // Add left edge overflow of left
-                        yTO += 1; // Subtraft left edge of right
+                        xTO += left._lEnd == RoofEdgeEnd.FlatShort ? 0 : 1; // Add left edge overflow of left
+                        yTO += right._lEnd == RoofEdgeEnd.FlatShort ? 0 : 1; // Subtraft left edge of right
 
                         // Other wall is 90 degrees from this one.
                         // Left wall sees a diagonal intersection in form /
@@ -653,7 +673,7 @@ namespace OpenTS2.Scenes.Lot.Roof
                         // Top lefts are flipped for each roof. Coordinates need to be flipped to be used on each other.
 
                         // On offsets between inverted axis, we also need to count the extra tiles.
-                        xTO += 2; // Add this left and other right extent
+                        xTO += (_lEnd == RoofEdgeEnd.FlatShort ? 0 : 1) + (other._rEnd == RoofEdgeEnd.FlatShort ? 0 : 1); // Add this left and other right extent
 
                         int xFrom = Math.Max(0, xTO - other._tileWidth);
                         int xTo = Math.Min(_tileWidth - 1, xTO - 1);

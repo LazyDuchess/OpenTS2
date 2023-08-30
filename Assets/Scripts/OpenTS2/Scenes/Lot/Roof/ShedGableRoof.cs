@@ -24,25 +24,25 @@ namespace OpenTS2.Scenes.Lot.Roof
                 case 0: // Towards positive x
                     Edges = new RoofEdge[]
                     {
-                        new RoofEdge(height, slope, tl, bl, br, tr, true, true),
+                        new RoofEdge(height, slope, tl, bl, br, tr, RoofEdgeEnd.Flat, RoofEdgeEnd.Flat),
                     };
                     break;
                 case 1: // Towards positive y
                     Edges = new RoofEdge[]
                     {
-                        new RoofEdge(height, slope, bl, br, tr, tl, true, true),
+                        new RoofEdge(height, slope, bl, br, tr, tl, RoofEdgeEnd.Flat, RoofEdgeEnd.Flat),
                     };
                     break;
                 case 2: // Towards negative x
                     Edges = new RoofEdge[]
                     {
-                        new RoofEdge(height, slope, br, tr, tl, bl, true, true),
+                        new RoofEdge(height, slope, br, tr, tl, bl, RoofEdgeEnd.Flat, RoofEdgeEnd.Flat),
                     };
                     break;
                 case 3: // Towards negative y
                     Edges = new RoofEdge[]
                     {
-                        new RoofEdge(height, slope, tr, tl, bl, br, true, true),
+                        new RoofEdge(height, slope, tr, tl, bl, br, RoofEdgeEnd.Flat, RoofEdgeEnd.Flat),
                     };
                     break;
             }
