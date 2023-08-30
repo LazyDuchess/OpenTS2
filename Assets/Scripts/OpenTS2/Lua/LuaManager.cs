@@ -42,6 +42,11 @@ namespace OpenTS2.Lua
         {
             _instance = this;
             _script = new Script();
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            foreach (var element in assemblies)
+            {
+                UserData.RegisterAssembly(element);
+            }
             LoadAPIs();
         }
 
@@ -142,6 +147,7 @@ namespace OpenTS2.Lua
         void LoadAPIs()
         {
             RegisterAPI(new MainAPI());
+            RegisterAPI(new ObjectAPI());
         }
 
         public void RegisterAPI(LuaAPI api)
