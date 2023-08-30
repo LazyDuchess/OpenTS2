@@ -59,7 +59,7 @@ namespace OpenTS2.Content.DBPF
             RoomSortflags,
             FunctionSortFlags,
             CatalogStringsIDPointer,
-            IsGlobalSimObj,
+            GlobalSimObject,
             ToolTipNameType,
             TemplateVer,
             NicenessMultiplier,
@@ -74,15 +74,15 @@ namespace OpenTS2.Content.DBPF
             CatalogPopupID,
             IgnoreCurrentModelIndexInIcons,
             LevelOffset,
-            HasShadow,
+            ShadowType,
             NumAttributes,
             NumObjArrays,
-            unused1,
+            ForSaleFlags,
             FrontDirection,
             unused2,
-            MultiTileLeadObj,
-            ExpansionFlag,
-            unused3,
+            MultiTileLeadObject,
+            ValidEPFlags1,
+            ValidEPFlags2,
             ChairEntryFlags,
             TileWidth,
             InhibitSuitCopying,
@@ -92,33 +92,39 @@ namespace OpenTS2.Content.DBPF
             ObjModelGUID1,
             ObjModelGUID2,
             BuildModeSubsort,
-            unused4,
-            unused5,
+            SelectorCategory,
+            SelectorSubCategory,
             FootprintMask,
-            unused6,
-            unused7,
+            ExtendFootprint,
+            ObjectSize,
             unused8,
             unused9,
-            HungerRating,
-            ComfortRating,
-            HygieneRating,
-            BladderRating,
-            EnergyRating,
-            FunRating,
-            RoomRating,
-            SkillFlags,
+            RatingHunger,
+            RatingComfort,
+            RatingHygiene,
+            RatingBladder,
+            RatingEnergy,
+            RatingFun,
+            RatingRoom,
+            RatingSkillFlags,
             NumTypeAttributes,
             MiscFlags,
             unused10,
             unused11,
-            FunctionPointerSubSortAndSubtype,
+            FunctionSubSort,
             DowntownSort,
             KeepBuying,
             VacationSort,
             ResetLotAction,
-            ObjType3d,
+            ObjType3D,
             CommunitySort,
             DreamFlags,
+            ThumbnailFlags,
+            Unused103,
+            Unused104,
+            Unused105,
+            Unused106,
+            Unused107,
             /// <summary>
             /// Just indicates the number of fields in the OBJD field array. Don't use for get/set.
             /// </summary>
@@ -240,7 +246,7 @@ namespace OpenTS2.Content.DBPF
         public ushort RoomSortflags { get { return this[FieldNames.RoomSortflags]; } set { this[FieldNames.RoomSortflags] = value; } }
         public ushort FunctionSortFlags { get { return this[FieldNames.AspirationFlags]; } set { this[FieldNames.FunctionSortFlags] = value; } }
         public ushort CatalogStringsIDPointer { get { return this[FieldNames.CatalogStringsIDPointer]; } set { this[FieldNames.CatalogStringsIDPointer] = value; } }
-        public ushort IsGlobalSimObj { get { return this[FieldNames.IsGlobalSimObj]; } set { this[FieldNames.IsGlobalSimObj] = value; } }
+        public ushort GlobalSimObject { get { return this[FieldNames.GlobalSimObject]; } set { this[FieldNames.GlobalSimObject] = value; } }
         public ushort ToolTipNameType { get { return this[FieldNames.ToolTipNameType]; } set { this[FieldNames.ToolTipNameType] = value; } }
         public ushort TemplateVer { get { return this[FieldNames.TemplateVer]; } set { this[FieldNames.TemplateVer] = value; } }
         public ushort NicenessMultiplier { get { return this[FieldNames.NicenessMultiplier]; } set { this[FieldNames.NicenessMultiplier] = value; } }
@@ -253,34 +259,34 @@ namespace OpenTS2.Content.DBPF
         public ushort CatalogPopupID { get { return this[FieldNames.CatalogPopupID]; } set { this[FieldNames.CatalogPopupID] = value; } }
         public ushort IgnoreCurrentModelIndexInIcons { get { return this[FieldNames.IgnoreCurrentModelIndexInIcons]; } set { this[FieldNames.IgnoreCurrentModelIndexInIcons] = value; } }
         public ushort LevelOffset { get { return this[FieldNames.LevelOffset]; } set { this[FieldNames.LevelOffset] = value; } }
-        public ushort HasShadow { get { return this[FieldNames.HasShadow]; } set { this[FieldNames.HasShadow] = value; } }
+        public ushort ShadowType { get { return this[FieldNames.ShadowType]; } set { this[FieldNames.ShadowType] = value; } }
         public ushort NumAttributes { get { return this[FieldNames.NumAttributes]; } set { this[FieldNames.NumAttributes] = value; } }
         public ushort NumObjArrays { get { return this[FieldNames.NumObjArrays]; } set { this[FieldNames.NumObjArrays] = value; } }
         public ushort FrontDirection { get { return this[FieldNames.FrontDirection]; } set { this[FieldNames.FrontDirection] = value; } }
-        public ushort MultiTileLeadObj { get { return this[FieldNames.MultiTileLeadObj]; } set { this[FieldNames.MultiTileLeadObj] = value; } }
-        public ushort ExpansionFlag { get { return this[FieldNames.ExpansionFlag]; } set { this[FieldNames.ExpansionFlag] = value; } }
+        public ushort MultiTileLeadObject { get { return this[FieldNames.MultiTileLeadObject]; } set { this[FieldNames.MultiTileLeadObject] = value; } }
+        public ushort ValidEPFlags1 { get { return this[FieldNames.ValidEPFlags1]; } set { this[FieldNames.ValidEPFlags1] = value; } }
         public ushort ChairEntryFlags { get { return this[FieldNames.ChairEntryFlags]; } set { this[FieldNames.ChairEntryFlags] = value; } }
         public ushort TileWidth { get { return this[FieldNames.TileWidth]; } set { this[FieldNames.TileWidth] = value; } }
         public ushort InhibitSuitCopying { get { return this[FieldNames.InhibitSuitCopying]; } set { this[FieldNames.InhibitSuitCopying] = value; } }
         public ushort BuildModeType { get { return this[FieldNames.BuildModeType]; } set { this[FieldNames.BuildModeType] = value; } }
         public ushort BuildModeSubsort { get { return this[FieldNames.BuildModeSubsort]; } set { this[FieldNames.BuildModeSubsort] = value; } }
         public ushort FootprintMask { get { return this[FieldNames.FootprintMask]; } set { this[FieldNames.FootprintMask] = value; } }
-        public ushort HungerRating { get { return this[FieldNames.HungerRating]; } set { this[FieldNames.HungerRating] = value; } }
-        public ushort ComfortRating { get { return this[FieldNames.ComfortRating]; } set { this[FieldNames.ComfortRating] = value; } }
-        public ushort HygieneRating { get { return this[FieldNames.HygieneRating]; } set { this[FieldNames.HygieneRating] = value; } }
-        public ushort BladderRating { get { return this[FieldNames.BladderRating]; } set { this[FieldNames.BladderRating] = value; } }
-        public ushort EnergyRating { get { return this[FieldNames.EnergyRating]; } set { this[FieldNames.EnergyRating] = value; } }
-        public ushort FunRating { get { return this[FieldNames.FunRating]; } set { this[FieldNames.FunRating] = value; } }
-        public ushort RoomRating { get { return this[FieldNames.RoomRating]; } set { this[FieldNames.RoomRating] = value; } }
-        public ushort SkillFlags { get { return this[FieldNames.SkillFlags]; } set { this[FieldNames.SkillFlags] = value; } }
+        public ushort RatingHunger { get { return this[FieldNames.RatingHunger]; } set { this[FieldNames.RatingHunger] = value; } }
+        public ushort RatingComfort { get { return this[FieldNames.RatingComfort]; } set { this[FieldNames.RatingComfort] = value; } }
+        public ushort RatingHygiene { get { return this[FieldNames.RatingHygiene]; } set { this[FieldNames.RatingHygiene] = value; } }
+        public ushort RatingBladder { get { return this[FieldNames.RatingBladder]; } set { this[FieldNames.RatingBladder] = value; } }
+        public ushort RatingEnergy { get { return this[FieldNames.RatingEnergy]; } set { this[FieldNames.RatingEnergy] = value; } }
+        public ushort RatingFun { get { return this[FieldNames.RatingFun]; } set { this[FieldNames.RatingFun] = value; } }
+        public ushort RatingRoom { get { return this[FieldNames.RatingRoom]; } set { this[FieldNames.RatingRoom] = value; } }
+        public ushort RatingSkillFlags { get { return this[FieldNames.RatingSkillFlags]; } set { this[FieldNames.RatingSkillFlags] = value; } }
         public ushort NumTypeAttributes { get { return this[FieldNames.NumTypeAttributes]; } set { this[FieldNames.NumTypeAttributes] = value; } }
         public ushort MiscFlags { get { return this[FieldNames.MiscFlags]; } set { this[FieldNames.MiscFlags] = value; } }
-        public ushort FunctionPointerSubSortAndSubtype { get { return this[FieldNames.FunctionPointerSubSortAndSubtype]; } set { this[FieldNames.FunctionPointerSubSortAndSubtype] = value; } }
+        public ushort FunctionSubSort { get { return this[FieldNames.FunctionSubSort]; } set { this[FieldNames.FunctionSubSort] = value; } }
         public ushort DowntownSort { get { return this[FieldNames.DowntownSort]; } set { this[FieldNames.DowntownSort] = value; } }
         public ushort KeepBuying { get { return this[FieldNames.KeepBuying]; } set { this[FieldNames.KeepBuying] = value; } }
         public ushort VacationSort { get { return this[FieldNames.VacationSort]; } set { this[FieldNames.VacationSort] = value; } }
         public ushort ResetLotAction { get { return this[FieldNames.ResetLotAction]; } set { this[FieldNames.ResetLotAction] = value; } }
-        public ushort ObjType3d { get { return this[FieldNames.ObjType3d]; } set { this[FieldNames.ObjType3d] = value; } }
+        public ushort ObjType3D { get { return this[FieldNames.ObjType3D]; } set { this[FieldNames.ObjType3D] = value; } }
         public ushort CommunitySort { get { return this[FieldNames.CommunitySort]; } set { this[FieldNames.CommunitySort] = value; } }
         public ushort DreamFlags { get { return this[FieldNames.DreamFlags]; } set { this[FieldNames.DreamFlags] = value; } }
     }

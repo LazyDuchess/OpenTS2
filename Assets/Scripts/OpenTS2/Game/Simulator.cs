@@ -54,7 +54,7 @@ namespace OpenTS2.Game
 
             foreach(var obj in objects)
             {
-                if ((obj.IsGlobalSimObj & (int)SimulationContext) == (int)SimulationContext)
+                if ((obj.GlobalSimObject & (int)SimulationContext) == (int)SimulationContext)
                 {
                     CreateObject(obj);
                 }
