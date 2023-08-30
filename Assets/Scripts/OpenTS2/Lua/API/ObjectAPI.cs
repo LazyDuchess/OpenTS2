@@ -16,7 +16,7 @@ namespace OpenTS2.Lua.API
         {
             var objManager = ObjectManager.Get();
             if (objManager == null)
-                throw new NullReferenceException("ObjectManager has not been constructed!");
+                throw new ScriptRuntimeException("ObjectManager has not been constructed!");
             if (objManager.GetObjectByGUID(guid) != null)
                 return true;
             return false;
@@ -28,10 +28,10 @@ namespace OpenTS2.Lua.API
         {
             var objManager = ObjectManager.Get();
             if (objManager == null)
-                throw new NullReferenceException("ObjectManager has not been constructed!");
+                throw new ScriptRuntimeException("ObjectManager has not been constructed!");
             var obj = objManager.GetObjectByGUID(guid);
             if (obj == null)
-                throw new NullReferenceException($"Object with GUID {guid} does not exist.");
+                throw new ScriptRuntimeException($"Object with GUID {guid} does not exist.");
             obj.Fields[field] = value;
         }
         public override void OnRegister(Script script)
