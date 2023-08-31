@@ -222,6 +222,8 @@ namespace OpenTS2.Scenes.Lot.Roof
                     return RoofCut.TopLeft;
                 case RoofTileBase.RightEdge:
                     return RoofCut.TopRight;
+                case RoofTileBase.Empty:
+                    return RoofCut.All;
                 default:
                     return 0;
             }

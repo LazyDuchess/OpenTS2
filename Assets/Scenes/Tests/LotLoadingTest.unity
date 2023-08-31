@@ -250,7 +250,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   NeighborhoodPrefix: N001
-  LotID: 10
+  LotID: 82
 --- !u!1 &2081008752
 GameObject:
   m_ObjectHideFlags: 0

@@ -73,6 +73,26 @@ namespace OpenTS2.Scenes.Lot.Roof
                     roof = new MansardRoof(entry, height);
                     break;
 
+                case RoofType.DiagonalLongGable:
+                    roof = new DiagonalGableRoof(entry, height, true);
+                    break;
+
+                case RoofType.DiagonalShortGable:
+                    roof = new DiagonalGableRoof(entry, height, false);
+                    break;
+
+                case RoofType.DiagonalHip:
+                    roof = new DiagonalHipRoof(entry, height);
+                    break;
+
+                case RoofType.DiagonalShedGable:
+                    roof = new DiagonalShedGableRoof(entry, height);
+                    break;
+
+                case RoofType.DiagonalShedHip:
+                    roof = new DiagonalShedHipRoof(entry, height);
+                    break;
+
                 default:
                     return;
             }
@@ -85,7 +105,7 @@ namespace OpenTS2.Scenes.Lot.Roof
             _roofs.Add(roof);
         }
 
-        public float GetHeightAt(float x, float y, float fallback = float.PositiveInfinity, float offset = 0)
+        public float GetHeightAt(float x, float y, int floor, float fallback = float.PositiveInfinity, float offset = 0)
         {
             // TODO: fast elimination based on roof rectangle/height?
 
@@ -93,11 +113,14 @@ namespace OpenTS2.Scenes.Lot.Roof
 
             foreach (var roof in _roofs)
             {
-                float result = roof.GetHeightAt(x, y);
-
-                if (result != float.PositiveInfinity && result > bestHeight)
+                if (roof.RoofEntry.LevelFrom == floor)
                 {
-                    bestHeight = result;
+                    float result = roof.GetHeightAt(x, y);
+
+                    if (result != float.PositiveInfinity && result > bestHeight)
+                    {
+                        bestHeight = result;
+                    }
                 }
             }
 

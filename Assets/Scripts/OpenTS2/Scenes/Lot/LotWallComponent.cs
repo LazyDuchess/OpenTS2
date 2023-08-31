@@ -597,9 +597,9 @@ namespace OpenTS2.Scenes.Lot
 
                 if (roofWall)
                 {
-                    heightTo = Mathf.Max(_roofs.GetHeightAt(to.XPos, to.YPos, heightTo, RoofOffset), floorTo);
-                    heightMid = Mathf.Max(_roofs.GetHeightAt(midX, midY, heightMid, RoofOffset), floorMid);
-                    heightFrom = Mathf.Max(_roofs.GetHeightAt(from.XPos, from.YPos, heightFrom, RoofOffset), floorFrom);
+                    heightTo = Mathf.Max(_roofs.GetHeightAt(to.XPos, to.YPos, from.Level, heightTo, RoofOffset), floorTo);
+                    heightMid = Mathf.Max(_roofs.GetHeightAt(midX, midY, from.Level, heightMid, RoofOffset), floorMid);
+                    heightFrom = Mathf.Max(_roofs.GetHeightAt(from.XPos, from.YPos, from.Level, heightFrom, RoofOffset), floorFrom);
                 }
 
                 wallVertices[3] = new Vector3(to.XPos, heightTo, to.YPos);

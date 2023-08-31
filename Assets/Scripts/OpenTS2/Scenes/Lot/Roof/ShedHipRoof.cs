@@ -6,21 +6,6 @@ namespace OpenTS2.Scenes.Lot.Roof
 {
     public class ShedHipRoof : AbstractSimpleRoof
     {
-        private Vector2 RotateVector(Vector2 vec, int dir)
-        {
-            switch (dir)
-            {
-                case 1:
-                    return new Vector2(-vec.y, vec.x);
-                case 2:
-                    return new Vector2(-vec.x, -vec.y);
-                case 3:
-                    return new Vector2(vec.y, -vec.x);
-            }
-
-            return vec;
-        }
-
         public ShedHipRoof(RoofEntry entry, float height) : base(entry, height)
         {
             int dir = DetermineDirectionCardinal(entry);

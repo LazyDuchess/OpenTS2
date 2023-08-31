@@ -23,7 +23,6 @@ namespace OpenTS2.Engine.Tests
 
         private void Start()
         {
-            LotID = 80;
             var contentProvider = ContentProvider.Get();
             var lotsFolderPath = Path.Combine(Filesystem.GetUserPath(), $"Neighborhoods/{NeighborhoodPrefix}/Lots");
             var lotFilename = $"{NeighborhoodPrefix}_Lot{LotID}.package";
