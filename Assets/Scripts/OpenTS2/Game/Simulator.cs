@@ -68,6 +68,8 @@ namespace OpenTS2.Game
             {
                 _virtualMachine.AddEntity(entity);
 
+                UpdateObjectData(entity);
+
                 var initFunction = entity.ObjectDefinition.Functions.GetFunction(ObjectFunctionsAsset.FunctionNames.Init);
 
                 if (initFunction.ActionTree != 0)
@@ -78,6 +80,12 @@ namespace OpenTS2.Game
                 HandleSimAnticsException(e);
             }
             return entity;
+        }
+
+        void UpdateObjectData(VMEntity entity)
+        {
+            entity.SetObjectData(VMObjectData.Room, -1);
+            entity.SetObjectData(VMObjectData.ObjectID, entity.ID);
         }
 
         public void HandleSimAnticsException(SimAnticsException exception)

@@ -13,11 +13,17 @@ namespace OpenTS2.SimAntics
     /// </summary>
     public class VM
     {
+        public short[] GlobalState;
         public VMScheduler Scheduler = new VMScheduler();
         public List<VMEntity> Entities = new List<VMEntity>();
         public uint CurrentTick = 0;
 
         private Dictionary<short, VMEntity> _entitiesByID = new Dictionary<short, VMEntity>();
+
+        public VM()
+        {
+            GlobalState = new short[60];
+        }
 
         /// <summary>
         /// Ticks all entities and advances the Simulation by 1 tick.

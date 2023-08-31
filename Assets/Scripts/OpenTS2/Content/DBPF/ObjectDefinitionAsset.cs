@@ -125,14 +125,10 @@ namespace OpenTS2.Content.DBPF
             Unused105,
             Unused106,
             Unused107,
-            /// <summary>
-            /// Just indicates the number of fields in the OBJD field array. Don't use for get/set.
-            /// </summary>
-            FIELD_COUNT
         }
 
         // Makes fields a lot easier to serialize and deserialize, and also to set and get from the VM.
-        public ushort[] Fields = new ushort[(int)FieldNames.FIELD_COUNT];
+        public ushort[] Fields = new ushort[108];
 
         private ushort this[FieldNames fieldName]
         {

@@ -25,6 +25,9 @@ namespace OpenTS2.SimAntics
             {
                 return source switch
                 {
+                    VMDataSource.MyObjectsAttributes => Entity.Attributes[dataIndex],
+                    VMDataSource.MyObject => Entity.ObjectData[dataIndex],
+                    VMDataSource.StackObject => StackObjectEntity.ObjectData[dataIndex],
                     VMDataSource.Literal => dataIndex,
                     VMDataSource.Temps => Entity.Temps[dataIndex],
                     VMDataSource.Params => StackFrame.Arguments[dataIndex],
@@ -33,12 +36,13 @@ namespace OpenTS2.SimAntics
                     VMDataSource.StackObjectsTemp => StackObjectEntity.Temps[dataIndex],
                     VMDataSource.Local => StackFrame.Locals[dataIndex],
                     VMDataSource.StackObjectsDefinition => (short)StackObjectEntity.ObjectDefinition.Fields[dataIndex],
-                    _ => throw new SimAnticsException("Attempted to retrieve a variable from an out of range data source.", StackFrame)
+                    VMDataSource.StackObjectsAttributes => StackObjectEntity.Attributes[dataIndex],
+                    _ => throw new SimAnticsException($"Attempted to retrieve a variable from an out of range data source ({source}[{dataIndex}]).", StackFrame)
                 };
             }
             catch (ArgumentOutOfRangeException)
             {
-                throw new SimAnticsException("Attempted to retrieve a variable from an out of range data index.", StackFrame);
+                throw new SimAnticsException($"Attempted to retrieve a variable from an out of range data index ({source}[{dataIndex}]).", StackFrame);
             }
         }
 
@@ -48,6 +52,15 @@ namespace OpenTS2.SimAntics
             {
                 switch (source)
                 {
+                    case VMDataSource.MyObjectsAttributes:
+                        Entity.Attributes[dataIndex] = value;
+                        return;
+                    case VMDataSource.MyObject:
+                        Entity.ObjectData[dataIndex] = value;
+                        return;
+                    case VMDataSource.StackObject:
+                        StackObjectEntity.ObjectData[dataIndex] = value;
+                        return;
                     case VMDataSource.Temps:
                         Entity.Temps[dataIndex] = value;
                         return;
@@ -66,12 +79,15 @@ namespace OpenTS2.SimAntics
                     case VMDataSource.Local:
                         StackFrame.Locals[dataIndex] = value;
                         return;
+                    case VMDataSource.StackObjectsAttributes:
+                        StackObjectEntity.Attributes[dataIndex] = value;
+                        return;
                 }
-                throw new SimAnticsException("Attempted to modify a variable from an out of range data source.", StackFrame);
+                throw new SimAnticsException($"Attempted to modify a variable from an out of range data source ({source}[{dataIndex}]).", StackFrame);
             }
             catch (ArgumentOutOfRangeException)
             {
-                throw new SimAnticsException("Attempted to modify a variable from an out of range data index.", StackFrame);
+                throw new SimAnticsException($"Attempted to modify a variable from an out of range data index ({source}[{dataIndex}]).", StackFrame);
             }
         }
     }

@@ -20,6 +20,8 @@ namespace OpenTS2.SimAntics
         public VMThread MainThread;
         public VM VM;
         public ObjectDefinitionAsset ObjectDefinition;
+        public short[] Attributes;
+        public short[] ObjectData = new short[114];
         public uint PrivateGroupID => ObjectDefinition.GlobalTGI.GroupID;
         public uint SemiGlobalGroupID
         {
@@ -40,6 +42,27 @@ namespace OpenTS2.SimAntics
         public VMEntity(ObjectDefinitionAsset objectDefinition) : this()
         {
             ObjectDefinition = objectDefinition;
+            Attributes = new short[objectDefinition.NumAttributes];
+        }
+
+        public short GetObjectData(VMObjectData field)
+        {
+            return ObjectData[(int)field];
+        }
+
+        public void ClearObjectFlags(VMObjectData field, short value)
+        {
+            ObjectData[(int)field] = (short)(ObjectData[(int)field] ^ value);
+        }
+
+        public void SetObjectFlags(VMObjectData field, short value)
+        {
+            ObjectData[(int)field] = (short)(ObjectData[(int)field] | value);
+        }
+
+        public void SetObjectData(VMObjectData field, short value)
+        {
+            ObjectData[(int)field] = value;
         }
 
         public void Tick()

@@ -34,7 +34,7 @@ namespace OpenTS2.Files.Formats.DBPF
 
             reader.Seek(SeekOrigin.Begin, 64);
 
-            for(var i=0;i<(int)ObjectDefinitionAsset.FieldNames.FIELD_COUNT;i++)
+            for(var i=0;i<(int)108;i++)
             {
                 var value = reader.ReadUInt16();
                 asset.Fields[i] = value;

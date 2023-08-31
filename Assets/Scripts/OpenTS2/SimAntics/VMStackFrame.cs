@@ -36,20 +36,19 @@ namespace OpenTS2.SimAntics
         public VMExitCode Tick()
         {
             var currentIterations = 0;
-            VMExitCode result;
-            var currentNode = GetCurrentNode();
+            VMExitCode result = VMExitCode.True;
+            var returnTarget = CurrentNode;
 
             if (CurrentContinueHandler != null)
             {
                 result = CurrentContinueHandler.Tick();
+                if (result == VMExitCode.Continue)
+                    return result;
+                else
+                {
+                    returnTarget = GetNodeReturnTarget(GetCurrentNode(), result);
+                }
             }
-            else
-                result = ExecuteNode(currentNode);
-
-            if (result == VMExitCode.Continue)
-                return result;
-
-            var returnTarget = GetNodeReturnTarget(currentNode, result);
 
             while (returnTarget != BHAVAsset.Node.ErrorReturnValue && returnTarget != BHAVAsset.Node.TrueReturnValue && returnTarget != BHAVAsset.Node.FalseReturnValue)
             {
@@ -59,7 +58,7 @@ namespace OpenTS2.SimAntics
                     throw new SimAnticsException($"Thread entered infinite loop! ( >{MaxIterations} primitives )", this);
                 }
                 SetCurrentNode(returnTarget);
-                currentNode = GetCurrentNode();
+                var currentNode = GetCurrentNode();
                 result = ExecuteNode(currentNode);
                 if (result == VMExitCode.Continue)
                     return result;
@@ -120,7 +119,10 @@ namespace OpenTS2.SimAntics
                     if (newStackFrame != null)
                     {
                         Thread.Frames.Push(newStackFrame);
-                        return newStackFrame.Tick();
+                        var res = newStackFrame.Tick();
+                        if (res != VMExitCode.Continue)
+                            Thread.Frames.Pop();
+                        return res;
                     }
                     else
                         throw new SimAnticsException("Attempted to GoSub to invalid tree, or called unknown primitive.", this);
