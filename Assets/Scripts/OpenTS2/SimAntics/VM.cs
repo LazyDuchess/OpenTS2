@@ -1,3 +1,4 @@
+using OpenTS2.Client;
 using OpenTS2.Common;
 using OpenTS2.Content;
 using OpenTS2.Files.Formats.DBPF;
@@ -23,6 +24,38 @@ namespace OpenTS2.SimAntics
         public VM()
         {
             GlobalState = new short[60];
+            InitializeGlobalState();
+        }
+
+        public short GetGlobal(ushort id)
+        {
+            return GlobalState[id];
+        }
+
+        public void SetGlobal(ushort id, short value)
+        {
+            GlobalState[id] = value;
+        }
+
+        public short GetGlobal(VMGlobals global)
+        {
+            return GetGlobal((ushort)global);
+        }
+
+        public void SetGlobal(VMGlobals global, short value)
+        {
+            SetGlobal((ushort)global, value);
+        }
+
+        void InitializeGlobalState()
+        {
+            var epManager = EPManager.Get();
+            var epFlags1 = (short)(epManager.InstalledProducts & 0xFFFF);
+            var epFlags2 = (short)(epManager.InstalledProducts >> 16);
+            SetGlobal(VMGlobals.GameEditionFlags1, epFlags1);
+            SetGlobal(VMGlobals.GameEditionFlags2, epFlags2);
+            var settings = Settings.Get();
+            SetGlobal(VMGlobals.CurrentLanguage, (short)settings.Language);
         }
 
         /// <summary>

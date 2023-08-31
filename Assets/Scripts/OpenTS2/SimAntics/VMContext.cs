@@ -25,6 +25,7 @@ namespace OpenTS2.SimAntics
             {
                 return source switch
                 {
+                    VMDataSource.Globals => VM.GetGlobal((ushort)dataIndex),
                     VMDataSource.MyObjectsAttributes => Entity.Attributes[dataIndex],
                     VMDataSource.MyObject => Entity.ObjectData[dataIndex],
                     VMDataSource.StackObject => StackObjectEntity.ObjectData[dataIndex],
@@ -52,6 +53,9 @@ namespace OpenTS2.SimAntics
             {
                 switch (source)
                 {
+                    case VMDataSource.Globals:
+                        VM.SetGlobal((ushort)dataIndex, value);
+                        return;
                     case VMDataSource.MyObjectsAttributes:
                         Entity.Attributes[dataIndex] = value;
                         return;
