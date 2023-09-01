@@ -12,7 +12,7 @@ namespace OpenTS2.Files.Formats.DBPF
     {
         public override AbstractAsset Deserialize(byte[] bytes, ResourceKey tgi, DBPFFile sourceFile)
         {
-            var propertySet = new PropertySet(Encoding.UTF8.GetString(bytes));
+            var propertySet = new PropertySet(bytes);
 
             var modelName = propertySet.GetProperty<StringProp>("modelname").Value;
             // Yup, the game just tacks on a _cres to the end of this.

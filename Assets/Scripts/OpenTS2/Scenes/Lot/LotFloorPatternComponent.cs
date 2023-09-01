@@ -85,6 +85,11 @@ namespace OpenTS2.Scenes.Lot
 
         public void Commit()
         {
+            if (_vertexBuilder.Count > 65536 && Mesh.indexFormat == UnityEngine.Rendering.IndexFormat.UInt16)
+            {
+                Mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+            }
+
             Mesh.SetVertices(_vertexBuilder);
             Mesh.SetUVs(0, _vertexUvBuilder);
             Mesh.SetIndices(_indexBuilder, MeshTopology.Triangles, 0);

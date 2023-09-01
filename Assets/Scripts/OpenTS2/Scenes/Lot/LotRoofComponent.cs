@@ -13,7 +13,7 @@ namespace OpenTS2.Scenes.Lot
 {
     public class LotRoofComponent : AssetReferenceComponent
     {
-        private const int DefaultGUID = 0x2CDCC1F8;
+        private const uint DefaultGUID = 0x0cdcc049;
 
         private RoofCollection _roofs;
         private RoofGeometryCollection _geometry;
@@ -50,7 +50,7 @@ namespace OpenTS2.Scenes.Lot
                         { "stdMatBaseTextureAddressingV", "tile" },
                         { "stdMatBaseTextureEnabled", "true" },
                         { "stdMatBaseTextureName", textureName },
-                        { "stdMatDiffCoef", "0.8,0.8,0.8,1" },
+                        { "stdMatDiffCoef", "0.5,0.5,0.5,1" },
                         { "stdMatEmissiveCoef", "0,0,0" },
                         { "stdMatEnvCubeCoef", "0,0,0,0,0" },
                         { "stdMatLayer", "0" },

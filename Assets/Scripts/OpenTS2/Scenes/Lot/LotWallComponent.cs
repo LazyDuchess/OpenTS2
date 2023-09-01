@@ -256,7 +256,8 @@ namespace OpenTS2.Scenes.Lot
 
             if (wallGraph.Floors != elevationData.Depth)
             {
-                throw new InvalidOperationException("Size mismatch between elevation and wall graph");
+                // Apparently these are allowed to disagree?
+                // throw new InvalidOperationException("Size mismatch between elevation and wall graph");
             }
 
             LoadPatterns();

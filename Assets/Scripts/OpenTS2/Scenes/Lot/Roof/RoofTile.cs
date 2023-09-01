@@ -100,8 +100,8 @@ namespace OpenTS2.Scenes.Lot.Roof
                 new AtlasIndex(7), // SmallLeft = 1,
                 new AtlasIndex(-1), // SmallRight = 2,
                 new AtlasIndex(3), // Bottom = 3,
-                new AtlasIndex(-1), // Left = 4, // Flip 11 substitute?
-                new AtlasIndex(-1), // Right = 5 // 11 substitute?
+                new AtlasIndex(11, true), // Left = 4, // Flip 11 substitute
+                new AtlasIndex(11), // Right = 5 // 11 substitute
             },
 
             // Top = 4,
@@ -122,8 +122,8 @@ namespace OpenTS2.Scenes.Lot.Roof
                 new AtlasIndex(-1), // SmallLeft = 1,
                 new AtlasIndex(7, true), // SmallRight = 2,
                 new AtlasIndex(3, true), // Bottom = 3,
-                new AtlasIndex(-1), // Left = 4, // Flip 11 substitute?
-                new AtlasIndex(-1), // Right = 5 // 11 substitute?
+                new AtlasIndex(11, true), // Left = 4, // Flip 11 substitute
+                new AtlasIndex(11), // Right = 5 // 11 substitute
             },
 
             // SmallRightEdge = 6,
@@ -268,6 +268,9 @@ namespace OpenTS2.Scenes.Lot.Roof
                     return 3;
                 case RoofTileBase.Top:
                     return 2;
+                case RoofTileBase.LeftToTop:
+                case RoofTileBase.TopToRight:
+                    return 1;
                 default:
                     return 0;
             }

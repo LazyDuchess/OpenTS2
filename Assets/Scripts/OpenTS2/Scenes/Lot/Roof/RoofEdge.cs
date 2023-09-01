@@ -523,6 +523,11 @@ namespace OpenTS2.Scenes.Lot.Roof
             return (x < _overhangSize && _lEnd != RoofEdgeEnd.FlatShort) || (x >= _tileWidth - _overhangSize && _rEnd != RoofEdgeEnd.FlatShort) || y >= _tileHeight - _overhangSize || y < _topOverhangSize;
         }
 
+        private bool IsOverhangX(int x, int y)
+        {
+            return (x < _overhangSize && _lEnd != RoofEdgeEnd.FlatShort) || (x >= _tileWidth - _overhangSize && _rEnd != RoofEdgeEnd.FlatShort);
+        }
+
         public bool Intersect(RoofEdge other)
         {
             // Can only run this if tiles line up.
@@ -620,7 +625,7 @@ namespace OpenTS2.Scenes.Lot.Roof
 
                                     if (thisHigher)
                                     {
-                                        if (!IsOverhang(x, y) || _height == other._height)
+                                        if (!IsOverhang(x, y) || (_height == other._height && other.IsOverhangX(xO, yO)))
                                         {
                                             // Only real roof can remove lower tiles if they're on a different level.
                                             other.CutUsingTile(tile, xO, yO, 0);
@@ -628,7 +633,7 @@ namespace OpenTS2.Scenes.Lot.Roof
                                     }
                                     else
                                     {
-                                        if (!other.IsOverhang(xO, yO) || _height == other._height)
+                                        if (!other.IsOverhang(xO, yO) || (_height == other._height && IsOverhangX(x, y)))
                                         {
                                             CutUsingTile(oTile, x, y, 0);
                                         }
@@ -692,14 +697,20 @@ namespace OpenTS2.Scenes.Lot.Roof
                                     {
                                         // The fun one.
 
-                                        // Cut the top left of the left edge into the right edge.
-                                        RoofCut cutFromL = (tile.Cuts() & RoofCut.TopLeft) | RoofCut.BottomRight;
-                                        oTile.Cut(cutFromL, 1);
+                                        bool lOverhang = left.IsOverhang(x, y);
+                                        bool rOverhang = right.IsOverhang(xO, yO);
 
-                                        // Cut the top right of the right edge into the left edge.
+                                        if (lOverhang == rOverhang)
+                                        {
+                                            // Cut the top left of the left edge into the right edge.
+                                            RoofCut cutFromL = (tile.Cuts() & RoofCut.TopLeft) | RoofCut.BottomRight;
+                                            oTile.Cut(cutFromL, 1);
 
-                                        RoofCut cutFromR = (oTile.Cuts() & RoofCut.TopRight) | RoofCut.BottomLeft;
-                                        tile.Cut(cutFromR, 3);
+                                            // Cut the top right of the right edge into the left edge.
+
+                                            RoofCut cutFromR = (oTile.Cuts() & RoofCut.TopRight) | RoofCut.BottomLeft;
+                                            tile.Cut(cutFromR, 3);
+                                        }
 
                                         // Only add the intersection graphics to the left face if the right isn't fully cut out.
                                         if ((oTile.Cuts() & RoofCut.TopRight) != RoofCut.TopRight)
@@ -787,7 +798,7 @@ namespace OpenTS2.Scenes.Lot.Roof
 
                                 if (tileHeight < tileHeightOther)
                                 {
-                                    if (!other.IsOverhang(xO, yO) || _height == other._height)
+                                    if (!other.IsOverhang(xO, yO) || (_height == other._height && IsOverhangX(x, y)))
                                     {
                                         CutUsingTile(oTile, x, y, dirDiff);
                                     }
@@ -809,7 +820,7 @@ namespace OpenTS2.Scenes.Lot.Roof
                                 }
                                 else
                                 {
-                                    if (!IsOverhang(x, y) || _height == other._height)
+                                    if (!IsOverhang(x, y) || (_height == other._height && other.IsOverhangX(xO, yO)))
                                     {
                                         other.CutUsingTile(tile, xO, yO, dirDiff);
                                     }

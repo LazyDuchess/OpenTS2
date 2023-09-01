@@ -14,7 +14,7 @@ namespace OpenTS2.Files.Formats.DBPF
         {
             try
             {
-                var propertySet = new PropertySet(Encoding.UTF8.GetString(bytes));
+                var propertySet = new PropertySet(bytes);
 
                 return new CatalogObjectAsset(propertySet);
             }
