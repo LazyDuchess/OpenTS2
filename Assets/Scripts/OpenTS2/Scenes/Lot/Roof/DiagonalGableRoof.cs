@@ -6,7 +6,7 @@ namespace OpenTS2.Scenes.Lot.Roof
 {
     public class DiagonalGableRoof : AbstractSimpleRoof
     {
-        public DiagonalGableRoof(RoofEntry entry, float height, bool isLong) : base(entry, height)
+        public DiagonalGableRoof(RoofEntry entry, float height, bool isLong, bool pagoda = false) : base(entry, height)
         {
             Vector2 diagVec = GetDiagonalVector(entry);
             int dir = DetermineDirection(diagVec);
@@ -32,8 +32,8 @@ namespace OpenTS2.Scenes.Lot.Roof
 
                 Edges = new RoofEdge[]
                 {
-                    new RoofEdge(height, slope, bl, br, br + toTop, bl + toTop, RoofEdgeEnd.Flat, RoofEdgeEnd.Flat),
-                    new RoofEdge(height, slope, tr, tl, tl - toTop, tr - toTop, RoofEdgeEnd.Flat, RoofEdgeEnd.Flat)
+                    new RoofEdge(height, slope, bl, br, br + toTop, bl + toTop, RoofEdgeEnd.Flat, RoofEdgeEnd.Flat, pagoda: pagoda),
+                    new RoofEdge(height, slope, tr, tl, tl - toTop, tr - toTop, RoofEdgeEnd.Flat, RoofEdgeEnd.Flat, pagoda: pagoda)
                 };
             }
             else
@@ -42,8 +42,8 @@ namespace OpenTS2.Scenes.Lot.Roof
 
                 Edges = new RoofEdge[]
                 {
-                    new RoofEdge(height, slope, br, tr, tr - toTop, br - toTop, RoofEdgeEnd.Flat, RoofEdgeEnd.Flat),
-                    new RoofEdge(height, slope, tl, bl, bl + toTop, tl + toTop, RoofEdgeEnd.Flat, RoofEdgeEnd.Flat)
+                    new RoofEdge(height, slope, br, tr, tr - toTop, br - toTop, RoofEdgeEnd.Flat, RoofEdgeEnd.Flat, pagoda: pagoda),
+                    new RoofEdge(height, slope, tl, bl, bl + toTop, tl + toTop, RoofEdgeEnd.Flat, RoofEdgeEnd.Flat, pagoda: pagoda)
                 };
             }
         }

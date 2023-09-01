@@ -6,7 +6,7 @@ namespace OpenTS2.Scenes.Lot.Roof
 {
     public class ShedGableRoof : AbstractSimpleRoof
     {
-        public ShedGableRoof(RoofEntry entry, float height) : base(entry, height)
+        public ShedGableRoof(RoofEntry entry, float height, bool pagoda = false) : base(entry, height)
         {
             int dir = DetermineDirectionCardinal(entry);
 
@@ -24,25 +24,25 @@ namespace OpenTS2.Scenes.Lot.Roof
                 case 0: // Towards positive x
                     Edges = new RoofEdge[]
                     {
-                        new RoofEdge(height, slope, tl, bl, br, tr, RoofEdgeEnd.Flat, RoofEdgeEnd.Flat),
+                        new RoofEdge(height, slope, tl, bl, br, tr, RoofEdgeEnd.Flat, RoofEdgeEnd.Flat, pagoda: pagoda),
                     };
                     break;
                 case 1: // Towards positive y
                     Edges = new RoofEdge[]
                     {
-                        new RoofEdge(height, slope, bl, br, tr, tl, RoofEdgeEnd.Flat, RoofEdgeEnd.Flat),
+                        new RoofEdge(height, slope, bl, br, tr, tl, RoofEdgeEnd.Flat, RoofEdgeEnd.Flat, pagoda: pagoda),
                     };
                     break;
                 case 2: // Towards negative x
                     Edges = new RoofEdge[]
                     {
-                        new RoofEdge(height, slope, br, tr, tl, bl, RoofEdgeEnd.Flat, RoofEdgeEnd.Flat),
+                        new RoofEdge(height, slope, br, tr, tl, bl, RoofEdgeEnd.Flat, RoofEdgeEnd.Flat, pagoda: pagoda),
                     };
                     break;
                 case 3: // Towards negative y
                     Edges = new RoofEdge[]
                     {
-                        new RoofEdge(height, slope, tr, tl, bl, br, RoofEdgeEnd.Flat, RoofEdgeEnd.Flat),
+                        new RoofEdge(height, slope, tr, tl, bl, br, RoofEdgeEnd.Flat, RoofEdgeEnd.Flat, pagoda: pagoda),
                     };
                     break;
             }

@@ -93,6 +93,30 @@ namespace OpenTS2.Scenes.Lot.Roof
                     roof = new DiagonalShedHipRoof(entry, height);
                     break;
 
+                case RoofType.PagodaHip:
+                    roof = new HipRoof(entry, height, pagoda: true);
+                    break;
+
+                case RoofType.PagodaLongGable:
+                    roof = new GableRoof(entry, height, true, pagoda: true);
+                    break;
+
+                case RoofType.PagodaShedGable:
+                    roof = new ShedGableRoof(entry, height, pagoda: true);
+                    break;
+
+                case RoofType.DiagonalPagodaHip:
+                    roof = new DiagonalHipRoof(entry, height, pagoda: true);
+                    break;
+
+                case RoofType.DiagonalPagodaLongGable:
+                    roof = new DiagonalGableRoof(entry, height, true, pagoda: true);
+                    break;
+
+                case RoofType.DiagonalPagodaShedGable:
+                    roof = new DiagonalShedGableRoof(entry, height, pagoda: true);
+                    break;
+
                 default:
                     return;
             }

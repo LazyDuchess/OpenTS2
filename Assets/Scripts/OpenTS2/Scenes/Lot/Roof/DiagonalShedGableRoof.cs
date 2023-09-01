@@ -6,7 +6,7 @@ namespace OpenTS2.Scenes.Lot.Roof
 {
     public class DiagonalShedGableRoof : AbstractSimpleRoof
     {
-        public DiagonalShedGableRoof(RoofEntry entry, float height) : base(entry, height)
+        public DiagonalShedGableRoof(RoofEntry entry, float height, bool pagoda = false) : base(entry, height)
         {
             Vector2 diagVec = GetDiagonalVector(entry);
             int dir = DetermineDirection(diagVec);
@@ -28,7 +28,7 @@ namespace OpenTS2.Scenes.Lot.Roof
             // For some reason, diagonal normal shed roofs have a top overhang. None of the other shed roofs have this.
             // The overhang has some weird properties. It has overhang rules for cutting out roofs below it,
             // but it does alter wall height, which suggests it's physically present unlike other overhangs.
-            Vector2 overhang = VectorFromDiagonal(RotateVector(new Vector2(0.5f, 0), dir));
+            Vector2 overhang = pagoda ? new Vector2() : VectorFromDiagonal(RotateVector(new Vector2(0.5f, 0), dir));
 
             float slope = entry.RoofAngle;
 
@@ -37,25 +37,25 @@ namespace OpenTS2.Scenes.Lot.Roof
                 case 0: // Towards positive x
                     Edges = new RoofEdge[]
                     {
-                        new RoofEdge(height, slope, tl, bl, br + overhang, tr + overhang, RoofEdgeEnd.Flat, RoofEdgeEnd.Flat, 2),
+                        new RoofEdge(height, slope, tl, bl, br + overhang, tr + overhang, RoofEdgeEnd.Flat, RoofEdgeEnd.Flat, 2, pagoda: pagoda),
                     };
                     break;
                 case 1: // Towards positive y
                     Edges = new RoofEdge[]
                     {
-                        new RoofEdge(height, slope, bl, br, tr + overhang, tl + overhang, RoofEdgeEnd.Flat, RoofEdgeEnd.Flat, 2),
+                        new RoofEdge(height, slope, bl, br, tr + overhang, tl + overhang, RoofEdgeEnd.Flat, RoofEdgeEnd.Flat, 2, pagoda: pagoda),
                     };
                     break;
                 case 2: // Towards negative x
                     Edges = new RoofEdge[]
                     {
-                        new RoofEdge(height, slope, br, tr, tl + overhang, bl + overhang, RoofEdgeEnd.Flat, RoofEdgeEnd.Flat, 2),
+                        new RoofEdge(height, slope, br, tr, tl + overhang, bl + overhang, RoofEdgeEnd.Flat, RoofEdgeEnd.Flat, 2, pagoda: pagoda),
                     };
                     break;
                 case 3: // Towards negative y
                     Edges = new RoofEdge[]
                     {
-                        new RoofEdge(height, slope, tr, tl, bl + overhang, br + overhang, RoofEdgeEnd.Flat, RoofEdgeEnd.Flat, 2),
+                        new RoofEdge(height, slope, tr, tl, bl + overhang, br + overhang, RoofEdgeEnd.Flat, RoofEdgeEnd.Flat, 2, pagoda: pagoda),
                     };
                     break;
             }

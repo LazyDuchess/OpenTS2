@@ -6,7 +6,7 @@ namespace OpenTS2.Scenes.Lot.Roof
 {
     public class DiagonalHipRoof : AbstractSimpleRoof
     {
-        public DiagonalHipRoof(RoofEntry entry, float height) : base(entry, height)
+        public DiagonalHipRoof(RoofEntry entry, float height, bool pagoda = false) : base(entry, height)
         {
             Vector2 size = GetDiagonalVector(entry);
             Vector2 from = new Vector2(entry.XFrom, entry.YFrom);
@@ -30,10 +30,10 @@ namespace OpenTS2.Scenes.Lot.Roof
 
             Edges = new RoofEdge[]
             {
-                new RoofEdge(height, slope, bl, br, br + minY, bl + minY), // Bottom
-                new RoofEdge(height, slope, br, tr, tr - minX, br - minX), // Right
-                new RoofEdge(height, slope, tr, tl, tl - minY, tr - minY), // Top
-                new RoofEdge(height, slope, tl, bl, bl + minX, tl + minX), // Left
+                new RoofEdge(height, slope, bl, br, br + minY, bl + minY, pagoda: pagoda), // Bottom
+                new RoofEdge(height, slope, br, tr, tr - minX, br - minX, pagoda: pagoda), // Right
+                new RoofEdge(height, slope, tr, tl, tl - minY, tr - minY, pagoda: pagoda), // Top
+                new RoofEdge(height, slope, tl, bl, bl + minX, tl + minX, pagoda: pagoda), // Left
             };
         }
     }

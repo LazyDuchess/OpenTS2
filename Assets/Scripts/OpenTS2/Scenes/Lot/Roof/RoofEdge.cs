@@ -56,6 +56,7 @@ namespace OpenTS2.Scenes.Lot.Roof
         private float _tileSize;
         private int _overhangSize;
         private int _topOverhangSize;
+        private bool _pagoda;
 
         private Vector3[] _vertices;
         private Vector2[] _uvs;
@@ -77,7 +78,8 @@ namespace OpenTS2.Scenes.Lot.Roof
             Vector2 tl,
             RoofEdgeEnd lEnd = RoofEdgeEnd.Normal,
             RoofEdgeEnd rEnd = RoofEdgeEnd.Normal,
-            int topOverhangSize = 0)
+            int topOverhangSize = 0,
+            bool pagoda = false)
         {
             _height = height;
             _slope = slope;
@@ -152,6 +154,12 @@ namespace OpenTS2.Scenes.Lot.Roof
             }
 
             _topOverhangSize = topOverhangSize;
+            _pagoda = pagoda;
+
+            if (pagoda)
+            {
+                _overhangSize += 2;
+            }
 
             _tileWidth = Mathf.RoundToInt(xDist / _tileSize) + (_lEnd == RoofEdgeEnd.FlatShort ? 0 : _overhangSize) + (_rEnd == RoofEdgeEnd.FlatShort ? 0 : _overhangSize);
             _tileHeight = Mathf.RoundToInt(yDist / _tileSize) + _overhangSize;
@@ -230,6 +238,44 @@ namespace OpenTS2.Scenes.Lot.Roof
             }
         }
 
+        private float GetPagodaSlopeAt(int yTile)
+        {
+            // At yTile = _tileHeight this should be 0.
+            // At yTile = 2 the roof should intersect with a normal roof at _slope
+            // At yTile = _tileHeight - _overhangSize the height should be 0.
+            // For the two top yTile, this overshoots a little.
+
+            float fromBottom = _tileHeight - yTile;
+            float heightIntersect = (_tileHeight - (_overhangSize + 2)) * _slope;
+            float intersectY = _tileHeight - 2;
+
+            // Expected height when fromBottom is 0 = 0
+            // Expected height when fromBottom is (tileHeight - 2) = heightIntersect
+
+            // height = a * y^2
+            float a = heightIntersect / (intersectY * intersectY);
+
+            // dy(height) = 2a * y;
+            return 2 * a * fromBottom;
+
+            // The corners have an additional slope modifier (that also affects the x direction) but that's not supported right now.
+        }
+
+        private float GetMaxHeight()
+        {
+            if (_pagoda)
+            {
+                // Height of the roof without the top two tiles, then add them on as they overshoot.
+                float baseSlope = (_tileHeight - (_overhangSize + 2)) * _slope;
+
+                return baseSlope + GetPagodaSlopeAt(0) + GetPagodaSlopeAt(1);
+            }
+            else
+            {
+                return (_tileHeight - _overhangSize) * _slope;
+            }
+        }
+
         private void DrawTrim(LotFloorPatternComponent trimComp, LotFloorPatternComponent edgeComp, Vector3 from, Vector3 to)
         {
             _edgeVertices[0] = from;
@@ -278,7 +324,7 @@ namespace OpenTS2.Scenes.Lot.Roof
             var topComp = geo.RoofTop.Component;
             var underComp = geo.RoofUnder.Component;
 
-            Vector3 basePos = new Vector3(_tl.x, _height + (_tileHeight - _overhangSize) * _slope + ThicknessTop, _tl.y);
+            Vector3 basePos = new Vector3(_tl.x, _height + GetMaxHeight() + ThicknessTop, _tl.y);
 
             Vector3 xTile = new Vector3(_xNormal.x * _tileSize, 0, _xNormal.y * _tileSize);
             Vector3 yTile = new Vector3(_yNormal.x * -_tileSize, -_slope, _yNormal.y * -_tileSize);
@@ -289,8 +335,14 @@ namespace OpenTS2.Scenes.Lot.Roof
             }
 
             int i = 0;
+            float yBase = 0;
             for (int y = 0; y < _tileHeight; y++)
             {
+                if (_pagoda)
+                {
+                    yTile.y = -GetPagodaSlopeAt(y);
+                }
+
                 for (int x = 0; x < _tileWidth; x++, i++)
                 {
                     ref RoofTile tile = ref _tiles[i];
@@ -302,10 +354,20 @@ namespace OpenTS2.Scenes.Lot.Roof
                         continue;
                     }
 
-                    _vertices[0] = basePos + x * xTile + y * yTile; // Top Left
+                    _vertices[0] = basePos + x * xTile + y * new Vector3(yTile.x, 0, yTile.z); // Top Left
+                    _vertices[0].y += yBase;
                     _vertices[1] = _vertices[0] + xTile; // Top Right
                     _vertices[2] = _vertices[1] + yTile; // Bottom Right
                     _vertices[3] = _vertices[0] + yTile; // Bottom Left
+
+                    if (_pagoda)
+                    {
+                        _vertices[0].y += PagodaCornerOffset(x);
+                        _vertices[1].y += PagodaCornerOffset(x + 1);
+                        _vertices[2].y += PagodaCornerOffset(x + 1);
+                        _vertices[3].y += PagodaCornerOffset(x);
+                    }
+
                     _vertices[4] = (_vertices[0] + _vertices[1] + _vertices[2] + _vertices[3]) / 4; // Center
 
                     Vector2 baseUV = new Vector2((graphic.Index % 5) * AtlasUVSize, 1 - ((graphic.Index / 5) * AtlasUVSize + AtlasUVYOff));
@@ -389,8 +451,28 @@ namespace OpenTS2.Scenes.Lot.Roof
                         DrawTrim(trimComp, edgeComp, _vertices[2], _vertices[1]);
                     }
                 }
+                yBase += yTile.y;
             }
-         }
+        }
+
+        public float PagodaCornerOffset(float x)
+        {
+            int cornerSize = Math.Min(4, Math.Max(0, _tileHeight - 4));
+
+            if (x < cornerSize && _lEnd == RoofEdgeEnd.Normal)
+            {
+                float scale = cornerSize - x;
+                return scale * scale * (1 / 16f) * _slope;
+            }
+
+            if (x > _tileWidth - cornerSize && _rEnd == RoofEdgeEnd.Normal)
+            {
+                float scale = x - (_tileWidth - cornerSize);
+                return scale * scale * (1 / 16f) * _slope;
+            }
+
+            return 0;
+        }
 
         public float GetHeightAt(float x, float y)
         {
@@ -412,7 +494,21 @@ namespace OpenTS2.Scenes.Lot.Roof
                 return float.PositiveInfinity;
             }
 
-            return yDist * (_slope / _tileSize) + _height;
+            if (_pagoda)
+            {
+                float fromBottom = (yDist / _tileSize) + _overhangSize;
+                float heightIntersect = (_tileHeight - (_overhangSize + 2)) * _slope;
+                float intersectY = (_tileHeight - 2);
+
+                // height = a * y^2
+                float a = heightIntersect / (intersectY * intersectY);
+
+                return a * fromBottom * fromBottom + _height;
+            }
+            else
+            {
+                return yDist * (_slope / _tileSize) + _height;
+            }
         }
 
         private void CutUsingTile(in RoofTile oTile, int x, int y, int dir)
@@ -433,7 +529,7 @@ namespace OpenTS2.Scenes.Lot.Roof
 
             float heightOffset = _height / _slope - other._height / other._slope;
 
-            if (_slope != other._slope || Math.Abs(heightOffset - Mathf.Round(heightOffset)) > Bias || _tileSize != other._tileSize)
+            if (_slope != other._slope || Math.Abs(heightOffset - Mathf.Round(heightOffset)) > Bias || _tileSize != other._tileSize || _pagoda || other._pagoda)
             {
                 return false;
             }
