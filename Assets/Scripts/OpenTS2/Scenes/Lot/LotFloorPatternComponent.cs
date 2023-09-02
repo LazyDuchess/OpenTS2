@@ -52,11 +52,6 @@ namespace OpenTS2.Scenes.Lot
             _indexBuilder.Add(baseVertex + c);
         }
 
-        public void AddIndex(int index)
-        {
-            _indexBuilder.Add(index);
-        }
-
         public void AddWindingRect(int baseVert)
         {
             _indexBuilder.Add(baseVert);

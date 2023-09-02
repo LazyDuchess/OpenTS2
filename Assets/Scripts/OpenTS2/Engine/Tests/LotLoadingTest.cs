@@ -165,7 +165,7 @@ namespace OpenTS2.Engine.Tests
             var terrainTextures = lotPackage.Entries.First(x => x.GlobalTGI.TypeID == TypeIDs.LOT_TEXTURES).GetAsset<LotTexturesAsset>();
             var terrainData = lotPackage.Entries.Where(x => x.GlobalTGI.TypeID == TypeIDs.LOT_TERRAIN).Select(x => x.GetAsset()).ToList();
 
-            var heightmap = (_2DArrayAsset<float>)terrainData.First(x => x is IArrayAsset array && array.ArrayType() == typeof(float));
+            var waterHeightmap = (_2DArrayAsset<float>)terrainData.First(x => x is IArrayAsset array && array.ArrayType() == typeof(float));
             var blend = terrainData.Where(x => x is IArrayAsset array && array.ArrayType() == typeof(byte))
                 .OrderBy(x => x.GlobalTGI.InstanceID)
                 .Select(x => (_2DArrayAsset<byte>)x)
@@ -173,7 +173,7 @@ namespace OpenTS2.Engine.Tests
                 .ToArray();
 
             var terrain = new GameObject("terrain", typeof(LotTerrainComponent));
-            terrain.GetComponent<LotTerrainComponent>().CreateFromTerrainAssets(terrainTextures, floorElevation, blend, wallGraph.BaseFloor);
+            terrain.GetComponent<LotTerrainComponent>().CreateFromTerrainAssets(terrainTextures, floorElevation, blend, waterHeightmap, wallGraph.BaseFloor);
             _lotObject.Add(terrain);
         }
     }

@@ -332,9 +332,14 @@ namespace OpenTS2.Scenes.Lot
             _thickness = new PatternMesh(gameObject, ThicknessTexture, LoadMaterial(contentProvider, ThicknessTexture).GetAsUnityMaterial());
         }
 
-        private bool IsWallThick(int type)
+        private bool IsWallThick(in WallLayerEntry elem)
         {
-            switch (type)
+            if (IsFence(elem.WallType))
+            {
+                return elem.Pattern1 != 65535 || elem.Pattern2 != 65535;
+            }
+
+            switch (elem.WallType)
             {
                 case WallType.Normal:
                 case WallType.Roof:
@@ -490,7 +495,7 @@ namespace OpenTS2.Scenes.Lot
                 WallIntersection from = GetOrAddIntersection(line.FromId);
                 WallIntersection to = GetOrAddIntersection(line.ToId);
 
-                if (_wallLayer.Walls.TryGetValue(line.LayerId, out var layer) && IsWallThick(layer.WallType))
+                if (_wallLayer.Walls.TryGetValue(line.LayerId, out var layer) && IsWallThick(layer))
                 {
                     // Add this line to both intersections
                     AddToIntersection(from, ref line, i, false);
@@ -560,6 +565,8 @@ namespace OpenTS2.Scenes.Lot
 
                     // This shouldn't happen...
                 }
+
+                bool isHalfWall = false;
                 
                 if (IsFence(layerElem.WallType))
                 {
@@ -573,7 +580,14 @@ namespace OpenTS2.Scenes.Lot
                         GetElevationInt(currentFloorElevation, width, height, from.XPos, from.YPos),
                         GetElevationInt(currentFloorElevation, width, height, to.XPos, to.YPos));
 
-                    continue;
+                    if (layerElem.Pattern1 == 65535 && layerElem.Pattern2 == 65535)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        isHalfWall = true;
+                    }
                 }
 
                 LotFloorPatternComponent lPattern = (layerElem.Pattern1 == 65535 ? null : _patterns[layerElem.Pattern1]?.Component);// ?? _thickness?.Component;
@@ -602,6 +616,12 @@ namespace OpenTS2.Scenes.Lot
                     heightMid = Mathf.Max(_roofs.GetHeightAt(midX, midY, from.Level, heightMid, RoofOffset), floorMid);
                     heightFrom = Mathf.Max(_roofs.GetHeightAt(from.XPos, from.YPos, from.Level, heightFrom, RoofOffset), floorFrom);
                 }
+                else if (isHalfWall)
+                {
+                    heightTo = Mathf.Min(heightTo, floorTo + HalfWallHeight);
+                    heightMid = Mathf.Min(heightMid, floorMid + HalfWallHeight);
+                    heightFrom = Mathf.Min(heightFrom, floorFrom + HalfWallHeight);
+                }
 
                 wallVertices[3] = new Vector3(to.XPos, heightTo, to.YPos);
                 wallVertices[4] = new Vector3(midX, heightMid, midY);
@@ -611,14 +631,16 @@ namespace OpenTS2.Scenes.Lot
                 float midUV = (wallVertices[4].y - wallVertices[1].y) / WallHeight;
                 float endUV = (wallVertices[3].y - wallVertices[2].y) / WallHeight;
 
-                wallUVs[0] = new Vector2(0, roofWall ? 1 : startUV);
-                wallUVs[1] = new Vector2(0.5f, roofWall ? 1 : midUV);
-                wallUVs[2] = new Vector2(1, roofWall ? 1 : endUV);
-                wallUVs[3] = new Vector2(1, roofWall ? (1 - endUV) : 0);
-                wallUVs[4] = new Vector2(0.5f, roofWall ? (1 - midUV) : 0);
-                wallUVs[5] = new Vector2(0, roofWall ? (1 - startUV) : 0);
+                bool bottomUVs = roofWall || isHalfWall;
 
-                bool isThick = IsWallThick(layerElem.WallType);
+                wallUVs[0] = new Vector2(0, bottomUVs ? 1 : startUV);
+                wallUVs[1] = new Vector2(0.5f, bottomUVs ? 1 : midUV);
+                wallUVs[2] = new Vector2(1, bottomUVs ? 1 : endUV);
+                wallUVs[3] = new Vector2(1, bottomUVs ? (1 - endUV) : 0);
+                wallUVs[4] = new Vector2(0.5f, bottomUVs ? (1 - midUV) : 0);
+                wallUVs[5] = new Vector2(0, bottomUVs ? (1 - startUV) : 0);
+
+                bool isThick = IsWallThick(layerElem);
 
                 if (isThick)
                 {

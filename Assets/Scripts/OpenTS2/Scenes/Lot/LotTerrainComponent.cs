@@ -29,6 +29,7 @@ namespace OpenTS2.Scenes.Lot
         private LotTexturesAsset _textures;
         private _3DArrayAsset<float> _elevationData;
         private _2DArrayAsset<byte>[] _blendMaskData;
+        private _2DArrayAsset<float> _waterHeightData;
         private int _baseLevel;
 
         private Texture2D _baseTexture;
@@ -36,10 +37,12 @@ namespace OpenTS2.Scenes.Lot
         private RenderTexture _blendTextures;
         private Texture2DArray _blendMasks;
 
+        private Mesh _waterMesh;
         private Mesh _terrainMesh;
         private Material _material;
+        private Material _waterMaterial;
 
-        public void CreateFromTerrainAssets(LotTexturesAsset textures, _3DArrayAsset<float> elevation, _2DArrayAsset<byte>[] blend, int baseLevel)
+        public void CreateFromTerrainAssets(LotTexturesAsset textures, _3DArrayAsset<float> elevation, _2DArrayAsset<byte>[] blend, _2DArrayAsset<float> waterHeightmap, int baseLevel)
         {
             // Some constraints...
             // Heightmap size must match size in textures, and all blend sizes must be 4x (-1) on both axis.
@@ -47,7 +50,12 @@ namespace OpenTS2.Scenes.Lot
 
             if (textures.Width != elevation.Width - 1 || textures.Height != elevation.Height - 1)
             {
-                throw new InvalidOperationException("Size mismatch between heightmap and LTTX");
+                throw new InvalidOperationException("Size mismatch between elevation and LTTX");
+            }
+
+            if (waterHeightmap.Width != elevation.Width || waterHeightmap.Height != elevation.Height)
+            {
+                throw new InvalidOperationException("Size mismatch between elevation and water heightmap");
             }
 
             if (textures.BlendTextures.Length != blend.Length)
@@ -65,6 +73,7 @@ namespace OpenTS2.Scenes.Lot
 
             _textures = textures;
             _elevationData = elevation;
+            _waterHeightData = waterHeightmap;
             _blendMaskData = blend;
             _baseLevel = baseLevel;
 
@@ -169,6 +178,10 @@ namespace OpenTS2.Scenes.Lot
                 _terrainMesh = new Mesh();
 
                 _material = new Material(Shader.Find("OpenTS2/Terrain"));
+
+                _waterMesh = new Mesh();
+
+                _waterMaterial = new Material(Shader.Find("OpenTS2/Water"));
             }
         }
 
