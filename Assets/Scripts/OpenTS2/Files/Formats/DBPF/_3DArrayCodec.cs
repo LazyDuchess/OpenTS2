@@ -52,6 +52,13 @@ namespace OpenTS2.Files.Formats.DBPF
             // Determine the data type using the remaining stream size.
 
             int elements = width * height * depth;
+
+            // TODO: This sucks
+            if (elements == 0)
+            {
+                return new _3DArrayAsset<Vector4<ushort>>(width, height, depth, id, new Vector4<ushort>[0][]);
+            }
+
             int elemSize = (int)((stream.Length - stream.Position) / elements);
 
             Vector4<ushort> readVec4Ushort()

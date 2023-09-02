@@ -22,14 +22,14 @@ namespace OpenTS2.Scenes.Lot
         }
     }
 
-    [RequireComponent(typeof(MeshFilter))]
-    [RequireComponent(typeof(MeshRenderer))]
     public class LotTerrainComponent : AssetReferenceComponent
     {
+
         private LotTexturesAsset _textures;
         private _3DArrayAsset<float> _elevationData;
         private _2DArrayAsset<byte>[] _blendMaskData;
         private _2DArrayAsset<float> _waterHeightData;
+        private _3DArrayAsset<Vector4<ushort>> _patternData;
         private int _baseLevel;
 
         private Texture2D _baseTexture;
@@ -37,12 +37,16 @@ namespace OpenTS2.Scenes.Lot
         private RenderTexture _blendTextures;
         private Texture2DArray _blendMasks;
 
-        private Mesh _waterMesh;
-        private Mesh _terrainMesh;
-        private Material _material;
-        private Material _waterMaterial;
+        private PatternMesh _terrain;
+        private PatternMesh _water;
 
-        public void CreateFromTerrainAssets(LotTexturesAsset textures, _3DArrayAsset<float> elevation, _2DArrayAsset<byte>[] blend, _2DArrayAsset<float> waterHeightmap, int baseLevel)
+        public void CreateFromTerrainAssets(
+            LotTexturesAsset textures,
+            _3DArrayAsset<float> elevation,
+            _2DArrayAsset<byte>[] blend,
+            _2DArrayAsset<float> waterHeightmap,
+            _3DArrayAsset<Vector4<ushort>> patterns,
+            int baseLevel)
         {
             // Some constraints...
             // Heightmap size must match size in textures, and all blend sizes must be 4x (-1) on both axis.
@@ -74,16 +78,17 @@ namespace OpenTS2.Scenes.Lot
             _textures = textures;
             _elevationData = elevation;
             _waterHeightData = waterHeightmap;
+            _patternData = patterns;
             _blendMaskData = blend;
             _baseLevel = baseLevel;
 
+            PrepareMeshes();
+
             LoadLotTextures();
-            GenerateTerrainVertices();
-            GenerateTerrainIndices();
+            BuildTerrainMesh();
             LoadAllBlendMasks();
             GenerateBlendBitmap();
 
-            PrepareMesh();
             BindMaterialAndTextures();
         }
 
@@ -168,41 +173,40 @@ namespace OpenTS2.Scenes.Lot
             _blendMasks.Apply();
         }
 
-        private const float TerrainGridSize = 1f;
-        private const float TerrainOffset = 0f;
-
-        private void EnsureMesh()
+        private void PrepareMeshes()
         {
-            if (_terrainMesh == null)
-            {
-                _terrainMesh = new Mesh();
-
-                _material = new Material(Shader.Find("OpenTS2/Terrain"));
-
-                _waterMesh = new Mesh();
-
-                _waterMaterial = new Material(Shader.Find("OpenTS2/Water"));
-            }
+            _terrain = new PatternMesh(gameObject, "Terrain", new Material(Shader.Find("OpenTS2/Terrain")));
+            _water = new PatternMesh(gameObject, "Water", new Material(Shader.Find("OpenTS2/Water")));
         }
 
-        private void GenerateTerrainVertices()
+        private static int GetFilledMask(ref Vector4<ushort> p)
+        {
+            return (p.w != 0 ? 1 : 0) | (p.z != 0 ? 2 : 0) | (p.y != 0 ? 4 : 0) | (p.x != 0 ? 8 : 0);
+        }
+
+        private void BuildTerrainMesh()
         {
             int width = _elevationData.Width;
             int height = _elevationData.Height;
 
+            Vector3[] tileVertices = new Vector3[5];
+            Vector2[] tileUVs = new Vector2[5];
+
+            _terrain.Component.Clear();
+            _water.Component.Clear();
+
             float[] data = _elevationData.Data[-_baseLevel];
 
-            int size = data.Length + (width - 1) * (height - 1);
+            int size = width * height + (width - 1) * (height - 1);
 
             var vertices = new Vector3[size];
             var uvs = new Vector2[size];
 
-            int i = 0;
-            for (int x = 0; x < width; x++)
+            for (int x = 0, i = 0; x < width; x++)
             {
                 for (int y = 0; y < height; y++, i++)
                 {
-                    vertices[i] = new Vector3(x * TerrainGridSize, data[i] + TerrainOffset, y * TerrainGridSize);
+                    vertices[i] = new Vector3(x, data[i], y);
                     uvs[i] = new Vector2(x, y);
                 }
             }
@@ -213,7 +217,7 @@ namespace OpenTS2.Scenes.Lot
             int mHeight = height - 1;
 
             float fx = 0.5f;
-            for (int x = 0; x < mWidth; x++, fx++)
+            for (int x = 0, i = width * height; x < mWidth; x++, fx++)
             {
                 float fy = 0.5f;
                 int vertPos = x * height;
@@ -221,55 +225,91 @@ namespace OpenTS2.Scenes.Lot
                 {
                     float average = (data[vertPos] + data[vertPos + height] + data[vertPos + 1] + data[vertPos + height + 1]) / 4f;
 
-                    vertices[i] = new Vector3(fx * TerrainGridSize, average + TerrainOffset, fy * TerrainGridSize);
+                    vertices[i] = new Vector3(fx, average, fy);
                     uvs[i] = new Vector2(fx, fy);
                 }
             }
 
-            EnsureMesh();
+            // Now to actually build the indices.
 
-            _terrainMesh.SetVertices(vertices);
-            _terrainMesh.SetUVs(0, uvs);
-        }
+            LotArchitectureMeshComponent terrainComp = _terrain.Component;
+            LotArchitectureMeshComponent waterComp = _water.Component;
 
-        private void GenerateTerrainIndices()
-        {
-            // When flooring is implemented, this should avoid generating terrain triangles where there is flooring.
-            // Should also respect diagonals.
-
-            // For now, just fill every tile.
-
-            int width = _elevationData.Width - 1;
-            int height = _elevationData.Height - 1;
-
-            var indices = new int[width * height * 12];
+            terrainComp.AddVertices(vertices, uvs);
 
             int midOffset = _elevationData.Width * _elevationData.Height;
 
-            int i = 0;
-            int vi = 0;
-            for (int x = 0; x < width; x++)
+            Vector4<ushort>[] patterns = _patternData.Data[-_baseLevel];
+            Vector4<ushort>[] poolPatterns = _patternData.Data[0];
+
+            float[] water = _waterHeightData.Data;
+
+            for (int x = 0, i = 0, pi = 0, vi = 0; x < mWidth; x++)
             {
-                for (int y = 0; y < height; y++, vi++)
+                for (int y = 0; y < mHeight; y++, vi++, pi++)
                 {
-                    // Triangles wrap around a midpoint;
-                    int mid = vi + midOffset - x;
+                    int filledMask = GetFilledMask(ref patterns[pi]) | GetFilledMask(ref poolPatterns[pi]);
 
-                    indices[i] = vi;
-                    indices[i + 1] = vi + 1;
-                    indices[i + 2] = mid;
+                    if (filledMask != 15)
+                    {
+                        // Triangles wrap around a midpoint
+                        int mid = midOffset - x;
 
-                    indices[i + 3] = vi + 1;
-                    indices[i + 4] = vi + height + 2;
-                    indices[i + 5] = mid;
+                        if ((filledMask & 8) == 0)
+                        {
+                            terrainComp.AddTriangle(vi, 0, 1, mid);
+                        }
 
-                    indices[i + 6] = vi + height + 2;
-                    indices[i + 7] = vi + height + 1;
-                    indices[i + 8] = mid;
+                        if ((filledMask & 4) == 0)
+                        {
+                            terrainComp.AddTriangle(vi, 1, height + 1, mid);
+                        }
 
-                    indices[i + 9] = vi + height + 1;
-                    indices[i + 10] = vi;
-                    indices[i + 11] = mid;
+                        if ((filledMask & 2) == 0)
+                        {
+                            terrainComp.AddTriangle(vi, height + 1, height, mid);
+                        }
+
+                        if ((filledMask & 1) == 0)
+                        {
+                            terrainComp.AddTriangle(vi, height, 0, mid);
+                        }
+
+                        // Does water appear here?
+
+                        int waterIndex = y * width + x;
+
+                        float e0 = water[waterIndex];
+                        float e1 = water[waterIndex + 1];
+                        float e2 = water[waterIndex + 1 + width];
+                        float e3 = water[waterIndex + width];
+
+                        // Does the water elevation exceed the terrain elevation at any of the corners?
+
+                        if (e0 > vertices[vi].y || e1 > vertices[vi + height].y || e2 > vertices[vi + height + 1].y || e3 > vertices[vi + 1].y)
+                        {
+                            tileVertices[0] = new Vector3(x, e0, y);
+                            tileVertices[1] = new Vector3(x + 1, e1, y);
+                            tileVertices[2] = new Vector3(x + 1, e2, y + 1);
+                            tileVertices[3] = new Vector3(x, e3, y + 1);
+                            tileVertices[4] = new Vector3(x + 0.5f, (e0 + e1 + e2 + e3) / 4, y + 0.5f);
+
+                            tileUVs[0] = new Vector2(y, x);
+                            tileUVs[1] = new Vector2(y, x + 1);
+                            tileUVs[2] = new Vector2(y + 1, x + 1);
+                            tileUVs[3] = new Vector2(y + 1, x);
+                            tileUVs[4] = new Vector2(y + 0.5f, x + 0.5f);
+
+                            int waterBase = waterComp.GetVertexIndex();
+
+                            waterComp.AddVertices(tileVertices, tileUVs);
+
+                            waterComp.AddTriangle(waterBase, 1, 0, 4);
+                            waterComp.AddTriangle(waterBase, 2, 1, 4);
+                            waterComp.AddTriangle(waterBase, 3, 2, 4);
+                            waterComp.AddTriangle(waterBase, 0, 3, 4);
+                        }
+                    }
 
                     i += 12;
                 }
@@ -277,30 +317,28 @@ namespace OpenTS2.Scenes.Lot
                 vi++;
             }
 
-            EnsureMesh();
-            _terrainMesh.SetIndices(indices, MeshTopology.Triangles, 0);
-        }
-
-        private void PrepareMesh()
-        {
-            _terrainMesh.RecalculateNormals();
-            _terrainMesh.RecalculateTangents();
-
-            GetComponent<MeshFilter>().sharedMesh = _terrainMesh;
+            terrainComp.Commit();
+            waterComp.Commit();
         }
 
         private void BindMaterialAndTextures()
         {
-            var meshRenderer = GetComponent<MeshRenderer>();
+            Material material = _terrain.Component.Material;
 
-            meshRenderer.sharedMaterial = _material;
+            material.SetTexture("_BaseTexture", _baseTexture);
+            material.SetTexture("_BlendBitmap", _blendBitmap);
+            material.SetTexture("_BlendTextures", _blendTextures);
+            material.SetTexture("_BlendMasks", _blendMasks);
 
-            _material.SetTexture("_BaseTexture", _baseTexture);
-            _material.SetTexture("_BlendBitmap", _blendBitmap);
-            _material.SetTexture("_BlendTextures", _blendTextures);
-            _material.SetTexture("_BlendMasks", _blendMasks);
+            material.SetVector("_InvLotSize", new Vector4(1f / (_elevationData.Width - 1), 1f / (_elevationData.Height - 1)));
 
-            _material.SetVector("_InvLotSize", new Vector4(1f / (_elevationData.Width - 1), 1f / (_elevationData.Height - 1)));
+            _water.Component.EnableShadows(false);
+
+            Material waterMaterial = _water.Component.Material;
+            // Very, VERY temporary.
+
+            waterMaterial.SetColor("_Color", new Color(0.4103774f, 0.4560846f, 1, 0.3333333f));
+            waterMaterial.SetFloat("_ReflectionMultiplier", 0f);
         }
 
         private void GenerateBlendBitmap()

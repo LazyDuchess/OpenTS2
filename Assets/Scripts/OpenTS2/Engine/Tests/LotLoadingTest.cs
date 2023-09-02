@@ -150,14 +150,15 @@ namespace OpenTS2.Engine.Tests
             wall.GetComponent<LotWallComponent>().CreateFromLotAssets(wallStyles, wallLayer, wallGraphR, fencePosts, floorElevation, roofs);
             _lotObject.Add(wall);
 
+            // Small bias otherwise wall tops cut through floors a bit.
+            wall.transform.position = new Vector3(0, -0.001f, 0);
+
             // Floors
 
             var floorPatterns = lotPackage.GetAssetByTGI<_3DArrayAsset<Vector4<ushort>>>(new ResourceKey(0, uint.MaxValue, TypeIDs.LOT_3ARY));
 
             var floor = new GameObject("floor", typeof(LotFloorComponent));
             floor.GetComponent<LotFloorComponent>().CreateFromLotAssets(floorStyles, floorPatterns, floorElevation, wallGraph.BaseFloor);
-            // Small bias until the floor is cut out of the terrain.
-            floor.transform.position = new Vector3(0, 0.001f, 0);
             _lotObject.Add(floor);
 
             // Terrain
@@ -173,7 +174,7 @@ namespace OpenTS2.Engine.Tests
                 .ToArray();
 
             var terrain = new GameObject("terrain", typeof(LotTerrainComponent));
-            terrain.GetComponent<LotTerrainComponent>().CreateFromTerrainAssets(terrainTextures, floorElevation, blend, waterHeightmap, wallGraph.BaseFloor);
+            terrain.GetComponent<LotTerrainComponent>().CreateFromTerrainAssets(terrainTextures, floorElevation, blend, waterHeightmap, floorPatterns, wallGraph.BaseFloor);
             _lotObject.Add(terrain);
         }
     }

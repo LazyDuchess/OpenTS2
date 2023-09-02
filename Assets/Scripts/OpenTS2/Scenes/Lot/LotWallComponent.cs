@@ -37,6 +37,14 @@ namespace OpenTS2.Scenes.Lot
         private const float Thickness = 0.075f;
         private const float RoofOffset = Thickness * 2.5f;
 
+        private static Dictionary<string, string> Builtins = new Dictionary<string, string>()
+        {
+            { "blank", FallbackMaterial },
+            { "deckskirtminimal", null },
+            { "foundationbrick", "wall_brick_base" },
+            { "wall_poolroundedlipblue", "wall_poolroundedlipblue_base" }
+        };
+
         private class FenceCollection
         {
             private CatalogFenceAsset _asset;
@@ -306,13 +314,15 @@ namespace OpenTS2.Scenes.Lot
 
                     materialName = catalogEntry?.Material ?? FallbackMaterial;
                 }
-                else if (entry.Value == "blank")
-                {
-                    materialName = FallbackMaterial;
-                }
-                else
+                else if (!Builtins.TryGetValue(entry.Value, out materialName))
                 {
                     materialName = entry.Value.StartsWith("wall_") ? (entry.Value + "_base") : ("wall_" + entry.Value + "_base");
+                }
+
+                if (materialName == null)
+                {
+                    // Explicitly remove this pattern.
+                    continue;
                 }
 
                 // Try fetch the texture using the material name.
@@ -520,7 +530,7 @@ namespace OpenTS2.Scenes.Lot
 
             int currentFloor = 0;
             float[] currentFloorElevation = _elevationData.Data[currentFloor];
-            float[] nextFloorElevation = _elevationData.Data[currentFloor + 1];
+            float[] nextFloorElevation = currentFloor + 1 < floors ? _elevationData.Data[currentFloor + 1] : null;
 
             Vector3[] wallVertices = new Vector3[6];
             Vector3[] wallVertices2 = new Vector3[6];
@@ -590,8 +600,8 @@ namespace OpenTS2.Scenes.Lot
                     }
                 }
 
-                LotFloorPatternComponent lPattern = (layerElem.Pattern1 == 65535 ? null : _patterns[layerElem.Pattern1]?.Component);// ?? _thickness?.Component;
-                LotFloorPatternComponent rPattern = (layerElem.Pattern2 == 65535 ? null : _patterns[layerElem.Pattern2]?.Component);// ?? _thickness?.Component;
+                LotArchitectureMeshComponent lPattern = (layerElem.Pattern1 == 65535 ? null : _patterns[layerElem.Pattern1]?.Component);// ?? _thickness?.Component;
+                LotArchitectureMeshComponent rPattern = (layerElem.Pattern2 == 65535 ? null : _patterns[layerElem.Pattern2]?.Component);// ?? _thickness?.Component;
 
                 float midX = (from.XPos + to.XPos) / 2;
                 float midY = (from.YPos + to.YPos) / 2;

@@ -7,7 +7,7 @@ namespace OpenTS2.Scenes.Lot
 {
     [RequireComponent(typeof(MeshFilter))]
     [RequireComponent(typeof(MeshRenderer))]
-    public class LotFloorPatternComponent : AssetReferenceComponent
+    public class LotArchitectureMeshComponent : AssetReferenceComponent
     {
         public Mesh Mesh;
         public Material Material;
@@ -76,6 +76,13 @@ namespace OpenTS2.Scenes.Lot
             _vertexBuilder.Clear();
             _vertexUvBuilder.Clear();
             _indexBuilder.Clear();
+        }
+
+        public void EnableShadows(bool enable)
+        {
+            var meshRenderer = GetComponent<MeshRenderer>();
+
+            meshRenderer.shadowCastingMode = enable ? UnityEngine.Rendering.ShadowCastingMode.On : UnityEngine.Rendering.ShadowCastingMode.Off;
         }
 
         public void Commit()

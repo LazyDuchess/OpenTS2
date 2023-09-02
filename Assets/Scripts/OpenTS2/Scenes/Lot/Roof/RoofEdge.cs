@@ -276,7 +276,7 @@ namespace OpenTS2.Scenes.Lot.Roof
             }
         }
 
-        private void DrawTrim(LotFloorPatternComponent trimComp, LotFloorPatternComponent edgeComp, Vector3 from, Vector3 to)
+        private void DrawTrim(LotArchitectureMeshComponent trimComp, LotArchitectureMeshComponent edgeComp, Vector3 from, Vector3 to)
         {
             _edgeVertices[0] = from;
             _edgeVertices[1] = to;
@@ -301,7 +301,7 @@ namespace OpenTS2.Scenes.Lot.Roof
             edgeComp.AddTriangle(edgeVertex, 2, 3, 0);
         }
 
-        private int AddUndersideVerts(LotFloorPatternComponent underComp)
+        private int AddUndersideVerts(LotArchitectureMeshComponent underComp)
         {
             var off = new Vector3(0, -ThicknessTotal, 0);
             int index = underComp.GetVertexIndex();
