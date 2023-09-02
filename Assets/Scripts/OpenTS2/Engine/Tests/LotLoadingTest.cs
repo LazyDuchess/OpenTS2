@@ -150,9 +150,6 @@ namespace OpenTS2.Engine.Tests
             wall.GetComponent<LotWallComponent>().CreateFromLotAssets(wallStyles, wallLayer, wallGraphR, fencePosts, floorElevation, roofs);
             _lotObject.Add(wall);
 
-            // Small bias otherwise wall tops cut through floors a bit.
-            wall.transform.position = new Vector3(0, -0.001f, 0);
-
             // Floors
 
             var floorPatterns = lotPackage.GetAssetByTGI<_3DArrayAsset<Vector4<ushort>>>(new ResourceKey(0, uint.MaxValue, TypeIDs.LOT_3ARY));

@@ -34,6 +34,7 @@ namespace OpenTS2.Scenes.Lot
         private const string FallbackMaterial = "wall_wallboard";
         private const float HalfWallHeight = 1f;
         private const float WallHeight = 3f;
+        private const float YBias = 0.001f;
         private const float Thickness = 0.075f;
         private const float RoofOffset = Thickness * 2.5f;
 
@@ -42,6 +43,7 @@ namespace OpenTS2.Scenes.Lot
             { "blank", FallbackMaterial },
             { "deckskirtminimal", null },
             { "foundationbrick", "wall_brick_base" },
+            { "deckredwood", "wall_deckredwoodb_base" },
             { "wall_poolroundedlipblue", "wall_poolroundedlipblue_base" }
         };
 
@@ -272,6 +274,8 @@ namespace OpenTS2.Scenes.Lot
             BuildWallIntersections();
             BuildWallMeshes();
             AddFencePosts();
+
+            gameObject.transform.position = new Vector3(0, -YBias, 0);
         }
 
         private ScenegraphMaterialDefinitionAsset LoadMaterial(ContentProvider contentProvider, string name)
@@ -357,6 +361,21 @@ namespace OpenTS2.Scenes.Lot
                 case WallType.Pool:
                 case WallType.OFBWall:
                     return true;
+                default:
+                    return false;
+            }
+        }
+
+        private bool IsDeck(int type)
+        {
+            switch (type)
+            {
+                case WallType.Deck:
+                case WallType.Deck2:
+                case WallType.Deck3:
+                case WallType.DeckInvis:
+                    return true;
+
                 default:
                     return false;
             }
@@ -651,6 +670,21 @@ namespace OpenTS2.Scenes.Lot
                 wallUVs[5] = new Vector2(0, bottomUVs ? (1 - startUV) : 0);
 
                 bool isThick = IsWallThick(layerElem);
+
+
+                if (!isThick && IsDeck(layerElem.WallType))
+                {
+                    float floorThickness = LotFloorComponent.Thickness - YBias;
+                    float floorThicknessUV = floorThickness / WallHeight;
+
+                    wallVertices[3].y -= floorThickness;
+                    wallVertices[4].y -= floorThickness;
+                    wallVertices[5].y -= floorThickness;
+
+                    wallUVs[3].y += floorThicknessUV;
+                    wallUVs[4].y += floorThicknessUV;
+                    wallUVs[5].y += floorThicknessUV;
+                }
 
                 if (isThick)
                 {

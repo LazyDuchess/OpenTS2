@@ -19,20 +19,14 @@ namespace OpenTS2.Content.DBPF
         DiagonalShedGable = 13,
         DiagonalShedHip = 14,
 
+        GreenhouseLongGable = 15,
+
         PagodaHip = 16,
         PagodaLongGable = 17,
         PagodaShedGable = 18,
         DiagonalPagodaHip = 19,
         DiagonalPagodaLongGable = 20,
         DiagonalPagodaShedGable = 21
-
-        // Straight roofs with the same slope support:
-        // - Combined gabled edge that can make a jagged appearing line (cuts out lines that go under other roofs)
-        //
-        // Straight/diagonal roofs with the same slope support:
-        // - Pretty intersection edges (but not between diag and straight)
-        //
-        // All other roofs don't really interact with each other.
     }
 
     public struct RoofEntry

@@ -21,7 +21,7 @@ namespace OpenTS2.Scenes.Lot
     {
         private const string ThicknessTexture = "floor-edge";
         private const string FallbackMaterial = "floor-grid";
-        private const float Thickness = 0.15f;
+        public const float Thickness = 0.15f;
 
         private StringMapAsset _patternMap;
         private _3DArrayAsset<float> _elevationData;
