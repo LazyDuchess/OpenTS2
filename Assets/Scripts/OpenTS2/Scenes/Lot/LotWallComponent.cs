@@ -50,7 +50,6 @@ namespace OpenTS2.Scenes.Lot
         private class FenceCollection
         {
             private CatalogFenceAsset _asset;
-            private ContentProvider _contentProvider;
             private GameObject _parent;
             private bool _hasDiag;
 
@@ -234,12 +233,7 @@ namespace OpenTS2.Scenes.Lot
             }
         }
 
-        private StringMapAsset _patternMap;
-        private WallLayerAsset _wallLayer;
-        private WallGraphAsset _wallGraph;
-        private FencePostLayerAsset _fencePosts;
-        private _3DArrayView<float> _elevationData;
-        private RoofCollection _roofs;
+        private LotArchitecture _architecture;
 
         private PatternMesh _thickness;
         private PatternMesh[] _patterns;
@@ -247,28 +241,11 @@ namespace OpenTS2.Scenes.Lot
         private Dictionary<int, WallIntersection> _intersections;
         private Dictionary<uint, FenceCollection> _fenceByGuid;
 
-        public void CreateFromLotAssets(
-            StringMapAsset patternMap,
-            WallLayerAsset wallLayer,
-            WallGraphAsset wallGraph,
-            FencePostLayerAsset fencePosts,
-            _3DArrayView<float> elevationData,
-            RoofCollection roofs)
+        public void CreateFromLotArchitecture(LotArchitecture architecture)
         {
-            _patternMap = patternMap;
-            _wallLayer = wallLayer;
-            _wallGraph = wallGraph;
-            _fencePosts = fencePosts;
-            _elevationData = elevationData;
-            _roofs = roofs;
+            _architecture = architecture;
 
             _fenceByGuid = new Dictionary<uint, FenceCollection>();
-
-            if (wallGraph.Floors != elevationData.Depth)
-            {
-                // Apparently these are allowed to disagree?
-                // throw new InvalidOperationException("Size mismatch between elevation and wall graph");
-            }
 
             LoadPatterns();
             BuildWallIntersections();
@@ -305,11 +282,12 @@ namespace OpenTS2.Scenes.Lot
 
             var contentProvider = ContentProvider.Get();
             var catalogManager = CatalogManager.Get();
+            var patternMap = _architecture.WallMap.Map;
 
-            ushort highestId = _patternMap.Map.Count == 0 ? (ushort)0 : _patternMap.Map.Keys.Max();
+            ushort highestId = patternMap.Count == 0 ? (ushort)0 : patternMap.Keys.Max();
             _patterns = new PatternMesh[highestId + 1];
 
-            foreach (StringMapEntry entry in _patternMap.Map.Values)
+            foreach (StringMapEntry entry in patternMap.Values)
             {
                 string materialName;
                 if (uint.TryParse(entry.Value, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out uint guid))
@@ -422,20 +400,20 @@ namespace OpenTS2.Scenes.Lot
             return elevation == null ? previous + WallHeight : GetElevationInterp(elevation, width, height, x, y);
         }
 
-        private WallIntersection GetOrAddIntersection(int id)
+        private WallIntersection GetOrAddIntersection(WallGraphAsset wallGraph, int id)
         {
             if (_intersections.TryGetValue(id, out WallIntersection intersection))
             {
                 return intersection;
             }
 
-            intersection = new WallIntersection(_wallGraph.Positions[id]);
+            intersection = new WallIntersection(wallGraph.Positions[id]);
             _intersections.Add(id, intersection);
 
             return intersection;
         }
 
-        private void AddToIntersection(WallIntersection intersection, ref WallGraphLineEntry line, int lineIndex, bool isTo)
+        private static void AddToIntersection(WallGraphAsset wallGraph, WallIntersection intersection, ref WallGraphLineEntry line, int lineIndex, bool isTo)
         {
             WallIntersectionMember newMember = new WallIntersectionMember(lineIndex);
 
@@ -444,7 +422,7 @@ namespace OpenTS2.Scenes.Lot
                 // Evaluate extents for new line, update others based on preference.
 
                 ref WallGraphPositionEntry pos = ref intersection.Position;
-                WallGraphPositionEntry inFrom = isTo ? _wallGraph.Positions[line.FromId] : _wallGraph.Positions[line.ToId]; //y
+                WallGraphPositionEntry inFrom = isTo ? wallGraph.Positions[line.FromId] : wallGraph.Positions[line.ToId]; //y
 
                 Vector2 vecIntoIntersection = new Vector2(pos.XPos - inFrom.XPos, pos.YPos - inFrom.YPos);
                 vecIntoIntersection.Normalize();
@@ -458,11 +436,11 @@ namespace OpenTS2.Scenes.Lot
                 {
                     WallIntersectionMember otherMember = intersection.IncomingLines[i];
 
-                    ref WallGraphLineEntry otherLine = ref _wallGraph.Lines[otherMember.WallID];
+                    ref WallGraphLineEntry otherLine = ref wallGraph.Lines[otherMember.WallID];
                     bool otherTo = otherLine.FromId == intersection.Position.Id;
                     WallGraphPositionEntry outTo = otherTo ?
-                        _wallGraph.Positions[otherLine.ToId] :
-                        _wallGraph.Positions[otherLine.FromId];
+                        wallGraph.Positions[otherLine.ToId] :
+                        wallGraph.Positions[otherLine.FromId];
 
                     Vector2 vecOutIntersection = new Vector2(outTo.XPos - pos.XPos, outTo.YPos - pos.YPos);
 
@@ -515,20 +493,23 @@ namespace OpenTS2.Scenes.Lot
 
         private void BuildWallIntersections()
         {
-            WallGraphLineEntry[] lines = _wallGraph.Lines;
+            WallGraphLineEntry[] lines = _architecture.WallGraphAll.Lines;
             _intersections = new Dictionary<int, WallIntersection>();
+
+            Dictionary<int, WallLayerEntry> wallLayer = _architecture.WallLayer.Walls;
+            WallGraphAsset wallGraph = _architecture.WallGraphAll;
 
             for (int i = 0; i < lines.Length; i++)
             {
                 ref WallGraphLineEntry line = ref lines[i];
-                WallIntersection from = GetOrAddIntersection(line.FromId);
-                WallIntersection to = GetOrAddIntersection(line.ToId);
+                WallIntersection from = GetOrAddIntersection(wallGraph, line.FromId);
+                WallIntersection to = GetOrAddIntersection(wallGraph, line.ToId);
 
-                if (_wallLayer.Walls.TryGetValue(line.LayerId, out var layer) && IsWallThick(layer))
+                if (wallLayer.TryGetValue(line.LayerId, out var layer) && IsWallThick(layer))
                 {
                     // Add this line to both intersections
-                    AddToIntersection(from, ref line, i, false);
-                    AddToIntersection(to, ref line, i, true);
+                    AddToIntersection(wallGraph, from, ref line, i, false);
+                    AddToIntersection(wallGraph, to, ref line, i, true);
                 }
             }
         }
@@ -536,20 +517,23 @@ namespace OpenTS2.Scenes.Lot
         private void BuildWallMeshes()
         {
             // TODO: split pattern meshes by level?
-            int width = _elevationData.Width;
-            int height = _elevationData.Height;
-            int floors = _elevationData.Depth;
-            int baseFloor = _wallGraph.BaseFloor;
+            _3DArrayView<float> elevationData = _architecture.Elevation;
+            RoofCollection roofs = _architecture.Roof;
 
-            WallGraphLineEntry[] lines = _wallGraph.Lines;
-            Dictionary<int, WallGraphPositionEntry> positions = _wallGraph.Positions;
-            Dictionary<int, WallLayerEntry> layer = _wallLayer.Walls;
+            int width = elevationData.Width;
+            int height = elevationData.Height;
+            int floors = elevationData.Depth;
+            int baseFloor = _architecture.BaseFloor;
+
+            WallGraphLineEntry[] lines = _architecture.WallGraphAll.Lines;
+            Dictionary<int, WallGraphPositionEntry> positions = _architecture.WallGraphAll.Positions;
+            Dictionary<int, WallLayerEntry> layer = _architecture.WallLayer.Walls;
 
             // Draw each line on the wall graph.
 
             int currentFloor = 0;
-            float[] currentFloorElevation = _elevationData.Data[currentFloor];
-            float[] nextFloorElevation = currentFloor + 1 < floors ? _elevationData.Data[currentFloor + 1] : null;
+            float[] currentFloorElevation = elevationData.Data[currentFloor];
+            float[] nextFloorElevation = currentFloor + 1 < floors ? elevationData.Data[currentFloor + 1] : null;
 
             Vector3[] wallVertices = new Vector3[6];
             Vector3[] wallVertices2 = new Vector3[6];
@@ -578,8 +562,8 @@ namespace OpenTS2.Scenes.Lot
                 {
                     currentFloor = floor;
 
-                    currentFloorElevation = _elevationData.Data[floor];
-                    nextFloorElevation = floor + 1 < floors ? _elevationData.Data[floor + 1] : null;
+                    currentFloorElevation = elevationData.Data[floor];
+                    nextFloorElevation = floor + 1 < floors ? elevationData.Data[floor + 1] : null;
                 }
 
                 if (!layer.TryGetValue(line.LayerId, out WallLayerEntry layerElem))
@@ -641,9 +625,9 @@ namespace OpenTS2.Scenes.Lot
 
                 if (roofWall)
                 {
-                    heightTo = Mathf.Max(_roofs.GetHeightAt(to.XPos, to.YPos, from.Level, heightTo, RoofOffset), floorTo);
-                    heightMid = Mathf.Max(_roofs.GetHeightAt(midX, midY, from.Level, heightMid, RoofOffset), floorMid);
-                    heightFrom = Mathf.Max(_roofs.GetHeightAt(from.XPos, from.YPos, from.Level, heightFrom, RoofOffset), floorFrom);
+                    heightTo = Mathf.Max(roofs.GetHeightAt(to.XPos, to.YPos, from.Level, heightTo, RoofOffset), floorTo);
+                    heightMid = Mathf.Max(roofs.GetHeightAt(midX, midY, from.Level, heightMid, RoofOffset), floorMid);
+                    heightFrom = Mathf.Max(roofs.GetHeightAt(from.XPos, from.YPos, from.Level, heightFrom, RoofOffset), floorFrom);
                 }
                 else if (isHalfWall)
                 {
@@ -841,12 +825,14 @@ namespace OpenTS2.Scenes.Lot
 
         private void AddFencePosts()
         {
-            int width = _elevationData.Width;
-            int height = _elevationData.Height;
-            int floors = _elevationData.Depth;
-            int baseFloor = _wallGraph.BaseFloor;
+            _3DArrayView<float> elevationData = _architecture.Elevation;
 
-            FencePost[] entries = _fencePosts.Entries;
+            int width = elevationData.Width;
+            int height = elevationData.Height;
+            int floors = elevationData.Depth;
+            int baseFloor = _architecture.BaseFloor;
+
+            FencePost[] entries = _architecture.FencePostLayer.Entries;
 
             for (int i = 0; i < entries.Length; i++)
             {
@@ -854,7 +840,7 @@ namespace OpenTS2.Scenes.Lot
 
                 var fence = GetFence(entry.GUID);
 
-                fence.AddPost(entry.XPos, entry.YPos, GetElevationInt(_elevationData.Data[entry.Level - baseFloor], width, height, entry.XPos, entry.YPos));
+                fence.AddPost(entry.XPos, entry.YPos, GetElevationInt(elevationData.Data[entry.Level - baseFloor], width, height, entry.XPos, entry.YPos));
             }
         }
     }

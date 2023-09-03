@@ -2,8 +2,8 @@ using OpenTS2.Common;
 using OpenTS2.Content.DBPF;
 using OpenTS2.Files.Formats.DBPF;
 using OpenTS2.Scenes.Lot.Roof;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace OpenTS2.Scenes.Lot
@@ -88,12 +88,8 @@ namespace OpenTS2.Scenes.Lot
             FloorPatterns = lotPackage.GetAssetByTGI<_3DArrayAsset>(new ResourceKey(ArrayFloorPatternsInstance, uint.MaxValue, TypeIDs.LOT_3ARY)).GetView<Vector4<ushort>>(true);
             Elevation = lotPackage.GetAssetByTGI<_3DArrayAsset>(new ResourceKey(ArrayElevationInstance, uint.MaxValue, TypeIDs.LOT_3ARY)).GetView<float>(true);
 
-            Pool = lotPackage.GetAssetByTGI<PoolAsset>(new ResourceKey(PoolInstance, uint.MaxValue, TypeIDs.LOT_POOL));
             RoofAsset = lotPackage.GetAssetByTGI<RoofAsset>(new ResourceKey(RoofInstance, uint.MaxValue, TypeIDs.LOT_ROOF));
-
-            BaseFloor = WallGraphAll.BaseFloor;
-
-            Roof = new RoofCollection(RoofAsset.Entries, Elevation, BaseFloor);
+            Pool = lotPackage.GetAssetByTGI<PoolAsset>(new ResourceKey(PoolInstance, uint.MaxValue, TypeIDs.LOT_POOL));
 
             // Terrain
 
@@ -107,6 +103,48 @@ namespace OpenTS2.Scenes.Lot
             {
                 BlendMasks[i] = lotPackage.GetAssetByTGI<_2DArrayAsset>(new ResourceKey((uint)(BlendMaskBaseInstance + i), uint.MaxValue, TypeIDs.LOT_TERRAIN)).GetView<byte>(true);
             }
+
+            // Runtime structures
+
+            BaseFloor = WallGraphAll.BaseFloor;
+            Roof = new RoofCollection(RoofAsset.Entries, Elevation, BaseFloor);
+
+            Validate();
+        }
+
+        private void Validate()
+        {
+            if (FloorPatterns.Width != Elevation.Width - 1 || FloorPatterns.Height != Elevation.Height - 1 || FloorPatterns.Depth != Elevation.Depth)
+            {
+                throw new InvalidOperationException("Size mismatch between heightmap and LTTX");
+            }
+
+            // Some terrain constraints...
+            // Heightmap size must match size in textures, and all blend sizes must be 4x (-1) on both axis.
+            // Blend textures must have the same count as the # of blend masks.
+
+            if (BlendTextures.Width != Elevation.Width - 1 || BlendTextures.Height != Elevation.Height - 1)
+            {
+                throw new InvalidOperationException("Size mismatch between elevation and LTTX");
+            }
+
+            if (WaterHeightmap.Width != Elevation.Width || WaterHeightmap.Height != Elevation.Height)
+            {
+                throw new InvalidOperationException("Size mismatch between elevation and water heightmap");
+            }
+
+            if (BlendTextures.BlendTextures.Length != BlendMasks.Length)
+            {
+                throw new InvalidOperationException("Blend texture count mismatch between LOTG and LTTX");
+            }
+
+            foreach (var mask in BlendMasks)
+            {
+                if (mask.Width != Elevation.Width * 4 - 3 || mask.Height != Elevation.Height * 4 - 3)
+                {
+                    throw new InvalidOperationException("Size mismatch between mask and heightmap");
+                }
+            }
         }
 
         /// <summary>
@@ -116,19 +154,19 @@ namespace OpenTS2.Scenes.Lot
         public void CreateGameObjects(List<GameObject> componentList)
         {
             var roofObj = new GameObject("roof", typeof(LotRoofComponent));
-            roofObj.GetComponent<LotRoofComponent>().CreateFromLotAssets(RoofAsset.Entries.FirstOrDefault().Pattern, Roof);
+            roofObj.GetComponent<LotRoofComponent>().CreateFromLotArchitecture(this);
             componentList.Add(roofObj);
 
             var wall = new GameObject("wall", typeof(LotWallComponent));
-            wall.GetComponent<LotWallComponent>().CreateFromLotAssets(WallMap, WallLayer, WallGraphAll, FencePostLayer, Elevation, Roof);
+            wall.GetComponent<LotWallComponent>().CreateFromLotArchitecture(this);
             componentList.Add(wall);
 
             var floor = new GameObject("floor", typeof(LotFloorComponent));
-            floor.GetComponent<LotFloorComponent>().CreateFromLotAssets(FloorMap, FloorPatterns, Elevation, BaseFloor);
+            floor.GetComponent<LotFloorComponent>().CreateFromLotArchitecture(this);
             componentList.Add(floor);
 
             var terrain = new GameObject("terrain", typeof(LotTerrainComponent));
-            terrain.GetComponent<LotTerrainComponent>().CreateFromTerrainAssets(BlendTextures, Elevation, BlendMasks, WaterHeightmap, FloorPatterns, BaseFloor);
+            terrain.GetComponent<LotTerrainComponent>().CreateFromLotArchitecture(this);
             componentList.Add(terrain);
         }
     }

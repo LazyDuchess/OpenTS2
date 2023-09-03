@@ -13,21 +13,14 @@ namespace OpenTS2.Scenes.Lot
 {
     public class LotRoofComponent : AssetReferenceComponent
     {
-        private const uint DefaultGUID = 0x0cdcc049;
-
-        private RoofCollection _roofs;
+        private LotArchitecture _architecture;
         private RoofGeometryCollection _geometry;
 
-        public void CreateFromLotAssets(uint patternGuid, RoofCollection roofs)
+        public void CreateFromLotArchitecture(LotArchitecture architecture)
         {
-            _roofs = roofs;
+            _architecture = architecture;
 
-            if (patternGuid == 0)
-            {
-                patternGuid = DefaultGUID;
-            }
-
-            LoadPatterns(patternGuid);
+            LoadPatterns(architecture.Roof.PatternGUID);
             BuildRoofs();
         }
 
@@ -77,7 +70,7 @@ namespace OpenTS2.Scenes.Lot
 
             if (roof == null)
             {
-                LoadPatterns(DefaultGUID);
+                LoadPatterns(RoofCollection.DefaultGUID);
                 return;
             }
 
@@ -94,7 +87,7 @@ namespace OpenTS2.Scenes.Lot
             {
                 _geometry.Clear();
 
-                _roofs.GenerateGeometry(_geometry);
+                _architecture.Roof.GenerateGeometry(_geometry);
 
                 _geometry.Commit();
             }

@@ -24,13 +24,7 @@ namespace OpenTS2.Scenes.Lot
 
     public class LotTerrainComponent : AssetReferenceComponent
     {
-
-        private LotTexturesAsset _textures;
-        private _3DArrayView<float> _elevationData;
-        private _2DArrayView<byte>[] _blendMaskData;
-        private _2DArrayView<float> _waterHeightData;
-        private _3DArrayView<Vector4<ushort>> _patternData;
-        private int _baseLevel;
+        private LotArchitecture _architecture;
 
         private Texture2D _baseTexture;
         private Texture2D _blendBitmap;
@@ -40,47 +34,9 @@ namespace OpenTS2.Scenes.Lot
         private PatternMesh _terrain;
         private PatternMesh _water;
 
-        public void CreateFromTerrainAssets(
-            LotTexturesAsset textures,
-            _3DArrayView<float> elevation,
-            _2DArrayView<byte>[] blend,
-            _2DArrayView<float> waterHeightmap,
-            _3DArrayView<Vector4<ushort>> patterns,
-            int baseLevel)
+        public void CreateFromLotArchitecture(LotArchitecture architecture)
         {
-            // Some constraints...
-            // Heightmap size must match size in textures, and all blend sizes must be 4x (-1) on both axis.
-            // Blend textures must have the same count as the # of blend masks.
-
-            if (textures.Width != elevation.Width - 1 || textures.Height != elevation.Height - 1)
-            {
-                throw new InvalidOperationException("Size mismatch between elevation and LTTX");
-            }
-
-            if (waterHeightmap.Width != elevation.Width || waterHeightmap.Height != elevation.Height)
-            {
-                throw new InvalidOperationException("Size mismatch between elevation and water heightmap");
-            }
-
-            if (textures.BlendTextures.Length != blend.Length)
-            {
-                throw new InvalidOperationException("Blend texture count mismatch between LOTG and LTTX");
-            }
-
-            foreach (var mask in blend)
-            {
-                if (mask.Width != elevation.Width * 4 - 3 || mask.Height != elevation.Height * 4 - 3)
-                {
-                    throw new InvalidOperationException("Size mismatch between mask and heightmap");
-                }
-            }
-
-            _textures = textures;
-            _elevationData = elevation;
-            _waterHeightData = waterHeightmap;
-            _patternData = patterns;
-            _blendMaskData = blend;
-            _baseLevel = baseLevel;
+            _architecture = architecture;
 
             PrepareMeshes();
 
@@ -106,22 +62,25 @@ namespace OpenTS2.Scenes.Lot
 
         private void LoadLotTextures()
         {
+            _2DArrayView<byte>[] blendMaskData = _architecture.BlendMasks;
+            LotTexturesAsset textures = _architecture.BlendTextures;
+
             var contentProvider = ContentProvider.Get();
 
-            var baseTexture = LoadTexture(contentProvider, _textures.BaseTexture);
+            var baseTexture = LoadTexture(contentProvider, textures.BaseTexture);
 
             _baseTexture = baseTexture.color.GetSelectedImageAsUnityTexture(contentProvider);
 
-            var blendTextures = new (Texture2D color, Texture2D bump)[_textures.BlendTextures.Length];
+            var blendTextures = new (Texture2D color, Texture2D bump)[textures.BlendTextures.Length];
 
             int maxWidth = 32;
             int maxHeight = 32;
 
             int i = 0;
-            foreach (string name in _textures.BlendTextures)
+            foreach (string name in textures.BlendTextures)
             {
-                var textures = LoadTexture(contentProvider, name);
-                blendTextures[i] = (textures.color?.GetSelectedImageAsUnityTexture(contentProvider) ?? Texture2D.whiteTexture, textures.bump?.GetSelectedImageAsUnityTexture(contentProvider) ?? Texture2D.whiteTexture);
+                var texture = LoadTexture(contentProvider, name);
+                blendTextures[i] = (texture.color?.GetSelectedImageAsUnityTexture(contentProvider) ?? Texture2D.whiteTexture, texture.bump?.GetSelectedImageAsUnityTexture(contentProvider) ?? Texture2D.whiteTexture);
 
                 maxWidth = Math.Max(Math.Max(maxWidth, blendTextures[i].color?.width ?? 0), blendTextures[i].bump?.width ?? 0);
                 maxHeight = Math.Max(Math.Max(maxHeight, blendTextures[i].color?.height ?? 0), blendTextures[i].bump?.height ?? 0);
@@ -137,7 +96,7 @@ namespace OpenTS2.Scenes.Lot
                 _blendTextures = new RenderTexture(new RenderTextureDescriptor(maxWidth, maxHeight, RenderTextureFormat.BGRA32, 0, mips));
                 _blendTextures.useMipMap = true;
                 _blendTextures.dimension = TextureDimension.Tex2DArray;
-                _blendTextures.volumeDepth = _blendMaskData.Length;
+                _blendTextures.volumeDepth = blendMaskData.Length;
                 _blendTextures.wrapMode = TextureWrapMode.Repeat;
             }
 
@@ -155,17 +114,20 @@ namespace OpenTS2.Scenes.Lot
 
         private void LoadAllBlendMasks()
         {
-            int maskWidth = (_elevationData.Width * 4 - 3);
-            int maskHeight = (_elevationData.Height * 4 - 3);
+            _3DArrayView<float> elevationData = _architecture.Elevation;
+            _2DArrayView<byte>[] blendMaskData = _architecture.BlendMasks;
+
+            int maskWidth = elevationData.Width * 4 - 3;
+            int maskHeight = elevationData.Height * 4 - 3;
 
             if (_blendMasks == null)
             {
-                _blendMasks = new Texture2DArray(maskWidth, maskHeight, _blendMaskData.Length, TextureFormat.R8, false);
+                _blendMasks = new Texture2DArray(maskWidth, maskHeight, blendMaskData.Length, TextureFormat.R8, false);
                 _blendMasks.wrapMode = TextureWrapMode.Clamp;
             }
 
             int i = 0;
-            foreach (var mask in _blendMaskData)
+            foreach (var mask in blendMaskData)
             {
                 _blendMasks.SetPixelData(mask.Data, 0, i++);
             }
@@ -186,8 +148,10 @@ namespace OpenTS2.Scenes.Lot
 
         private void BuildTerrainMesh()
         {
-            int width = _elevationData.Width;
-            int height = _elevationData.Height;
+            _3DArrayView<float> elevationData = _architecture.Elevation;
+
+            int width = elevationData.Width;
+            int height = elevationData.Height;
 
             Vector3[] tileVertices = new Vector3[5];
             Vector2[] tileUVs = new Vector2[5];
@@ -195,7 +159,7 @@ namespace OpenTS2.Scenes.Lot
             _terrain.Component.Clear();
             _water.Component.Clear();
 
-            float[] data = _elevationData.Data[-_baseLevel];
+            float[] data = elevationData.Data[-_architecture.BaseFloor];
 
             int size = width * height + (width - 1) * (height - 1);
 
@@ -237,12 +201,14 @@ namespace OpenTS2.Scenes.Lot
 
             terrainComp.AddVertices(vertices, uvs);
 
-            int midOffset = _elevationData.Width * _elevationData.Height;
+            int midOffset = elevationData.Width * elevationData.Height;
 
-            Vector4<ushort>[] patterns = _patternData.Data[-_baseLevel];
-            Vector4<ushort>[] poolPatterns = _patternData.Data[0];
+            _3DArrayView<Vector4<ushort>> patternData = _architecture.FloorPatterns;
 
-            float[] water = _waterHeightData.Data;
+            Vector4<ushort>[] patterns = patternData.Data[-_architecture.BaseFloor];
+            Vector4<ushort>[] poolPatterns = patternData.Data[0];
+
+            float[] water = _architecture.WaterHeightmap.Data;
 
             for (int x = 0, i = 0, pi = 0, vi = 0; x < mWidth; x++)
             {
@@ -323,6 +289,8 @@ namespace OpenTS2.Scenes.Lot
 
         private void BindMaterialAndTextures()
         {
+            _3DArrayView<float> elevationData = _architecture.Elevation;
+
             Material material = _terrain.Component.Material;
 
             material.SetTexture("_BaseTexture", _baseTexture);
@@ -330,7 +298,7 @@ namespace OpenTS2.Scenes.Lot
             material.SetTexture("_BlendTextures", _blendTextures);
             material.SetTexture("_BlendMasks", _blendMasks);
 
-            material.SetVector("_InvLotSize", new Vector4(1f / (_elevationData.Width - 1), 1f / (_elevationData.Height - 1)));
+            material.SetVector("_InvLotSize", new Vector4(1f / (elevationData.Width - 1), 1f / (elevationData.Height - 1)));
 
             _water.Component.EnableShadows(false);
 
@@ -347,15 +315,18 @@ namespace OpenTS2.Scenes.Lot
             // This helps reduce the number of textures that need to be sampled in fragment.
             // This could be done with a render to texture, as long as it happens whenever the blend masks change.
 
-            int bitmapWidth = (_elevationData.Width * 4 - 3);
-            int bitmapHeight = (_elevationData.Height * 4 - 3);
+            _3DArrayView<float> elevationData = _architecture.Elevation;
+            _2DArrayView<byte>[] blendMaskData = _architecture.BlendMasks;
+
+            int bitmapWidth = (elevationData.Width * 4 - 3);
+            int bitmapHeight = (elevationData.Height * 4 - 3);
 
             var size = bitmapWidth * bitmapHeight;
 
             var blendData = new uint[size];
 
             int bitN = 0;
-            foreach (var blend in _blendMaskData)
+            foreach (var blend in blendMaskData)
             {
                 uint bit = 1u << bitN;
 

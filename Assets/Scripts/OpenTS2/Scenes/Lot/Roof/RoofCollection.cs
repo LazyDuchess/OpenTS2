@@ -6,6 +6,10 @@ namespace OpenTS2.Scenes.Lot.Roof
 {
     public class RoofCollection
     {
+        public const uint DefaultGUID = 0x0cdcc049;
+
+        public uint PatternGUID { get; private set; }
+
         private List<IRoofType> _roofs;
         private _3DArrayView<float> _elevation;
         private int _baseFloor;
@@ -16,9 +20,17 @@ namespace OpenTS2.Scenes.Lot.Roof
             _elevation = elevation;
             _baseFloor = baseFloor;
 
+            uint patternGuid = 0;
+
             foreach (var entry in entries)
             {
+                patternGuid = entry.Pattern;
                 AddRoof(entry);
+            }
+
+            if (patternGuid == 0)
+            {
+                PatternGUID = DefaultGUID;
             }
         }
 

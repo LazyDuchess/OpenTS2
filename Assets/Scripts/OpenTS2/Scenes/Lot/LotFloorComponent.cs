@@ -6,14 +6,10 @@ using OpenTS2.Content.DBPF.Scenegraph;
 using OpenTS2.Files.Formats.DBPF;
 using OpenTS2.Files.Formats.DBPF.Scenegraph;
 using OpenTS2.Files.Formats.DBPF.Scenegraph.Block;
-using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Runtime.InteropServices;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 namespace OpenTS2.Scenes.Lot
 {
@@ -23,25 +19,14 @@ namespace OpenTS2.Scenes.Lot
         private const string FallbackMaterial = "floor-grid";
         public const float Thickness = 0.15f;
 
-        private StringMapAsset _patternMap;
-        private _3DArrayView<float> _elevationData;
-        private _3DArrayView<Vector4<ushort>> _patternData;
-        private int _baseLevel;
+        private LotArchitecture _architecture;
 
         private PatternMesh _thickness;
         private PatternMesh[] _patterns;
 
-        public void CreateFromLotAssets(StringMapAsset patternMap, _3DArrayView<Vector4<ushort>> patternData, _3DArrayView<float> elevationData, int baseLevel)
+        public void CreateFromLotArchitecture(LotArchitecture architecture)
         {
-            _patternMap = patternMap;
-            _patternData = patternData;
-            _elevationData = elevationData;
-            _baseLevel = baseLevel;
-
-            if (patternData.Width != elevationData.Width - 1 || patternData.Height != elevationData.Height - 1 || patternData.Depth != elevationData.Depth)
-            {
-                throw new InvalidOperationException("Size mismatch between heightmap and LTTX");
-            }
+            _architecture = architecture;
 
             LoadPatterns();
             BuildFloorMeshes();
@@ -100,10 +85,12 @@ namespace OpenTS2.Scenes.Lot
             var contentProvider = ContentProvider.Get();
             var catalogManager = CatalogManager.Get();
 
-            ushort highestId = _patternMap.Map.Count == 0 ? (ushort)0 : _patternMap.Map.Keys.Max();
+            Dictionary<ushort, StringMapEntry> patternMap = _architecture.FloorMap.Map;
+
+            ushort highestId = patternMap.Count == 0 ? (ushort)0 : patternMap.Keys.Max();
             _patterns = new PatternMesh[highestId + 1];
 
-            foreach (StringMapEntry entry in _patternMap.Map.Values)
+            foreach (StringMapEntry entry in patternMap.Values)
             {
                 string materialName;
                 if (uint.TryParse(entry.Value, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out uint guid))
@@ -134,9 +121,13 @@ namespace OpenTS2.Scenes.Lot
 
         private void BuildFloorMeshes()
         {
+            _3DArrayView<float> elevationData = _architecture.Elevation;
+            _3DArrayView<Vector4<ushort>> patternData = _architecture.FloorPatterns;
+            int baseFloor = _architecture.BaseFloor;
+
             // TODO: split pattern meshes by level?
-            int width = _patternData.Width;
-            int height = _patternData.Height;
+            int width = patternData.Width;
+            int height = patternData.Height;
             int eHeight = height + 1;
 
             foreach (PatternMesh pattern in _patterns)
@@ -172,10 +163,10 @@ namespace OpenTS2.Scenes.Lot
                 thickComp.AddTriangle(baseVert, 2, 3, 0);
             }
 
-            for (int i = 0; i < _patternData.Depth; i++)
+            for (int i = 0; i < patternData.Depth; i++)
             {
-                Vector4<ushort>[] patterns = _patternData.Data[i];
-                float[] elevation = _elevationData.Data[i];
+                Vector4<ushort>[] patterns = patternData.Data[i];
+                float[] elevation = elevationData.Data[i];
 
                 // NOTE: 3D arrays are width then height, rather than height then width.
 
@@ -298,7 +289,7 @@ namespace OpenTS2.Scenes.Lot
                                 comp.AddTriangle(m4Base, 0, 3, 4);
                             }
 
-                            if (i > -_baseLevel)
+                            if (i > -baseFloor)
                             {
                                 if (filledMask != 15)
                                 {
