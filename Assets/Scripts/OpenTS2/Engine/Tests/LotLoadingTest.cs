@@ -9,7 +9,6 @@ using OpenTS2.Content.DBPF.Scenegraph;
 using OpenTS2.Files;
 using OpenTS2.Files.Formats.DBPF;
 using OpenTS2.Scenes.Lot;
-using OpenTS2.Scenes.Lot.Roof;
 using UnityEditor;
 using UnityEngine;
 
@@ -24,6 +23,7 @@ namespace OpenTS2.Engine.Tests
         private int _lotId;
 
         private List<GameObject> _lotObject = new List<GameObject>();
+        private LotArchitecture _architecture;
 
         private void UnloadLot()
         {
@@ -118,61 +118,10 @@ namespace OpenTS2.Engine.Tests
                 }
             }
 
-            var wallStyles = lotPackage.Entries.First(x => x.GlobalTGI.TypeID == TypeIDs.LOT_STRINGMAP && x.GlobalTGI.InstanceID == 13).GetAsset<StringMapAsset>();
-            var floorStyles = lotPackage.Entries.First(x => x.GlobalTGI.TypeID == TypeIDs.LOT_STRINGMAP && x.GlobalTGI.InstanceID == 14).GetAsset<StringMapAsset>();
+            _architecture = new LotArchitecture();
 
-            var wallGraphs = lotPackage.Entries.Where(x => x.GlobalTGI.TypeID == TypeIDs.LOT_WALLGRAPH).Select(x => x.GetAsset<WallGraphAsset>()).ToList();
-
-            var arry3 = lotPackage.Entries.Where(x => x.GlobalTGI.TypeID == TypeIDs.LOT_3ARY).Select(x => x.GetAsset()).ToList();
-
-            // Shared
-
-            var wallLayer = lotPackage.GetAssetByTGI<WallLayerAsset>(new ResourceKey(4, uint.MaxValue, TypeIDs.LOT_WALLLAYER));
-            var wallGraph = lotPackage.GetAssetByTGI<WallGraphAsset>(new ResourceKey(0x18, uint.MaxValue, TypeIDs.LOT_WALLGRAPH));
-            var floorElevation = lotPackage.GetAssetByTGI<_3DArrayAsset>(new ResourceKey(1, uint.MaxValue, TypeIDs.LOT_3ARY)).GetView<float>(true);
-            var pool = lotPackage.GetAssetByTGI<PoolAsset>(new ResourceKey(0, uint.MaxValue, TypeIDs.LOT_POOL));
-            var roof = lotPackage.GetAssetByTGI<RoofAsset>(new ResourceKey(0, uint.MaxValue, TypeIDs.LOT_ROOF));
-
-            var roofs = new RoofCollection(roof.Entries, floorElevation, wallGraph.BaseFloor);
-
-            // Roofs
-
-            var roofObj = new GameObject("roof", typeof(LotRoofComponent));
-            roofObj.GetComponent<LotRoofComponent>().CreateFromLotAssets(roof.Entries.FirstOrDefault().Pattern, roofs);
-            _lotObject.Add(roofObj);
-
-            // Walls
-
-            var wallGraphR = wallGraph;
-            var fencePosts = lotPackage.GetAssetByTGI<FencePostLayerAsset>(new ResourceKey(0x11, uint.MaxValue, TypeIDs.LOT_FENCEPOST));
-
-            var wall = new GameObject("wall", typeof(LotWallComponent));
-            wall.GetComponent<LotWallComponent>().CreateFromLotAssets(wallStyles, wallLayer, wallGraphR, fencePosts, floorElevation, roofs);
-            _lotObject.Add(wall);
-
-            // Floors
-
-            var floorPatterns = lotPackage.GetAssetByTGI<_3DArrayAsset>(new ResourceKey(0, uint.MaxValue, TypeIDs.LOT_3ARY)).GetView<Vector4<ushort>>(true);
-
-            var floor = new GameObject("floor", typeof(LotFloorComponent));
-            floor.GetComponent<LotFloorComponent>().CreateFromLotAssets(floorStyles, floorPatterns, floorElevation, wallGraph.BaseFloor);
-            _lotObject.Add(floor);
-
-            // Terrain
-
-            var terrainTextures = lotPackage.Entries.First(x => x.GlobalTGI.TypeID == TypeIDs.LOT_TEXTURES).GetAsset<LotTexturesAsset>();
-            var terrainData = lotPackage.Entries.Where(x => x.GlobalTGI.TypeID == TypeIDs.LOT_TERRAIN).Select(x => x.GetAsset()).ToList();
-
-            var waterHeightmap = ((_2DArrayAsset)terrainData.First(x => x is _2DArrayAsset array && array.ElementSize == 4)).GetView<float>(true);
-            var blend = terrainData.Where(x => x is _2DArrayAsset array && array.ElementSize == 1)
-                .OrderBy(x => x.GlobalTGI.InstanceID)
-                .Select(x => ((_2DArrayAsset)x).GetView<byte>(true))
-                .Take(terrainTextures.BlendTextures.Length)
-                .ToArray();
-
-            var terrain = new GameObject("terrain", typeof(LotTerrainComponent));
-            terrain.GetComponent<LotTerrainComponent>().CreateFromTerrainAssets(terrainTextures, floorElevation, blend, waterHeightmap, floorPatterns, wallGraph.BaseFloor);
-            _lotObject.Add(terrain);
+            _architecture.LoadFromPackage(lotPackage);
+            _architecture.CreateGameObjects(_lotObject);
         }
     }
 
