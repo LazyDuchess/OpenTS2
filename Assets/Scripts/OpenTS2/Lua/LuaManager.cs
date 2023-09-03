@@ -58,9 +58,9 @@ namespace OpenTS2.Lua
                 api.PrepareLuaPrimitive(param0, param1, param2);
         }
 
-        void ThrowLuaPrimitiveException(ScriptRuntimeException exception)
+        void ThrowLuaPrimitiveException(ScriptRuntimeException exception, string name)
         {
-            throw new SimAnticsException($"Problem executing Lua script:{Environment.NewLine}{exception.DecoratedMessage}", Context.StackFrame);
+            throw new SimAnticsException($"Problem executing Lua script {name}:{Environment.NewLine}{exception.DecoratedMessage}", Context.StackFrame);
         }
 
         /// <summary>
@@ -83,14 +83,21 @@ namespace OpenTS2.Lua
                 try
                 {
                     var luaAsset = entry.GetAsset<LuaAsset>();
-                    switch(entry.TGI.TypeID)
+                    try
                     {
-                        case TypeIDs.LUA_GLOBAL:
-                            RunScript(luaAsset.Source);
-                            break;
-                        case TypeIDs.LUA_LOCAL:
-                            _objectScriptsByName[luaAsset.FileName] = luaAsset;
-                            break;
+                        switch (entry.TGI.TypeID)
+                        {
+                            case TypeIDs.LUA_GLOBAL:
+                                RunScript(luaAsset.Source);
+                                break;
+                            case TypeIDs.LUA_LOCAL:
+                                _objectScriptsByName[luaAsset.FileName] = luaAsset;
+                                break;
+                        }
+                    }
+                    catch(InterpreterException e)
+                    {
+                        Debug.LogError($"LuaManager: Failed to run object script {luaAsset.FileName}:{Environment.NewLine}{e.DecoratedMessage}");
                     }
 
                 }
@@ -130,7 +137,7 @@ namespace OpenTS2.Lua
         /// <param name="param2">Parameter 2</param>
         /// <param name="ctx">SimAntics Context</param>
         /// <returns>The exit code for this primitive.</returns>
-        public VMExitCode RunScriptPrimitive(string lua, short param0, short param1, short param2, VMContext ctx)
+        public VMExitCode RunScriptPrimitive(string name, string lua, short param0, short param1, short param2, VMContext ctx)
         {
             PrepGlobalsForPrimitive(param0, param1, param2, ctx);
             try
@@ -139,7 +146,7 @@ namespace OpenTS2.Lua
             }
             catch(ScriptRuntimeException e)
             {
-                ThrowLuaPrimitiveException(e);
+                ThrowLuaPrimitiveException(e, name);
             }
             return ExitCode;
         }
