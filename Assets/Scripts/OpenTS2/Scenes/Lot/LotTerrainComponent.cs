@@ -26,10 +26,10 @@ namespace OpenTS2.Scenes.Lot
     {
 
         private LotTexturesAsset _textures;
-        private _3DArrayAsset<float> _elevationData;
-        private _2DArrayAsset<byte>[] _blendMaskData;
-        private _2DArrayAsset<float> _waterHeightData;
-        private _3DArrayAsset<Vector4<ushort>> _patternData;
+        private _3DArrayView<float> _elevationData;
+        private _2DArrayView<byte>[] _blendMaskData;
+        private _2DArrayView<float> _waterHeightData;
+        private _3DArrayView<Vector4<ushort>> _patternData;
         private int _baseLevel;
 
         private Texture2D _baseTexture;
@@ -42,10 +42,10 @@ namespace OpenTS2.Scenes.Lot
 
         public void CreateFromTerrainAssets(
             LotTexturesAsset textures,
-            _3DArrayAsset<float> elevation,
-            _2DArrayAsset<byte>[] blend,
-            _2DArrayAsset<float> waterHeightmap,
-            _3DArrayAsset<Vector4<ushort>> patterns,
+            _3DArrayView<float> elevation,
+            _2DArrayView<byte>[] blend,
+            _2DArrayView<float> waterHeightmap,
+            _3DArrayView<Vector4<ushort>> patterns,
             int baseLevel)
         {
             // Some constraints...

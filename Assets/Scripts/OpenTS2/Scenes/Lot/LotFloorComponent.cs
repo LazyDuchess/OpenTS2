@@ -24,14 +24,14 @@ namespace OpenTS2.Scenes.Lot
         public const float Thickness = 0.15f;
 
         private StringMapAsset _patternMap;
-        private _3DArrayAsset<float> _elevationData;
-        private _3DArrayAsset<Vector4<ushort>> _patternData;
+        private _3DArrayView<float> _elevationData;
+        private _3DArrayView<Vector4<ushort>> _patternData;
         private int _baseLevel;
 
         private PatternMesh _thickness;
         private PatternMesh[] _patterns;
 
-        public void CreateFromLotAssets(StringMapAsset patternMap, _3DArrayAsset<Vector4<ushort>> patternData, _3DArrayAsset<float> elevationData, int baseLevel)
+        public void CreateFromLotAssets(StringMapAsset patternMap, _3DArrayView<Vector4<ushort>> patternData, _3DArrayView<float> elevationData, int baseLevel)
         {
             _patternMap = patternMap;
             _patternData = patternData;

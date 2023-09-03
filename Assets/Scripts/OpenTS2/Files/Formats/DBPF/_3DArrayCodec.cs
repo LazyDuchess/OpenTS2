@@ -1,12 +1,17 @@
 using OpenTS2.Common;
+using OpenTS2.Common.Utils;
 using OpenTS2.Content;
 using OpenTS2.Content.DBPF;
 using OpenTS2.Files.Utils;
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
+using System.Text;
+using UnityEngine;
 
 namespace OpenTS2.Files.Formats.DBPF
 {
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct Vector4<T> where T : unmanaged
     {
         public T x;
@@ -26,8 +31,11 @@ namespace OpenTS2.Files.Formats.DBPF
     }
 
     [Codec(TypeIDs.LOT_3ARY)]
-    public class _32ArrayCodec : AbstractCodec
+    public class _3DArrayCodec : AbstractCodec
     {
+        private const uint TypeId = 0x2a51171b;
+        private const string TypeName = "c3DArray";
+
         public override AbstractAsset Deserialize(byte[] bytes, ResourceKey tgi, DBPFFile sourceFile)
         {
             var stream = new MemoryStream(bytes);
@@ -36,13 +44,20 @@ namespace OpenTS2.Files.Formats.DBPF
             // Skip 64 bytes.
             reader.Seek(SeekOrigin.Current, 64);
 
-            int id = reader.ReadInt32(); // Magic?
-            int version = reader.ReadInt32(); // Version?
+            var id = reader.ReadUInt32();
+            if (id != TypeId)
+            {
+                throw new ArgumentException($"c3DArray has wrong id {id:x}");
+            }
+
+            var version = reader.ReadUInt32();
+            Debug.Assert(version == 1, "Wrong version for c3DArray");
+
             string blockName = reader.ReadVariableLengthPascalString();
 
-            if (blockName != "c3DArray")
+            if (blockName != TypeName)
             {
-                throw new NotImplementedException($"Invalid 3D Array type {blockName}");
+                throw new NotImplementedException($"Wrong type name {blockName}, expected c3DArray.");
             }
 
             int width = reader.ReadInt32();
@@ -53,59 +68,48 @@ namespace OpenTS2.Files.Formats.DBPF
 
             int elements = width * height * depth;
 
-            // TODO: This sucks
             if (elements == 0)
             {
-                return new _3DArrayAsset<Vector4<ushort>>(width, height, depth, id, new Vector4<ushort>[0][]);
+                return new _3DArrayAsset(width, height, depth, 0, new byte[0][]);
             }
 
             int elemSize = (int)((stream.Length - stream.Position) / elements);
 
-            Vector4<ushort> readVec4Ushort()
-            {
-                return new Vector4<ushort>(reader.ReadUInt16(), reader.ReadUInt16(), reader.ReadUInt16(), reader.ReadUInt16());
-            }
-
-            Vector4<int> readVec4Int()
-            {
-                return new Vector4<int>(reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32());
-            }
-
-            switch (elemSize)
-            {
-                case 1:
-                    return new _3DArrayAsset<byte>(width, height, depth, id, ReadElements(elements, reader.ReadByte, depth));
-                case 2:
-                    return new _3DArrayAsset<ushort>(width, height, depth, id, ReadElements(elements, reader.ReadUInt16, depth));
-                case 4:
-                    return new _3DArrayAsset<float>(width, height, depth, id, ReadElements(elements, reader.ReadFloat, depth));
-                case 8:
-                    return new _3DArrayAsset<Vector4<ushort>>(width, height, depth, id, ReadElements(elements, readVec4Ushort, depth));
-                case 16:
-                    return new _3DArrayAsset<Vector4<int>>(width, height, depth, id, ReadElements(elements, readVec4Int, depth));
-                default:
-                    throw new NotImplementedException($"Invalid 3D Array size {elemSize}");
-            }
-        }
-
-        private T[][] ReadElements<T>(int elements, Func<T> reader, int depth)
-        {
-            T[][] result = new T[depth][];
+            byte[][] result = new byte[depth][];
 
             for (int i = 0; i < depth; i++)
             {
-                int elemSlice = elements / depth;
-                T[] slice = new T[elements];
-
-                for (int j = 0; j < elemSlice; j++)
-                {
-                    slice[j] = reader();
-                }
-
-                result[i] = slice;
+                result[i] = reader.ReadBytes(width * height * elemSize);
             }
 
-            return result;
+            return new _3DArrayAsset(width, height, depth, elemSize, result);
+        }
+
+        public override byte[] Serialize(AbstractAsset asset)
+        {
+            var arrayAsset = asset as _3DArrayAsset;
+            arrayAsset.AutoCommit();
+
+            var stream = new MemoryStream(0);
+            var writer = new BinaryWriter(stream);
+            writer.Write(new byte[64]);
+            writer.Write(TypeId);
+            writer.Write(1);
+            writer.Write(TypeName.Length);
+            writer.Write(Encoding.UTF8.GetBytes(TypeName));
+            writer.Write(arrayAsset.Width);
+            writer.Write(arrayAsset.Height);
+            writer.Write(arrayAsset.Depth);
+
+            for (var i = 0; i < arrayAsset.Depth; i++)
+            {
+                writer.Write(arrayAsset.Data[i]);
+            }
+
+            var buffer = StreamUtils.GetBuffer(stream);
+            stream.Dispose();
+            writer.Dispose();
+            return buffer;
         }
     }
 }

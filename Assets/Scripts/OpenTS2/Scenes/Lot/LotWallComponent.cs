@@ -238,7 +238,7 @@ namespace OpenTS2.Scenes.Lot
         private WallLayerAsset _wallLayer;
         private WallGraphAsset _wallGraph;
         private FencePostLayerAsset _fencePosts;
-        private _3DArrayAsset<float> _elevationData;
+        private _3DArrayView<float> _elevationData;
         private RoofCollection _roofs;
 
         private PatternMesh _thickness;
@@ -252,7 +252,7 @@ namespace OpenTS2.Scenes.Lot
             WallLayerAsset wallLayer,
             WallGraphAsset wallGraph,
             FencePostLayerAsset fencePosts,
-            _3DArrayAsset<float> elevationData,
+            _3DArrayView<float> elevationData,
             RoofCollection roofs)
         {
             _patternMap = patternMap;

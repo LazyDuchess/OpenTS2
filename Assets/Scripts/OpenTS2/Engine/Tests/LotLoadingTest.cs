@@ -129,7 +129,7 @@ namespace OpenTS2.Engine.Tests
 
             var wallLayer = lotPackage.GetAssetByTGI<WallLayerAsset>(new ResourceKey(4, uint.MaxValue, TypeIDs.LOT_WALLLAYER));
             var wallGraph = lotPackage.GetAssetByTGI<WallGraphAsset>(new ResourceKey(0x18, uint.MaxValue, TypeIDs.LOT_WALLGRAPH));
-            var floorElevation = lotPackage.GetAssetByTGI<_3DArrayAsset<float>>(new ResourceKey(1, uint.MaxValue, TypeIDs.LOT_3ARY));
+            var floorElevation = lotPackage.GetAssetByTGI<_3DArrayAsset>(new ResourceKey(1, uint.MaxValue, TypeIDs.LOT_3ARY)).GetView<float>(true);
             var pool = lotPackage.GetAssetByTGI<PoolAsset>(new ResourceKey(0, uint.MaxValue, TypeIDs.LOT_POOL));
             var roof = lotPackage.GetAssetByTGI<RoofAsset>(new ResourceKey(0, uint.MaxValue, TypeIDs.LOT_ROOF));
 
@@ -152,7 +152,7 @@ namespace OpenTS2.Engine.Tests
 
             // Floors
 
-            var floorPatterns = lotPackage.GetAssetByTGI<_3DArrayAsset<Vector4<ushort>>>(new ResourceKey(0, uint.MaxValue, TypeIDs.LOT_3ARY));
+            var floorPatterns = lotPackage.GetAssetByTGI<_3DArrayAsset>(new ResourceKey(0, uint.MaxValue, TypeIDs.LOT_3ARY)).GetView<Vector4<ushort>>(true);
 
             var floor = new GameObject("floor", typeof(LotFloorComponent));
             floor.GetComponent<LotFloorComponent>().CreateFromLotAssets(floorStyles, floorPatterns, floorElevation, wallGraph.BaseFloor);
@@ -163,10 +163,10 @@ namespace OpenTS2.Engine.Tests
             var terrainTextures = lotPackage.Entries.First(x => x.GlobalTGI.TypeID == TypeIDs.LOT_TEXTURES).GetAsset<LotTexturesAsset>();
             var terrainData = lotPackage.Entries.Where(x => x.GlobalTGI.TypeID == TypeIDs.LOT_TERRAIN).Select(x => x.GetAsset()).ToList();
 
-            var waterHeightmap = (_2DArrayAsset<float>)terrainData.First(x => x is IArrayAsset array && array.ArrayType() == typeof(float));
-            var blend = terrainData.Where(x => x is IArrayAsset array && array.ArrayType() == typeof(byte))
+            var waterHeightmap = ((_2DArrayAsset)terrainData.First(x => x is _2DArrayAsset array && array.ElementSize == 4)).GetView<float>(true);
+            var blend = terrainData.Where(x => x is _2DArrayAsset array && array.ElementSize == 1)
                 .OrderBy(x => x.GlobalTGI.InstanceID)
-                .Select(x => (_2DArrayAsset<byte>)x)
+                .Select(x => ((_2DArrayAsset)x).GetView<byte>(true))
                 .Take(terrainTextures.BlendTextures.Length)
                 .ToArray();
 

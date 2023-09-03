@@ -7,10 +7,10 @@ namespace OpenTS2.Scenes.Lot.Roof
     public class RoofCollection
     {
         private List<IRoofType> _roofs;
-        private _3DArrayAsset<float> _elevation;
+        private _3DArrayView<float> _elevation;
         private int _baseFloor;
         
-        public RoofCollection(RoofEntry[] entries, _3DArrayAsset<float> elevation, int baseFloor)
+        public RoofCollection(RoofEntry[] entries, _3DArrayView<float> elevation, int baseFloor)
         {
             _roofs = new List<IRoofType>();
             _elevation = elevation;
