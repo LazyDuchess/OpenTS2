@@ -26,6 +26,7 @@ public class ScenegraphAnimationCodecTest
                 TypeIDs.SCENEGRAPH_ANIM));
         Assert.IsNotNull(animationAsset);
 
+        Assert.That(animationAsset.AnimResource.LocomotionType, Is.EqualTo(0));
         Assert.That(animationAsset.AnimResource.HeadingOffset, Is.EqualTo(0.0));
         Assert.That(animationAsset.AnimResource.TurnRotation, Is.EqualTo(0.0));
         Assert.That(animationAsset.AnimResource.LocomotionDistance, Is.EqualTo(0.0));
@@ -117,6 +118,7 @@ public class ScenegraphAnimationCodecTest
             .GetAsset<ScenegraphAnimationAsset>(new ResourceKey("a2o-exerciseMachine-benchPress-start_anim", GroupIDs.Scenegraph,
                 TypeIDs.SCENEGRAPH_ANIM));
 
+        Assert.That(animationAsset.AnimResource.LocomotionType, Is.EqualTo(0));
         Assert.That(animationAsset.AnimResource.HeadingOffset, Is.EqualTo(-1.570).Within(0.001));
         Assert.That(animationAsset.AnimResource.TurnRotation, Is.EqualTo(0.0));
         Assert.That(animationAsset.AnimResource.LocomotionDistance, Is.EqualTo(0.0));

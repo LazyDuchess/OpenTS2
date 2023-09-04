@@ -22,8 +22,9 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
         /// </summary>
         public const double FramesPerTick = 0.03;
 
-        public ScenegraphResource ScenegraphResource;
+        public ScenegraphResource ScenegraphResource { get; }
 
+        public byte LocomotionType { get; }
         public float HeadingOffset { get; }
         public float TurnRotation { get; }
 
@@ -34,13 +35,14 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
         /// </summary>
         public float Velocity { get; }
 
-        public AnimTarget[] AnimTargets;
+        public AnimTarget[] AnimTargets { get; }
 
         public AnimResourceConstBlock(PersistTypeInfo blockTypeInfo, ScenegraphResource scenegraphResource,
-            float headingOffset, float locomotionDistance, float velocity, float turnRotation,
+            byte locomotionType, float headingOffset, float locomotionDistance, float velocity, float turnRotation,
             AnimTarget[] animTargets) : base(blockTypeInfo)
         {
             ScenegraphResource = scenegraphResource;
+            LocomotionType = locomotionType;
             HeadingOffset = headingOffset;
             TurnRotation = turnRotation;
             AnimTargets = animTargets;
@@ -666,7 +668,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                 var eventDataString = reader.ReadNullTerminatedString();
             }
 
-            return new AnimResourceConstBlock(blockTypeInfo, resource, headingOffset, locomotionDistance,
+            return new AnimResourceConstBlock(blockTypeInfo, resource, locomotionType, headingOffset, locomotionDistance,
                 velocityMPT, turnRotation, animTargets);
         }
 
