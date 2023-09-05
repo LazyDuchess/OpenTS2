@@ -6,6 +6,8 @@ using OpenTS2.Content.DBPF.Scenegraph;
 using OpenTS2.Files.Formats.DBPF;
 using OpenTS2.Files.Formats.DBPF.Scenegraph;
 using OpenTS2.Files.Formats.DBPF.Scenegraph.Block;
+using OpenTS2.Scenes.Lot.State;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -21,15 +23,16 @@ namespace OpenTS2.Scenes.Lot
 
         private LotArchitecture _architecture;
 
-        private PatternMesh _thickness;
-        private PatternMesh[] _patterns;
+        private PatternMeshCollection _patterns;
 
-        public void CreateFromLotArchitecture(LotArchitecture architecture)
+        public LotFloorComponent CreateFromLotArchitecture(LotArchitecture architecture)
         {
             _architecture = architecture;
 
             LoadPatterns();
             BuildFloorMeshes();
+
+            return this;
         }
 
         private ScenegraphMaterialDefinitionAsset GenerateMaterial(string textureName)
@@ -88,7 +91,8 @@ namespace OpenTS2.Scenes.Lot
             Dictionary<ushort, StringMapEntry> patternMap = _architecture.FloorMap.Map;
 
             ushort highestId = patternMap.Count == 0 ? (ushort)0 : patternMap.Keys.Max();
-            _patterns = new PatternMesh[highestId + 1];
+
+            PatternDescriptor[] patterns = new PatternDescriptor[highestId + 2];
 
             foreach (StringMapEntry entry in patternMap.Values)
             {
@@ -108,15 +112,18 @@ namespace OpenTS2.Scenes.Lot
 
                 var material = LoadMaterial(contentProvider, materialName);
 
-                if (material == null)
-                {
-
-                }
-
-                _patterns[entry.Id] = material == null ? null : new PatternMesh(gameObject, materialName, material?.GetAsUnityMaterial());
+                patterns[entry.Id + 1] = new PatternDescriptor(
+                    materialName,
+                    material == null ? null : material?.GetAsUnityMaterial()
+                );
             }
 
-            _thickness = new PatternMesh(gameObject, ThicknessTexture, GenerateMaterial(ThicknessTexture).GetAsUnityMaterial());
+            patterns[0] = new PatternDescriptor(
+                ThicknessTexture,
+                GenerateMaterial(ThicknessTexture).GetAsUnityMaterial()
+            );
+
+            _patterns = new PatternMeshCollection(gameObject, patterns, Array.Empty<PatternVariant>(), _architecture.FloorPatterns.Depth);
         }
 
         private void BuildFloorMeshes()
@@ -125,23 +132,16 @@ namespace OpenTS2.Scenes.Lot
             _3DArrayView<Vector4<ushort>> patternData = _architecture.FloorPatterns;
             int baseFloor = _architecture.BaseFloor;
 
-            // TODO: split pattern meshes by level?
             int width = patternData.Width;
             int height = patternData.Height;
             int eHeight = height + 1;
 
-            foreach (PatternMesh pattern in _patterns)
-            {
-                pattern?.Component.Clear();
-            }
+            _patterns.ClearAll();
 
             Vector3[] tileVertices = new Vector3[5];
             Vector2[] tileUVs = new Vector2[5];
 
-            Vector3[] thicknessVertices = new Vector3[4];
-            Vector2[] thicknessUVs = new Vector2[4];
-
-            var thickComp = _thickness.Component;
+            LotArchitectureMeshComponent thickComp = null;
 
             void AddThickness(int from, int to)
             {
@@ -165,6 +165,8 @@ namespace OpenTS2.Scenes.Lot
 
             for (int i = 0; i < patternData.Depth; i++)
             {
+                PatternMeshFloor floor = null;
+
                 Vector4<ushort>[] patterns = patternData.Data[i];
                 float[] elevation = elevationData.Data[i];
 
@@ -187,6 +189,14 @@ namespace OpenTS2.Scenes.Lot
 
                         if (filledMask != 0)
                         {
+                            if (floor == null)
+                            {
+                                // Lazy init - don't create the floor unless it's actually being used.
+                                floor = _patterns.GetFloor(i);
+                                PatternMesh thickness = floor.Get(0);
+                                thickComp = thickness.Component;
+                            }
+
                             // Pattern is present.
                             float e0 = elevation[ei];
                             float e1 = elevation[ei + eHeight];
@@ -205,7 +215,7 @@ namespace OpenTS2.Scenes.Lot
                             tileUVs[3] = new Vector2(fy + 1, fx);
                             tileUVs[4] = new Vector2(fy + 0.5f, fx + 0.5f);
 
-                            PatternMesh mesh1 = _patterns[p.w];
+                            PatternMesh mesh1 = floor.Get(p.w + 1);
                             int m1Base = 0;
 
                             if (mesh1 != null)
@@ -217,7 +227,7 @@ namespace OpenTS2.Scenes.Lot
                                 comp.AddTriangle(m1Base, 1, 0, 4);
                             }
 
-                            PatternMesh mesh2 = _patterns[p.z];
+                            PatternMesh mesh2 = floor.Get(p.z + 1);
                             int m2Base = 0;
 
                             if (mesh2 != null)
@@ -237,7 +247,7 @@ namespace OpenTS2.Scenes.Lot
                                 comp.AddTriangle(m2Base, 2, 1, 4);
                             }
 
-                            PatternMesh mesh3 = _patterns[p.y];
+                            PatternMesh mesh3 = floor.Get(p.y + 1);
                             int m3Base = 0;
 
                             if (mesh3 != null)
@@ -261,7 +271,7 @@ namespace OpenTS2.Scenes.Lot
                                 comp.AddTriangle(m3Base, 3, 2, 4);
                             }
 
-                            PatternMesh mesh4 = _patterns[p.x];
+                            PatternMesh mesh4 = floor.Get(p.x + 1);
 
                             if (mesh4 != null)
                             {
@@ -347,12 +357,12 @@ namespace OpenTS2.Scenes.Lot
                 }
             }
 
-            foreach (PatternMesh pattern in _patterns)
-            {
-                pattern?.Component.Commit();
-            }
+            _patterns.CommitAll();
+        }
 
-            _thickness.Component.Commit();
+        public void UpdateDisplay(WorldState state)
+        {
+            _patterns.UpdateDisplay(state, _architecture.BaseFloor);
         }
     }
 }

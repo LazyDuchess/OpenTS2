@@ -5,6 +5,7 @@ using OpenTS2.Content.DBPF;
 using OpenTS2.Content.DBPF.Scenegraph;
 using OpenTS2.Files.Formats.DBPF;
 using OpenTS2.Scenes.Lot.Roof;
+using OpenTS2.Scenes.Lot.State;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -47,164 +48,6 @@ namespace OpenTS2.Scenes.Lot
             { "wall_poolroundedlipblue", "wall_poolroundedlipblue_base" }
         };
 
-        private class FenceCollection
-        {
-            private CatalogFenceAsset _asset;
-            private GameObject _parent;
-            private bool _hasDiag;
-
-            private ScenegraphResourceAsset _railCres;
-            private ScenegraphResourceAsset _diagRailCres;
-            private ScenegraphResourceAsset _postCres;
-
-            private List<GameObject> _rails;
-            private List<GameObject> _diagRails;
-            private List<GameObject> _posts;
-
-            public FenceCollection(ContentProvider contentProvider, GameObject parent, uint guid)
-            {
-                var catalog = CatalogManager.Get();
-
-                _asset = catalog.GetFenceById(guid);
-
-                if (_asset == null)
-                {
-                    return;
-                }
-
-                _hasDiag = _asset.DiagRail != null;
-                _parent = parent;
-
-                _railCres = contentProvider.GetAsset<ScenegraphResourceAsset>(
-                    new ResourceKey(_asset.Rail + "_cres", GroupIDs.Scenegraph,
-                        TypeIDs.SCENEGRAPH_CRES));
-
-                _diagRailCres = _hasDiag ? contentProvider.GetAsset<ScenegraphResourceAsset>(
-                    new ResourceKey(_asset.DiagRail + "_cres", GroupIDs.Scenegraph,
-                        TypeIDs.SCENEGRAPH_CRES)) : null;
-
-                _postCres = contentProvider.GetAsset<ScenegraphResourceAsset>(
-                    new ResourceKey(_asset.Post + "_cres", GroupIDs.Scenegraph,
-                        TypeIDs.SCENEGRAPH_CRES));
-
-                _rails = new List<GameObject>();
-                _diagRails = new List<GameObject>();
-                _posts = new List<GameObject>();
-
-                parent.GetComponent<LotWallComponent>().AddReference(_railCres, _diagRailCres, _postCres);
-            }
-
-            public void AddRail(float fromX, float fromY, float toX, float toY, float fromElevation, float toElevation)
-            {
-                float direction = Mathf.Rad2Deg * Mathf.Atan2(toY - fromY, toX - fromX);
-                Vector3 shearVec = new Vector3(toX - fromX, toY - fromY, toElevation - fromElevation);
-                float magnitude = new Vector2(toX - fromX, toY - fromY).magnitude;
-                float shearMagnitude = shearVec.magnitude;
-
-                GameObject model;
-
-                if (magnitude > 1.1 && _diagRailCres != null)
-                {
-                    model = _diagRailCres.CreateRootGameObject();
-
-                    model.transform.parent = _parent.transform;
-
-                    magnitude /= Mathf.Sqrt(2);
-
-                    _diagRails.Add(model);
-                }
-                else
-                {
-                    if (_railCres != null)
-                    {
-                        model = _railCres.CreateRootGameObject();
-
-                        model.transform.parent = _parent.transform;
-
-                        _rails.Add(model);
-                    }
-                    else
-                    {
-                        return;
-                    }
-                }
-
-                Transform modelSpace = model.transform.GetChild(0);
-                modelSpace.localScale = new Vector3(magnitude, 1, 1);
-
-                if (shearVec.z != 0)
-                {
-                    // Shear transform
-                    // Because Unity doesn't support submitting your own transform matrix for some reason,
-                    // We need to combine a bunch of transformations to perform a shear.
-                    // In this case, we want the Z dimension to be sheared with x and y left intact.
-
-                    float realAngle = Mathf.Atan2(shearVec.z, magnitude);
-                    float shearAngle = realAngle > 0 ? Mathf.PI / 2 - realAngle : Mathf.PI / -2 - realAngle;
-
-                    var top = new GameObject("skew_top").transform;
-                    top.SetParent(model.transform);
-                    var mid = new GameObject("skew_mid").transform;
-                    mid.SetParent(top);
-                    var bot = new GameObject("skew_bot").transform;
-                    bot.SetParent(mid);
-                    modelSpace.SetParent(bot);
-                    modelSpace.localRotation = Quaternion.identity;
-
-                    top.localRotation = Quaternion.Euler(0, -realAngle * Mathf.Rad2Deg, 0);
-                    mid.localRotation = Quaternion.Euler(0, 45, 0);
-                    bot.localRotation = Quaternion.Euler(0, (-shearAngle / 2) * Mathf.Rad2Deg, 0);
-
-                    float initialScale = shearMagnitude;
-                    float finalScale = Mathf.Sqrt(2);
-
-                    top.localScale = new Vector3(finalScale / Mathf.Sin(shearAngle), 1, finalScale);
-                    mid.localScale = new Vector3(Mathf.Sin(shearAngle / 2), 1, Mathf.Cos(shearAngle / 2));
-                    bot.localScale = new Vector3(initialScale, 1, 1 / initialScale);
-
-                    modelSpace = top;
-                }
-
-                modelSpace.localPosition = new Vector3(fromX, fromY, fromElevation);
-                modelSpace.localRotation = Quaternion.Euler(0, 0, direction) * modelSpace.localRotation;
-            }
-
-            public void AddPost(float x, float y, float elevation)
-            {
-                if (_postCres != null)
-                {
-                    var model = _postCres.CreateRootGameObject();
-
-                    model.transform.parent = _parent.transform;
-
-                    model.transform.GetChild(0).localPosition = new Vector3(x, y, elevation);
-
-                    _posts.Add(model);
-                }
-            }
-
-            public void Clear()
-            {
-                foreach (GameObject rail in _rails)
-                {
-                    Destroy(rail);
-                }
-
-                foreach (GameObject rail in _diagRails)
-                {
-                    Destroy(rail);
-                }
-
-                foreach (GameObject post in _posts)
-                {
-                    Destroy(post);
-                }
-
-                _rails.Clear();
-                _posts.Clear();
-            }
-        }
-
         private struct WallIntersectionMember
         {
             public int WallID;
@@ -235,17 +78,13 @@ namespace OpenTS2.Scenes.Lot
 
         private LotArchitecture _architecture;
 
-        private PatternMesh _thickness;
-        private PatternMesh[] _patterns;
+        private PatternMeshCollection _patterns;
 
         private Dictionary<int, WallIntersection> _intersections;
-        private Dictionary<uint, FenceCollection> _fenceByGuid;
 
-        public void CreateFromLotArchitecture(LotArchitecture architecture)
+        public LotWallComponent CreateFromLotArchitecture(LotArchitecture architecture)
         {
             _architecture = architecture;
-
-            _fenceByGuid = new Dictionary<uint, FenceCollection>();
 
             LoadPatterns();
             BuildWallIntersections();
@@ -253,6 +92,8 @@ namespace OpenTS2.Scenes.Lot
             AddFencePosts();
 
             gameObject.transform.position = new Vector3(0, -YBias, 0);
+
+            return this;
         }
 
         private ScenegraphMaterialDefinitionAsset LoadMaterial(ContentProvider contentProvider, string name)
@@ -264,18 +105,6 @@ namespace OpenTS2.Scenes.Lot
             return material;
         }
 
-        private FenceCollection GetFence(uint guid)
-        {
-            if (!_fenceByGuid.TryGetValue(guid, out FenceCollection result))
-            {
-                result = new FenceCollection(ContentProvider.Get(), gameObject, guid);
-
-                _fenceByGuid[guid] = result;
-            }
-
-            return result;
-        }
-
         private void LoadPatterns()
         {
             // Load the patterns. Some references are by asset name (do not exist in catalog), others are by catalog GUID.
@@ -285,7 +114,7 @@ namespace OpenTS2.Scenes.Lot
             var patternMap = _architecture.WallMap.Map;
 
             ushort highestId = patternMap.Count == 0 ? (ushort)0 : patternMap.Keys.Max();
-            _patterns = new PatternMesh[highestId + 1];
+            PatternDescriptor[] patterns = new PatternDescriptor[highestId + 2];
 
             foreach (StringMapEntry entry in patternMap.Values)
             {
@@ -313,7 +142,10 @@ namespace OpenTS2.Scenes.Lot
 
                 try
                 {
-                    _patterns[entry.Id] = material == null ? null : new PatternMesh(gameObject, materialName, material?.GetAsUnityMaterial());
+                    patterns[entry.Id + 1] = new PatternDescriptor(
+                        materialName,
+                        material == null ? null : material?.GetAsUnityMaterial()
+                    );
                 }
                 catch (Exception e)
                 {
@@ -321,7 +153,12 @@ namespace OpenTS2.Scenes.Lot
                 }
             }
 
-            _thickness = new PatternMesh(gameObject, ThicknessTexture, LoadMaterial(contentProvider, ThicknessTexture).GetAsUnityMaterial());
+            patterns[0] = new PatternDescriptor(
+                ThicknessTexture,
+                LoadMaterial(contentProvider, ThicknessTexture).GetAsUnityMaterial()
+            );
+
+            _patterns = new PatternMeshCollection(gameObject, patterns, Array.Empty<PatternVariant>(), _architecture.WallGraphAll.Floors);
         }
 
         private bool IsWallThick(in WallLayerEntry elem)
@@ -525,15 +362,13 @@ namespace OpenTS2.Scenes.Lot
             int floors = elevationData.Depth;
             int baseFloor = _architecture.BaseFloor;
 
+            _patterns.ClearAll();
+
             WallGraphLineEntry[] lines = _architecture.WallGraphAll.Lines;
             Dictionary<int, WallGraphPositionEntry> positions = _architecture.WallGraphAll.Positions;
             Dictionary<int, WallLayerEntry> layer = _architecture.WallLayer.Walls;
 
             // Draw each line on the wall graph.
-
-            int currentFloor = 0;
-            float[] currentFloorElevation = elevationData.Data[currentFloor];
-            float[] nextFloorElevation = currentFloor + 1 < floors ? elevationData.Data[currentFloor + 1] : null;
 
             Vector3[] wallVertices = new Vector3[6];
             Vector3[] wallVertices2 = new Vector3[6];
@@ -544,7 +379,12 @@ namespace OpenTS2.Scenes.Lot
             Vector3[] thicknessVerts = new Vector3[8];
             Vector2[] thicknessUVs = new Vector2[8];
 
-            var thicknessComp = _thickness.Component;
+            int currentFloor = -1;
+            float[] currentFloorElevation = null;
+            float[] nextFloorElevation = null;
+
+            LotArchitectureMeshComponent thicknessComp = null;
+            PatternMeshFloor meshFloor = null;
 
             for (int i = 0; i < lines.Length; i++)
             {
@@ -564,6 +404,9 @@ namespace OpenTS2.Scenes.Lot
 
                     currentFloorElevation = elevationData.Data[floor];
                     nextFloorElevation = floor + 1 < floors ? elevationData.Data[floor + 1] : null;
+
+                    meshFloor = _patterns.GetFloor(floor);
+                    thicknessComp = meshFloor.Get(0).Component;
                 }
 
                 if (!layer.TryGetValue(line.LayerId, out WallLayerEntry layerElem))
@@ -583,7 +426,7 @@ namespace OpenTS2.Scenes.Lot
                 
                 if (IsFence(layerElem.WallType))
                 {
-                    var fence = GetFence((uint)layerElem.WallType);
+                    var fence = meshFloor.GetFence((uint)layerElem.WallType);
 
                     fence.AddRail(
                         from.XPos,
@@ -603,8 +446,8 @@ namespace OpenTS2.Scenes.Lot
                     }
                 }
 
-                LotArchitectureMeshComponent lPattern = (layerElem.Pattern1 == 65535 ? null : _patterns[layerElem.Pattern1]?.Component);// ?? _thickness?.Component;
-                LotArchitectureMeshComponent rPattern = (layerElem.Pattern2 == 65535 ? null : _patterns[layerElem.Pattern2]?.Component);// ?? _thickness?.Component;
+                LotArchitectureMeshComponent lPattern = (layerElem.Pattern1 == 65535 ? null : meshFloor.Get(layerElem.Pattern1 + 1)?.Component);// ?? _thickness?.Component;
+                LotArchitectureMeshComponent rPattern = (layerElem.Pattern2 == 65535 ? null : meshFloor.Get(layerElem.Pattern2 + 1)?.Component);// ?? _thickness?.Component;
 
                 float midX = (from.XPos + to.XPos) / 2;
                 float midY = (from.YPos + to.YPos) / 2;
@@ -815,12 +658,7 @@ namespace OpenTS2.Scenes.Lot
                 }
             }
 
-            foreach (PatternMesh pattern in _patterns)
-            {
-                pattern?.Component.Commit();
-            }
-
-            thicknessComp.Commit();
+            _patterns.CommitAll();
         }
 
         private void AddFencePosts()
@@ -834,14 +672,39 @@ namespace OpenTS2.Scenes.Lot
 
             FencePost[] entries = _architecture.FencePostLayer.Entries;
 
+            PatternMeshFloor meshFloor = null;
+            FenceCollection fence = null;
+            int previousFloor = -1;
+            uint lastGUID = 0;
+
             for (int i = 0; i < entries.Length; i++)
             {
                 ref FencePost entry = ref entries[i];
 
-                var fence = GetFence(entry.GUID);
+                int floor = entry.Level - baseFloor;
 
-                fence.AddPost(entry.XPos, entry.YPos, GetElevationInt(elevationData.Data[entry.Level - baseFloor], width, height, entry.XPos, entry.YPos));
+                if (floor != previousFloor)
+                {
+                    previousFloor = floor;
+
+                    meshFloor = _patterns.GetFloor(floor);
+
+                    lastGUID = 0;
+                }
+
+                if (entry.GUID != lastGUID)
+                {
+                    lastGUID = entry.GUID;
+                    fence = meshFloor.GetFence(entry.GUID);
+                }
+
+                fence.AddPost(entry.XPos, entry.YPos, GetElevationInt(elevationData.Data[floor], width, height, entry.XPos, entry.YPos));
             }
+        }
+
+        public void UpdateDisplay(WorldState state)
+        {
+            _patterns.UpdateDisplay(state, _architecture.BaseFloor, DisplayUpdateType.Wall);
         }
     }
 }

@@ -2,6 +2,7 @@ using OpenTS2.Common;
 using OpenTS2.Content.DBPF;
 using OpenTS2.Files.Formats.DBPF;
 using OpenTS2.Scenes.Lot.Roof;
+using OpenTS2.Scenes.Lot.State;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -39,6 +40,12 @@ namespace OpenTS2.Scenes.Lot
         public const int WaterHeightmapInstance = 15222;
         public const int BlendMaskBaseInstance = 0x5CBC;
         public const int TerrainUnknownInstance = 0x5CEE;
+
+        // Components
+        private LotRoofComponent _roofComponent;
+        private LotWallComponent _wallComponent;
+        private LotFloorComponent _floorComponent;
+        private LotTerrainComponent _terrainComponent;
 
         // Metadata
         public int BaseFloor { get; private set; }
@@ -154,20 +161,70 @@ namespace OpenTS2.Scenes.Lot
         public void CreateGameObjects(List<GameObject> componentList)
         {
             var roofObj = new GameObject("roof", typeof(LotRoofComponent));
-            roofObj.GetComponent<LotRoofComponent>().CreateFromLotArchitecture(this);
+            _roofComponent = roofObj.GetComponent<LotRoofComponent>().CreateFromLotArchitecture(this);
             componentList.Add(roofObj);
 
             var wall = new GameObject("wall", typeof(LotWallComponent));
-            wall.GetComponent<LotWallComponent>().CreateFromLotArchitecture(this);
+            _wallComponent = wall.GetComponent<LotWallComponent>().CreateFromLotArchitecture(this);
             componentList.Add(wall);
 
             var floor = new GameObject("floor", typeof(LotFloorComponent));
-            floor.GetComponent<LotFloorComponent>().CreateFromLotArchitecture(this);
+            _floorComponent = floor.GetComponent<LotFloorComponent>().CreateFromLotArchitecture(this);
             componentList.Add(floor);
 
             var terrain = new GameObject("terrain", typeof(LotTerrainComponent));
-            terrain.GetComponent<LotTerrainComponent>().CreateFromLotArchitecture(this);
+            _terrainComponent = terrain.GetComponent<LotTerrainComponent>().CreateFromLotArchitecture(this);
             componentList.Add(terrain);
+        }
+
+        private static int CalculateElevationIndex(int height, int x, int y)
+        {
+            return x * height + y;
+        }
+
+        private static float GetElevationInterp(float[] elevation, int width, int height, float x, float y)
+        {
+            int wm1 = width - 1;
+            int hm1 = height - 1;
+
+            x = Mathf.Clamp(x, 0, wm1);
+            y = Mathf.Clamp(y, 0, hm1);
+
+            float i0 = elevation[CalculateElevationIndex(height, (int)x, (int)y)];
+            float i1 = elevation[CalculateElevationIndex(height, Math.Min(wm1, (int)x + 1), (int)y)];
+            float j0 = elevation[CalculateElevationIndex(height, (int)x, Math.Min(hm1, (int)y + 1))];
+            float j1 = elevation[CalculateElevationIndex(height, Math.Min(wm1, (int)x + 1), Math.Min(hm1, (int)y + 1))];
+
+            float xi = x % 1;
+            float yi = y % 1;
+
+            return Mathf.Lerp(Mathf.Lerp(i0, i1, xi), Mathf.Lerp(j0, j1, xi), yi);
+        }
+
+        public int GetLevelAt(Vector3 position)
+        {
+            for (int i = 0; i < Elevation.Depth; i++)
+            {
+                float height = GetElevationInterp(Elevation.Data[i], Elevation.Width, Elevation.Height, position.x, position.y);
+
+                if (position.z < height)
+                {
+                    return Math.Max(0, i - 1) + BaseFloor;
+                }
+            }
+
+            return BaseFloor + Elevation.Depth - 1;
+        }
+
+        /// <summary>
+        /// Update the world state, which determines how architecture is displayed.
+        /// </summary>
+        /// <param name="state">New world state</param>
+        public void UpdateState(WorldState state)
+        {
+            _roofComponent.UpdateDisplay(state);
+            _wallComponent.UpdateDisplay(state);
+            _floorComponent.UpdateDisplay(state);
         }
     }
 }

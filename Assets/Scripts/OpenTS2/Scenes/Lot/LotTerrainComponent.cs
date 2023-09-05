@@ -34,7 +34,7 @@ namespace OpenTS2.Scenes.Lot
         private PatternMesh _terrain;
         private PatternMesh _water;
 
-        public void CreateFromLotArchitecture(LotArchitecture architecture)
+        public LotTerrainComponent CreateFromLotArchitecture(LotArchitecture architecture)
         {
             _architecture = architecture;
 
@@ -46,6 +46,8 @@ namespace OpenTS2.Scenes.Lot
             GenerateBlendBitmap();
 
             BindMaterialAndTextures();
+
+            return this;
         }
 
         private (ScenegraphTextureAsset color, ScenegraphTextureAsset bump) LoadTexture(ContentProvider contentProvider, string name)

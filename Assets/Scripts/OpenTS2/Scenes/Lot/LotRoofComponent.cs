@@ -8,20 +8,24 @@ using OpenTS2.Files.Formats.DBPF.Scenegraph.Block;
 using OpenTS2.Files.Formats.DBPF.Scenegraph;
 using OpenTS2.Scenes.Lot.Roof;
 using System.Collections.Generic;
+using System;
+using OpenTS2.Scenes.Lot.State;
 
 namespace OpenTS2.Scenes.Lot
 {
     public class LotRoofComponent : AssetReferenceComponent
     {
         private LotArchitecture _architecture;
-        private RoofGeometryCollection _geometry;
+        private PatternMeshCollection _patterns;
 
-        public void CreateFromLotArchitecture(LotArchitecture architecture)
+        public LotRoofComponent CreateFromLotArchitecture(LotArchitecture architecture)
         {
             _architecture = architecture;
 
             LoadPatterns(architecture.Roof.PatternGUID);
             BuildRoofs();
+
+            return this;
         }
 
         private ScenegraphMaterialDefinitionAsset GenerateMaterial(string textureName)
@@ -74,23 +78,30 @@ namespace OpenTS2.Scenes.Lot
                 return;
             }
 
-            _geometry = new RoofGeometryCollection(
-                new PatternMesh(gameObject, roof.TextureTop, GenerateMaterial(roof.TextureTop).GetAsUnityMaterial()),
-                new PatternMesh(gameObject, roof.TextureEdges, GenerateMaterial(roof.TextureEdges).GetAsUnityMaterial()),
-                new PatternMesh(gameObject, roof.TextureTrim, GenerateMaterial(roof.TextureTrim).GetAsUnityMaterial()),
-                new PatternMesh(gameObject, roof.TextureUnder, GenerateMaterial(roof.TextureUnder).GetAsUnityMaterial()));
+            _patterns = new PatternMeshCollection(gameObject,
+                new PatternDescriptor[]
+                {
+                    new PatternDescriptor(roof.TextureTop, GenerateMaterial(roof.TextureTop).GetAsUnityMaterial()),
+                    new PatternDescriptor(roof.TextureEdges, GenerateMaterial(roof.TextureEdges).GetAsUnityMaterial()),
+                    new PatternDescriptor(roof.TextureTrim, GenerateMaterial(roof.TextureTrim).GetAsUnityMaterial()),
+                    new PatternDescriptor(roof.TextureUnder, GenerateMaterial(roof.TextureUnder).GetAsUnityMaterial())
+                },
+                Array.Empty<PatternVariant>(),
+                _architecture.FloorPatterns.Depth);
         }
 
         public void BuildRoofs()
         {
-            if (_geometry.Valid())
-            {
-                _geometry.Clear();
+            _patterns.ClearAll();
 
-                _architecture.Roof.GenerateGeometry(_geometry);
+            _architecture.Roof.GenerateGeometry(_patterns, _architecture.BaseFloor);
 
-                _geometry.Commit();
-            }
+            _patterns.CommitAll();
+        }
+
+        public void UpdateDisplay(WorldState state)
+        {
+            _patterns.UpdateDisplay(state, _architecture.BaseFloor, DisplayUpdateType.Roof);
         }
     }
 }

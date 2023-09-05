@@ -2,7 +2,6 @@ using OpenTS2.Components;
 using System.Collections.Generic;
 using UnityEngine;
 
-
 namespace OpenTS2.Scenes.Lot
 {
     [RequireComponent(typeof(MeshFilter))]
@@ -16,6 +15,10 @@ namespace OpenTS2.Scenes.Lot
         private List<Vector2> _vertexUvBuilder = new List<Vector2>();
         private List<int> _indexBuilder = new List<int>();
 
+        private MeshRenderer _renderer;
+        private bool _enableShadows = true;
+        private bool _visible = true;
+
         public void Initialize(Material material)
         {
             Mesh = new Mesh();
@@ -23,9 +26,14 @@ namespace OpenTS2.Scenes.Lot
 
             GetComponent<MeshFilter>().sharedMesh = Mesh;
 
-            var meshRenderer = GetComponent<MeshRenderer>();
+            _renderer = GetComponent<MeshRenderer>();
 
-            meshRenderer.sharedMaterial = material;
+            _renderer.sharedMaterial = material;
+        }
+
+        public void EnableExtraUV()
+        {
+
         }
 
         public int GetVertexIndex()
@@ -80,12 +88,44 @@ namespace OpenTS2.Scenes.Lot
 
         public void EnableShadows(bool enable)
         {
-            var meshRenderer = GetComponent<MeshRenderer>();
+            _enableShadows = enable;
 
-            meshRenderer.shadowCastingMode = enable ? UnityEngine.Rendering.ShadowCastingMode.On : UnityEngine.Rendering.ShadowCastingMode.Off;
+            UpdateVisibility(true);
         }
 
-        public void Commit()
+        private void UpdateVisibility(bool shadowChange)
+        {
+            if (_enableShadows)
+            {
+                if (shadowChange)
+                {
+                    _renderer.enabled = true;
+                }
+
+                _renderer.shadowCastingMode = _visible ? UnityEngine.Rendering.ShadowCastingMode.On : UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
+            }
+            else
+            {
+                if (shadowChange)
+                {
+                    _renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                }
+
+                _renderer.enabled = _visible;
+            }
+        }
+
+        public void SetVisible(bool visible)
+        {
+            if (visible != _visible)
+            {
+                _visible = visible;
+
+                UpdateVisibility(false);
+            }
+        }
+
+        public bool Commit()
         {
             if (_vertexBuilder.Count > 65536 && Mesh.indexFormat == UnityEngine.Rendering.IndexFormat.UInt16)
             {
@@ -99,6 +139,8 @@ namespace OpenTS2.Scenes.Lot
             Mesh.RecalculateNormals();
             Mesh.RecalculateTangents();
             Mesh.RecalculateBounds();
+
+            return _vertexBuilder.Count > 0 || _indexBuilder.Count > 0;
         }
     }
 }

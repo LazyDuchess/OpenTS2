@@ -9,6 +9,7 @@ using OpenTS2.Content.DBPF.Scenegraph;
 using OpenTS2.Files;
 using OpenTS2.Files.Formats.DBPF;
 using OpenTS2.Scenes.Lot;
+using OpenTS2.Scenes.Lot.State;
 using UnityEditor;
 using UnityEngine;
 
@@ -19,10 +20,19 @@ namespace OpenTS2.Engine.Tests
         public string NeighborhoodPrefix = "N001";
         public int LotID = 82;
 
+        public int Floor = 5;
+        public WallsMode Mode = WallsMode.Roof;
+
+        public int BaseFloor => _architecture?.BaseFloor ?? 0;
+        public int MaxFloor => _architecture?.FloorPatterns.Depth ?? 1;
+
+        private WorldState _state = new WorldState(5, WallsMode.Roof);
+
         private string _nhood;
         private int _lotId;
 
         private List<GameObject> _lotObject = new List<GameObject>();
+        private List<GameObject> _testObjects = new List<GameObject>();
         private LotArchitecture _architecture;
 
         private void UnloadLot()
@@ -31,6 +41,9 @@ namespace OpenTS2.Engine.Tests
             {
                 Destroy(obj);
             }
+
+            _lotObject.Clear();
+            _testObjects.Clear();
         }
 
         private void Start()
@@ -55,6 +68,16 @@ namespace OpenTS2.Engine.Tests
             {
                 StartCoroutine(ReloadLot());
             }
+
+            WorldState state = new WorldState(Floor, Mode);
+
+            if (!state.Equals(_state))
+            {
+                _architecture.UpdateState(state);
+                UpdateObjectVisibility(state.Level);
+
+                _state = state;
+            }
         }
 
         System.Collections.IEnumerator ReloadLot()
@@ -65,6 +88,29 @@ namespace OpenTS2.Engine.Tests
             {
                 UnloadLot();
                 LoadLot(NeighborhoodPrefix, LotID);
+            }
+        }
+
+        private void SetObjectVisiblity(GameObject obj, bool visible)
+        {
+            foreach (MeshRenderer renderer in obj.GetComponentsInChildren<MeshRenderer>())
+            {
+                renderer.shadowCastingMode = visible ? UnityEngine.Rendering.ShadowCastingMode.On : UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
+            }
+
+            foreach (SkinnedMeshRenderer renderer in obj.GetComponentsInChildren<SkinnedMeshRenderer>())
+            {
+                renderer.shadowCastingMode = visible ? UnityEngine.Rendering.ShadowCastingMode.On : UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
+            }
+        }
+
+        private void UpdateObjectVisibility(int viewLevel)
+        {
+            foreach (GameObject obj in _testObjects)
+            {
+                int level = _architecture.GetLevelAt(obj.transform.GetChild(0).localPosition);
+
+                SetObjectVisiblity(obj, level < viewLevel);
             }
         }
 
@@ -111,6 +157,7 @@ namespace OpenTS2.Engine.Tests
                     model.transform.GetChild(0).localRotation = lotObject.Object.Rotation;
 
                     _lotObject.Add(model);
+                    _testObjects.Add(model);
                 }
                 catch (Exception e)
                 {
@@ -122,6 +169,9 @@ namespace OpenTS2.Engine.Tests
 
             _architecture.LoadFromPackage(lotPackage);
             _architecture.CreateGameObjects(_lotObject);
+
+            _state = new WorldState(_architecture.FloorPatterns.Depth, WallsMode.Roof);
+            _architecture.UpdateState(_state);
         }
     }
 
@@ -210,6 +260,12 @@ namespace OpenTS2.Engine.Tests
             {
                 test.LotID = LotIds[index];
             }
+
+            WallsMode walls = (WallsMode)EditorGUILayout.EnumPopup("Walls", test.Mode);
+            test.Mode = walls;
+
+            int floor = EditorGUILayout.IntSlider(test.Floor, 1, test.MaxFloor + test.BaseFloor);
+            test.Floor = floor;
 
             test.Changed();
         }

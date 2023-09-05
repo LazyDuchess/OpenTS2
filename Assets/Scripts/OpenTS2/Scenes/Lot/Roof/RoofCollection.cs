@@ -8,6 +8,11 @@ namespace OpenTS2.Scenes.Lot.Roof
     {
         public const uint DefaultGUID = 0x0cdcc049;
 
+        private const int RoofTopId = 0;
+        private const int RoofEdgesId = 1;
+        private const int RoofTrimId = 2;
+        private const int RoofUnderId = 3;
+
         public uint PatternGUID { get; private set; }
 
         private List<IRoofType> _roofs;
@@ -30,8 +35,10 @@ namespace OpenTS2.Scenes.Lot.Roof
 
             if (patternGuid == 0)
             {
-                PatternGUID = DefaultGUID;
+                patternGuid = DefaultGUID;
             }
+
+            PatternGUID = patternGuid;
         }
 
         private int CalculateElevationIndex(int x, int y)
@@ -163,10 +170,26 @@ namespace OpenTS2.Scenes.Lot.Roof
             return bestHeight == float.NegativeInfinity ? fallback : bestHeight - offset;
         }
 
-        public void GenerateGeometry(RoofGeometryCollection geo)
+        public void GenerateGeometry(PatternMeshCollection patterns, int baseFloor)
         {
+            int floor = -1;
+            RoofGeometryCollection geo = default;
+
             foreach (var roof in _roofs)
             {
+                if (floor != roof.RoofEntry.LevelFrom)
+                {
+                    floor = roof.RoofEntry.LevelFrom;
+
+                    PatternMeshFloor meshFloor = patterns.GetFloor(floor - baseFloor);
+                    geo = new RoofGeometryCollection(
+                        meshFloor.Get(RoofTopId),
+                        meshFloor.Get(RoofEdgesId),
+                        meshFloor.Get(RoofTrimId),
+                        meshFloor.Get(RoofUnderId)
+                    );
+                }
+
                 roof.GenerateGeometry(geo);
             }
         }
