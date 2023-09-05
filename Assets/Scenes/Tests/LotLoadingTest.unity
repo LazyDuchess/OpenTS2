@@ -251,6 +251,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   NeighborhoodPrefix: N001
   LotID: 82
+  Floor: 1
+  Mode: 3
 --- !u!1 &2081008752
 GameObject:
   m_ObjectHideFlags: 0
@@ -291,7 +293,7 @@ Light:
     m_CustomResolution: -1
     m_Strength: 1
     m_Bias: 0.05
-    m_NormalBias: 0.4
+    m_NormalBias: 0
     m_NearPlane: 0.2
     m_CullingMatrixOverride:
       e00: 1
