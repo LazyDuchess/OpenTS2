@@ -14,27 +14,13 @@ using UnityEngine;
 
 namespace OpenTS2.Scenes.Lot
 {
-    public static class WallType
-    {
-        public const int Normal = 1;
-        public const int ThinFence = 2; // unused?
-        public const int Roof = 3;
-        public const int DeckInvis = 4;
-        public const int Deck = 16;
-        public const int Foundation = 23;
-        public const int Deck2 = 24;
-        public const int Deck3 = 26;
-        public const int Pool = 29;
-        public const int OFBWall = 300;
-        public const int OFBScreen = 301;
-    }
-
-    public class LotWallComponent : AssetReferenceComponent
+    public class LotWallComponent : AssetReferenceComponent, IPatternMaterialConfigurator
     {
         private const string ThicknessTexture = "wall_top";
         private const string FallbackMaterial = "wall_wallboard";
         private const float HalfWallHeight = 1f;
         private const float WallHeight = 3f;
+        private const float WallsDownHeight = 0.2f;
         private const float YBias = 0.001f;
         private const float Thickness = 0.075f;
         private const float RoofOffset = Thickness * 2.5f;
@@ -81,6 +67,8 @@ namespace OpenTS2.Scenes.Lot
         private PatternMeshCollection _patterns;
 
         private Dictionary<int, WallIntersection> _intersections;
+
+        public bool ExtraUV => true;
 
         public LotWallComponent CreateFromLotArchitecture(LotArchitecture architecture)
         {
@@ -142,9 +130,10 @@ namespace OpenTS2.Scenes.Lot
 
                 try
                 {
+                    // Note: Sometimes walls use the standard material, but we want them to use a special shader for cutaways.
                     patterns[entry.Id + 1] = new PatternDescriptor(
                         materialName,
-                        material == null ? null : material?.GetAsUnityMaterial()
+                        material == null ? null : material?.GetAsUnityMaterial("Wallpaper")
                     );
                 }
                 catch (Exception e)
@@ -158,7 +147,7 @@ namespace OpenTS2.Scenes.Lot
                 LoadMaterial(contentProvider, ThicknessTexture).GetAsUnityMaterial()
             );
 
-            _patterns = new PatternMeshCollection(gameObject, patterns, Array.Empty<PatternVariant>(), _architecture.WallGraphAll.Floors);
+            _patterns = new PatternMeshCollection(gameObject, patterns, Array.Empty<PatternVariant>(), this, _architecture.WallGraphAll.Floors);
         }
 
         private bool IsWallThick(in WallLayerEntry elem)
@@ -181,7 +170,7 @@ namespace OpenTS2.Scenes.Lot
             }
         }
 
-        private bool IsDeck(int type)
+        private bool IsDeck(WallType type)
         {
             switch (type)
             {
@@ -196,7 +185,7 @@ namespace OpenTS2.Scenes.Lot
             }
         }
 
-        private bool IsFence(int type)
+        private bool IsFence(WallType type)
         {
             return (uint)type > 255;
         }
@@ -373,11 +362,17 @@ namespace OpenTS2.Scenes.Lot
             Vector3[] wallVertices = new Vector3[6];
             Vector3[] wallVertices2 = new Vector3[6];
             Vector3[] endVertices = new Vector3[4];
+
+            Vector2[] blankWallsDown = new Vector2[6];
+
             Vector2[] endUVs = new Vector2[4];
             Vector2[] wallUVs = new Vector2[6];
+            Vector2[] endWallsDown = new Vector2[4];
+            Vector2[] wallsDown = new Vector2[6];
 
             Vector3[] thicknessVerts = new Vector3[8];
             Vector2[] thicknessUVs = new Vector2[8];
+            Vector2[] thicknessWallsDown = new Vector2[8];
 
             int currentFloor = -1;
             float[] currentFloorElevation = null;
@@ -416,7 +411,7 @@ namespace OpenTS2.Scenes.Lot
                         Id = line.LayerId,
                         Pattern1 = 65535,
                         Pattern2 = 65535,
-                        WallType = 2
+                        WallType = WallType.ThinFence
                     };
 
                     // This shouldn't happen...
@@ -496,8 +491,11 @@ namespace OpenTS2.Scenes.Lot
                 wallUVs[4] = new Vector2(0.5f, bottomUVs ? (1 - midUV) : 0);
                 wallUVs[5] = new Vector2(0, bottomUVs ? (1 - startUV) : 0);
 
-                bool isThick = IsWallThick(layerElem);
+                wallsDown[3] = new Vector2(0, (wallVertices[3].y - wallVertices[2].y) - WallsDownHeight);
+                wallsDown[4] = new Vector2(0, (wallVertices[4].y - wallVertices[1].y) - WallsDownHeight);
+                wallsDown[5] = new Vector2(0, (wallVertices[5].y - wallVertices[0].y) - WallsDownHeight);
 
+                bool isThick = IsWallThick(layerElem);
 
                 if (!isThick && IsDeck(layerElem.WallType))
                 {
@@ -565,8 +563,17 @@ namespace OpenTS2.Scenes.Lot
                         thicknessUVs[j] = new Vector2(0, thicknessVerts[j].z);
                     }
 
+                    thicknessWallsDown[0] = wallsDown[5];
+                    thicknessWallsDown[1] = wallsDown[4];
+                    thicknessWallsDown[2] = wallsDown[3];
+                    thicknessWallsDown[3] = wallsDown[3];
+                    thicknessWallsDown[4] = wallsDown[4];
+                    thicknessWallsDown[5] = wallsDown[5];
+                    thicknessWallsDown[6] = wallsDown[5];
+                    thicknessWallsDown[7] = wallsDown[3];
+
                     int thicknessBase = thicknessComp.GetVertexIndex();
-                    thicknessComp.AddVertices(thicknessVerts, thicknessUVs);
+                    thicknessComp.AddVertices(thicknessVerts, thicknessUVs, thicknessWallsDown);
 
                     // Start to Mid
                     thicknessComp.AddTriangle(thicknessBase, 1, 0, 4);
@@ -584,7 +591,7 @@ namespace OpenTS2.Scenes.Lot
                 if (lPattern != null)
                 {
                     var lVertStart = lPattern.GetVertexIndex();
-                    lPattern.AddVertices(wallVertices, wallUVs);
+                    lPattern.AddVertices(wallVertices, wallUVs, isThick ? wallsDown : blankWallsDown);
 
                     // Start to Mid
                     lPattern.AddTriangle(lVertStart, 0, 5, 4);
@@ -603,7 +610,7 @@ namespace OpenTS2.Scenes.Lot
                     wallUVs[5].x = 1;
 
                     var rVertStart = rPattern.GetVertexIndex();
-                    rPattern.AddVertices(isThick ? wallVertices2 : wallVertices, wallUVs);
+                    rPattern.AddVertices(isThick ? wallVertices2 : wallVertices, wallUVs, isThick ? wallsDown : blankWallsDown);
 
                     // Start to Mid
                     rPattern.AddTriangle(rVertStart, 0, 1, 4);
@@ -615,46 +622,55 @@ namespace OpenTS2.Scenes.Lot
                 }
 
                 // Cap off wall ends.
-                if (toI.Simple && toI.IncomingLines.Count == 1 && rPattern != null)
+                if (isThick)
                 {
-                    float bottomV = (wallVertices[3].y - wallVertices[2].y) / WallHeight;
+                    if (toI.Simple && toI.IncomingLines.Count == 1 && rPattern != null)
+                    {
+                        float bottomV = (wallVertices[3].y - wallVertices[2].y) / WallHeight;
 
-                    endVertices[0] = wallVertices[2];
-                    endVertices[1] = wallVertices2[2];
-                    endVertices[2] = wallVertices2[3];
-                    endVertices[3] = wallVertices[3];
+                        endVertices[0] = wallVertices[2];
+                        endVertices[1] = wallVertices2[2];
+                        endVertices[2] = wallVertices2[3];
+                        endVertices[3] = wallVertices[3];
 
-                    endUVs[0] = new Vector2(1 - Thickness * 2, bottomV);
-                    endUVs[1] = new Vector2(1, bottomV);
-                    endUVs[2] = new Vector2(1, 0);
-                    endUVs[3] = new Vector2(1 - Thickness * 2, 0);
+                        endUVs[0] = new Vector2(1 - Thickness * 2, bottomV);
+                        endUVs[1] = new Vector2(1, bottomV);
+                        endUVs[2] = new Vector2(1, 0);
+                        endUVs[3] = new Vector2(1 - Thickness * 2, 0);
 
-                    var rVertStart = rPattern.GetVertexIndex();
-                    rPattern.AddVertices(endVertices, endUVs);
+                        endWallsDown[2] = wallsDown[3];
+                        endWallsDown[3] = wallsDown[3];
 
-                    rPattern.AddTriangle(rVertStart, 0, 3, 2);
-                    rPattern.AddTriangle(rVertStart, 2, 1, 0);
-                }
+                        var rVertStart = rPattern.GetVertexIndex();
+                        rPattern.AddVertices(endVertices, endUVs, endWallsDown);
 
-                if (fromI.Simple && fromI.IncomingLines.Count == 1 && lPattern != null)
-                {
-                    float bottomV = (wallVertices[5].y - wallVertices[0].y) / WallHeight;
+                        rPattern.AddTriangle(rVertStart, 0, 3, 2);
+                        rPattern.AddTriangle(rVertStart, 2, 1, 0);
+                    }
 
-                    endVertices[0] = wallVertices2[0];
-                    endVertices[1] = wallVertices[0];
-                    endVertices[2] = wallVertices[5];
-                    endVertices[3] = wallVertices2[5];
+                    if (fromI.Simple && fromI.IncomingLines.Count == 1 && lPattern != null)
+                    {
+                        float bottomV = (wallVertices[5].y - wallVertices[0].y) / WallHeight;
 
-                    endUVs[0] = new Vector2(1 - Thickness * 2, bottomV);
-                    endUVs[1] = new Vector2(1, bottomV);
-                    endUVs[2] = new Vector2(1, 0);
-                    endUVs[3] = new Vector2(1 - Thickness * 2, 0);
+                        endVertices[0] = wallVertices2[0];
+                        endVertices[1] = wallVertices[0];
+                        endVertices[2] = wallVertices[5];
+                        endVertices[3] = wallVertices2[5];
 
-                    var lVertStart = lPattern.GetVertexIndex();
-                    lPattern.AddVertices(endVertices, endUVs);
+                        endUVs[0] = new Vector2(1 - Thickness * 2, bottomV);
+                        endUVs[1] = new Vector2(1, bottomV);
+                        endUVs[2] = new Vector2(1, 0);
+                        endUVs[3] = new Vector2(1 - Thickness * 2, 0);
 
-                    lPattern.AddTriangle(lVertStart, 0, 3, 2);
-                    lPattern.AddTriangle(lVertStart, 2, 1, 0);
+                        endWallsDown[2] = wallsDown[5];
+                        endWallsDown[3] = wallsDown[5];
+
+                        var lVertStart = lPattern.GetVertexIndex();
+                        lPattern.AddVertices(endVertices, endUVs, endWallsDown);
+
+                        lPattern.AddTriangle(lVertStart, 0, 3, 2);
+                        lPattern.AddTriangle(lVertStart, 2, 1, 0);
+                    }
                 }
             }
 
@@ -705,6 +721,21 @@ namespace OpenTS2.Scenes.Lot
         public void UpdateDisplay(WorldState state)
         {
             _patterns.UpdateDisplay(state, _architecture.BaseFloor, DisplayUpdateType.Wall);
+        }
+
+        public void Configure(WorldState state, bool visible, bool isTop, Material mat)
+        {
+            bool areWallsDown = isTop && state.Walls <= WallsMode.Cutaway;
+
+            mat.SetTexture("_WallsDownTex", areWallsDown ? Texture2D.whiteTexture : Texture2D.blackTexture);
+            mat.SetVector("_InvLotSize", new Vector4(1f / _architecture.FloorPatterns.Width, 1f / _architecture.FloorPatterns.Height, 0, 0));
+        }
+
+        public void AlterMeshBounds(Mesh mesh)
+        {
+            Bounds bounds = mesh.bounds;
+            bounds.Encapsulate(bounds.max - new Vector3(0, WallHeight, 0));
+            mesh.bounds = bounds;
         }
     }
 }

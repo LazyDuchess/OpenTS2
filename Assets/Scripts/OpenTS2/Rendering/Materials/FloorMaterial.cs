@@ -14,7 +14,7 @@ namespace OpenTS2.Rendering.Materials
 
         public override Material Parse(ScenegraphMaterialDefinitionAsset definition)
         {
-            // Includes floorMaterialScaleU and floorMaterialScaleV, currently unhandled.
+            // Includes floorMaterialScaleU and floorMaterialScaleV, currently included in the StandardMaterial.
             var material = base.Parse(definition);
 
             float u = float.Parse(definition.GetProperty("floorMaterialScaleU", defaultValue: "1.0"));

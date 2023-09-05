@@ -125,7 +125,7 @@ namespace OpenTS2.Scenes.Lot
             if (_blendMasks == null)
             {
                 _blendMasks = new Texture2DArray(maskWidth, maskHeight, blendMaskData.Length, TextureFormat.R8, false);
-                _blendMasks.wrapMode = TextureWrapMode.Clamp;
+                _blendMasks.wrapMode = TextureWrapMode.Repeat;
             }
 
             int i = 0;
@@ -355,7 +355,7 @@ namespace OpenTS2.Scenes.Lot
                 // This is RUint, but for some reason that is not a choice, so we cast in the shader.
                 _blendBitmap = new Texture2D(bitmapWidth, bitmapHeight, TextureFormat.RFloat, false);
                 _blendBitmap.filterMode = FilterMode.Point;
-                _blendBitmap.wrapMode = TextureWrapMode.Clamp;
+                _blendBitmap.wrapMode = TextureWrapMode.Repeat;
             }
 
             _blendBitmap.SetPixelData(blendDataF, 0);

@@ -7,6 +7,11 @@ namespace OpenTS2.Rendering.Materials
     {
         public override string Name => "Wallpaper";
 
+        protected override Shader GetShader(ScenegraphMaterialDefinitionAsset definition)
+        {
+            return Shader.Find("OpenTS2/StandardMaterial/Wall");
+        }
+
         public override Material Parse(ScenegraphMaterialDefinitionAsset definition)
         {
             // TODO: mask

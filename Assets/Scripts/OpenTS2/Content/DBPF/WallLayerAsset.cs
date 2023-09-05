@@ -2,10 +2,25 @@ using System.Collections.Generic;
 
 namespace OpenTS2.Content.DBPF
 {
+    public enum WallType : int
+    {
+        Normal = 1,
+        ThinFence = 2, // unused?
+        Roof = 3,
+        DeckInvis = 4,
+        Deck = 16,
+        Foundation = 23,
+        Deck2 = 24,
+        Deck3 = 26,
+        Pool = 29,
+        OFBWall = 300,
+        OFBScreen = 301
+    }
+
     public struct WallLayerEntry
     {
         public int Id;
-        public int WallType; // 1/3?
+        public WallType WallType;
         public ushort Pattern1;
         public ushort Pattern2;
 

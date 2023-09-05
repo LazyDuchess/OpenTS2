@@ -18,12 +18,14 @@ namespace OpenTS2.Scenes.Lot
         private PatternVariant[] _variants;
 
         private PatternMeshFloor[] _floors;
+        private IPatternMaterialConfigurator _matConfig;
 
-        public PatternMeshCollection(GameObject parent, PatternDescriptor[] patterns, PatternVariant[] variants, int floorCount)
+        public PatternMeshCollection(GameObject parent, PatternDescriptor[] patterns, PatternVariant[] variants, IPatternMaterialConfigurator matConfig, int floorCount)
         {
             _parent = parent;
             _patterns = patterns;
             _variants = variants;
+            _matConfig = matConfig;
 
             _floors = new PatternMeshFloor[floorCount];
         }
@@ -42,7 +44,7 @@ namespace OpenTS2.Scenes.Lot
 
             if (result == null)
             {
-                result = new PatternMeshFloor(_parent, floor, _variants, _patterns);
+                result = new PatternMeshFloor(_parent, floor, _variants, _patterns, _matConfig);
 
                 _floors[floor] = result;
             }
@@ -88,11 +90,6 @@ namespace OpenTS2.Scenes.Lot
                 {
                     topLevel = -1;
                 }
-            }
-            else if (type == DisplayUpdateType.Wall && state.Walls < WallsMode.Up)
-            {
-                // Temporary - the vertex shader should be doing this.
-                topLevel--;
             }
 
             for (int i = 0; i < _floors.Length; i++)

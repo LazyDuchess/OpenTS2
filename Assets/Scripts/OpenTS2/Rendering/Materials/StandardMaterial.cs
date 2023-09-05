@@ -21,22 +21,26 @@ namespace OpenTS2.Rendering.Materials
         private static readonly int DiffuseCoefficient = Shader.PropertyToID("_DiffuseCoefficient");
         private static readonly int BumpMap = Shader.PropertyToID("_BumpMap");
 
-        public override Material Parse(ScenegraphMaterialDefinitionAsset definition)
+        protected virtual Shader GetShader(ScenegraphMaterialDefinitionAsset definition)
         {
-            Shader shader;
             // Decide which shader to use based on the alpha blending and alpha testing.
             if (definition.GetProperty("stdMatAlphaTestEnabled", defaultValue: "0") == "1")
             {
-                shader = Shader.Find("OpenTS2/StandardMaterial/AlphaCutOut");
+                return Shader.Find("OpenTS2/StandardMaterial/AlphaCutOut");
             }
             else if (definition.GetProperty("stdMatAlphaBlendMode", defaultValue: "none") == "blend")
             {
-                shader = Shader.Find("OpenTS2/StandardMaterial/AlphaBlended");
+                return Shader.Find("OpenTS2/StandardMaterial/AlphaBlended");
             }
             else
             {
-                shader = Shader.Find("OpenTS2/StandardMaterial/Opaque");
+                return Shader.Find("OpenTS2/StandardMaterial/Opaque");
             }
+        }
+
+        public override Material Parse(ScenegraphMaterialDefinitionAsset definition)
+        {
+            Shader shader = GetShader(definition);
 
             var material = new Material(shader);
             var bumpMapEnabled = false;

@@ -42,13 +42,13 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             _material.Free();
         }
 
-        public Material GetAsUnityMaterial()
+        public Material GetAsUnityMaterial(string forceType = null)
         {
             if (_material != null)
             {
                 return _material;
             }
-            _material = MaterialManager.Parse(this);
+            _material = MaterialManager.Parse(this, forceType);
             return _material;
         }
     }

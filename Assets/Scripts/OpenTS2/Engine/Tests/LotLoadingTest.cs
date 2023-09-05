@@ -170,7 +170,9 @@ namespace OpenTS2.Engine.Tests
             _architecture.LoadFromPackage(lotPackage);
             _architecture.CreateGameObjects(_lotObject);
 
-            _state = new WorldState(_architecture.FloorPatterns.Depth, WallsMode.Roof);
+            Floor = MaxFloor + BaseFloor;
+            Mode = WallsMode.Roof;
+            _state = new WorldState(Floor, Mode);
             _architecture.UpdateState(_state);
         }
     }

@@ -45,9 +45,9 @@ namespace OpenTS2.Rendering
             Batching.MarkShadersNoBatching("OpenTS2/LotImposterRoof");
         }
 
-        public static Material Parse(ScenegraphMaterialDefinitionAsset definition)
+        public static Material Parse(ScenegraphMaterialDefinitionAsset definition, string forceType)
         {
-            if (!s_materials.TryGetValue(definition.MaterialDefinition.Type, out AbstractMaterial material))
+            if (!s_materials.TryGetValue(forceType ?? definition.MaterialDefinition.Type, out AbstractMaterial material))
                 throw new KeyNotFoundException($"Can't find material type {definition.MaterialDefinition.Type} for {definition.MaterialDefinition.MaterialName}");
             return material.Parse(definition);
         }

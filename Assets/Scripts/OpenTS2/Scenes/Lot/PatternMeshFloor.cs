@@ -22,13 +22,11 @@ namespace OpenTS2.Scenes.Lot
     {
         public readonly string Name;
         public readonly Func<Material, Material> MaterialTransform;
-        public readonly bool ExtraUV;
 
-        public PatternVariant(string name, Func<Material, Material> materialTransform = null, bool extraUV = false)
+        public PatternVariant(string name, Func<Material, Material> materialTransform = null)
         {
             Name = name;
             MaterialTransform = materialTransform;
-            ExtraUV = extraUV;
         }
     }
 
@@ -44,12 +42,15 @@ namespace OpenTS2.Scenes.Lot
 
         private Dictionary<uint, FenceCollection> _fenceByGuid;
 
-        public PatternMeshFloor(GameObject parent, int id, PatternVariant[] variants, PatternDescriptor[] patterns)
+        private IPatternMaterialConfigurator _matConfig;
+
+        public PatternMeshFloor(GameObject parent, int id, PatternVariant[] variants, PatternDescriptor[] patterns, IPatternMaterialConfigurator matConfig)
         {
             Object = new GameObject($"Floor {id}");
             Object.transform.SetParent(parent.transform);
 
             _variants = variants;
+            _matConfig = matConfig;
 
             UpdatePatterns(patterns);
         }
@@ -87,11 +88,11 @@ namespace OpenTS2.Scenes.Lot
                         Object,
                         $"{descriptor.Name}_{variant.Name}",
                         variant.MaterialTransform != null ? variant.MaterialTransform(descriptor.Material) : descriptor.Material,
-                        variant.ExtraUV);
+                        _matConfig);
                 }
                 else
                 {
-                    result = new PatternMesh(Object, descriptor.Name, descriptor.Material);
+                    result = new PatternMesh(Object, descriptor.Name, descriptor.Material, _matConfig);
                 }
 
                 _patternMeshes[key] = result;

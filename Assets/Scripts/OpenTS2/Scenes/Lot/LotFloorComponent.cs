@@ -123,7 +123,7 @@ namespace OpenTS2.Scenes.Lot
                 GenerateMaterial(ThicknessTexture).GetAsUnityMaterial()
             );
 
-            _patterns = new PatternMeshCollection(gameObject, patterns, Array.Empty<PatternVariant>(), _architecture.FloorPatterns.Depth);
+            _patterns = new PatternMeshCollection(gameObject, patterns, Array.Empty<PatternVariant>(), null, _architecture.FloorPatterns.Depth);
         }
 
         private void BuildFloorMeshes()

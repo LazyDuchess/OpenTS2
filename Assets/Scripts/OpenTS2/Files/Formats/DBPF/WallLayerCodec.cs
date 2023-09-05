@@ -48,7 +48,7 @@ namespace OpenTS2.Files.Formats.DBPF
                 entries[i] = new WallLayerEntry()
                 {
                     Id = reader.ReadInt32(),
-                    WallType = reader.ReadInt32(),
+                    WallType = (WallType)reader.ReadInt32(),
                     Pattern1 = reader.ReadUInt16(),
                     Pattern2 = reader.ReadUInt16()
                 };

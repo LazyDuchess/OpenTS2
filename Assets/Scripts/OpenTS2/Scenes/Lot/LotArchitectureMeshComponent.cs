@@ -13,6 +13,7 @@ namespace OpenTS2.Scenes.Lot
 
         private List<Vector3> _vertexBuilder = new List<Vector3>();
         private List<Vector2> _vertexUvBuilder = new List<Vector2>();
+        private List<Vector2> _vertexUv2Builder;
         private List<int> _indexBuilder = new List<int>();
 
         private MeshRenderer _renderer;
@@ -33,7 +34,7 @@ namespace OpenTS2.Scenes.Lot
 
         public void EnableExtraUV()
         {
-
+            _vertexUv2Builder ??= new List<Vector2>();
         }
 
         public int GetVertexIndex()
@@ -51,6 +52,13 @@ namespace OpenTS2.Scenes.Lot
         {
             _vertexBuilder.AddRange(vertices);
             _vertexUvBuilder.AddRange(uvs);
+        }
+
+        public void AddVertices(Vector3[] vertices, Vector2[] uvs, Vector2[] uvs2)
+        {
+            _vertexBuilder.AddRange(vertices);
+            _vertexUvBuilder.AddRange(uvs);
+            _vertexUv2Builder.AddRange(uvs2);
         }
 
         public void AddTriangle(int baseVertex, int a, int b, int c)
@@ -134,6 +142,10 @@ namespace OpenTS2.Scenes.Lot
 
             Mesh.SetVertices(_vertexBuilder);
             Mesh.SetUVs(0, _vertexUvBuilder);
+            if (_vertexUv2Builder != null)
+            {
+                Mesh.SetUVs(1, _vertexUv2Builder);
+            }
             Mesh.SetIndices(_indexBuilder, MeshTopology.Triangles, 0);
 
             Mesh.RecalculateNormals();

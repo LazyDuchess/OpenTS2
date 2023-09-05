@@ -87,6 +87,7 @@ namespace OpenTS2.Scenes.Lot
                     new PatternDescriptor(roof.TextureUnder, GenerateMaterial(roof.TextureUnder).GetAsUnityMaterial())
                 },
                 Array.Empty<PatternVariant>(),
+                null,
                 _architecture.FloorPatterns.Depth);
         }
 

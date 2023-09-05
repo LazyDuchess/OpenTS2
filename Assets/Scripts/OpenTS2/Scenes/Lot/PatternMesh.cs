@@ -4,6 +4,13 @@ using UnityEngine;
 
 namespace OpenTS2.Scenes.Lot
 {
+    public interface IPatternMaterialConfigurator
+    {
+        public bool ExtraUV { get; }
+        public void Configure(WorldState state, bool visible, bool isTop, Material mat);
+        public void AlterMeshBounds(Mesh mesh);
+    }
+
     public class PatternMesh
     {
         public GameObject Object;
@@ -12,22 +19,24 @@ namespace OpenTS2.Scenes.Lot
         private string _name;
         private Material _material;
         private Dictionary<Texture2D, PatternMesh> _maskMeshes;
+        private IPatternMaterialConfigurator _matConfig;
 
-        public PatternMesh(GameObject parent, string name, Material material, bool extraUV = false)
+        public PatternMesh(GameObject parent, string name, Material material, IPatternMaterialConfigurator matConfig = null)
         {
             _name = name;
-            _material = material;
+            _material = new Material(material);
+            _matConfig = matConfig;
 
             Object = new GameObject(name, typeof(LotArchitectureMeshComponent));
             Component = Object.GetComponent<LotArchitectureMeshComponent>();
 
-            if (extraUV)
+            if (matConfig?.ExtraUV == true)
             {
                 Component.EnableExtraUV();
             }
 
             Object.transform.SetParent(parent.transform);
-            Component.Initialize(material);
+            Component.Initialize(_material);
         }
 
         public PatternMesh GetForMask(Texture2D mask)
@@ -38,7 +47,7 @@ namespace OpenTS2.Scenes.Lot
             {
                 Material material = new Material(_material);
 
-                // TODO: Bind the mask as a mask texture.
+                material.SetTexture("_TexMask", mask);
 
                 mesh = new PatternMesh(Object, $"{_name}_mask_{mask.GetHashCode():x8}", material);
             }
@@ -67,6 +76,11 @@ namespace OpenTS2.Scenes.Lot
 
             hasData |= Component.Commit();
 
+            if (hasData)
+            {
+                _matConfig?.AlterMeshBounds(Component.Mesh);
+            }
+
             if (_maskMeshes != null)
             {
                 foreach (PatternMesh pattern in _maskMeshes.Values)
@@ -80,8 +94,17 @@ namespace OpenTS2.Scenes.Lot
 
         public void UpdateDisplay(WorldState state, bool visible, bool isTop)
         {
-            // TODO: Walls cutaway
+            _matConfig?.Configure(state, visible, isTop, _material);
+
             Component.SetVisible(visible);
+
+            if (_maskMeshes != null)
+            {
+                foreach (PatternMesh pattern in _maskMeshes.Values)
+                {
+                    pattern.UpdateDisplay(state, visible, isTop);
+                }
+            }
         }
     }
 }
