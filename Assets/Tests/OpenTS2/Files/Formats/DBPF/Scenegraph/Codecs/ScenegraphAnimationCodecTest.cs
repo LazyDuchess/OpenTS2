@@ -120,6 +120,7 @@ public class ScenegraphAnimationCodecTest
             .GetAsset<ScenegraphAnimationAsset>(new ResourceKey("a2o-exerciseMachine-benchPress-start_anim", GroupIDs.Scenegraph,
                 TypeIDs.SCENEGRAPH_ANIM));
 
+        Assert.That(animationAsset.AnimResource.IsFullyBodySkeletal, Is.EqualTo(true));
         Assert.That(animationAsset.AnimResource.LocomotionType, Is.EqualTo(0));
         Assert.That(animationAsset.AnimResource.HeadingOffset, Is.EqualTo(-1.570).Within(0.001));
         Assert.That(animationAsset.AnimResource.TurnRotation, Is.EqualTo(0.0));
@@ -129,6 +130,15 @@ public class ScenegraphAnimationCodecTest
         var skeletonTarget = animationAsset.AnimResource.AnimTargets[0];
         Assert.That(skeletonTarget.TagName, Is.EqualTo("auskel"));
         Assert.That(skeletonTarget.AnimType, Is.EqualTo(1));
+
+        var rootTransChannels = GetChannelsByName(skeletonTarget, "root_trans");
+        Assert.That(rootTransChannels.Length, Is.EqualTo(2));
+        Assert.That(rootTransChannels[0].AnimatedAttribute, Is.EqualTo(AnimResourceConstBlock.AnimatedAttribute.ContactIk));
+        Assert.That(rootTransChannels[0].Type, Is.EqualTo(AnimResourceConstBlock.ChannelType.Float1));
+        Assert.That(rootTransChannels[0].IsBaseDataReturned, Is.EqualTo(true));
+        Assert.That(rootTransChannels[1].AnimatedAttribute, Is.EqualTo(AnimResourceConstBlock.AnimatedAttribute.Transform));
+        Assert.That(rootTransChannels[1].Type, Is.EqualTo(AnimResourceConstBlock.ChannelType.TransformXYZ));
+        Assert.That(rootTransChannels[1].IsBaseDataReturned, Is.EqualTo(true));
 
         var leftHandChannels = GetChannelsByName(skeletonTarget, "l_handcontrol0");
         Assert.That(leftHandChannels.Length, Is.EqualTo(2));

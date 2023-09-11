@@ -24,6 +24,10 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
 
         public ScenegraphResource ScenegraphResource { get; }
 
+        private byte Flags { get; }
+
+        public bool IsFullyBodySkeletal => (Flags & 1) == 1;
+
         public byte LocomotionType { get; }
         public float HeadingOffset { get; }
         public float TurnRotation { get; }
@@ -38,10 +42,12 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
         public AnimTarget[] AnimTargets { get; }
 
         public AnimResourceConstBlock(PersistTypeInfo blockTypeInfo, ScenegraphResource scenegraphResource,
+            byte flags,
             byte locomotionType, float headingOffset, float locomotionDistance, float velocity, float turnRotation,
             AnimTarget[] animTargets) : base(blockTypeInfo)
         {
             ScenegraphResource = scenegraphResource;
+            Flags = flags;
             LocomotionType = locomotionType;
             HeadingOffset = headingOffset;
             TurnRotation = turnRotation;
@@ -672,7 +678,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                 var eventDataString = reader.ReadNullTerminatedString();
             }
 
-            return new AnimResourceConstBlock(blockTypeInfo, resource, locomotionType, headingOffset, locomotionDistance,
+            return new AnimResourceConstBlock(blockTypeInfo, resource, flags, locomotionType, headingOffset, locomotionDistance,
                 velocityMPT, turnRotation, animTargets);
         }
 
