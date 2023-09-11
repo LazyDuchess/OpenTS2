@@ -126,6 +126,7 @@ public class ScenegraphAnimationCodecTest
 
         var skeletonTarget = animationAsset.AnimResource.AnimTargets[0];
         Assert.That(skeletonTarget.TagName, Is.EqualTo("auskel"));
+        Assert.That(skeletonTarget.AnimType, Is.EqualTo(1));
 
         var leftHandChannels = GetChannelsByName(skeletonTarget, "l_handcontrol0");
         Assert.That(leftHandChannels.Length, Is.EqualTo(2));

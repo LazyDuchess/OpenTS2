@@ -58,6 +58,8 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
         {
             public string TagName;
 
+            public ushort AnimType;
+
             public int NumSharedChannels;
             public SharedChannel[] Channels;
 
@@ -489,7 +491,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                 // 2 ignored uint32s
                 reader.ReadBytes(4 * 2);
 
-                var animType = reader.ReadUInt16();
+                animTargets[i].AnimType = reader.ReadUInt16();
                 animTargets[i].NumSharedChannels = reader.ReadUInt16();
                 animTargets[i].NumIKChains = reader.ReadByte();
                 var channelType = reader.ReadByte();
