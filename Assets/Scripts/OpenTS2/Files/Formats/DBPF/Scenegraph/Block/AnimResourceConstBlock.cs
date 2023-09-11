@@ -123,6 +123,8 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
 
             public uint DurationTicks => ChannelFlags & 0x7FFF; // Bottom 15 bits give the channel duration.
 
+            public bool IsBaseDataReturned => ((ChannelFlags >> 15) & 1) == 1; // 16th bit, unknown what this means.
+
             private uint AnimatedAttributeIdx => (ChannelFlags >> 17) & 0b11111; // Bits 1 to 6 of the 3rd byte.
             /// <summary>
             /// Which attribute of the bone this channel animates, e.g the translation or the rotation.

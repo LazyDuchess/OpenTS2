@@ -54,6 +54,7 @@ public class ScenegraphAnimationCodecTest
         Assert.That(translationChannel.Type, Is.EqualTo(AnimResourceConstBlock.ChannelType.TransformXYZ));
         Assert.That(translationChannel.IKChainIdx, Is.EqualTo(-1)); // No ik chain for this channel.
         Assert.That(translationChannel.AnimatedAttribute, Is.EqualTo(AnimResourceConstBlock.AnimatedAttribute.Transform));
+        Assert.That(translationChannel.IsBaseDataReturned, Is.EqualTo(true));
         // Since we have an XYZ animation, there should be one component per axis.
         Assert.That(translationChannel.Components.Length, Is.EqualTo(3));
         Assert.That(translationChannel.DurationTicks, Is.EqualTo(286));
@@ -85,6 +86,7 @@ public class ScenegraphAnimationCodecTest
         Assert.That(bodyRotation.Type, Is.EqualTo(AnimResourceConstBlock.ChannelType.EulerRotation));
         Assert.That(bodyRotation.IKChainIdx, Is.EqualTo(-1)); // No ik chain for this channel.
         Assert.That(bodyRotation.AnimatedAttribute, Is.EqualTo(AnimResourceConstBlock.AnimatedAttribute.Rotation));
+        Assert.That(bodyRotation.IsBaseDataReturned, Is.EqualTo(true));
         // One component per axis: roll, pitch, yaw.
         Assert.That(bodyRotation.Components.Length, Is.EqualTo(3));
         Assert.That(bodyRotation.DurationTicks, Is.EqualTo(286));
@@ -132,8 +134,10 @@ public class ScenegraphAnimationCodecTest
         Assert.That(leftHandChannels.Length, Is.EqualTo(2));
         Assert.That(leftHandChannels[0].AnimatedAttribute, Is.EqualTo(AnimResourceConstBlock.AnimatedAttribute.Rotation));
         Assert.That(leftHandChannels[0].Type, Is.EqualTo(AnimResourceConstBlock.ChannelType.EulerRotation));
+        Assert.That(leftHandChannels[0].IsBaseDataReturned, Is.EqualTo(true));
         Assert.That(leftHandChannels[1].AnimatedAttribute, Is.EqualTo(AnimResourceConstBlock.AnimatedAttribute.Transform));
         Assert.That(leftHandChannels[1].Type, Is.EqualTo(AnimResourceConstBlock.ChannelType.TransformXYZ));
+        Assert.That(leftHandChannels[1].IsBaseDataReturned, Is.EqualTo(true));
 
         var leftHandContactChannels = GetChannelsByName(skeletonTarget, "l_handcontrol0_a");
         Assert.That(leftHandContactChannels.Length, Is.EqualTo(1));
