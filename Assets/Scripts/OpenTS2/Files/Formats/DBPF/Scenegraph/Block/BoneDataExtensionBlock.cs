@@ -45,7 +45,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             Quaternion jointOrientation = Quaternion.identity;
             if (blockTypeInfo.Version > 3)
             {
-                jointOrientation = QuaterionSerialzier.Deserialize(reader);
+                jointOrientation = QuaternionSerializer.Deserialize(reader);
             }
 
             return new BoneDataExtensionBlock(blockTypeInfo, headingOffsetAxis, mirrorAxis, stretchAxis, stretchFactor,

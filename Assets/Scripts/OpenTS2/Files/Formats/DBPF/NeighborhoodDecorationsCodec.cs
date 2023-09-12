@@ -142,7 +142,7 @@ namespace OpenTS2.Files.Formats.DBPF
                 var objectVersion = reader.ReadByte();
 
                 var positionOffset = Vector3Serializer.Deserialize(reader);
-                var modelOrientation = QuaterionSerialzier.Deserialize(reader);
+                var modelOrientation = QuaternionSerializer.Deserialize(reader);
                 // unknown
                 var unknown = Vector3Serializer.Deserialize(reader);
 

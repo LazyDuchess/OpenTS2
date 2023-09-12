@@ -278,7 +278,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             var bindPoses = new GeometryDataContainerBlock.BindPose[reader.ReadUInt32()];
             for (var i = 0; i < bindPoses.Length; i++)
             {
-                var rotation = QuaterionSerialzier.Deserialize(reader);
+                var rotation = QuaternionSerializer.Deserialize(reader);
                 var position = Vector3Serializer.Deserialize(reader);
                 bindPoses[i] = new GeometryDataContainerBlock.BindPose(position, rotation);
             }

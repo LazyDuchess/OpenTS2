@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using OpenTS2.Common.Utils;
 using OpenTS2.Files.Formats.DBPF.Scenegraph.Block;
+using OpenTS2.Files.Formats.DBPF.Types;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 
@@ -103,15 +104,41 @@ namespace OpenTS2.Content.DBPF.Scenegraph
         {
             if (channel.Type == AnimResourceConstBlock.ChannelType.EulerRotation)
             {
-                var curveX =
-                    new AnimationCurve(CreateKeyFramesForComponent(channel.DurationTicks, channel.Components[0]));
-                clip.SetCurve(relativePathToBone, typeof(Transform), "localEulerAngles.x", curveX);
-                var curveY =
-                    new AnimationCurve(CreateKeyFramesForComponent(channel.DurationTicks, channel.Components[1]));
-                clip.SetCurve(relativePathToBone, typeof(Transform), "localEulerAngles.y", curveY);
-                var curveZ =
-                    new AnimationCurve(CreateKeyFramesForComponent(channel.DurationTicks, channel.Components[2]));
-                clip.SetCurve(relativePathToBone, typeof(Transform), "localEulerAngles.z", curveZ);
+                var xFrames = CreateKeyFramesForComponent(channel.DurationTicks, channel.Components[0]);
+                var yFrames = CreateKeyFramesForComponent(channel.DurationTicks, channel.Components[1]);
+                var zFrames = CreateKeyFramesForComponent(channel.DurationTicks, channel.Components[2]);
+                var curveX = new AnimationCurve(xFrames);
+                var curveY = new AnimationCurve(yFrames);
+                var curveZ = new AnimationCurve(zFrames);
+
+                var quatX = new Keyframe[xFrames.Length];
+                var quatY = new Keyframe[xFrames.Length];
+                var quatZ = new Keyframe[xFrames.Length];
+                var quatW = new Keyframe[xFrames.Length];
+
+                // Convert from xyz euler rotations to quaternions.
+                for (var i = 0; i < curveX.keys.Length; i++)
+                {
+                    var xFrame = curveX.keys[i];
+                    var t = xFrame.time;
+                    var (y, z) = (curveY.Evaluate(t), curveZ.Evaluate(t));
+                    var quat = QuaternionSerializer.FromSims2EulerRotationDegrees(xFrame.value, y, z);
+
+                    quatX[i] = new Keyframe(t, quat.x);
+                    quatY[i] = new Keyframe(t, quat.y);
+                    quatZ[i] = new Keyframe(t, quat.z);
+                    quatW[i] = new Keyframe(t, quat.w);
+                }
+
+                curveX = new AnimationCurve(quatX);
+                curveY = new AnimationCurve(quatY);
+                curveZ = new AnimationCurve(quatZ);
+                var curveW = new AnimationCurve(quatW);
+
+                clip.SetCurve(relativePathToBone, typeof(Transform), "localRotation.x", curveX);
+                clip.SetCurve(relativePathToBone, typeof(Transform), "localRotation.y", curveY);
+                clip.SetCurve(relativePathToBone, typeof(Transform), "localRotation.z", curveZ);
+                clip.SetCurve(relativePathToBone, typeof(Transform), "localRotation.w", curveW);
             }
             else if (channel.Type == AnimResourceConstBlock.ChannelType.TransformXYZ)
             {

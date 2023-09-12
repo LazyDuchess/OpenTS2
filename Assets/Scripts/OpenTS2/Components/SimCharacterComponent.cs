@@ -265,7 +265,7 @@ namespace OpenTS2.Components
                 tip = tip,
                 target = Scenegraph.BoneCRC32ToTransform[target.TranslationCrc],
                 targetPositionWeight = 1.0f,
-                targetRotationWeight = 0.0f,
+                targetRotationWeight = 1.0f,
                 hintWeight = 1.0f,
             };
 

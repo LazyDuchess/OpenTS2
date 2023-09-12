@@ -43,7 +43,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
             var compositionTree = CompositionTreeNodeBlock.Deserialize(reader);
 
             var transform = Vector3Serializer.Deserialize(reader);
-            var rotation = QuaterionSerialzier.Deserialize(reader);
+            var rotation = QuaternionSerializer.Deserialize(reader);
             var boneId = reader.ReadUInt32();
             return new TransformNodeBlock(blockTypeInfo, compositionTree, transform, rotation, boneId);
         }

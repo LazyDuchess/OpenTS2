@@ -61,14 +61,14 @@ namespace OpenTS2.Files.Formats.DBPF
             }
 
             var position = Vector3Serializer.Deserialize(reader);
-            var rotation = QuaterionSerialzier.Deserialize(reader);
+            var rotation = QuaternionSerializer.Deserialize(reader);
 
             var numBones = reader.ReadUInt32();
             for (var i = 0; i < numBones; i++)
             {
                 var boneName = reader.ReadVariableLengthPascalString();
                 var bonePosition = Vector3Serializer.Deserialize(reader);
-                var boneRotation = QuaterionSerialzier.Deserialize(reader);
+                var boneRotation = QuaternionSerializer.Deserialize(reader);
             }
 
             return new LotObjectAsset.LotObject(resourceName, position, rotation);

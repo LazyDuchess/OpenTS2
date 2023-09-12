@@ -84,7 +84,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                     return new DataListValue<DataListValue[]>(name, items);
                 case 8:
                     // quanterion
-                    return new DataListValue<Quaternion>(name, QuaterionSerialzier.Deserialize(reader));
+                    return new DataListValue<Quaternion>(name, QuaternionSerializer.Deserialize(reader));
                 case 9:
                     // bytes
                     var len = reader.ReadUInt32();
