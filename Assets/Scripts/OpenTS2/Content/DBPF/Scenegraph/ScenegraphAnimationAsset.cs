@@ -202,7 +202,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
         }
 
         // Assuming 30fps for now.
-        private const float TicksToSeconds = (float)(AnimResourceConstBlock.FramesPerTick / 30.0);
+        private const float TicksToSeconds = (float)(AnimResourceConstBlock.FramesPerTick / 24.0);
 
         private static float ConvertTimeToSeconds(float timeInTicks)
         {
