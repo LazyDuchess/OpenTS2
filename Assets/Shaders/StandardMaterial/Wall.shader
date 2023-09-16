@@ -38,15 +38,6 @@ Shader "OpenTS2/StandardMaterial/Wall"
         float4 _DiffuseCoefficient;
         float4 _InvLotSize;
 
-        struct VertInput
-        {
-            float2 texcoord_MainTex : TEXCOORD1;
-            float2 texcoord_WallsDownTex : TEXCOORD2;
-            float4 vertex;
-            float4 tangent;
-            float3 normal;
-        };
-
         struct Input
         {
             float2 uv_MainTex;

@@ -40,7 +40,7 @@ namespace OpenTS2.Files.Formats.DBPF
             {
                 entries[i] = new PoolEntry()
                 {
-                    Unknown1 = reader.ReadInt32(),
+                    Id = reader.ReadInt32(),
                     XPos = reader.ReadFloat(),
                     YPos = reader.ReadFloat(),
                     Level = reader.ReadInt32(),

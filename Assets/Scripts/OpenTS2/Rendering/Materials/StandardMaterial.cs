@@ -97,12 +97,7 @@ namespace OpenTS2.Rendering.Materials
                 }
             }
 
-            float alpha = alphaMul * untexturedAlpha;
-
-            if (alpha != 1)
-            {
-                material.SetFloat(AlphaMultiplier, alpha);
-            }
+            material.SetFloat(AlphaMultiplier, alphaMul * untexturedAlpha);
 
             if (bumpMapEnabled && bumpMapTexture != null)
             {

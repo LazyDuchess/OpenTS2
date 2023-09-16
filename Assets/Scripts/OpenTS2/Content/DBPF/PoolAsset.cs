@@ -2,7 +2,7 @@ namespace OpenTS2.Content.DBPF
 {
     public struct PoolEntry
     {
-        public int Unknown1;
+        public int Id;
         public float XPos;
         public float YPos;
         public int Level;

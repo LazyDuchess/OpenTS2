@@ -6,12 +6,11 @@ namespace OpenTS2.Content.DBPF
     {
         public string Value;
         public ushort Id;
-        public ushort Unknown1;
-        public ushort Unknown2;
+        public uint Unknown;
 
         public override string ToString()
         {
-            return $"{Value}: {Id} ({Unknown1} {Unknown2})";
+            return $"{Value}: {Id} ({Unknown})";
         }
     }
 

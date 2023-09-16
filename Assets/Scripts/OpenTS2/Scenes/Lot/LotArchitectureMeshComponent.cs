@@ -68,25 +68,6 @@ namespace OpenTS2.Scenes.Lot
             _indexBuilder.Add(baseVertex + c);
         }
 
-        public void AddWindingRect(int baseVert)
-        {
-            _indexBuilder.Add(baseVert);
-            _indexBuilder.Add(baseVert + 1);
-            _indexBuilder.Add(baseVert + 4);
-
-            _indexBuilder.Add(baseVert + 1);
-            _indexBuilder.Add(baseVert + 2);
-            _indexBuilder.Add(baseVert + 4);
-
-            _indexBuilder.Add(baseVert + 2);
-            _indexBuilder.Add(baseVert + 3);
-            _indexBuilder.Add(baseVert + 4);
-
-            _indexBuilder.Add(baseVert + 3);
-            _indexBuilder.Add(baseVert);
-            _indexBuilder.Add(baseVert + 4);
-        }
-
         public void Clear()
         {
             _vertexBuilder.Clear();

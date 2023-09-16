@@ -49,8 +49,7 @@ namespace OpenTS2.Files.Formats.DBPF
                 {
                     Value = reader.ReadVariableLengthPascalString(),
                     Id = reader.ReadUInt16(),
-                    Unknown1 = reader.ReadUInt16(),
-                    Unknown2 = reader.ReadUInt16()
+                    Unknown = reader.ReadUInt32()
                 };
             }
 
