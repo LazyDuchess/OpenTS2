@@ -7,13 +7,14 @@ Shader "OpenTS2/StandardMaterial/AlphaBlended"
         _AlphaMultiplier("Alpha Multiplier", Range(0.0, 1.0)) = 1.0
         _BumpMap("Bump Map", 2D) = "white" {}
         _DiffuseCoefficient("Diffuse color coefficient", Color) = (1, 1, 1, 1)
+        _UVScale("UV scale", Vector) = (1, 1, 0, 0)
 
         _SeaLevel("Sea Level", float) = -100.0
     }
     SubShader
     {
         ZWrite Off
-        Tags { "RenderType"="Transparent" "Queue"="Transparent" }
+        Tags { "RenderType"="Transparent" "Queue"="Transparent" "ForceNoShadowCasting"="True" }
 
         CGPROGRAM
         #pragma surface surf Lambert fullforwardshadows alpha:blend

@@ -1,8 +1,10 @@
-﻿using System;
+﻿using OpenTS2.Files.Utils;
+using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Globalization;
+using System.IO;
+using System.Text;
 using System.Xml.Linq;
-using UnityEngine;
 
 namespace OpenTS2.Files.Formats.XML
 {
@@ -11,6 +13,15 @@ namespace OpenTS2.Files.Formats.XML
     /// </summary>
     public class PropertySet
     {
+        private enum CPFType : uint
+        {
+            Int = 0xEB61E4F7,
+            String = 0x0B8BEA18,
+            Float = 0xABC78708,
+            Bool = 0xCBA908E1,
+            Int2 = 0x0C264712
+        }
+
         public Dictionary<string, IPropertyType> Properties { get; } = new Dictionary<string, IPropertyType>();
 
         /// <summary>
@@ -28,8 +39,62 @@ namespace OpenTS2.Files.Formats.XML
             throw new ArgumentException($"{key} is of type {Properties[key].GetType()}, not {typeof(T)}");
         }
 
+        public PropertySet(byte[] data)
+        {
+            if (data[0] == 0xe0 && data[1] == 0x50 && data[2] == 0xe7 && data[3] == 0xcb)
+            {
+                var stream = new MemoryStream(data);
+                var reader = IoBuffer.FromStream(stream, ByteOrder.LITTLE_ENDIAN);
+
+                LoadFromCPF(reader);
+            }
+            else
+            {
+                LoadFromXML(Encoding.UTF8.GetString(data));
+            }
+        }
+
         public PropertySet(string xml)
         {
+            LoadFromXML(xml);
+        }
+
+        private void LoadFromCPF(IoBuffer reader)
+        {
+            uint type = reader.ReadUInt32();
+            short version = reader.ReadInt16();
+
+            int count = reader.ReadInt32();
+
+            for (int i = 0; i < count; i++)
+            {
+                CPFType fieldType = (CPFType)reader.ReadUInt32();
+                string key = reader.ReadUint32PrefixedString();
+
+                switch (fieldType)
+                {
+                    case CPFType.Int:
+                    case CPFType.Int2:
+                        Properties[key] = new Uint32Prop() { Value = reader.ReadUInt32() };
+                        break;
+                    case CPFType.Float:
+                        Properties[key] = new StringProp() { Value = reader.ReadSingle().ToString(CultureInfo.InvariantCulture) };
+                        break;
+                    case CPFType.Bool:
+                        Properties[key] = new Uint32Prop() { Value = reader.ReadByte() };
+                        break;
+                    case CPFType.String:
+                        Properties[key] = new StringProp() { Value = reader.ReadUint32PrefixedString() };
+                        break;
+                }
+            }
+        }
+
+        private void LoadFromXML(string xml)
+        {
+            // Special characters are used without proper escaping in XMLs in TS2. & needs escaped.
+            xml = xml.Replace("&", "&amp;");
+
             var parsed = XElement.Parse(xml);
             if (parsed.Name.LocalName != "cGZPropertySetString")
             {

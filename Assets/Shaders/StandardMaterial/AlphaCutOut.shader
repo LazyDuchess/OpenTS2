@@ -7,6 +7,7 @@ Shader "OpenTS2/StandardMaterial/AlphaCutOut"
         _AlphaMultiplier ("Alpha Multiplier", Range(0.0, 1.0)) = 1.0
         _BumpMap("Bump Map", 2D) = "white" {}
         _DiffuseCoefficient("Diffuse color coefficient", Color) = (1, 1, 1, 1)
+        _UVScale("UV scale", Vector) = (1, 1, 0, 0)
 
         _SeaLevel("Sea Level", float) = -100.0
 
@@ -22,7 +23,7 @@ Shader "OpenTS2/StandardMaterial/AlphaCutOut"
                 Pass Replace
             }
         CGPROGRAM
-        #pragma surface surf Lambert fullforwardshadows alphatest:_AlphaCutOff
+        #pragma surface surf Lambert addshadow fullforwardshadows alphatest:_AlphaCutOff
 
         #include "Assets/Shaders/StandardMaterial/shader_body.cginc"
 

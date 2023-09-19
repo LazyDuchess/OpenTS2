@@ -21,25 +21,32 @@ namespace OpenTS2.Rendering.Materials
         private static readonly int DiffuseCoefficient = Shader.PropertyToID("_DiffuseCoefficient");
         private static readonly int BumpMap = Shader.PropertyToID("_BumpMap");
 
-        public override Material Parse(ScenegraphMaterialDefinitionAsset definition)
+        protected virtual Shader GetShader(ScenegraphMaterialDefinitionAsset definition)
         {
-            Shader shader;
             // Decide which shader to use based on the alpha blending and alpha testing.
             if (definition.GetProperty("stdMatAlphaTestEnabled", defaultValue: "0") == "1")
             {
-                shader = Shader.Find("OpenTS2/StandardMaterial/AlphaCutOut");
+                return Shader.Find("OpenTS2/StandardMaterial/AlphaCutOut");
             }
             else if (definition.GetProperty("stdMatAlphaBlendMode", defaultValue: "none") == "blend")
             {
-                shader = Shader.Find("OpenTS2/StandardMaterial/AlphaBlended");
+                return Shader.Find("OpenTS2/StandardMaterial/AlphaBlended");
             }
             else
             {
-                shader = Shader.Find("OpenTS2/StandardMaterial/Opaque");
+                return Shader.Find("OpenTS2/StandardMaterial/Opaque");
             }
+        }
+
+        public override Material Parse(ScenegraphMaterialDefinitionAsset definition)
+        {
+            Shader shader = GetShader(definition);
 
             var material = new Material(shader);
             var bumpMapEnabled = false;
+            float alphaMul = 1f;
+            float untexturedAlpha = 1f;
+
             ScenegraphTextureAsset bumpMapTexture = null;
             // Adjust the material properties based on the corresponding keys.
             foreach (var property in definition.MaterialDefinition.MaterialProperties)
@@ -78,7 +85,10 @@ namespace OpenTS2.Rendering.Materials
                         material.mainTexture = texture.GetSelectedImageAsUnityTexture(ContentProvider.Get());
                         break;
                     case "stdMatAlphaMultiplier":
-                        material.SetFloat(AlphaMultiplier, float.Parse(property.Value));
+                        alphaMul = float.Parse(property.Value);
+                        break;
+                    case "stdMatUntexturedDiffAlpha":
+                        untexturedAlpha = float.Parse(property.Value);
                         break;
                     case "stdMatDiffCoef":
                         var coefficients = property.Value.Split(',').Select(float.Parse).ToArray();
@@ -86,6 +96,8 @@ namespace OpenTS2.Rendering.Materials
                         break;
                 }
             }
+
+            material.SetFloat(AlphaMultiplier, alphaMul * untexturedAlpha);
 
             if (bumpMapEnabled && bumpMapTexture != null)
             {
