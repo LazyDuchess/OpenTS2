@@ -24,11 +24,6 @@ namespace OpenTS2.Components
         ///
         /// The returned game object carries a transform to convert it from sims coordinate space to unity space.
         /// </summary>
-        public static GameObject CreateRootScenegraph(ScenegraphResourceAsset resourceAsset)
-        {
-            return CreateRootScenegraph(new []{ resourceAsset });
-        }
-
         public static GameObject CreateRootScenegraph(params ScenegraphResourceAsset[] resourceAssets)
         {
             var scenegraph = CreateScenegraphComponent(resourceAssets);

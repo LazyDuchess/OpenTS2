@@ -47,6 +47,9 @@ namespace OpenTS2.Scenes.Lot
 
             BindMaterialAndTextures();
 
+            //Make Mesh Collider for terrain
+            SetTerrainCollider(_terrain.Component);
+
             return this;
         }
 
