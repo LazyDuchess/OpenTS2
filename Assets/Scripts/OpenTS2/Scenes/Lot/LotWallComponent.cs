@@ -19,7 +19,7 @@ namespace OpenTS2.Scenes.Lot
         private const string ThicknessTexture = "wall_top";
         private const string FallbackMaterial = "wall_wallboard";
         private const float HalfWallHeight = 1f;
-        private const float WallHeight = 3f;
+        public const float WallHeight = 3f;
         private const float WallsDownHeight = 0.2f;
         private const float YBias = 0.001f;
         private const float Thickness = 0.075f;
@@ -65,6 +65,7 @@ namespace OpenTS2.Scenes.Lot
         private LotArchitecture _architecture;
 
         private PatternMeshCollection _patterns;
+        private PatternDescriptor[] _loadedPatternDescriptions;
 
         private Dictionary<int, WallIntersection> _intersections;
 
@@ -74,14 +75,19 @@ namespace OpenTS2.Scenes.Lot
         {
             _architecture = architecture;
 
-            LoadPatterns();
-            BuildWallIntersections();
-            BuildWallMeshes();
-            AddFencePosts();
+            Invalidate();
 
             gameObject.transform.position = new Vector3(0, -YBias, 0);
 
             return this;
+        }
+
+        public override void Invalidate()
+        {
+            LoadPatterns();
+            BuildWallIntersections();
+            BuildWallMeshes();
+            AddFencePosts();
         }
 
         private ScenegraphMaterialDefinitionAsset LoadMaterial(ContentProvider contentProvider, string name)
@@ -104,8 +110,22 @@ namespace OpenTS2.Scenes.Lot
             ushort highestId = patternMap.Count == 0 ? (ushort)0 : patternMap.Keys.Max();
             PatternDescriptor[] patterns = new PatternDescriptor[highestId + 2];
 
+            bool changesMade = false;
+            bool previousStateExisting = _loadedPatternDescriptions != null;
+
             foreach (StringMapEntry entry in patternMap.Values)
             {
+                //Persistent data -- calls from Invalidate() will call this with data already loaded, in which case
+                //We can save time by not reloading the same loaded data
+                // TODO
+                if (previousStateExisting && _loadedPatternDescriptions.Length == patterns.Length && 
+                    _loadedPatternDescriptions[entry.Id + 1].Name != null) // loaded
+                { // PatternDescriptor is a struct -- check the name see if it's null, if not, the pattern is loaded already
+                    patterns[entry.Id + 1] = _loadedPatternDescriptions[entry.Id + 1];
+                    continue;
+                }
+                changesMade = true;
+
                 string materialName;
                 if (uint.TryParse(entry.Value, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out uint guid))
                 {
@@ -142,11 +162,22 @@ namespace OpenTS2.Scenes.Lot
                 }
             }
 
+            if (previousStateExisting)
+            {
+                if (!changesMade) return; // no changes to wall patterns since last load 
+
+                patterns[0] = _loadedPatternDescriptions[0];
+                _loadedPatternDescriptions = patterns;
+                _patterns.UpdatePatterns(patterns);
+                return;
+            }
+
             patterns[0] = new PatternDescriptor(
                 ThicknessTexture,
                 LoadMaterial(contentProvider, ThicknessTexture).GetAsUnityMaterial()
             );
 
+            _loadedPatternDescriptions = patterns;
             _patterns = new PatternMeshCollection(gameObject, patterns, Array.Empty<PatternVariant>(), this, _architecture.WallGraphAll.Floors);
         }
 
