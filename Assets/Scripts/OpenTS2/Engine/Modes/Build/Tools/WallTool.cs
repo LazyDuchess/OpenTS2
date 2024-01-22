@@ -59,14 +59,6 @@ namespace OpenTS2.Engine.Modes.Build.Tools
         /// </summary>
         protected override void DoAction(bool Undoing = false)
         {
-            //NEEDS REFACTOR REALLY BAD
-            //Get layer IDs from the created walls when making a facade
-            //that way, we only delete walls SUCCESSFULLY MADE and also it won't be so buggy
-            //and performance will be (slightly) better
-            //please do this soon jeremy >.<
-            //---
-            //Jan 21st: i did.
-
             bool actionSelected = !deletingWalls;
             Vector2Int destination = toolDragEnd;
             if (deletingWalls) destination = toolLastActionDragEnd;
