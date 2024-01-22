@@ -62,8 +62,13 @@ namespace OpenTS2.Engine.Modes.Build.Tools
             int currFloor = 0;
             int nextFloor = currFloor + 1;
 
-            float elevation = BuildModeServer.PollElevation(ToolDragOrigin, 0) + FoundationHeight;
-            BuildModeServer.LevelRegion(ToolDragOrigin, ToolDragDestination, elevation, nextFloor);
+            float elevation = BuildModeServer.PollElevation(ToolDragOrigin, ToolDragFloor);
+            if (ToolDragFloor == 0)
+                elevation += FoundationHeight;
+            //This levels the Elevation map where the floor is on this foundation.
+            //This makes the walls stubby and the floor appear seamless. This also uses the LevelBeneathMe feature of the function.
+            //It will ensure all terrain beneath the foundation is less than the elevation -.1f.
+            BuildModeServer.LevelRegion(ToolDragOrigin, ToolDragDestination, elevation, nextFloor, true, -.1f);
             if (!Undo)
             {
                 BuildModeServer.CreateWalls(ToolDragOrigin, ToolDragDestination, currFloor,
