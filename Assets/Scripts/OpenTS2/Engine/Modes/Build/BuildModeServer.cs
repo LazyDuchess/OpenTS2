@@ -220,13 +220,13 @@ namespace OpenTS2.Engine.Modes.Build
         /// <param name="Floor"></param>
         /// <param name="Type"></param>
         /// <returns></returns>
-        public void CreateWalls(Vector2Int From, Vector2Int To, int Floor, 
+        public int[]? CreateWalls(Vector2Int From, Vector2Int To, int Floor, 
             WallType Type = WallType.Normal, 
             WallCreationModes CreationOption = WallCreationModes.Single,
             string FrontWallpaperPattern = "blank", string BackWallpaperPattern = "blank")            
         {
-            if (From == To) return;
-            if (CreationOption != WallCreationModes.Single && !RegionValid(From, To)) return;
+            if (From == To) return null;
+            if (CreationOption != WallCreationModes.Single && !RegionValid(From, To)) return null;
             string argsStr = $"From: {From} To: {To} Floor: {Floor} Type: {Type} Mode: {CreationOption}" +
                 $"Front: {FrontWallpaperPattern} Back: {BackWallpaperPattern}";
 
@@ -241,16 +241,18 @@ namespace OpenTS2.Engine.Modes.Build
             if (BackWallpaperPattern != "blank")
                 architecture.EnsurePatternReferenced(BackWallpaperPattern, LotArchitecture.ArchitectureGameObjectTypes.wall, out back, out _);
 
-            bool? returnValue = true;
-            foreach (var wall in walls)            
-                returnValue = architecture.CreateWall(wall.A, wall.B, Floor, Type, front, back);
+            int[] createdWallIDs = null;
+            foreach (var wall in walls)
+                createdWallIDs = architecture.CreateWall(wall.A, wall.B, Floor, Type, front, back);
 
-            if (returnValue.HasValue) // walls were placed here
+            if (createdWallIDs != null) // walls were placed here
             {
                 loadedLot.InvalidateWalls();
                 LogHistory($"Created wall(s). {argsStr}", "Create Walls");
+                return createdWallIDs;
             }
             else LogHistory($"Could not create wall(s). {argsStr}", "Create Walls");
+            return null;
         }
         /// <summary>
         /// Clears out all walls in the specified region with the given wall creation options
@@ -275,6 +277,12 @@ namespace OpenTS2.Engine.Modes.Build
                 LogHistory($"Deleted wall(s). {argsStr}", "Delete Walls");
             }
             else LogHistory($"Could not delete wall(s). {argsStr}", "Delete Walls");
+        }
+        public void DeleteAllWalls(params int[] WallLayerIDs)
+        {
+            if (WallLayerIDs.Length == 0) return;
+            architecture.DeleteAllWalls(WallLayerIDs);
+            loadedLot.InvalidateWalls();
         }
 
         /// <summary>

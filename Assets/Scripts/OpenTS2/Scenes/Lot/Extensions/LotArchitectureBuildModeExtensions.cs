@@ -1,4 +1,5 @@
-﻿using Codice.Utils;
+﻿using Codice.CM.Triggers;
+using Codice.Utils;
 using log4net.Core;
 using OpenTS2.Content.DBPF;
 using System;
@@ -37,7 +38,7 @@ namespace OpenTS2.Scenes.Lot.Extensions
         /// <param name="PatternBack">The Pattern2 of the wall</param>
         /// <returns><see langword="null"/> upon total failure; no walls placed.
         /// <see langword="false"/> if some walls were placed. <see langword="true"/> if all wall segments placed.</returns>
-        public static bool? CreateWall(this LotArchitecture Architecture, Vector2 From,
+        public static int[]? CreateWall(this LotArchitecture Architecture, Vector2 From,
             Vector2 To, int Floor, WallType Type = WallType.Normal, ushort PatternFront = ushort.MaxValue, ushort PatternBack = ushort.MaxValue)
         {
             //get the wall's direction vector
@@ -53,19 +54,22 @@ namespace OpenTS2.Scenes.Lot.Extensions
             }
             if ((Math.Abs(dirVector.x) != 1 || dirVector.y != 0) && (Math.Abs(dirVector.y) != 1 || dirVector.x != 0) &&
                 (Math.Abs(dirVector.x) != 1 || Math.Abs(dirVector.y) != 1)) // valid directions for a wall
-                return false;
+                return null;
 
             //subdivide the wall into 1 unit lengths (otherwise wall paints will appear stretchy)
             var wallLength = (double)Math.Abs(Vector2.Distance(From, To));
-            if (diagonal) wallLength *= 0.7;
+            if (diagonal) wallLength *= 0.8;
 
             int successfulWallSegments = 0, totalSegments = (int)wallLength;
+            int[] createdWallIDs = new int[totalSegments];
+
             for (int segment = 0; segment < (wallLength); segment++)
             {
                 var fooFrom = From + (dirVector * segment);
                 var fooTo = From + (dirVector * (segment + 1));
                 //Add wall to wallgraph
                 if (!Architecture.WallGraphAll.PushWall(fooFrom, fooTo, Floor, out int LayerID)) continue;
+                createdWallIDs[segment] = LayerID;
                 //Add wall layer data
                 Architecture.WallLayer.Walls.Add(LayerID, new WallLayerEntry()
                 {
@@ -77,7 +81,7 @@ namespace OpenTS2.Scenes.Lot.Extensions
                 successfulWallSegments++;
             }
             if (successfulWallSegments <= 0) return null; // total failure
-            return successfulWallSegments < totalSegments ? false : true; // somewhat / complete success code
+            return createdWallIDs; // somewhat / complete success code
         }
         /// <summary>
         /// Deletes wall segments between the two points provided on the given floor
@@ -120,6 +124,18 @@ namespace OpenTS2.Scenes.Lot.Extensions
             }
             if (successfulWallSegments <= 0) return null; // total failure
             return successfulWallSegments < totalSegments ? false : true; // somewhat / complete success code
+        }
+        public static void DeleteAllWalls(this LotArchitecture Architecture, params int[] WallLayerIDs)
+        {
+            if (WallLayerIDs.Length <= 0) return;
+            foreach(var ID in WallLayerIDs)
+            {
+                //Remove wall from wallgraph
+                if (Architecture.WallGraphAll.RemoveWalls(WallLayerIDs) == 0) continue;
+                //Remove wall layer data
+                foreach(var id in WallLayerIDs)
+                    Architecture.WallLayer.Walls.Remove(id);
+            }
         }
         /// <summary>
         /// Checks to see if the given pattern name is referenced; if it isn't, will reference it in the <see cref="LotArchitecture.FloorMap"/>

@@ -127,6 +127,15 @@ namespace OpenTS2.Content.DBPF
             return true;
         }
 
+        private void _delWall(int index)
+        {
+            int i = index;
+            //found the wall
+            if (i != _lines.Length - 1) // last wall
+                _lines[i] = _lines[_lines.Length - 1]; // move last line to this spot    
+            Array.Resize(ref _lines, _lines.Length - 1); // shorten array by one
+        }
+
         internal bool RemoveWall(Vector2 From, Vector2 To, int Floor, out int LayerID)
         { // should be refactored to batch delete a set of segments instead of one at a time due to iterations being potentially large
             LayerID = -1;
@@ -146,14 +155,34 @@ namespace OpenTS2.Content.DBPF
                 if (line.ToId != toId && line.ToId != fromId) continue;
                 if (line.FromId != toId && line.FromId != fromId) continue;
 
-                //found the wall
-                if (i != _lines.Length - 1) // last wall
-                    _lines[i] = _lines[_lines.Length - 1]; // move last line to this spot    
-                Array.Resize(ref _lines, _lines.Length - 1); // shorten array by one
+                _delWall(i);
                 LayerID = line.LayerId;
                 return true;
             }
             return false; // not found
+        }
+        /// <summary>
+        /// Deletes all the wall lines from the selected floor by their LayerID.
+        /// </summary>
+        /// <param name="Floor"></param>
+        /// <param name="WallLayerIDs"></param>
+        /// <returns></returns>
+        internal int RemoveWalls(params int[] WallLayerIDs)
+        {
+            int index = -1;
+            int found = 0;
+            HashSet<int> deletionIndices = new HashSet<int>();
+            foreach(var line in _lines)
+            {
+                index++;
+                if (!WallLayerIDs.Contains(line.LayerId)) continue;
+                found++;
+                deletionIndices.Add(index);
+            }
+            int deleted = 0;
+            foreach (int i in deletionIndices)
+                _delWall(i - deleted++);
+            return deleted;
         }
     }
 }

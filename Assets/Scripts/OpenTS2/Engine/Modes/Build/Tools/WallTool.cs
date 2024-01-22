@@ -22,7 +22,15 @@ namespace OpenTS2.Engine.Modes.Build.Tools
         bool deletingWalls => DeleteMode;
 
         //private
+        /// <summary>
+        /// This is used when dragging an area of walls. 
+        /// <para/>The walls created as a facade have their IDs stored here.
+        /// When the action is cancelled or the facade changes, these IDs
+        /// will be used to delete the unneeded walls.
+        /// </summary>
+        HashSet<int> facadeWallIDs = new HashSet<int>();
         BuildModeServer buildModeServer => BuildModeServer;
+        bool Hovering = false;
 
         /// <summary>
         /// Creates a new <see cref="WallTool"/> on the specified lot
@@ -56,6 +64,8 @@ namespace OpenTS2.Engine.Modes.Build.Tools
             //that way, we only delete walls SUCCESSFULLY MADE and also it won't be so buggy
             //and performance will be (slightly) better
             //please do this soon jeremy >.<
+            //---
+            //Jan 21st: i did.
 
             bool actionSelected = !deletingWalls;
             Vector2Int destination = toolDragEnd;
@@ -67,7 +77,15 @@ namespace OpenTS2.Engine.Modes.Build.Tools
                 else destination = toolDragEnd;
                 actionSelected = !actionSelected;
             }
-            if (toolDragStart - destination == new Vector2Int(0, 0)) return; // zero area 
+            if (toolDragStart - destination == new Vector2Int(0, 0))
+            {
+                if (Hovering && facadeWallIDs.Count > 0)
+                {
+                    buildModeServer.DeleteAllWalls(facadeWallIDs.ToArray());
+                    facadeWallIDs.Clear();
+                }
+                return; // zero area 
+            }
             if (actionSelected)
             {
                 float startElevation = buildModeServer.PollElevation(toolDragStart, toolDragFloor);
@@ -78,12 +96,31 @@ namespace OpenTS2.Engine.Modes.Build.Tools
                     //buildModeServer.SetElevationRelative(startElevation, toolDragFloor, segment.A, segment.B);
                     //level above the wall to ensure the height is accurate
                     buildModeServer.SetElevationRelative(LotWallComponent.WallHeight, toolDragFloor + 1, segment.A, segment.B);
-                }            
-                buildModeServer.CreateWalls(toolDragStart, destination, toolDragFloor, WallType.Normal, wallCreateMode);
+                }
+                var createdWallIDs = buildModeServer.CreateWalls(toolDragStart, destination, toolDragFloor, WallType.Normal, wallCreateMode);
+                if (Hovering)
+                {
+                    if (createdWallIDs != null)
+                        Array.ForEach(createdWallIDs, (int item) => facadeWallIDs.Add(item));
+                }
+                else if(facadeWallIDs.Any()) facadeWallIDs.Clear();
             }
-            else buildModeServer.DeleteWalls(toolDragStart, destination, toolDragFloor, wallCreateMode);
+            else
+            {
+                if (Hovering && facadeWallIDs.Count > 0)
+                {
+                    buildModeServer.DeleteAllWalls(facadeWallIDs.ToArray());
+                    facadeWallIDs.Clear();
+                }
+                buildModeServer.DeleteWalls(toolDragStart, destination, ToolDragFloor, wallCreateMode);                
+            }
         }
 
-        protected override void DoHoverAction(bool Undo = false) => DoAction(Undo);
+        protected override void DoHoverAction(bool Undo = false)
+        {
+            Hovering = true;
+            DoAction(Undo);
+            Hovering = false;
+        }
     }
 }
