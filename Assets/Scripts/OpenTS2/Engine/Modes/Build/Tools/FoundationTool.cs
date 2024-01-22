@@ -15,35 +15,61 @@ namespace OpenTS2.Engine.Modes.Build.Tools
     /// </summary>
     internal class FoundationTool : AbstractRegionSelectBuildTool
     {
-        public FoundationTool(BuildModeServer Server) : base(Server)
+        const float FoundationHeight = 1;
+        const string FoundationWallpaper = "foundationbrick";
+        private const string FoundationFlooring = "wood_wide_planks";
+
+        /// <summary>
+        /// Sets up a new Foundation Tool with the specified walls and floors
+        /// <para>By default this is The Sims 2 default values Brick walls and Wood floors</para>
+        /// </summary>
+        /// <param name="Server"></param>
+        /// <param name="Wallpaper"></param>
+        /// <param name="Flooring"></param>
+        public FoundationTool(BuildModeServer Server, 
+            string Wallpaper = FoundationWallpaper, 
+            string Flooring = FoundationFlooring) : base(Server)
         {
+            WallpaperPattern = Wallpaper;
+            FlooringPattern = Flooring;
         }
 
         public override string ToolName => "Foundation Tool";
+
+        //**PATTERN 
+        /// <summary>
+        /// The pattern to paint the walls when creating a Foundation
+        /// </summary>
+        public string WallpaperPattern { get; set; }
+        /// <summary>
+        /// The pattern to paint the floors when creating a Foundation
+        /// </summary>
+        public string FlooringPattern { get; set; }
+        //***
+
         protected override MultilevelBehavior MultiLevelBehavior { get; set; } = MultilevelBehavior.Constrain;
+        
 
         protected override void DoAction(bool Undo = false)
         {
             if (DeleteMode) Undo = !Undo;
-            float change = 1;
             if (ToolDragFloor > 1)
             {
                 OnToolCancel("Foundation can only be placed on terrain.");
                 return;
             }
-            else if (ToolDragFloor == 1) change = 0;
 
             int currFloor = 0;
             int nextFloor = currFloor + 1;
 
-            float elevation = BuildModeServer.PollElevation(ToolDragOrigin, ToolDragFloor) + change;
+            float elevation = BuildModeServer.PollElevation(ToolDragOrigin, 0) + FoundationHeight;
             BuildModeServer.LevelRegion(ToolDragOrigin, ToolDragDestination, elevation, nextFloor);
             if (!Undo)
             {
                 BuildModeServer.CreateWalls(ToolDragOrigin, ToolDragDestination, currFloor,
                     Content.DBPF.WallType.Foundation, BuildModeServer.WallCreationModes.Room,
-                    "foundationbrick", "foundationbrick");
-                BuildModeServer.CreateFloors(ToolDragOrigin, ToolDragDestination, "wood_wide_planks", nextFloor, false);
+                    WallpaperPattern, WallpaperPattern);
+                BuildModeServer.CreateFloors(ToolDragOrigin, ToolDragDestination, FlooringPattern, nextFloor, false);
             }
             else
             {
