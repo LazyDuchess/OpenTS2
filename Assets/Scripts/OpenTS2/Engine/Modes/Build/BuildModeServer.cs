@@ -304,15 +304,46 @@ namespace OpenTS2.Engine.Modes.Build
         /// <returns></returns>
         bool RegionValid(Vector2Int From, Vector2Int To) => Math.Abs(From.x - To.x) * Math.Abs(From.y - To.y) != 0;
 
-        public bool IsFloorAt(Vector2Int Position, int Level = 0)
+        /// <summary>
+        /// Checks to see if there is a floor at the given location.
+        /// <para>If <paramref name="Level"/> is provided as <see langword="default"/>, it will check floors on ALL levels.</para>
+        /// </summary>
+        /// <param name="Position"></param>
+        /// <param name="Level"></param>
+        /// <returns></returns>
+        public bool IsFloorAt(Vector2Int Position, int? Level = default)
         {
-            Level = -architecture.BaseFloor + Level;
+            bool inquire(int level, int index)
+            {
+                var value = architecture.FloorPatterns.Data[level][index];
+                return value.w != 0 || value.x != 0 || value.y != 0 || value.z != 0;
+            }            
+
+            int level = 0;
+            bool allLevels = Level == default;
+            if (!allLevels)
+                level = -architecture.BaseFloor + Level.Value;
+
             var mPos = Position;
+
+            bool inquiryList(int level, int index)
+            {
+                if (inquire(level, index)) return true;
+                if (index == 0) return false;
+                if (inquire(level, index - 1)) return true;
+                index = ((mPos.x - 1) * architecture.FloorPatterns.Height) + mPos.y;
+                if (inquire(level, index)) return true;
+                return false;
+            }
+
             int index = (mPos.x * architecture.FloorPatterns.Height) + mPos.y;
 
-            var value = architecture.FloorPatterns.Data[Level][index];
+            if (!allLevels)            
+                return inquiryList(level, index);            
 
-            return value.w != 0 || value.x != 0 || value.y != 0 || value.z != 0;
+            for (level = architecture.BaseFloor; level < architecture.FloorPatterns.Data.Length; level++)            
+                if (inquiryList(level, index)) return true;            
+            return false;
         }
 
         /// <summary>
@@ -388,7 +419,8 @@ namespace OpenTS2.Engine.Modes.Build
         }
         public void CreateFloors(Vector2Int From, Vector2Int To, ushort PatternID, int Level = 0, bool ModifyTerrain = true) =>
             CreateFloors(From, To, new Files.Formats.DBPF.Vector4<ushort>(PatternID, PatternID, PatternID, PatternID), Level, ModifyTerrain);
-        public void CreateFloors(Vector2Int From, Vector2Int To, Files.Formats.DBPF.Vector4<ushort> QuarterTilePatternIDs, int Level = 0, bool ModifyTerrain = true)
+        public void CreateFloors(Vector2Int From, Vector2Int To,
+            Vector4<ushort> QuarterTilePatternIDs, int Level = 0, bool ModifyTerrain = true)
         {
             if (!RegionValid(From, To)) return; // check area nonzero            
 
@@ -441,7 +473,18 @@ namespace OpenTS2.Engine.Modes.Build
             loadedLot.InvalidateFloors(); // invalidating floors also may incur a terrain re-evaluation if necessary
         }
 
-        public void LevelRegion(Vector2Int From, Vector2Int To, float Elevation = 0, int Floor = 0)
+        /// <summary>
+        /// Levels a region of terrain/elevation map.
+        /// </summary>
+        /// <param name="From">The point to start at</param>
+        /// <param name="To">The point to go to.</param>
+        /// <param name="Elevation">What elevation value to level to.</param>
+        /// <param name="Floor">Which level of the Elevation Map to perform the modification.</param>
+        /// <param name="LevelFloorsBeneathMe">If true, will ensure each level beneath <paramref name="Floor"/> does not exceed this elevation.
+        /// Only greater elevations will be modified, lower ones will be ignored.</param>
+        /// <param name="LevelBeneathMeDelta">In the event the terrain on a lower floor exceeds the elevation here on this floor, by how much to 
+        /// decrease <paramref name="Elevation"/> to yield the elevation of the terrain on the lower floor?</param>
+        public void LevelRegion(Vector2Int From, Vector2Int To, float Elevation = 0, int Floor = 0, bool LevelFloorsBeneathMe = true, float LevelBeneathMeDelta = -0f)
         {
             if (!RegionValid(From, To)) return;
             Floor = -architecture.BaseFloor + Floor;
@@ -477,6 +520,23 @@ namespace OpenTS2.Engine.Modes.Build
 
                     dataSet[index] = Elevation;
                     levelModify = true;
+
+                    //level beneath me
+                    if (LevelFloorsBeneathMe)
+                    {
+                        try
+                        {
+                            for (int elevationLevel = Floor; elevationLevel > 0; elevationLevel--)
+                            {
+                                ref float[] meValDataSet = ref arr.Data[elevationLevel - 1];
+                                meValDataSet[index] = Math.Min(Elevation + LevelBeneathMeDelta, meValDataSet[index]);
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Debug.LogError($"LevelRegion() :: LevelBeneathMe error: {e.Message}");
+                        }
+                    }
                 }
             }
 
@@ -534,7 +594,7 @@ namespace OpenTS2.Engine.Modes.Build
             int index = (mPos.x * architecture.Elevation.Height) + mPos.y;
 
             //The Sims 2 won't allow any terrain modifications if the cursor is directly over unexposed terrain
-            if (ConstrainedFloorElevation && IsFloorAt(mPos))
+            if (ConstrainedFloorElevation && IsFloorAt(mPos, Floor))
                 return false;
 
             bool levelModify = false;
