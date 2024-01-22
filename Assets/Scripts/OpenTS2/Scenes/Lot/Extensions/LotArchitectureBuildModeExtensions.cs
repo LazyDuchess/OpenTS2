@@ -58,9 +58,9 @@ namespace OpenTS2.Scenes.Lot.Extensions
 
             //subdivide the wall into 1 unit lengths (otherwise wall paints will appear stretchy)
             var wallLength = (double)Math.Abs(Vector2.Distance(From, To));
-            if (diagonal) wallLength *= 0.8;
+            if (diagonal) wallLength *= 0.7;
 
-            int successfulWallSegments = 0, totalSegments = (int)wallLength;
+            int successfulWallSegments = 0, totalSegments = (int)Math.Round(wallLength);
             int[] createdWallIDs = new int[totalSegments];
 
             for (int segment = 0; segment < (wallLength); segment++)
@@ -69,6 +69,8 @@ namespace OpenTS2.Scenes.Lot.Extensions
                 var fooTo = From + (dirVector * (segment + 1));
                 //Add wall to wallgraph
                 if (!Architecture.WallGraphAll.PushWall(fooFrom, fooTo, Floor, out int LayerID)) continue;
+                if (createdWallIDs.Length <= segment)
+                    Array.Resize(ref createdWallIDs, segment + 1);
                 createdWallIDs[segment] = LayerID;
                 //Add wall layer data
                 Architecture.WallLayer.Walls.Add(LayerID, new WallLayerEntry()
