@@ -18,5 +18,10 @@ namespace OpenTS2.Scenes.Lot.State
             Level = level;
             Walls = walls;
         }
+
+        public override string ToString()
+        {
+            return $"Walls: {Walls}, Level: {Level}";
+        }
     }
 }

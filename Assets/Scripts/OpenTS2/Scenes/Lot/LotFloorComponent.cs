@@ -24,10 +24,12 @@ namespace OpenTS2.Scenes.Lot
         private LotArchitecture _architecture;
 
         private PatternMeshCollection _patterns;
+        private Dictionary<int, HashSet<Collider>> _colliders;
 
         public LotFloorComponent CreateFromLotArchitecture(LotArchitecture architecture)
         {
             _architecture = architecture;
+            _colliders = new Dictionary<int, HashSet<Collider>>();
 
             LoadPatterns();
             BuildFloorMeshes();
@@ -95,7 +97,7 @@ namespace OpenTS2.Scenes.Lot
             PatternDescriptor[] patterns = new PatternDescriptor[highestId + 2];
 
             foreach (StringMapEntry entry in patternMap.Values)
-            {
+            {                
                 string materialName;
                 if (uint.TryParse(entry.Value, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out uint guid))
                 {
@@ -136,6 +138,7 @@ namespace OpenTS2.Scenes.Lot
             int height = patternData.Height;
             int eHeight = height + 1;
 
+            _colliders.Clear();
             _patterns.ClearAll();
 
             Vector3[] tileVertices = new Vector3[5];
@@ -191,11 +194,13 @@ namespace OpenTS2.Scenes.Lot
                         {
                             if (floor == null)
                             {
-                                // Lazy init - don't create the floor unless it's actually being used.
+                                // Lazy init - don't create the floor unless it's actually being used.                                
                                 floor = _patterns.GetFloor(i);
                                 PatternMesh thickness = floor.Get(0);
                                 thickComp = thickness.Component;
                             }
+                            if (!_colliders.ContainsKey(i))
+                                _colliders.Add(i, new HashSet<Collider>());
 
                             // Pattern is present.
                             float e0 = elevation[ei];
@@ -225,6 +230,8 @@ namespace OpenTS2.Scenes.Lot
 
                                 comp.AddVertices(tileVertices, tileUVs);
                                 comp.AddTriangle(m1Base, 1, 0, 4);
+
+                                _colliders[i].Add(mesh1.Object.GetComponent<MeshCollider>());
                             }
 
                             PatternMesh mesh2 = floor.Get(p.z + 1);
@@ -245,6 +252,7 @@ namespace OpenTS2.Scenes.Lot
                                 }
 
                                 comp.AddTriangle(m2Base, 2, 1, 4);
+                                _colliders[i].Add(mesh2.Object.GetComponent<MeshCollider>());
                             }
 
                             PatternMesh mesh3 = floor.Get(p.y + 1);
@@ -269,6 +277,7 @@ namespace OpenTS2.Scenes.Lot
                                 }
 
                                 comp.AddTriangle(m3Base, 3, 2, 4);
+                                _colliders[i].Add(mesh3.Object.GetComponent<MeshCollider>());
                             }
 
                             PatternMesh mesh4 = floor.Get(p.x + 1);
@@ -296,7 +305,8 @@ namespace OpenTS2.Scenes.Lot
                                     comp.AddVertices(tileVertices, tileUVs);
                                 }
 
-                                comp.AddTriangle(m4Base, 0, 3, 4);
+                                comp.AddTriangle(m4Base, 0, 3, 4); 
+                                _colliders[i].Add(mesh4.Object.GetComponent<MeshCollider>());
                             }
 
                             if (i > -baseFloor)
@@ -363,6 +373,13 @@ namespace OpenTS2.Scenes.Lot
         public void UpdateDisplay(WorldState state)
         {
             _patterns.UpdateDisplay(state, _architecture.BaseFloor);
+        }
+
+        internal bool TryGetCollidersByFloor(int floor, out IEnumerable<Collider> Colliders)
+        {
+            var success = _colliders.TryGetValue(floor, out var value);
+            Colliders = value; // cringe out parameter doesn't do implicit casts ;_;
+            return success;
         }
     }
 }

@@ -1,4 +1,5 @@
 using OpenTS2.Common;
+using OpenTS2.Components;
 using OpenTS2.Content.DBPF;
 using OpenTS2.Files.Formats.DBPF;
 using OpenTS2.Scenes.Lot.Roof;
@@ -154,27 +155,72 @@ namespace OpenTS2.Scenes.Lot
             }
         }
 
+        public T GetComponentByType<T>(ArchitectureGameObjectTypes Type) where T : AssetReferenceComponent => Type switch
+        {
+            ArchitectureGameObjectTypes.roof => _roofComponent as T,
+            ArchitectureGameObjectTypes.wall => _wallComponent as T,
+            ArchitectureGameObjectTypes.floor => _floorComponent as T,
+            ArchitectureGameObjectTypes.terrain => _terrainComponent as T,
+            _ => default
+        };
+
+        public void InvalidateComponent(ArchitectureGameObjectTypes Type) => GetComponentByType<AssetReferenceComponent>(Type)?.Invalidate();
+
         /// <summary>
         /// Creates game objects for the lot architecture, and returns them in the provided list.
         /// </summary>
         /// <param name="componentList">List of created game objects</param>
         public void CreateGameObjects(List<GameObject> componentList)
         {
-            var roofObj = new GameObject("roof", typeof(LotRoofComponent));
-            _roofComponent = roofObj.GetComponent<LotRoofComponent>().CreateFromLotArchitecture(this);
-            componentList.Add(roofObj);
+            // make gameobjects for each type of object on the lot
+            for(int type = 0; type < Enum.GetValues(typeof(ArchitectureGameObjectTypes)).Length; type++)
+            {
+                ArchitectureGameObjectTypes tType = (ArchitectureGameObjectTypes)type;
+                if (!CreateGameObjectsOfType(componentList, tType))
+                    ; // TODO: Handle if this fails 
+            }
+        }
 
-            var wall = new GameObject("wall", typeof(LotWallComponent));
-            _wallComponent = wall.GetComponent<LotWallComponent>().CreateFromLotArchitecture(this);
-            componentList.Add(wall);
+        public enum ArchitectureGameObjectTypes
+        {
+            roof,
+            wall, 
+            floor, 
+            terrain
+        }
 
-            var floor = new GameObject("floor", typeof(LotFloorComponent));
-            _floorComponent = floor.GetComponent<LotFloorComponent>().CreateFromLotArchitecture(this);
-            componentList.Add(floor);
-
-            var terrain = new GameObject("terrain", typeof(LotTerrainComponent));
-            _terrainComponent = terrain.GetComponent<LotTerrainComponent>().CreateFromLotArchitecture(this);
-            componentList.Add(terrain);
+        /// <summary>
+        /// Creates the correspondent GameObject for the type of geometry specified by <paramref name="Type"/>
+        /// <para>Adds it to the given component list automatically</para>
+        /// </summary>
+        /// <param name="componentList"></param>
+        /// <param name="Type"></param>
+        /// <returns></returns>
+        public bool CreateGameObjectsOfType(List<GameObject> componentList, ArchitectureGameObjectTypes Type)
+        {
+            GameObject obj = default;
+            switch (Type)
+            {
+                case ArchitectureGameObjectTypes.roof:
+                    var roofObj = obj = new GameObject("roof", typeof(LotRoofComponent));
+                    _roofComponent = roofObj.GetComponent<LotRoofComponent>().CreateFromLotArchitecture(this);
+                    break;
+                case ArchitectureGameObjectTypes.wall:
+                    var wall = obj = new GameObject("wall", typeof(LotWallComponent));
+                    _wallComponent = wall.GetComponent<LotWallComponent>().CreateFromLotArchitecture(this);
+                    break;
+                case ArchitectureGameObjectTypes.floor:
+                    var floor = obj = new GameObject("floor", typeof(LotFloorComponent));
+                    _floorComponent = floor.GetComponent<LotFloorComponent>().CreateFromLotArchitecture(this);
+                    break;
+                case ArchitectureGameObjectTypes.terrain:
+                    var terrain = obj = new GameObject("terrain", typeof(LotTerrainComponent));
+                    _terrainComponent = terrain.GetComponent<LotTerrainComponent>().CreateFromLotArchitecture(this);
+                    break;
+                default: return false;
+            }
+            componentList.Add(obj);
+            return true;
         }
 
         private static int CalculateElevationIndex(int height, int x, int y)
@@ -225,6 +271,6 @@ namespace OpenTS2.Scenes.Lot
             _roofComponent.UpdateDisplay(state);
             _wallComponent.UpdateDisplay(state);
             _floorComponent.UpdateDisplay(state);
-        }
+        }        
     }
 }
