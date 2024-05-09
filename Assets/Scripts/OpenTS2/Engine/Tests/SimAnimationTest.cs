@@ -18,6 +18,8 @@ namespace OpenTS2.Engine.Tests
         [TextArea(minLines: 10, maxLines: 10)]
         public string matchedNames = "";
 
+        private bool baking = false;
+
         private readonly Dictionary<string, ScenegraphAnimationAsset> _animations = new Dictionary<string, ScenegraphAnimationAsset>();
         private Animation _animationObj;
         private SimCharacterComponent _sim;
@@ -73,6 +75,10 @@ namespace OpenTS2.Engine.Tests
             {
                 return;
             }
+            if (baking)
+            {
+                return;
+            }
             // Play the neutral animation for one second to reset positions to default.
             _animationObj.Play("a-pose-neutral-stand_anim");
 
@@ -92,7 +98,8 @@ namespace OpenTS2.Engine.Tests
             yield return new WaitForFixedUpdate();
 
             _sim.AdjustInverseKinematicWeightsForAnimation(anim.AnimResource);
-            _animationObj.Play(animName);
+
+            yield return BakeAnimationIntoNewAnimation(animName);
         }
 
         private ScenegraphAnimationAsset UpdateAnimationsListAndGetSelection()
@@ -103,6 +110,90 @@ namespace OpenTS2.Engine.Tests
             // Display 10 matching animations.
             matchedNames = string.Join("\n", tenMatchedAnimations.Select(pair => pair.Key));
             return tenMatchedAnimations.Length == 0 ? null : tenMatchedAnimations[0].Value;
+        }
+
+        IEnumerator BakeAnimationIntoNewAnimation(string animName)
+        {
+            var bakedName = $"{animName}_baked";
+            if (_animationObj.GetClip(bakedName) != null)
+            {
+                yield break;
+            }
+            baking = true;
+
+            var bakedClip = new AnimationClip();
+            bakedClip.legacy = true;
+
+            _animationObj.wrapMode = WrapMode.Clamp;
+            // Now play the animation frame-by-frame and bake in all the bones.
+            _animationObj.Play(animName);
+            var animState = _animationObj[animName];
+
+            // Each bone will have position and rotation keyframes for each frame.
+            var boneToKeyframes = new Dictionary<string, PositionAndRotationKeyframes>();
+            foreach (var bone in _sim.Scenegraph.BoneNamesToRelativePaths.Keys)
+            {
+                boneToKeyframes[bone] = new PositionAndRotationKeyframes();
+            }
+
+            animState.time = 0.0f;
+            var timeStep = 1.0f / 24; // 24 frames per second. Bake every frame.
+            for (var t = 0.0f; t < animState.length; t += timeStep)
+            {
+                yield return new WaitForFixedUpdate();
+
+                // for each bone in the skeleton, bake in some key frames.
+                foreach (var item in _sim.Scenegraph.BoneNamesToTransform)
+                {
+                    var boneName = item.Key;
+                    var boneTransform = item.Value;
+                    boneToKeyframes[boneName].BakeInDataFromTransform(animState.time, boneTransform);
+                }
+
+                animState.time = t;
+            }
+
+            foreach (var entry in boneToKeyframes)
+            {
+                var relativeBonePath = _sim.Scenegraph.BoneNamesToRelativePaths[entry.Key];
+                var posAndRot = entry.Value;
+
+                bakedClip.SetCurve(relativeBonePath, typeof(Transform), "localPosition.x", new AnimationCurve(posAndRot.PosX.ToArray()));
+                bakedClip.SetCurve(relativeBonePath, typeof(Transform), "localPosition.y", new AnimationCurve(posAndRot.PosY.ToArray()));
+                bakedClip.SetCurve(relativeBonePath, typeof(Transform), "localPosition.z", new AnimationCurve(posAndRot.PosZ.ToArray()));
+
+                bakedClip.SetCurve(relativeBonePath, typeof(Transform), "localRotation.x", new AnimationCurve(posAndRot.QuatX.ToArray()));
+                bakedClip.SetCurve(relativeBonePath, typeof(Transform), "localRotation.y", new AnimationCurve(posAndRot.QuatY.ToArray()));
+                bakedClip.SetCurve(relativeBonePath, typeof(Transform), "localRotation.z", new AnimationCurve(posAndRot.QuatZ.ToArray()));
+                bakedClip.SetCurve(relativeBonePath, typeof(Transform), "localRotation.w", new AnimationCurve(posAndRot.QuatW.ToArray()));
+            }
+
+            _animationObj.AddClip(bakedClip, bakedName);
+            baking = false;
+        }
+
+        private class PositionAndRotationKeyframes
+        {
+            internal List<Keyframe> PosX = new List<Keyframe>();
+            internal List<Keyframe> PosY = new List<Keyframe>();
+            internal List<Keyframe> PosZ = new List<Keyframe>();
+
+            internal List<Keyframe> QuatX = new List<Keyframe>();
+            internal List<Keyframe> QuatY = new List<Keyframe>();
+            internal List<Keyframe> QuatZ = new List<Keyframe>();
+            internal List<Keyframe> QuatW = new List<Keyframe>();
+
+            public void BakeInDataFromTransform(float time, Transform transform)
+            {
+                PosX.Add(new Keyframe(time, transform.localPosition.x));
+                PosY.Add(new Keyframe(time, transform.localPosition.y));
+                PosZ.Add(new Keyframe(time, transform.localPosition.z));
+
+                QuatX.Add(new Keyframe(time, transform.localRotation.x));
+                QuatY.Add(new Keyframe(time, transform.localRotation.y));
+                QuatZ.Add(new Keyframe(time, transform.localRotation.z));
+                QuatW.Add(new Keyframe(time, transform.localRotation.w));
+            }
         }
     }
 }
