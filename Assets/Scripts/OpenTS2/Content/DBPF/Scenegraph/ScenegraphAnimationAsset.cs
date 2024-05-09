@@ -76,7 +76,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             clip.SetCurve(property, typeof(TwoBoneIKConstraint), "m_Data.m_TargetPositionWeight", curve);
         }
 
-        private static void CreateBlendCurveForChannel(AnimationClip clip, AnimResourceConstBlock.SharedChannel channel,
+        public static void CreateBlendCurveForChannel(AnimationClip clip, AnimResourceConstBlock.SharedChannel channel,
             string relativePathToBlend)
         {
             if (channel.Type != AnimResourceConstBlock.ChannelType.Float1)

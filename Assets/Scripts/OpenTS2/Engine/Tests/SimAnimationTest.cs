@@ -99,7 +99,7 @@ namespace OpenTS2.Engine.Tests
 
             _sim.AdjustInverseKinematicWeightsForAnimation(anim.AnimResource);
 
-            yield return BakeAnimationIntoNewAnimation(animName);
+            yield return BakeAnimationIntoNewAnimation(animName, anim);
         }
 
         private ScenegraphAnimationAsset UpdateAnimationsListAndGetSelection()
@@ -112,7 +112,7 @@ namespace OpenTS2.Engine.Tests
             return tenMatchedAnimations.Length == 0 ? null : tenMatchedAnimations[0].Value;
         }
 
-        IEnumerator BakeAnimationIntoNewAnimation(string animName)
+        IEnumerator BakeAnimationIntoNewAnimation(string animName, ScenegraphAnimationAsset anim)
         {
             var bakedName = $"{animName}_baked";
             if (_animationObj.GetClip(bakedName) != null)
@@ -166,6 +166,21 @@ namespace OpenTS2.Engine.Tests
                 bakedClip.SetCurve(relativeBonePath, typeof(Transform), "localRotation.y", new AnimationCurve(posAndRot.QuatY.ToArray()));
                 bakedClip.SetCurve(relativeBonePath, typeof(Transform), "localRotation.z", new AnimationCurve(posAndRot.QuatZ.ToArray()));
                 bakedClip.SetCurve(relativeBonePath, typeof(Transform), "localRotation.w", new AnimationCurve(posAndRot.QuatW.ToArray()));
+            }
+
+            // Add curves for blend channels.
+            foreach (var target in anim.AnimResource.AnimTargets)
+            {
+                foreach (var channel in target.Channels)
+                {
+                    if (!_sim.Scenegraph.BlendNamesToRelativePaths.TryGetValue(channel.ChannelName,
+                            out var relativePathsToBlend)) continue;
+
+                    foreach (var blendRelativePath in relativePathsToBlend)
+                    {
+                        ScenegraphAnimationAsset.CreateBlendCurveForChannel(bakedClip, channel, blendRelativePath);
+                    }
+                }
             }
 
             _animationObj.AddClip(bakedClip, bakedName);
