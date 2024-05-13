@@ -71,7 +71,7 @@ namespace OpenTS2.SimAntics.Primitives
                     throw new SimAnticsException($"Can't find Lua object script named {scriptName}", ctx.StackFrame);
             }
 
-            var luaResult = luaManager.RunScriptPrimitive(scriptSource, param0, param1, param2, ctx);
+            var luaResult = luaManager.RunScriptPrimitive(scriptName, scriptSource, param0, param1, param2, ctx);
 
             return new VMReturnValue(luaResult);
         }

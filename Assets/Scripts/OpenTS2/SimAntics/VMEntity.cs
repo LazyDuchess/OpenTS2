@@ -1,4 +1,5 @@
 ﻿using OpenTS2.Content.DBPF;
+using OpenTS2.Files.Formats.DBPF;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +20,8 @@ namespace OpenTS2.SimAntics
         public VMThread MainThread;
         public VM VM;
         public ObjectDefinitionAsset ObjectDefinition;
+        public short[] Attributes;
+        public short[] ObjectData = new short[114];
         public uint PrivateGroupID => ObjectDefinition.GlobalTGI.GroupID;
         public uint SemiGlobalGroupID
         {
@@ -39,6 +42,27 @@ namespace OpenTS2.SimAntics
         public VMEntity(ObjectDefinitionAsset objectDefinition) : this()
         {
             ObjectDefinition = objectDefinition;
+            Attributes = new short[objectDefinition.NumAttributes];
+        }
+
+        public short GetObjectData(VMObjectData field)
+        {
+            return ObjectData[(int)field];
+        }
+
+        public void ClearObjectFlags(VMObjectData field, short value)
+        {
+            ObjectData[(int)field] = (short)(ObjectData[(int)field] ^ value);
+        }
+
+        public void SetObjectFlags(VMObjectData field, short value)
+        {
+            ObjectData[(int)field] = (short)(ObjectData[(int)field] | value);
+        }
+
+        public void SetObjectData(VMObjectData field, short value)
+        {
+            ObjectData[(int)field] = value;
         }
 
         public void Tick()
@@ -56,6 +80,32 @@ namespace OpenTS2.SimAntics
                 return;
             }
             VM.RemoveEntity(ID);
+        }
+
+        public BHAVAsset GetBHAV(ushort treeID)
+        {
+            // 0x0XXX is global scope, 0x1XXX is private scope and 0x2XXX is semiglobal scope.
+            var groupid = SemiGlobalGroupID;
+
+            if (treeID < 0x1000)
+                groupid = GroupIDs.Global;
+            else if (treeID < 0x2000)
+                groupid = PrivateGroupID;
+
+            return VM.GetBHAV(treeID, groupid);
+        }
+
+        public VMExitCode RunTreeImmediately(ushort treeID)
+        {
+            var thread = new VMThread(this);
+            thread.CanYield = false;
+
+            var bhav = GetBHAV(treeID);
+
+            var stackFrame = new VMStackFrame(bhav, thread);
+            thread.Frames.Push(stackFrame);
+
+            return thread.Tick();
         }
     }
 }

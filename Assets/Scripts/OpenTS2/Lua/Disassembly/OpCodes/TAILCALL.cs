@@ -13,6 +13,13 @@ namespace OpenTS2.Lua.Disassembly.OpCodes
             var start = (ushort)(A + 1);
             var end = A + B - 1;
             var callValues = "";
+
+            if (context.IsThisCall(A))
+            {
+                context.Code.WriteLine("-- THISCALL");
+                start++;
+            }
+
             for (var i = start; i <= end; i++)
             {
                 if (i > start)

@@ -28,8 +28,8 @@ namespace OpenTS2.Content
             }
         }
 
-        //mask of all products, minus store.
-        int _installedProducts = 0x3EFFF;
+        //mask of all products
+        int _installedProducts = 0x3FFFF;
         public EPManager()
         {
             s_instance = this;

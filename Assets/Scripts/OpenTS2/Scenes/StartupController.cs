@@ -14,6 +14,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using OpenTS2.UI.Layouts;
+using OpenTS2.Lua;
 
 namespace OpenTS2.Scenes
 {
@@ -106,6 +107,8 @@ namespace OpenTS2.Scenes
 
         private void OnFinishLoading()
         {
+            var luaMgr = LuaManager.Get();
+            luaMgr.InitializeObjectScripts();
             CursorController.Cursor = CursorController.CursorType.Hourglass;
             if (LoadObjects && !GameLoaded)
             {
