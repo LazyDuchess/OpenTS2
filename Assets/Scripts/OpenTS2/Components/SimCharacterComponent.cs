@@ -20,7 +20,7 @@ namespace OpenTS2.Components
     [RequireComponent(typeof(AssetReferenceComponent))]
     public class SimCharacterComponent : MonoBehaviour
     {
-        public static SimCharacterComponent CreateNakedBaseSim()
+        public static SimCharacterComponent CreateNakedBaseSim(bool makeAnimationRig = true)
         {
             // Load the skeleton, body, hair and face resources.
             const string skeletonResourceName = "auskel_cres";
@@ -49,7 +49,14 @@ namespace OpenTS2.Components
             simCharacterObject.GetComponent<AssetReferenceComponent>().AddReference(skeletonAsset, bodyAsset, baldHairAsset, baseFaceAsset);
 
             var simsComponent = simCharacterObject.GetComponent<SimCharacterComponent>();
-            simsComponent.SetupAnimationRig(scenegraph);
+            if (makeAnimationRig)
+            {
+                simsComponent.SetupAnimationRig(scenegraph);
+            }
+            else
+            {
+                simsComponent.Scenegraph = scenegraph;
+            }
 
             return simsComponent;
         }

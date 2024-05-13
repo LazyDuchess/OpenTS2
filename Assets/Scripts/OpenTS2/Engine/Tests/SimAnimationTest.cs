@@ -24,6 +24,9 @@ namespace OpenTS2.Engine.Tests
         private Animation _animationObj;
         private SimCharacterComponent _sim;
 
+        private SimCharacterComponent _bakedSim;
+        private Animation _bakedAnim;
+
         private void Start()
         {
             var contentProvider = ContentProvider.Get();
@@ -45,6 +48,35 @@ namespace OpenTS2.Engine.Tests
                 _animations[animationAsset.AnimResource.ScenegraphResource.ResourceName] = animationAsset;
             }
             UpdateAnimationsListAndGetSelection();
+
+            // Create another sim that we can bake animations into and make clean for export.
+            _bakedSim = SimCharacterComponent.CreateNakedBaseSim(makeAnimationRig:false);
+            _bakedSim.gameObject.name = "bakedSim";
+            // Remove ikpole, ikctr and handcontrol objects from the baked sim.
+            foreach (var bone in _bakedSim.Scenegraph.transform.Find("auskel").GetComponentsInChildren<Transform>())
+            {
+                Debug.Log($"bone name: {bone.name}");
+                if (bone.name.Contains("ikctr") || bone.name.Contains("ikpole"))
+                {
+                    UnityEngine.Object.DestroyImmediate(bone.gameObject);
+                    Debug.Log("Destroyed");
+                }
+            }
+            UnityEngine.Object.DestroyImmediate(_bakedSim.Scenegraph.transform.Find("auskel/root_trans/r_handcontrol0")
+                .gameObject);
+            UnityEngine.Object.DestroyImmediate(_bakedSim.Scenegraph.transform.Find("auskel/root_trans/l_handcontrol0")
+                .gameObject);
+            UnityEngine.Object.DestroyImmediate(_bakedSim.Scenegraph.transform.Find("auskel/root_trans/r_handcontrol1")
+                .gameObject);
+            UnityEngine.Object.DestroyImmediate(_bakedSim.Scenegraph.transform.Find("auskel/root_trans/l_handcontrol1")
+                .gameObject);
+            UnityEngine.Object.DestroyImmediate(_bakedSim.Scenegraph.transform.Find("auskel/transform")
+                .gameObject);
+            UnityEngine.Object.DestroyImmediate(_bakedSim.Scenegraph.transform.Find("auskel/transform")
+                .gameObject);
+            UnityEngine.Object.DestroyImmediate(_bakedSim.Scenegraph.transform.Find("auskel/transform")
+                .gameObject);
+            _bakedAnim = _bakedSim.Scenegraph.transform.Find("auskel").gameObject.AddComponent<Animation>();
 
             _sim = SimCharacterComponent.CreateNakedBaseSim();
 
@@ -115,7 +147,7 @@ namespace OpenTS2.Engine.Tests
         IEnumerator BakeAnimationIntoNewAnimation(string animName, ScenegraphAnimationAsset anim)
         {
             var bakedName = $"{animName}_baked";
-            if (_animationObj.GetClip(bakedName) != null)
+            if (_bakedAnim.GetClip(bakedName) != null)
             {
                 yield break;
             }
@@ -153,10 +185,22 @@ namespace OpenTS2.Engine.Tests
                 animState.time = t;
             }
 
+            var boneSet = new HashSet<string>();
+            foreach (var bone in _bakedSim.Scenegraph.transform.Find("auskel").GetComponentsInChildren<Transform>())
+            {
+                boneSet.Add(bone.name);
+            }
+
             foreach (var entry in boneToKeyframes)
             {
+                if (!boneSet.Contains(entry.Key))
+                {
+                    continue;
+                }
                 var relativeBonePath = _sim.Scenegraph.BoneNamesToRelativePaths[entry.Key];
+                relativeBonePath = relativeBonePath.Replace("auskel/", "");
                 var posAndRot = entry.Value;
+                Debug.Log(relativeBonePath);
 
                 bakedClip.SetCurve(relativeBonePath, typeof(Transform), "localPosition.x", new AnimationCurve(posAndRot.PosX.ToArray()));
                 bakedClip.SetCurve(relativeBonePath, typeof(Transform), "localPosition.y", new AnimationCurve(posAndRot.PosY.ToArray()));
@@ -178,12 +222,13 @@ namespace OpenTS2.Engine.Tests
 
                     foreach (var blendRelativePath in relativePathsToBlend)
                     {
-                        ScenegraphAnimationAsset.CreateBlendCurveForChannel(bakedClip, channel, blendRelativePath);
+                        var blendPath = blendRelativePath.Replace("auskel/", "");
+                        ScenegraphAnimationAsset.CreateBlendCurveForChannel(bakedClip, channel, blendPath);
                     }
                 }
             }
 
-            _animationObj.AddClip(bakedClip, bakedName);
+            _bakedAnim.AddClip(bakedClip, bakedName);
             baking = false;
         }
 
