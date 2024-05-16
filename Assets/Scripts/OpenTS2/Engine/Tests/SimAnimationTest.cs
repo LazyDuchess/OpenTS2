@@ -165,6 +165,12 @@ namespace OpenTS2.Engine.Tests
             var boneToKeyframes = new Dictionary<string, PositionAndRotationKeyframes>();
             foreach (var bone in _sim.Scenegraph.BoneNamesToRelativePaths.Keys)
             {
+                // Don't bother animating the "surface" or "grip" bones, they're parented and don't actually get
+                // animated.
+                if (bone.Contains("grip") || bone.Contains("surface"))
+                {
+                    continue;
+                }
                 boneToKeyframes[bone] = new PositionAndRotationKeyframes();
             }
 
@@ -178,6 +184,11 @@ namespace OpenTS2.Engine.Tests
                 foreach (var item in _sim.Scenegraph.BoneNamesToTransform)
                 {
                     var boneName = item.Key;
+                    // Only do bones present in the set.
+                    if (!boneToKeyframes.ContainsKey(boneName))
+                    {
+                        continue;
+                    }
                     var boneTransform = item.Value;
                     boneToKeyframes[boneName].BakeInDataFromTransform(animState.time, boneTransform);
                 }
@@ -247,14 +258,24 @@ namespace OpenTS2.Engine.Tests
 
             public void BakeInDataFromTransform(float time, Transform transform)
             {
-                PosX.Add(new Keyframe(time, transform.localPosition.x));
-                PosY.Add(new Keyframe(time, transform.localPosition.y));
-                PosZ.Add(new Keyframe(time, transform.localPosition.z));
+                AddValue(PosX, time, transform.localPosition.x);
+                AddValue(PosY, time, transform.localPosition.y);
+                AddValue(PosZ, time, transform.localPosition.z);
 
-                QuatX.Add(new Keyframe(time, transform.localRotation.x));
-                QuatY.Add(new Keyframe(time, transform.localRotation.y));
-                QuatZ.Add(new Keyframe(time, transform.localRotation.z));
-                QuatW.Add(new Keyframe(time, transform.localRotation.w));
+                AddValue(QuatX, time, transform.localRotation.x);
+                AddValue(QuatY, time, transform.localRotation.y);
+                AddValue(QuatZ, time, transform.localRotation.z);
+                AddValue(QuatW, time, transform.localRotation.w);
+            }
+
+            private static void AddValue(IList<Keyframe> list, float time, float newValue)
+            {
+                // Only add keyframe if different from previous value.
+                if (list.Count > 0 && Mathf.Approximately(list[list.Count - 1].value, newValue))
+                {
+                    return;
+                }
+                list.Add(new Keyframe(time, newValue));
             }
         }
     }
