@@ -55,7 +55,6 @@ namespace OpenTS2.Engine.Tests
             // Remove ikpole, ikctr and handcontrol objects from the baked sim.
             foreach (var bone in _bakedSim.Scenegraph.transform.Find("auskel").GetComponentsInChildren<Transform>())
             {
-                Debug.Log($"bone name: {bone.name}");
                 if (bone.name.Contains("ikctr") || bone.name.Contains("ikpole"))
                 {
                     UnityEngine.Object.DestroyImmediate(bone.gameObject);
@@ -211,7 +210,6 @@ namespace OpenTS2.Engine.Tests
                 var relativeBonePath = _sim.Scenegraph.BoneNamesToRelativePaths[entry.Key];
                 relativeBonePath = relativeBonePath.Replace("auskel/", "");
                 var posAndRot = entry.Value;
-                Debug.Log(relativeBonePath);
 
                 bakedClip.SetCurve(relativeBonePath, typeof(Transform), "localPosition.x", new AnimationCurve(posAndRot.PosX.ToArray()));
                 bakedClip.SetCurve(relativeBonePath, typeof(Transform), "localPosition.y", new AnimationCurve(posAndRot.PosY.ToArray()));

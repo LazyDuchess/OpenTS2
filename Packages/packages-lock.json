@@ -84,12 +84,47 @@
       "dependencies": {},
       "url": "https://packages.unity.com"
     },
+    "com.unity.nuget.newtonsoft-json": {
+      "version": "2.0.0",
+      "depth": 1,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.render-pipelines.core": {
+      "version": "10.8.1",
+      "depth": 2,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.ugui": "1.0.0",
+        "com.unity.modules.physics": "1.0.0",
+        "com.unity.modules.jsonserialize": "1.0.0"
+      },
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.searcher": {
+      "version": "4.3.2",
+      "depth": 2,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
     "com.unity.services.core": {
       "version": "1.0.1",
       "depth": 1,
       "source": "registry",
       "dependencies": {
         "com.unity.modules.unitywebrequest": "1.0.0"
+      },
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.shadergraph": {
+      "version": "10.8.1",
+      "depth": 1,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.render-pipelines.core": "10.8.1",
+        "com.unity.searcher": "4.3.2"
       },
       "url": "https://packages.unity.com"
     },
@@ -133,6 +168,18 @@
         "com.unity.modules.ui": "1.0.0",
         "com.unity.modules.imgui": "1.0.0"
       }
+    },
+    "org.khronos.unitygltf": {
+      "version": "https://github.com/KhronosGroup/UnityGLTF.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.nuget.newtonsoft-json": "2.0.0",
+        "com.unity.modules.imageconversion": "1.0.0",
+        "com.unity.shadergraph": "10.0.0",
+        "com.unity.mathematics": "1.0.0"
+      },
+      "hash": "dbd863412a2807fea00b4433d28ec3682eac6bda"
     },
     "com.unity.modules.ai": {
       "version": "1.0.0",
