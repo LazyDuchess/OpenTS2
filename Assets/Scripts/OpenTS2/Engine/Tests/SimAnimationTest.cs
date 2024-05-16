@@ -230,6 +230,8 @@ namespace OpenTS2.Engine.Tests
 
             _bakedAnim.AddClip(bakedClip, bakedName);
             baking = false;
+
+            //UnityEditor.Formats.Fbx.Exporter.ModelExporter.ExportObject("");
         }
 
         private class PositionAndRotationKeyframes
