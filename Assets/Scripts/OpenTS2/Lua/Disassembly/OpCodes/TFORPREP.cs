@@ -41,6 +41,12 @@ namespace OpenTS2.Lua.Disassembly.OpCodes
 
         public override void Disassemble(LuaC50.Context context)
         {
+            context.Code.WriteLine("if type(" + context.R(A) + ") == \"table\" then");
+            context.Code.Indentation++;
+            context.Code.WriteLine(context.R((ushort)(A + 1)) + " = " + context.R(A));
+            context.Code.WriteLine(context.R(A) + " = next");
+            context.Code.Indentation--;
+            context.Code.WriteEnd();
             context.Code.WriteLine("for "+ context.R((ushort)(A + 2)) + ", "+ context.R((ushort)(A + 3)) + " in "+ context.R(A) + ", "+ context.R((ushort)(A + 1)) + " do");
             context.Code.Indentation++;
             //context.Code.WriteLine("-- A: " + A);

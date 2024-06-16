@@ -36,6 +36,12 @@ namespace OpenTS2.Lua.Disassembly.OpCodes
             start = (ushort)(A + 1);
             end = A + B - 1;
 
+            if (context.IsThisCall(A))
+            {
+                context.Code.WriteLine("-- THISCALL");
+                start++;
+            }
+
             if (start > end+1 && WorkaroundRegisterAmount > 0)
             {
                 context.Code.WriteLine("-- HACK: CALL instruction had invalid start and end for arg values.");
@@ -58,6 +64,7 @@ namespace OpenTS2.Lua.Disassembly.OpCodes
                 context.Code.WriteLine(context.R(A) + "(" + callValues + ")");
             else
                 context.Code.WriteLine(retValues + " = " + context.R(A) + "("+callValues+")");
+            context.UnmarkThisCall(A);
         }
     }
 }

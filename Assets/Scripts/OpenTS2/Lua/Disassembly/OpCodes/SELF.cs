@@ -12,6 +12,7 @@ namespace OpenTS2.Lua.Disassembly.OpCodes
         {
             context.Code.WriteLine(context.R((ushort)(A + 1)) + " = " + context.R(B));
             context.Code.WriteLine(context.R(A) + " = " + context.R(B) + "[" + context.RKAsString(C) + "]");
+            context.MarkThisCall(A);
         }
     }
 }

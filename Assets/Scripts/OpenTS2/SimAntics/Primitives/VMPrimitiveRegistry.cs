@@ -13,6 +13,7 @@ namespace OpenTS2.SimAntics.Primitives
         public static void Initialize()
         {
             RegisterPrimitive<VMSleep>(0x0);
+            RegisterPrimitive<VMGenericSimCall>(0x1);
             RegisterPrimitive<VMExpression>(0x2);
             RegisterPrimitive<VMRandomNumber>(0x8);
             RegisterPrimitive<VMRemoveObjectInstance>(0x12);

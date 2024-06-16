@@ -48,5 +48,12 @@ namespace OpenTS2.Content
         {
             _objectByGUID[objd.GUID] = objd;
         }
+
+        public ObjectDefinitionAsset GetObjectByGUID(uint guid)
+        {
+            if (_objectByGUID.TryGetValue(guid, out ObjectDefinitionAsset obj))
+                return obj;
+            return null;
+        }
     }
 }
