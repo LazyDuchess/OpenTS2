@@ -58,6 +58,23 @@ public class SkiaLabel : MonoBehaviour
         }
     }
 
+    public float LineSpacing
+    {
+        get
+        {
+            return m_LineSpacing;
+        }
+
+        set
+        {
+            if (value != m_LineSpacing)
+            {
+                m_LineSpacing = value;
+                Render();
+            }
+        }
+    }
+
     [TextArea]
     [SerializeField] 
     protected string m_Text = "";
@@ -65,11 +82,38 @@ public class SkiaLabel : MonoBehaviour
     protected int m_FontSize = 32;
     [SerializeField]
     protected Color32 m_FontColor = Color.white;
+    [SerializeField]
+    protected float m_LineSpacing = 1f;
+
+    protected RawImage RawImage
+    {
+        get
+        {
+            if (_rawImage == null)
+                _rawImage = GetComponent<RawImage>();
+            return _rawImage;
+        }
+    }
+
+    protected RectTransform RectTransform
+    {
+        get
+        {
+            if (_rectTransform == null)
+                _rectTransform = GetComponent<RectTransform>();
+            return _rectTransform;
+        }
+    }
 
     private Texture2D _texture;
+    private RawImage _rawImage;
+    private RectTransform _rectTransform;
 
     private void Awake()
     {
+        var rawImage = GetComponent<RawImage>();
+        if (rawImage == null)
+            gameObject.AddComponent<RawImage>();
         Render();
     }
 
@@ -85,7 +129,6 @@ public class SkiaLabel : MonoBehaviour
 
     private void ValidateTexture(SKImageInfo imageInfo)
     {
-        var rawImage = GetComponent<RawImage>();
         var fmt = (imageInfo.ColorType == SKColorType.Rgba8888) ? TextureFormat.RGBA32 : TextureFormat.BGRA32;
 
         if (_texture != null && !_texture.isReadable)
@@ -104,13 +147,13 @@ public class SkiaLabel : MonoBehaviour
         }
 
         _texture.wrapMode = TextureWrapMode.Clamp;
-        rawImage.texture = _texture;
+        RawImage.texture = _texture;
+        RawImage.uvRect = new Rect(0, 1, 1, -1);
     }
 
     private void Render()
     {
-        var rect = GetComponent<RectTransform>();
-        var skImageInfo = new SKImageInfo(Mathf.CeilToInt(rect.sizeDelta.x), Mathf.CeilToInt(rect.sizeDelta.y));
+        var skImageInfo = new SKImageInfo(Mathf.CeilToInt(RectTransform.sizeDelta.x), Mathf.CeilToInt(RectTransform.sizeDelta.y));
         ValidateTexture(skImageInfo);
 
         var surface = SKSurface.Create(skImageInfo);
@@ -146,7 +189,7 @@ public class SkiaLabel : MonoBehaviour
             var currentText = text.Substring(lastLineIndex, (i + 1) - lastLineIndex);
             var cutText = currentText.Substring(0, currentText.Length - 1);
 
-            if (c == '\n' || c == '\n')
+            if (c == '\n' || c == '\r')
             {
                 lines.Add(cutText);
                 lastLineIndex = i + 1;
@@ -211,11 +254,11 @@ public class SkiaLabel : MonoBehaviour
             lines.Add(text.Substring(lastLineIndex));
         }
 
-        var y = m_FontSize;
+        var y = (float)m_FontSize;
         foreach (var wrappedLine in lines)
         {
             canvas.DrawText(wrappedLine, 0f, y, paint);
-            y += m_FontSize;
+            y += m_FontSize * m_LineSpacing;
         }
     }
 
