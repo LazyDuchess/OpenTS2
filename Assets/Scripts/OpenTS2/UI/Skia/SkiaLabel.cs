@@ -5,6 +5,7 @@ using SkiaSharp;
 using UnityEngine.UI;
 using Codice.Client.Common;
 using System.Runtime.InteropServices.WindowsRuntime;
+using static OpenTS2.UI.Skia.ParsedLabelText;
 
 namespace OpenTS2.UI.Skia
 {
@@ -12,6 +13,31 @@ namespace OpenTS2.UI.Skia
     [RequireComponent(typeof(RawImage))]
     public class SkiaLabel : MonoBehaviour
     {
+        public ParsedLabelText ParsedText
+        {
+            get
+            {
+                if (_parsedText == null)
+                    Render();
+                return _parsedText;
+            }
+        }
+        public int VerticalScroll
+        {
+            get
+            {
+                return m_VerticalScroll;
+            }
+
+            set
+            {
+                if (m_VerticalScroll != value)
+                {
+                    m_VerticalScroll = value;
+                    Render();
+                }
+            }
+        }
         public VerticalAlign VerticalAlign
         {
             get
@@ -145,12 +171,16 @@ namespace OpenTS2.UI.Skia
         protected VerticalAlign m_VerticalAlign = VerticalAlign.Top;
         [SerializeField]
         protected HorizontalAlign m_HorizontalAlign = HorizontalAlign.Left;
+        [SerializeField]
+        protected int m_VerticalScroll = 0;
         protected SkiaFont m_Font;
         [SerializeField]
         private TextAsset m_FontAsset;
         [SerializeField]
         [HideInInspector]
         private bool _fontFromAsset = false;
+        private SKPaint _skPaint = null;
+        private ParsedLabelText _parsedText = null;
 
         protected RawImage RawImage
         {
@@ -267,6 +297,100 @@ namespace OpenTS2.UI.Skia
             }
         }
 
+        public CharAtLine GetCharacterOnLine(int charIndex)
+        {
+            if (charIndex < 0 || charIndex >= _parsedText.OriginalText.Length)
+                return null;
+
+            for(var i = 0; i < _parsedText.Lines.Count; i++)
+            {
+                var line = _parsedText.Lines[i];
+                if (charIndex >= line.EndIndex || charIndex < line.BeginIndex)
+                    continue;
+                var index = charIndex - line.BeginIndex;
+                var charAtLine = new CharAtLine();
+                charAtLine.CharIndex = index;
+                charAtLine.LineIndex = i;
+                return charAtLine;
+            }
+
+            var closestLeftLine = -1;
+
+            for(var i = 0; i < _parsedText.Lines.Count; i++)
+            {
+                var line = _parsedText.Lines[i];
+                if (line.EndIndex <= charIndex)
+                    closestLeftLine = i;
+                else
+                    break;
+            }
+
+            if (closestLeftLine != -1)
+            {
+                var charAtLine = new CharAtLine();
+                charAtLine.LineIndex = closestLeftLine + 1;
+                charAtLine.CharIndex = 0;
+                charAtLine.Underflows = true;
+                return charAtLine;
+            }
+
+            return null;
+        }
+
+        private float AlignX(float x, int line)
+        {
+            var width = PracticalWidth;
+            var lineWidth = _skPaint.MeasureText(ParsedText.Lines[line].Text);
+            switch (HorizontalAlign)
+            {
+                case HorizontalAlign.Left:
+                    break;
+
+                case HorizontalAlign.Center:
+                    x += width / 2f;
+                    x -= lineWidth / 2f;
+                    break;
+
+                case HorizontalAlign.Right:
+                    x += width;
+                    x -= lineWidth;
+                    break;
+            }
+            return x;
+        }
+
+        public CharRect GetCharacterRect(int charIndex)
+        {
+            if (charIndex < 0 || charIndex >= _parsedText.OriginalText.Length)
+                return default;
+            var charAtLine = GetCharacterOnLine(charIndex);
+            if (charAtLine == null)
+                charAtLine = GetCharacterOnLine(0);
+            if (charAtLine.Underflows)
+            {
+                var x = 0f;
+                var y = -GetLineY(charAtLine.LineIndex) + m_FontSize;
+                var height = m_FontSize;
+                var width = 1;
+
+                return new CharRect(new Rect(x, y, width, height), IsLineOutOfBounds(charAtLine.LineIndex));
+            }
+            else
+            {
+                var line = _parsedText.Lines[charAtLine.LineIndex];
+                var y = -GetLineY(charAtLine.LineIndex) + m_FontSize;
+                var height = m_FontSize;
+
+                var character = line.Text[charAtLine.CharIndex];
+                var width = _skPaint.MeasureText(character.ToString());
+                var subStringLeft = line.Text.Substring(0, charAtLine.CharIndex);
+                var x = _skPaint.MeasureText(subStringLeft);
+                x = AlignX(x, charAtLine.LineIndex);
+
+                return new CharRect(new Rect(x, y, width, height), IsLineOutOfBounds(charAtLine.LineIndex));
+            }
+        }
+
         private void Render()
         {
             ValidateFont();
@@ -276,33 +400,36 @@ namespace OpenTS2.UI.Skia
             var surface = SKSurface.Create(skImageInfo);
             var canvas = surface.Canvas;
 
-            using (var paint = new SKPaint())
-            {
-                paint.TextSize = m_FontSize;
-                paint.IsAntialias = true;
-                paint.Color = new SKColor(m_FontColor.r, m_FontColor.g, m_FontColor.b, m_FontColor.a);
-                paint.IsStroke = false;
+            if (_skPaint == null)
+                _skPaint = new SKPaint();
 
-                if (m_Font != null && m_Font.Typeface != null)
-                    paint.Typeface = m_Font.Typeface;
+            _skPaint.TextSize = m_FontSize;
+            _skPaint.IsAntialias = true;
+            _skPaint.Color = new SKColor(m_FontColor.r, m_FontColor.g, m_FontColor.b, m_FontColor.a);
+            _skPaint.IsStroke = false;
 
-                DrawText(canvas, paint, skImageInfo);
-            }
+            if (m_Font != null && m_Font.Typeface != null)
+                _skPaint.Typeface = m_Font.Typeface;
+            else
+                _skPaint.Typeface = SKTypeface.Default;
+           
+            DrawText(canvas, skImageInfo);
 
             var pixMap = surface.PeekPixels();
             _texture.LoadRawTextureData(pixMap.GetPixels(), pixMap.RowBytes * pixMap.Height);
             _texture.Apply(false, true);
         }
 
-        private void DrawText(SKCanvas canvas, SKPaint paint, SKImageInfo imageInfo)
+        private void ParseText(SKImageInfo imageInfo)
         {
+            var parsedText = new ParsedLabelText();
             var text = m_Text;
-            text = text.Replace("\t", "    ");
+            parsedText.OriginalText = text;
+            text = text.Replace('\t', ' ');
 
             var wrappedHeight = (float)m_FontSize;
 
-            var lines = new List<string>();
-            var lastCharWasSpace = false;
+            var lines = new List<TextLine>();
             var lastWordIndex = -1;
             var lastLineIndex = 0;
             for (var i = 0; i < text.Length; i++)
@@ -310,39 +437,35 @@ namespace OpenTS2.UI.Skia
                 var c = text[i];
                 var currentText = text.Substring(lastLineIndex, (i + 1) - lastLineIndex);
                 var cutText = currentText.Substring(0, currentText.Length - 1);
-
+                var cutLine = new TextLine(cutText, lastLineIndex, lastLineIndex + (currentText.Length - 1));
                 if (c == '\n' || c == '\r')
                 {
-                    lines.Add(cutText);
+                    lines.Add(cutLine);
                     lastLineIndex = i + 1;
                     lastWordIndex = -1;
-                    lastCharWasSpace = false;
                     continue;
                 }
 
                 if (c == ' ')
                 {
-                    if (!lastCharWasSpace)
-                        lastWordIndex = i;
-                    lastCharWasSpace = true;
-                    continue;
+                    lastWordIndex = i;
                 }
 
-                lastCharWasSpace = false;
-                var length = paint.MeasureText(currentText);
+                var length = _skPaint.MeasureText(currentText);
                 if (length > imageInfo.Width)
                 {
                     if (lastWordIndex != -1)
                     {
+                        lastWordIndex++;
                         var textAtLastWord = text.Substring(lastLineIndex, lastWordIndex - lastLineIndex);
-                        var lastWordLength = paint.MeasureText(textAtLastWord);
+                        var lastWordLength = _skPaint.MeasureText(textAtLastWord);
                         if (lastWordLength <= imageInfo.Width)
                         {
-                            lines.Add(textAtLastWord);
-                            var nextWordSearchStart = lastWordIndex + 1;
-                            lastLineIndex = lastWordIndex + 1;
+                            var lineAtLastWord = new TextLine(textAtLastWord, lastLineIndex, lastWordIndex - 1);
+                            lines.Add(lineAtLastWord);
+                            var nextWordSearchStart = lastWordIndex;
+                            lastLineIndex = lastWordIndex;
                             lastWordIndex = -1;
-                            lastCharWasSpace = false;
                             for (var n = nextWordSearchStart; n < text.Length; n++)
                             {
                                 if (text[n] != ' ')
@@ -354,18 +477,16 @@ namespace OpenTS2.UI.Skia
                         }
                         else
                         {
-                            lines.Add(cutText);
+                            lines.Add(cutLine);
                             lastLineIndex = i;
                             lastWordIndex = -1;
-                            lastCharWasSpace = false;
                         }
                     }
                     else
                     {
-                        lines.Add(cutText);
+                        lines.Add(cutLine);
                         lastLineIndex = i;
                         lastWordIndex = -1;
-                        lastCharWasSpace = false;
                     }
                 }
             }
@@ -373,15 +494,23 @@ namespace OpenTS2.UI.Skia
             var lastLineLength = text.Length - lastLineIndex;
             if (lastLineLength > 0)
             {
-                lines.Add(text.Substring(lastLineIndex));
+                var lastLine = new TextLine(text.Substring(lastLineIndex), lastLineIndex, text.Length);
+                lines.Add(lastLine);
             }
 
             wrappedHeight += (lines.Count - 1) * m_LineSpacing * m_FontSize;
 
-            var height = imageInfo.Height;
-            var heightMiddle = height / 2f;
-            var wrappedHeightMiddle = wrappedHeight / 2f;
+            parsedText.Lines = lines;
+            parsedText.Height = wrappedHeight;
 
+            _parsedText = parsedText;
+        }
+
+        private float GetLineY(int line)
+        {
+            var height = PracticalHeight;
+            var heightMiddle = height / 2f;
+            var wrappedHeightMiddle = _parsedText.Height / 2f;
             var y = (float)m_FontSize;
 
             switch (VerticalAlign)
@@ -395,16 +524,33 @@ namespace OpenTS2.UI.Skia
                     break;
 
                 case VerticalAlign.Bottom:
-                    y = (height - wrappedHeight) + m_FontSize;
+                    y = (height - _parsedText.Height) + m_FontSize;
                     break;
             }
 
-            foreach (var wrappedLine in lines)
+            y -= m_FontSize * LineSpacing * m_VerticalScroll;
+            y += m_FontSize * m_LineSpacing * line;
+            return y;
+        }
+
+        public bool IsLineOutOfBounds(int lineIndex)
+        {
+            var y = GetLineY(lineIndex);
+            if (y < m_FontSize || y > PracticalHeight)
+                return true;
+            return false;
+        }
+
+        private void DrawText(SKCanvas canvas, SKImageInfo imageInfo)
+        {
+            ParseText(imageInfo);
+            for(var i = 0; i < _parsedText.Lines.Count; i++)
             {
+                var line = _parsedText.Lines[i];
                 var width = imageInfo.Width;
-                var middle = width/2f;
-                var lineLength = paint.MeasureText(wrappedLine);
-                var lineMiddle = lineLength/2f;
+                var middle = width / 2f;
+                var lineLength = _skPaint.MeasureText(line.Text);
+                var lineMiddle = lineLength / 2f;
                 var xPos = 0f;
 
                 switch (HorizontalAlign)
@@ -421,9 +567,9 @@ namespace OpenTS2.UI.Skia
                         xPos = width - lineLength;
                         break;
                 }
-                if (y >= m_FontSize && y <= height)
-                    canvas.DrawText(wrappedLine, xPos, y, paint);
-                y += m_FontSize * m_LineSpacing;
+                var y = GetLineY(i);
+                if (!IsLineOutOfBounds(i))
+                    canvas.DrawText(line.Text, xPos, y, _skPaint);
             }
         }
 
