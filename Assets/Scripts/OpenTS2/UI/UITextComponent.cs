@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenTS2.UI.Skia;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,13 +14,13 @@ namespace OpenTS2.UI
         {
             get
             {
-                return TextComponent.text;
+                return TextComponent.Text;
             }
             set
             {
-                TextComponent.text = value;
+                TextComponent.Text = value;
             }
         }
-        public Text TextComponent => transform.GetComponentInChildren<Text>();
+        public SkiaLabel TextComponent => transform.GetComponentInChildren<SkiaLabel>();
     }
 }

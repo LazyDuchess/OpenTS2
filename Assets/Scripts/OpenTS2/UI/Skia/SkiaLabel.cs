@@ -4,6 +4,7 @@ using UnityEngine;
 using SkiaSharp;
 using UnityEngine.UI;
 using Codice.Client.Common;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace OpenTS2.UI.Skia
 {
@@ -171,6 +172,36 @@ namespace OpenTS2.UI.Skia
             }
         }
 
+        protected Canvas Canvas
+        {
+            get
+            {
+                return GetComponentInParent<Canvas>();
+            }
+        }
+
+        protected int PracticalWidth
+        {
+            get
+            {
+                float rectWidth = RectTransformUtility.PixelAdjustRect(RectTransform, Canvas).width;
+                var ceil = Mathf.CeilToInt(rectWidth);
+                ceil = Mathf.Max(ceil, 2);
+                return ceil;
+            }
+        }
+
+        protected int PracticalHeight
+        {
+            get
+            {
+                float rectHeight = RectTransformUtility.PixelAdjustRect(RectTransform, Canvas).height;
+                var ceil = Mathf.CeilToInt(rectHeight);
+                ceil = Mathf.Max(ceil, 2);
+                return ceil;
+            }
+        }
+
         private Texture2D _texture;
         private RawImage _rawImage;
         private RectTransform _rectTransform;
@@ -196,6 +227,11 @@ namespace OpenTS2.UI.Skia
         private void ValidateTexture(SKImageInfo imageInfo)
         {
             var fmt = (imageInfo.ColorType == SKColorType.Rgba8888) ? TextureFormat.RGBA32 : TextureFormat.BGRA32;
+            var w = imageInfo.Width;
+            var h = imageInfo.Height;
+
+            w = Mathf.Max(w, 1);
+            h = Mathf.Max(h, 1);
 
             if (_texture != null && !_texture.isReadable)
             {
@@ -205,11 +241,11 @@ namespace OpenTS2.UI.Skia
 
             if (_texture == null)
             {
-                _texture = new Texture2D(imageInfo.Width, imageInfo.Height, fmt, false, true);
+                _texture = new Texture2D(w, h, fmt, false, true);
             }
-            else if (_texture.width != imageInfo.Width || _texture.height != imageInfo.Height || _texture.format != fmt)
+            else if (_texture.width != w || _texture.height != h || _texture.format != fmt)
             {
-                _texture.Resize(imageInfo.Width, imageInfo.Height, fmt, false);
+                _texture.Resize(w, h, fmt, false);
             }
 
             _texture.wrapMode = TextureWrapMode.Clamp;
@@ -234,7 +270,7 @@ namespace OpenTS2.UI.Skia
         private void Render()
         {
             ValidateFont();
-            var skImageInfo = new SKImageInfo(Mathf.CeilToInt(RectTransform.sizeDelta.x), Mathf.CeilToInt(RectTransform.sizeDelta.y));
+            var skImageInfo = new SKImageInfo(PracticalWidth, PracticalHeight);
             ValidateTexture(skImageInfo);
 
             var surface = SKSurface.Create(skImageInfo);

@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
+using OpenTS2.UI.Skia;
 
 namespace OpenTS2.UI
 {
@@ -15,7 +16,8 @@ namespace OpenTS2.UI
     public class UITextElement : UIElement
     {
         protected override Type UIComponentType => typeof(UITextComponent);
-        public TextAnchor Alignment = TextAnchor.MiddleCenter;
+        public HorizontalAlign HorizontalAlign = HorizontalAlign.Left;
+        public VerticalAlign VerticalAlign = VerticalAlign.Top;
         public Color32 ForeColor = Color.black;
 
         public override void ParseProperties(UIProperties properties)
@@ -36,31 +38,40 @@ namespace OpenTS2.UI
                 switch(align)
                 {
                     case "lefttop":
-                        Alignment = TextAnchor.UpperLeft;
+                        HorizontalAlign = HorizontalAlign.Left;
+                        VerticalAlign = VerticalAlign.Top;
                         break;
                     case "centertop":
-                        Alignment = TextAnchor.UpperCenter;
+                        HorizontalAlign = HorizontalAlign.Center;
+                        VerticalAlign = VerticalAlign.Top;
                         break;
                     case "righttop":
-                        Alignment = TextAnchor.UpperRight;
+                        HorizontalAlign = HorizontalAlign.Right;
+                        VerticalAlign = VerticalAlign.Top;
                         break;
                     case "leftcenter":
-                        Alignment = TextAnchor.MiddleLeft;
+                        HorizontalAlign = HorizontalAlign.Left;
+                        VerticalAlign = VerticalAlign.Middle;
                         break;
                     case "center":
-                        Alignment = TextAnchor.MiddleCenter;
+                        HorizontalAlign = HorizontalAlign.Center;
+                        VerticalAlign = VerticalAlign.Middle;
                         break;
                     case "rightcenter":
-                        Alignment = TextAnchor.MiddleRight;
+                        HorizontalAlign = HorizontalAlign.Right;
+                        VerticalAlign = VerticalAlign.Middle;
                         break;
                     case "leftbottom":
-                        Alignment = TextAnchor.LowerLeft;
+                        HorizontalAlign = HorizontalAlign.Left;
+                        VerticalAlign = VerticalAlign.Bottom;
                         break;
                     case "centerbottom":
-                        Alignment = TextAnchor.LowerCenter;
+                        HorizontalAlign = HorizontalAlign.Center;
+                        VerticalAlign = VerticalAlign.Bottom;
                         break;
                     case "rightbottom":
-                        Alignment = TextAnchor.LowerRight;
+                        HorizontalAlign = HorizontalAlign.Right;
+                        VerticalAlign = VerticalAlign.Bottom;
                         break;
                 }
             }
@@ -70,6 +81,19 @@ namespace OpenTS2.UI
             var uiComponent = base.Instantiate(parent);
             var textGameObject = new GameObject("Text");
             textGameObject.transform.SetParent(uiComponent.transform);
+            var text = textGameObject.AddComponent<SkiaLabel>();
+            text.FontColor = ForeColor;
+            text.Text = Caption;
+            text.FontSize = 14;
+            text.HorizontalAlign = HorizontalAlign;
+            text.VerticalAlign = VerticalAlign;
+            var rect = text.GetComponent<RectTransform>();
+            rect.anchorMax = new Vector2(1f, 1f);
+            rect.anchorMin = Vector2.zero;
+
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = new Vector2(1f, 1f);
+            /*
             var text = textGameObject.AddComponent<Text>();
             text.color = ForeColor;
             text.text = Caption;
@@ -81,7 +105,7 @@ namespace OpenTS2.UI
             rect.anchorMin = Vector2.zero;
 
             rect.offsetMin = Vector2.zero;
-            rect.offsetMax = new Vector2(1f, 1f);
+            rect.offsetMax = new Vector2(1f, 1f);*/
             return uiComponent;
         }
     }

@@ -20,6 +20,7 @@ namespace OpenTS2.UI
         public override UIComponent Instantiate(Transform parent)
         {
             var component = base.Instantiate(parent) as UITextEditComponent;
+            /*
             var inputField = component.gameObject.AddComponent<InputField>();
             component.TextComponent.supportRichText = false;
             inputField.textComponent = component.TextComponent;
@@ -28,7 +29,7 @@ namespace OpenTS2.UI
             else
                 inputField.lineType = InputField.LineType.MultiLineNewline;
             inputField.onEndEdit.AddListener(delegate { component.CheckTextEdited(); });
-            component.gameObject.AddComponent<TextFieldBehaviour>();
+            component.gameObject.AddComponent<TextFieldBehaviour>();*/
             return component;
         }
     }

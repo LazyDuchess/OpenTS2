@@ -17,10 +17,12 @@ namespace OpenTS2.UI
         {
             get
             {
+                return "";
                 return Input.text;
             }
             set
             {
+                return;
                 Input.text = value;
                 _originalText = value;
             }
