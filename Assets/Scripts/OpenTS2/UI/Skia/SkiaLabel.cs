@@ -62,33 +62,66 @@ public class SkiaLabel : MonoBehaviour
 
     private void DrawText(SKCanvas canvas, SKPaint paint, SKImageInfo imageInfo)
     {
-        var splitText = Text.Split(' ');
-        var wrappedLines = new List<string>();
-        var lineLength = 0f;
-        var line = "";
-        foreach(var word in splitText)
+        var lines = new List<string>();
+        var lastCharWasSpace = false;
+        var lastWordIndex = -1;
+        var lastLineIndex = 0;
+        for(var i = 0; i < Text.Length; i++)
         {
-            var wordWithSpace = $"{word} ";
-            var wordWithSpaceLength = paint.MeasureText(wordWithSpace);
-            if (lineLength + wordWithSpaceLength > imageInfo.Width)
+            var c = Text[i];
+            if (c == ' ')
             {
-                wrappedLines.Add(line);
-                line = wordWithSpace;
-                lineLength = wordWithSpaceLength;
+                if (!lastCharWasSpace)
+                    lastWordIndex = i;
+                lastCharWasSpace = true;
             }
             else
             {
-                line += wordWithSpace;
-                lineLength += wordWithSpaceLength;
+                lastCharWasSpace = false;
+                var currentText = Text.Substring(lastLineIndex, (i + 1) - lastLineIndex);
+                var length = paint.MeasureText(currentText);
+                if (length > imageInfo.Width)
+                {
+                    var cutText = currentText.Substring(0, currentText.Length - 1);
+                    if (lastWordIndex != -1)
+                    {
+                        var textAtLastWord = Text.Substring(lastLineIndex, lastWordIndex - lastLineIndex);
+                        var lastWordLength = paint.MeasureText(textAtLastWord);
+                        if (lastWordLength <= imageInfo.Width)
+                        {
+                            lines.Add(textAtLastWord);
+                            lastLineIndex = lastWordIndex + 1;
+                            lastWordIndex = -1;
+                            lastCharWasSpace = false;
+                        }
+                        else
+                        {
+                            lines.Add(cutText);
+                            lastLineIndex = i;
+                            lastWordIndex = -1;
+                            lastCharWasSpace = false;
+                        }
+                    }
+                    else
+                    {
+                        lines.Add(cutText);
+                        lastLineIndex = i;
+                        lastWordIndex = -1;
+                        lastCharWasSpace = false;
+                    }
+                }
             }
         }
 
-        wrappedLines.Add(line);
+        var lastLineLength = Text.Length - lastLineIndex;
+        if (lastLineLength > 0)
+        {
+            lines.Add(Text.Substring(lastLineIndex));
+        }
 
         var y = FontSize;
-        foreach (var wrappedLine in wrappedLines)
+        foreach (var wrappedLine in lines)
         {
-            Debug.Log(wrappedLine);
             canvas.DrawText(wrappedLine, 0f, y, paint);
             y += FontSize;
         }
