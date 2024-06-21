@@ -32,6 +32,12 @@ namespace OpenTS2.UI.Skia
             SelectedGUIUpdate();
         }
 
+        private string SanitizeText(string text)
+        {
+            text = text.Replace('\t'.ToString(), " ");
+            return text;
+        }
+
         private void SelectedGUIUpdate()
         {
             var currentInput = "";
@@ -40,9 +46,9 @@ namespace OpenTS2.UI.Skia
             if (ev.type != EventType.KeyDown) return;
             if (ev.isKey)
             {
-                if (ev.character != 0 && ev.character != '\t')
+                if (ev.character != 0)
                 {
-                    currentInput = ev.character.ToString();
+                    currentInput = SanitizeText(ev.character.ToString());
                 }
                 currentKey = ev.keyCode;
             }
@@ -60,11 +66,16 @@ namespace OpenTS2.UI.Skia
                 case KeyCode.Backspace:
                     Backspace();
                     break;
+
+                case KeyCode.V:
+                    if (Input.GetKey(KeyCode.LeftControl))
+                        PasteClipboard();
+                    break;
             }
 
             if (currentInput != "")
             {
-                TypeCharacter(currentInput);
+                TypeString(currentInput);
             }
             ev.Use();
         }
@@ -97,14 +108,20 @@ namespace OpenTS2.UI.Skia
             }
         }
 
-        private void TypeCharacter(string character)
+        private void TypeString(string str)
         {
             _caretTimer = 0f;
             var strBuilder = new StringBuilder(_label.Text);
             var pointInsertion = _selectedCharacter + 1;
-            strBuilder.Insert(pointInsertion, character);
+            strBuilder.Insert(pointInsertion, str);
             _label.Text = strBuilder.ToString();
-            MoveCaretRight();
+            _selectedCharacter += str.Length;
+        }
+
+        private void PasteClipboard()
+        {
+            var clipboard = SanitizeText(GUIUtility.systemCopyBuffer);
+            TypeString(clipboard);
         }
 
         private void Backspace()
