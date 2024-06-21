@@ -5,36 +5,49 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace OpenTS2.UI.Skia
 {
-    public class SkiaInputField : Selectable
+    public class SkiaInputField : Selectable, IUpdateSelectedHandler
     {
-        private bool Selected => true;
+        private bool Selected => EventSystem.current != null && EventSystem.current.currentSelectedGameObject == gameObject;
         [SerializeField]
         private RectTransform _caret;
         [SerializeField]
         private SkiaLabel _label;
 
-        private int _selectedCharacter = 0;
+        private int _selectedCharacter = -1;
         private float _caretTimer = 0f;
         private float CaretTime => WinUtils.GetCaretBlinkTimer();
+        private Event _processingEvent = new Event();
 
         private void Update()
         {
             if (!Application.isPlaying) return;
-            SelectedUpdate();
+            if (Selected)
+                SelectedUpdate();
+            else
+                DeselectedUpdate();
+        }
+
+        private void DeselectedUpdate()
+        {
+            if (_caret.gameObject.activeSelf)
+                _caret.gameObject.SetActive(false);
         }
 
         private void OnGUI()
         {
-            SelectedGUIUpdate();
+            if (!Application.isPlaying) return;
+            if (Selected)
+                SelectedGUIUpdate();
         }
 
         private string SanitizeText(string text)
         {
-            text = text.Replace('\t'.ToString(), " ");
+            text = text.Replace('\t'.ToString(), "");
             return text;
         }
 
@@ -66,11 +79,6 @@ namespace OpenTS2.UI.Skia
                 case KeyCode.Backspace:
                     Backspace();
                     break;
-
-                case KeyCode.V:
-                    if (Input.GetKey(KeyCode.LeftControl))
-                        PasteClipboard();
-                    break;
             }
 
             if (currentInput != "")
@@ -90,7 +98,7 @@ namespace OpenTS2.UI.Skia
         private void DoCaretAnimation()
         {
             var caretTime = CaretTime;
-            _caretTimer += Time.deltaTime;
+            _caretTimer += Time.unscaledDeltaTime;
             if (_caretTimer > CaretTime * 2f)
             {
                 _caretTimer = 0f;
@@ -169,6 +177,27 @@ namespace OpenTS2.UI.Skia
         private void ValidateSelection()
         {
             _selectedCharacter = Mathf.Clamp(_selectedCharacter, -1, _label.Text.Length - 1);
+        }
+
+        public void OnUpdateSelected(BaseEventData eventData)
+        {
+            if (Selected)
+            {
+                while (Event.PopEvent(_processingEvent))
+                {
+                    var commandName = _processingEvent.commandName;
+                    if (commandName != null)
+                    {
+                        switch (commandName)
+                        {
+                            case "Paste":
+                                PasteClipboard();
+                                break;
+                        }
+                    }
+                }
+                eventData.Use();
+            }
         }
     }
 }

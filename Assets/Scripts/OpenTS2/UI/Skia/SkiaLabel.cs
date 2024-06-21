@@ -166,7 +166,7 @@ namespace OpenTS2.UI.Skia
         [SerializeField]
         protected Color32 m_FontColor = Color.white;
         [SerializeField]
-        protected float m_LineSpacing = 1f;
+        protected float m_LineSpacing = 1.25f;
         [SerializeField]
         protected VerticalAlign m_VerticalAlign = VerticalAlign.Top;
         [SerializeField]
