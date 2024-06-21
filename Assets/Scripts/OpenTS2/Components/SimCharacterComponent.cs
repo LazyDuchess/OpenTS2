@@ -83,11 +83,13 @@ namespace OpenTS2.Components
             Scenegraph = scene;
             var skeleton = Scenegraph.BoneNamesToTransform["auskel"].gameObject;
 
+#if UNITY_EDITOR
             // Add a bone-renderer so we can visualize the sim's bones.
             var boneRenderer = skeleton.AddComponent<BoneRenderer>();
             var boneTransforms = new List<Transform>();
             GetAllBoneTransformsForVisualization(Scenegraph.BoneNamesToTransform["root_trans"], boneTransforms);
             boneRenderer.transforms = boneTransforms.ToArray();
+#endif
 
             // Add an animator component to the auskel.
             _animator = skeleton.AddComponent<Animator>();
@@ -127,6 +129,7 @@ namespace OpenTS2.Components
 
         private void AddGizmosAroundInverseKinmaticsPositions()
         {
+#if UNITY_EDITOR
             // Add some effectors around the foot control points to see what animations should look like.
             var cubePrimitive = GameObject.CreatePrimitive(PrimitiveType.Cube);
             var cubeMesh = cubePrimitive.GetComponent<MeshFilter>().sharedMesh;
@@ -153,6 +156,7 @@ namespace OpenTS2.Components
                 new RigEffectorData.Style()
                     { color = new Color(0.0f, 0.8f, 0.4f, 0.5f), size = 0.04f, shape = sphereMesh });
             Destroy(spherePrimitive);
+#endif
         }
 
         public void AdjustInverseKinematicWeightsForAnimation(AnimResourceConstBlock anim)
