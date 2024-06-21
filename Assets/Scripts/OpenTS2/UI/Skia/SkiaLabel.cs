@@ -111,7 +111,7 @@ namespace OpenTS2.UI.Skia
         {
             get
             {
-                return FontSize;
+                return m_FontSize;
             }
 
             set
@@ -419,6 +419,11 @@ namespace OpenTS2.UI.Skia
             _texture.LoadRawTextureData(pixMap.GetPixels(), pixMap.RowBytes * pixMap.Height);
             _texture.Apply(false, true);
         }
+        public int GetTextCharIndexForLineChar(int lineIndex, int c)
+        {
+            var line = ParsedText.Lines[lineIndex];
+            return c + line.BeginIndex;
+        }
 
         private void ParseText(SKImageInfo imageInfo)
         {
@@ -506,7 +511,12 @@ namespace OpenTS2.UI.Skia
             _parsedText = parsedText;
         }
 
-        private float GetLineY(int line)
+        public float GetLineLength(int line)
+        {
+            return _skPaint.MeasureText(_parsedText.Lines[line].Text);
+        }
+
+        public float GetLineY(int line)
         {
             var height = PracticalHeight;
             var heightMiddle = height / 2f;
