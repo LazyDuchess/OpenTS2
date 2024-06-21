@@ -1,11 +1,7 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using SkiaSharp;
 using UnityEngine.UI;
-using Codice.Client.Common;
-using System.Runtime.InteropServices.WindowsRuntime;
-using static OpenTS2.UI.Skia.ParsedLabelText;
 
 namespace OpenTS2.UI.Skia
 {
