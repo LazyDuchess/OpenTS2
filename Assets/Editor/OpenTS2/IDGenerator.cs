@@ -5,7 +5,7 @@ using OpenTS2.Files.Formats.DBPF;
 using UnityEditor;
 using OpenTS2.Common;
 
-namespace OpenTS2.Editor
+namespace OpenTS2
 {
     class IDGenerator : EditorWindow
     {
