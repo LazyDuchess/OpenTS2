@@ -64,6 +64,11 @@ namespace OpenTS2.UI.Skia
         private string SanitizeText(string text)
         {
             text = text.Replace('\t'.ToString(), "");
+            if (Label.SingleLine)
+            {
+                text = text.Replace('\n'.ToString(), "");
+                text = text.Replace('\r'.ToString(), "");
+            }
             return text;
         }
 

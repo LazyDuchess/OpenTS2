@@ -13,6 +13,22 @@ namespace OpenTS2.UI.Skia
     [RequireComponent(typeof(RawImage))]
     public class SkiaLabel : MonoBehaviour
     {
+        public bool SingleLine
+        {
+            get
+            {
+                return m_SingleLine;
+            }
+
+            set
+            {
+                if (m_SingleLine != value)
+                {
+                    m_SingleLine = value;
+                    Render();
+                }
+            }
+        }
         public ParsedLabelText ParsedText
         {
             get
@@ -175,10 +191,15 @@ namespace OpenTS2.UI.Skia
         protected int m_VerticalScroll = 0;
         protected SkiaFont m_Font;
         [SerializeField]
+        protected bool m_SingleLine = false;
+
+        [SerializeField]
         private TextAsset m_FontAsset;
         [SerializeField]
         [HideInInspector]
         private bool _fontFromAsset = false;
+
+
         private SKPaint _skPaint = null;
         private ParsedLabelText _parsedText = null;
 
@@ -436,6 +457,18 @@ namespace OpenTS2.UI.Skia
             var wrappedHeight = (float)m_FontSize;
 
             var lines = new List<TextLine>();
+
+            if (SingleLine)
+            {
+                parsedText.Height = wrappedHeight;
+                text = text.Replace('\n', ' ');
+                text = text.Replace('\r', ' ');
+                lines.Add(new TextLine(text, 0, text.Length));
+                parsedText.Lines = lines;
+                _parsedText = parsedText;
+                return;
+            }
+
             var lastWordIndex = -1;
             var lastLineIndex = 0;
             for (var i = 0; i < text.Length; i++)
