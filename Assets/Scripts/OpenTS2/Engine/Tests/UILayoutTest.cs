@@ -20,7 +20,6 @@ namespace OpenTS2.Engine.Tests
         public string Key = "0x49001017";
         public bool Reload = false;
         public bool LoadPackagesFromAllEPs = true;
-        private readonly string RelativeUIPackagePath = "Res/UI/ui.package";
         private List<UIComponent> _instances = new List<UIComponent>();
         void LoadAllUIPackages()
         {
