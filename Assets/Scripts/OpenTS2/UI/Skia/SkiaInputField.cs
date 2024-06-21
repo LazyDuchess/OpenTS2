@@ -66,7 +66,7 @@ namespace OpenTS2.UI.Skia
 
         private void UpdateCaretPosition()
         {
-            _caret.sizeDelta = new Vector2(1, _label.FontSize);
+            _caret.sizeDelta = new Vector2(1, _label.FontSize + ((_label.LineSpacing - 1f) * _label.FontSize));
             if (_selectedCharacter < 0)
             {
                 _caret.anchoredPosition = new Vector2(0f, 0f);
