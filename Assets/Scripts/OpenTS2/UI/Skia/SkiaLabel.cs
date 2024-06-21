@@ -272,6 +272,7 @@ namespace OpenTS2.UI.Skia
             if (_texture == null)
             {
                 _texture = new Texture2D(w, h, fmt, false, true);
+                _texture.name = "Skia Text";
             }
             else if (_texture.width != w || _texture.height != h || _texture.format != fmt)
             {
