@@ -78,7 +78,7 @@ namespace DBPFSharp
         /// <param name="prefixLength">If set to <c>true</c> prefix the size of the compressed data, as is used by SC4; otherwise <c>false</c>.</param>
         /// <returns>A byte array containing the compressed data or null if the data cannot be compressed.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="input" /> is null.</exception>
-        public static byte[]? Compress(byte[] input, bool prefixLength)
+        public static byte[] Compress(byte[] input, bool prefixLength)
         {
             if (input == null)
             {
@@ -418,7 +418,7 @@ namespace DBPFSharp
             /// <remarks>
             /// This method has been adapted from deflate.c in zlib version 1.2.3.
             /// </remarks>
-            public byte[]? Compress()
+            public byte[] Compress()
             {
                 this.hash = input[0];
                 this.hash = ((this.hash << hashShift) ^ input[1]) & hashMask;

@@ -17,7 +17,6 @@ namespace OpenTS2.UI
     public class TextFieldBehaviour : MonoBehaviour, ISelectHandler
     {
         private InputField inputField;
-        private bool isCaretPositionReset = false;
 
         void Start()
         {
