@@ -10,7 +10,7 @@ using UnityEngine.Rendering;
 
 namespace OpenTS2
 {
-    public class BuildPreProcessor : IPreprocessBuildWithReport
+    public class ShaderBuildPreProcessor : IPreprocessBuildWithReport
     {
         public int callbackOrder => 0;
 
