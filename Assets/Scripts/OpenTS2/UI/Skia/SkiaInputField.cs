@@ -12,16 +12,32 @@ namespace OpenTS2.UI.Skia
 {
     public class SkiaInputField : Selectable, IUpdateSelectedHandler
     {
+        public string Text
+        {
+            get
+            {
+                return Label.Text;
+            }
+
+            set
+            {
+                Label.Text = value;
+            }
+        }
         private bool Selected => EventSystem.current != null && EventSystem.current.currentSelectedGameObject == gameObject;
-        [SerializeField]
-        private RectTransform _caret;
-        [SerializeField]
-        private SkiaLabel _label;
+        public RectTransform Caret;
+        public SkiaLabel Label;
 
         private int _selectedCharacter = -1;
         private float _caretTimer = 0f;
         private float CaretTime => WinUtils.GetCaretBlinkTimer();
         private Event _processingEvent = new Event();
+        public Action OnTextEdited;
+
+        private void FireTextEdited()
+        {
+            OnTextEdited?.Invoke();
+        }
 
         private void Update()
         {
@@ -34,8 +50,8 @@ namespace OpenTS2.UI.Skia
 
         private void DeselectedUpdate()
         {
-            if (_caret.gameObject.activeSelf)
-                _caret.gameObject.SetActive(false);
+            if (Caret.gameObject.activeSelf)
+                Caret.gameObject.SetActive(false);
         }
 
         private void OnGUI()
@@ -106,24 +122,25 @@ namespace OpenTS2.UI.Skia
 
             if (_caretTimer > caretTime)
             {
-                if (_caret.gameObject.activeSelf)
-                    _caret.gameObject.SetActive(false);
+                if (Caret.gameObject.activeSelf)
+                    Caret.gameObject.SetActive(false);
             }
             else
             {
-                if (!_caret.gameObject.activeSelf)
-                    _caret.gameObject.SetActive(true);
+                if (!Caret.gameObject.activeSelf)
+                    Caret.gameObject.SetActive(true);
             }
         }
 
         private void TypeString(string str)
         {
             _caretTimer = 0f;
-            var strBuilder = new StringBuilder(_label.Text);
+            var strBuilder = new StringBuilder(Label.Text);
             var pointInsertion = _selectedCharacter + 1;
             strBuilder.Insert(pointInsertion, str);
-            _label.Text = strBuilder.ToString();
+            Label.Text = strBuilder.ToString();
             _selectedCharacter += str.Length;
+            FireTextEdited();
         }
 
         private void PasteClipboard()
@@ -136,10 +153,11 @@ namespace OpenTS2.UI.Skia
         {
             if (_selectedCharacter >= 0)
             {
-                var strBuilder = new StringBuilder(_label.Text);
+                var strBuilder = new StringBuilder(Label.Text);
                 strBuilder.Remove(_selectedCharacter, 1);
-                _label.Text = strBuilder.ToString();
+                Label.Text = strBuilder.ToString();
                 MoveCaretLeft();
+                FireTextEdited();
             }
         }
 
@@ -157,26 +175,32 @@ namespace OpenTS2.UI.Skia
         {
             _caretTimer = 0f;
             _selectedCharacter++;
-            if (_selectedCharacter >= _label.Text.Length)
-                _selectedCharacter = _label.Text.Length - 1;
+            if (_selectedCharacter >= Label.Text.Length)
+                _selectedCharacter = Label.Text.Length - 1;
         }
 
         private void UpdateCaretPosition()
         {
-            _caret.sizeDelta = new Vector2(1, _label.FontSize + ((_label.LineSpacing - 1f) * _label.FontSize));
+            Caret.sizeDelta = new Vector2(1, Label.FontSize + ((Label.LineSpacing - 1f) * Label.FontSize));
             if (_selectedCharacter < 0)
             {
-                var firstLineY = -_label.GetLineY(0) + _label.FontSize;
-                _caret.anchoredPosition = new Vector2(0f, firstLineY);
+                var firstLineY = -Label.GetLineY(0) + Label.FontSize;
+                Caret.anchoredPosition = new Vector2(0f, firstLineY);
                 return;
             }
-            var rect = _label.GetCharacterRect(_selectedCharacter);
-            _caret.anchoredPosition = new Vector2(rect.Rect.x + rect.Rect.width, rect.Rect.y);
+            var rect = Label.GetCharacterRect(_selectedCharacter);
+            Caret.anchoredPosition = new Vector2(rect.Rect.x + rect.Rect.width, rect.Rect.y);
         }
 
         private void ValidateSelection()
         {
-            _selectedCharacter = Mathf.Clamp(_selectedCharacter, -1, _label.Text.Length - 1);
+            _selectedCharacter = Mathf.Clamp(_selectedCharacter, -1, Label.Text.Length - 1);
+        }
+
+        public override void OnSelect(BaseEventData eventData)
+        {
+            base.OnSelect(eventData);
+            _selectedCharacter = Label.Text.Length - 1;
         }
 
         public void OnUpdateSelected(BaseEventData eventData)

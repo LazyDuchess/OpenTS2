@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenTS2.UI.Skia;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,32 +11,23 @@ namespace OpenTS2.UI
 {
     public class UITextEditComponent : UITextComponent
     {
-        private string _originalText;
         public Action<string> OnTextEdited;
-        public InputField Input => GetComponent<InputField>();
+        public SkiaInputField Input => GetComponent<SkiaInputField>();
         public override string Text
         {
             get
             {
-                return "";
-                return Input.text;
+                return Input.Text;
             }
             set
             {
-                return;
-                Input.text = value;
-                _originalText = value;
+                Input.Text = value;
             }
         }
 
-        public void CheckTextEdited()
+        public void FireTextEdited()
         {
-            if (Text != _originalText)
-            {
-                Debug.Log($"TEXT EDITED! ({_originalText}) => ({Text})");
-                OnTextEdited?.Invoke(Text);
-                _originalText = Text;
-            }
+            OnTextEdited?.Invoke(Input.Text);
         }
     }
 }
