@@ -33,7 +33,7 @@ namespace OpenTS2.UI
             inputField.Caret = caret.GetComponent<RectTransform>();
             inputField.Caret.anchorMin = new Vector2(0f, 1f);
             inputField.Caret.anchorMax = new Vector2(0f, 1f);
-            inputField.Caret.pivot = new Vector2(0.5f, 1f);
+            inputField.Caret.pivot = new Vector2(0f, 1f);
             inputField.OnTextEdited += component.FireTextEdited;
             inputField.Label.SingleLine = SingleLine;
             /*
