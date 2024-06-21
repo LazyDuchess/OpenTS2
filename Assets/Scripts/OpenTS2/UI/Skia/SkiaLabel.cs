@@ -13,6 +13,16 @@ namespace OpenTS2.UI.Skia
     [RequireComponent(typeof(RawImage))]
     public class SkiaLabel : MonoBehaviour
     {
+        private static Material Material
+        {
+            get
+            {
+                if (_material == null)
+                    _material = Resources.Load<Material>("Skia Font Material");
+                return _material;
+            }
+        }
+        private static Material _material = null;
         public bool SingleLine
         {
             get
@@ -152,7 +162,7 @@ namespace OpenTS2.UI.Skia
                 if (value != m_FontColor)
                 {
                     m_FontColor = value;
-                    Render();
+                    ValidateMaterial();
                 }
             }
         }
@@ -413,8 +423,15 @@ namespace OpenTS2.UI.Skia
             }
         }
 
+        private void ValidateMaterial()
+        {
+            RawImage.material = Material;
+            RawImage.color = m_FontColor;
+        }
+
         private void Render()
         {
+            ValidateMaterial();
             ValidateFont();
             var skImageInfo = new SKImageInfo(PracticalWidth, PracticalHeight);
             ValidateTexture(skImageInfo);
@@ -427,7 +444,7 @@ namespace OpenTS2.UI.Skia
 
             _skPaint.TextSize = m_FontSize;
             _skPaint.IsAntialias = true;
-            _skPaint.Color = new SKColor(m_FontColor.r, m_FontColor.g, m_FontColor.b, m_FontColor.a);
+            _skPaint.Color = new SKColor(255, 255, 255, 255);
             _skPaint.IsStroke = false;
 
             if (m_Font != null && m_Font.Typeface != null)
