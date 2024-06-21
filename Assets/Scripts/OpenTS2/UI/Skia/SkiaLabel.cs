@@ -468,23 +468,17 @@ namespace OpenTS2.UI.Skia
                         {
                             var lineAtLastWord = new TextLine(textAtLastWord, lastLineIndex, lastWordIndex - 1);
                             lines.Add(lineAtLastWord);
-                            var nextWordSearchStart = lastWordIndex;
                             lastLineIndex = lastWordIndex;
                             lastWordIndex = -1;
-                            for (var n = nextWordSearchStart; n < text.Length; n++)
-                            {
-                                if (text[n] != ' ')
-                                {
-                                    lastLineIndex = n;
-                                    break;
-                                }
-                            }
+                            
                         }
                         else
                         {
                             lines.Add(cutLine);
                             lastLineIndex = i;
                             lastWordIndex = -1;
+                            if (c == ' ')
+                                lastLineIndex++;
                         }
                     }
                     else
@@ -492,6 +486,8 @@ namespace OpenTS2.UI.Skia
                         lines.Add(cutLine);
                         lastLineIndex = i;
                         lastWordIndex = -1;
+                        if (c == ' ')
+                            lastLineIndex++;
                     }
                 }
             }
