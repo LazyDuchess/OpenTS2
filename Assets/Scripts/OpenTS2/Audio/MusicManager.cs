@@ -15,10 +15,6 @@ namespace OpenTS2.Audio
 {
     public class MusicManager : MonoBehaviour
     {
-        readonly static ResourceKey MusicCategoriesXMLKey = new ResourceKey(0xFFD3706D, 0x38888A91, 0x4C1940C5, 0xEBFEE33F);
-        readonly static ResourceKey SplashKey = new ResourceKey(0xFF8DFFC2, 0xE4085DD2, 0xFF8DFFC2, 0x2026960B);
-        private ContentProvider _contentProvider;
-
         public static AudioAsset SplashAudio
         {
             get
@@ -28,8 +24,15 @@ namespace OpenTS2.Audio
             }
         }
 
+        public static MusicManager Instance { get; private set; }
+
+        readonly static ResourceKey MusicCategoriesXMLKey = new ResourceKey(0xFFD3706D, 0x38888A91, 0x4C1940C5, 0xEBFEE33F);
+        readonly static ResourceKey SplashKey = new ResourceKey(0xFF8DFFC2, 0xE4085DD2, 0xFF8DFFC2, 0x2026960B);
+        private ContentProvider _contentProvider;
+
         private void Awake()
         {
+            Instance = this;
             _contentProvider = ContentProvider.Get();
             Core.OnFinishedLoading += LoadMusicCategories;
         }

@@ -12,19 +12,13 @@ namespace OpenTS2.Audio
     [RequireComponent(typeof(AudioSource))]
     public class MusicController : MonoBehaviour
     {
-        public static MusicController Singleton => s_singleton;
-        static MusicController s_singleton = null;
+        public static MusicController Singleton { get; private set; }
         private AudioSource _audioSource;
         private AudioAsset _currentAudioAsset;
 
         private void Awake()
         {
-            if (s_singleton != null)
-            {
-                Destroy(gameObject);
-                return;
-            }
-            s_singleton = this;
+            Singleton = this;
             _audioSource = GetComponent<AudioSource>();
         }
 

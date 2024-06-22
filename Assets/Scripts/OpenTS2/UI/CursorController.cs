@@ -9,8 +9,7 @@ using UnityEngine;
 namespace OpenTS2.UI {
     public class CursorController : MonoBehaviour
     {
-        public static CursorController Singleton => s_singleton;
-        static CursorController s_singleton = null;
+        public static CursorController Singleton { get; private set; }
 
         public enum CursorType
         {
@@ -66,12 +65,7 @@ namespace OpenTS2.UI {
 
         private void Awake()
         {
-            if (s_singleton != null)
-            {
-                Destroy(gameObject);
-                return;
-            }
-            s_singleton = this;
+            Singleton = this;
             RegisterCursors();
         }
 

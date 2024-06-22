@@ -12,19 +12,13 @@ namespace OpenTS2.Engine
     /// </summary>
     public class AssetController : MonoBehaviour
     {
-        public static AssetController Singleton => s_singleton;
-        public static Font DefaultFont => s_singleton._defaultFont;
-        static AssetController s_singleton = null;
+        public static AssetController Singleton { get; private set; }
+        public static Font DefaultFont => Singleton._defaultFont;
         [SerializeField]
         private Font _defaultFont;
         private void Awake()
         {
-            if (s_singleton != null)
-            {
-                Destroy(gameObject);
-                return;
-            }
-            s_singleton = this;
+            Singleton = this;
         }
     }
 }
