@@ -12,27 +12,27 @@ namespace OpenTS2.Audio
     [RequireComponent(typeof(AudioSource))]
     public class MusicController : MonoBehaviour
     {
-        public static MusicController Singleton { get; private set; }
+        public static MusicController Instance { get; private set; }
         private AudioSource _audioSource;
         private AudioAsset _currentAudioAsset;
 
         private void Awake()
         {
-            Singleton = this;
+            Instance = this;
             _audioSource = GetComponent<AudioSource>();
         }
 
         public static void PlayMusic(AudioAsset music)
         {
-            Singleton._currentAudioAsset = music;
-            Singleton._audioSource.clip = music.Clip;
-            Singleton._audioSource.volume = 1f;
-            Singleton._audioSource.Play();
+            Instance._currentAudioAsset = music;
+            Instance._audioSource.clip = music.Clip;
+            Instance._audioSource.volume = 1f;
+            Instance._audioSource.Play();
         }
 
         public static void FadeOutMusic()
         {
-            Singleton.StartCoroutine(Singleton.FadeOut());
+            Instance.StartCoroutine(Instance.FadeOut());
         }
 
         IEnumerator FadeOut()

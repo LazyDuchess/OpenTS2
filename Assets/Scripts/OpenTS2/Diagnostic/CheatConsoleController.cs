@@ -11,7 +11,7 @@ namespace OpenTS2.Diagnostic
     /// </summary>
     public class CheatConsoleController : MonoBehaviour, IConsoleOutput
     {
-        public static CheatConsoleController Singleton { get; private set; }
+        public static CheatConsoleController Instance { get; private set; }
         public GameObject ConsoleParent;
         public InputField CheatInputField;
         public Text ConsoleOutput;
@@ -24,7 +24,7 @@ namespace OpenTS2.Diagnostic
 
         private void Awake()
         {
-            Singleton = this;
+            Instance = this;
             CheatInputField.onValueChanged.AddListener(OnTextChanged);
             ConsoleParent.SetActive(false);
             DontDestroyOnLoad(this);

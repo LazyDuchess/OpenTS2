@@ -9,7 +9,7 @@ using UnityEngine;
 namespace OpenTS2.UI {
     public class CursorController : MonoBehaviour
     {
-        public static CursorController Singleton { get; private set; }
+        public static CursorController Instance { get; private set; }
 
         public enum CursorType
         {
@@ -65,7 +65,7 @@ namespace OpenTS2.UI {
 
         private void Awake()
         {
-            Singleton = this;
+            Instance = this;
             RegisterCursors();
         }
 

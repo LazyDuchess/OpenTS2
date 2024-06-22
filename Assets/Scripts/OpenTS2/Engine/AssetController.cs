@@ -12,13 +12,13 @@ namespace OpenTS2.Engine
     /// </summary>
     public class AssetController : MonoBehaviour
     {
-        public static AssetController Singleton { get; private set; }
-        public static Font DefaultFont => Singleton._defaultFont;
+        public static AssetController Instance { get; private set; }
+        public static Font DefaultFont => Instance._defaultFont;
         [SerializeField]
         private Font _defaultFont;
         private void Awake()
         {
-            Singleton = this;
+            Instance = this;
         }
     }
 }
