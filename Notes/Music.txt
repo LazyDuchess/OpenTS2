@@ -1,0 +1,10 @@
+Music categories are in a Property Set XML resource
+
+Located at TSData/Res/Sound/Misc.package in SP9
+
+Resourcekey:
+
+Instance ID: 0xFFD3706D
+Instance (High): 0x38888A91
+Group ID: 0x4C1940C5
+Type ID: 0xEBFEE33F
