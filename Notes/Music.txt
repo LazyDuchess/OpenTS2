@@ -40,4 +40,12 @@ Locale ini is for locale-specific tracks.
 
 Group ID and hash for the radio station can be generated with the OpenTS2.IDGenerator tool (Editor -> OpenTS2 -> Resource Key -> From Filename). The resulting Instance ID is the hash you want.
 
-TODO: Figure out how mp3s are mapped to stringset for localization.
+When adding custom songs to a .package file, use the hash for the radio station as the Group ID and a hash of what you want the song to be localized to in english as the Instance ID (lo and hi)
+
+When adding station and song names on stringsets, the text has to match the hash of the song and station in US english.
+
+-----------------------------------------------------------------------------------------------------------------
+
+Maybe editing just the ini files is ok and the packed .inis can be left alone? Dunno.
+
+-----------------------------------------------------------------------------------------------------------------
