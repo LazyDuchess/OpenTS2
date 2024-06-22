@@ -25,7 +25,6 @@ namespace OpenTS2.Engine
                 return;
             }
             s_singleton = this;
-            DontDestroyOnLoad(gameObject);
         }
     }
 }

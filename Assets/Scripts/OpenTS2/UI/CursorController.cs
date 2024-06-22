@@ -72,7 +72,6 @@ namespace OpenTS2.UI {
                 return;
             }
             s_singleton = this;
-            DontDestroyOnLoad(gameObject);
             RegisterCursors();
         }
 

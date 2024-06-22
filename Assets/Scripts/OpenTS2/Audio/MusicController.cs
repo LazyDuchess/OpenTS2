@@ -25,7 +25,6 @@ namespace OpenTS2.Audio
                 return;
             }
             s_singleton = this;
-            DontDestroyOnLoad(gameObject);
             _audioSource = GetComponent<AudioSource>();
         }
 
