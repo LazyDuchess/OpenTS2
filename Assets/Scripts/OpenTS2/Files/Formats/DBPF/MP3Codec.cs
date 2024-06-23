@@ -41,20 +41,20 @@ namespace OpenTS2.Files.Formats.DBPF
         public override AbstractAsset Deserialize(byte[] bytes, ResourceKey tgi, DBPFFile sourceFile)
         {
             var magic = Encoding.UTF8.GetString(bytes, 0, 2);
-            byte[] data = new byte[] { };
+            var data = bytes;
             switch(magic)
             {
                 case "XA":
                     var xa = new XAFile(bytes);
                     data = xa.DecompressedData;
-                    break;
+                    return new WAVAudioAsset(data);
                 case "UT":
                     var utk = new UTKFile(bytes);
                     utk.UTKDecode();
                     data = utk.DecompressedWav;
-                    break;
+                    return new WAVAudioAsset(data);
             }
-            return new AudioAsset(data);
+            return new MP3AudioAsset(data);
         }
     }
 }

@@ -23,6 +23,15 @@ namespace OpenTS2.Audio
             _rawPlaylist = playlist;
         }
 
+        public Song PopNextSong()
+        {
+            var song = CurrentPlaylist[0];
+            if (CurrentPlaylist.Count <= 1)
+                InitializePlaylist();
+            CurrentPlaylist.Remove(song);
+            return song;
+        }
+
         public void InitializePlaylist()
         {
             CurrentPlaylist = new List<Song>();
@@ -32,6 +41,11 @@ namespace OpenTS2.Audio
                 var playList = new List<Song>(musicManager.GetPlaylist(playlistName));
                 playList.Shuffle();
                 CurrentPlaylist.AddRange(playList);
+            }
+            var playlistsText = "";
+            foreach (var playlist in _rawPlaylist)
+            {
+                playlistsText += $"{playlist} ";
             }
         }
     }

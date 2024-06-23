@@ -82,7 +82,7 @@ namespace OpenTS2.Scenes
                 if (InitialLoadScreenReiaPlayer != null)
                     Destroy(InitialLoadScreenReiaPlayer.gameObject);
             }
-            MusicController.PlayMusic(MusicManager.SplashAudio);
+            MusicController.PlaySplashMusic(MusicManager.SplashAudio);
         }
 
         private void Update()

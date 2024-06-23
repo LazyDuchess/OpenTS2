@@ -19,12 +19,12 @@ namespace OpenTS2.Audio
 {
     public class MusicManager : MonoBehaviour
     {
-        public static AudioAsset SplashAudio
+        public static WAVAudioAsset SplashAudio
         {
             get
             {
                 var contentProvider = ContentProvider.Get();
-                return contentProvider.GetAsset<AudioAsset>(SplashKey);
+                return contentProvider.GetAsset<WAVAudioAsset>(SplashKey);
             }
         }
 
@@ -37,6 +37,19 @@ namespace OpenTS2.Audio
         public Dictionary<uint, List<Song>> PlaylistByHash = new Dictionary<uint, List<Song>>();
 
         private ContentProvider _contentProvider;
+
+        public MusicCategory GetMusicCategory (string name)
+        {
+            var hash = FileUtils.LowHash(name);
+            return GetMusicCategory(hash);
+        }
+
+        public MusicCategory GetMusicCategory(uint hash)
+        {
+            if (MusicCategoryByHash.TryGetValue(hash, out var category))
+                return category;
+            return null;
+        }
 
         public List<Song> GetPlaylist(string name)
         {

@@ -11,6 +11,7 @@ namespace OpenTS2.Engine
     public class Core : MonoBehaviour
     {
         public static Action OnFinishedLoading;
+        public static Action OnNeighborhoodEntered;
 
         private void Awake()
         {
