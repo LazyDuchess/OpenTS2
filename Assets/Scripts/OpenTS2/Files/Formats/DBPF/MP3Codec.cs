@@ -53,6 +53,8 @@ namespace OpenTS2.Files.Formats.DBPF
                     utk.UTKDecode();
                     data = utk.DecompressedWav;
                     return new WAVAudioAsset(data);
+                case "RI":
+                    return new WAVAudioAsset(data);
             }
             return new MP3AudioAsset(data);
         }
