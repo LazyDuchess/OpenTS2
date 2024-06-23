@@ -32,8 +32,8 @@ namespace OpenTS2.Engine.Tests
         {
             ContentLoading.LoadContentStartup();
             PluginSupport.Initialize();
-            MusicSource.clip = MusicManager.SplashAudio.Clip;
-            MusicSource.Play();
+            //MusicSource.clip = MusicManager.SplashAudio.Clip;
+            //MusicSource.Play();
             stopW = new Stopwatch();
             stopW.Start();
             if (async)

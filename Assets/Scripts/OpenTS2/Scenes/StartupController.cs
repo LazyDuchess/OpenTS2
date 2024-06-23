@@ -82,7 +82,7 @@ namespace OpenTS2.Scenes
                 if (InitialLoadScreenReiaPlayer != null)
                     Destroy(InitialLoadScreenReiaPlayer.gameObject);
             }
-            MusicController.PlaySplashMusic(MusicManager.SplashAudio);
+            Core.OnStartup?.Invoke();
         }
 
         private void Update()
@@ -122,7 +122,8 @@ namespace OpenTS2.Scenes
                 NeighborhoodManager.Initialize();
             CursorController.Cursor = CursorController.CursorType.Default;
             Debug.Log("All loaded");
-            Core.OnFinishedLoading?.Invoke();
+            if (!GameLoaded)
+                Core.OnFinishedLoading?.Invoke();
             FadeOutLoading();
             try
             {

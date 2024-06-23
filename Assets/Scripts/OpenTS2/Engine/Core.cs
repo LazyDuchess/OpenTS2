@@ -10,6 +10,7 @@ namespace OpenTS2.Engine
 {
     public class Core : MonoBehaviour
     {
+        public static Action OnStartup;
         public static Action OnFinishedLoading;
         public static Action OnNeighborhoodEntered;
 

@@ -14,24 +14,38 @@ using System.IO;
 
 namespace OpenTS2.Audio
 {
-    [RequireComponent(typeof(AudioSource))]
+    [RequireComponent(typeof(TSAudioSource))]
     public class MusicController : MonoBehaviour
     {
         private WaveOutEvent _waveOut = null;
         public static MusicController Instance { get; private set; }
-        private AudioSource _audioSource;
+        private TSAudioSource _tsAudioSource;
         private AudioAsset _currentAudioAsset;
         private MusicCategory _currentMusicCategory = null;
 
         private void Awake()
         {
             Instance = this;
-            _audioSource = GetComponent<AudioSource>();
+            _tsAudioSource = GetComponent<TSAudioSource>();
             Core.OnNeighborhoodEntered += OnNeighborhoodEntered;
+            Core.OnStartup += OnStartup;
+        }
+
+        private void OnStartup()
+        {
+            _tsAudioSource.Audio = MusicManager.SplashAudio;
+            _tsAudioSource.Volume = 0.5f;
+            _tsAudioSource.Loop = true;
+            _tsAudioSource.Play();
         }
 
         private void OnNeighborhoodEntered()
         {
+            StopAllCoroutines();
+            _tsAudioSource.PlaybackFinished -= OnSongEnd;
+            _tsAudioSource.PlaybackFinished += OnSongEnd;
+            _tsAudioSource.Loop = false;
+            _tsAudioSource.Volume = 0.5f;
             _currentMusicCategory = MusicManager.Instance.GetMusicCategory("NHood");
             PlayNextSong();
         }
@@ -41,41 +55,16 @@ namespace OpenTS2.Audio
             var contentProvider = ContentProvider.Get();
             var currentSong = _currentMusicCategory.PopNextSong();
             var songAsset = contentProvider.GetAsset<MP3AudioAsset>(currentSong.Key);
-            var stream = new MemoryStream(songAsset.AudioData);
-            var reader = new Mp3FileReader(stream);
-            if (_waveOut != null)
-            {
-                _waveOut.PlaybackStopped -= OnSongEnd;
-                _waveOut.Dispose();
-            }
-            _waveOut = new WaveOutEvent(); // or WaveOutEvent()
-            _waveOut.Init(reader);
-            _waveOut.Volume = 0.5f;
-            _waveOut.Play();
-            _waveOut.PlaybackStopped += OnSongEnd;
+            _tsAudioSource.Audio = songAsset;
+            _tsAudioSource.Play();
         }
 
-        private void OnSongEnd(object sender, StoppedEventArgs e)
+        private void OnSongEnd()
         {
             PlayNextSong();
         }
 
-        public void OnApplicationQuit()
-        {
-            if (_waveOut != null)
-            {
-                _waveOut.PlaybackStopped -= OnSongEnd;
-                _waveOut.Dispose();
-            }
-        }
-
-        public static void PlaySplashMusic(WAVAudioAsset music)
-        {
-            Instance._currentAudioAsset = music;
-            Instance._audioSource.clip = music.Clip;
-            Instance._audioSource.volume = 1f;
-            Instance._audioSource.Play();
-        }
+        
 
         public static void FadeOutMusic()
         {
@@ -84,11 +73,11 @@ namespace OpenTS2.Audio
 
         IEnumerator FadeOut()
         {
-            var volume = _audioSource.volume;
+            var volume = _tsAudioSource.Volume;
             while (volume > 0f)
             {
                 volume -= 0.5f * Time.deltaTime;
-                _audioSource.volume = volume;
+                _tsAudioSource.Volume = volume;
                 yield return null;
             }
             StopMusic();
@@ -96,8 +85,7 @@ namespace OpenTS2.Audio
 
         void StopMusic()
         {
-            _audioSource.Stop();
-            _currentAudioAsset = null;
+            _tsAudioSource.Stop();
         }
     }
 }

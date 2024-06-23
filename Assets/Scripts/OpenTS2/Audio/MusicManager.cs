@@ -19,12 +19,12 @@ namespace OpenTS2.Audio
 {
     public class MusicManager : MonoBehaviour
     {
-        public static WAVAudioAsset SplashAudio
+        public static AudioAsset SplashAudio
         {
             get
             {
                 var contentProvider = ContentProvider.Get();
-                return contentProvider.GetAsset<WAVAudioAsset>(SplashKey);
+                return contentProvider.GetAsset<AudioAsset>(SplashKey);
             }
         }
 
