@@ -15,6 +15,7 @@ namespace OpenTS2.UI
     public class UITextElement : UIElement
     {
         protected override Type UIComponentType => typeof(UITextComponent);
+        // TODO Default should be upper left, but looks ugly atm without fonts.
         public TextAnchor Alignment = TextAnchor.MiddleCenter;
         public Color32 ForeColor = Color.black;
 
