@@ -21,6 +21,16 @@ namespace OpenTS2.Audio
         private TSAudioSource _tsAudioSource;
         private MusicCategory _currentMusicCategory = null;
 
+        public void StartMusicCategory(string musicCategory)
+        {
+            _tsAudioSource.PlaybackFinished -= OnSongEnd;
+            _tsAudioSource.PlaybackFinished += OnSongEnd;
+            _tsAudioSource.Loop = false;
+            _tsAudioSource.Volume = 0.5f;
+            _currentMusicCategory = MusicManager.Instance.GetMusicCategory(musicCategory);
+            PlayNextSong();
+        }
+
         private void Awake()
         {
             Instance = this;
@@ -39,20 +49,14 @@ namespace OpenTS2.Audio
 
         private void OnNeighborhoodEntered()
         {
-            StopAllCoroutines();
-            _tsAudioSource.PlaybackFinished -= OnSongEnd;
-            _tsAudioSource.PlaybackFinished += OnSongEnd;
-            _tsAudioSource.Loop = false;
-            _tsAudioSource.Volume = 0.5f;
-            _currentMusicCategory = MusicManager.Instance.GetMusicCategory("NHood");
-            PlayNextSong();
+            StartMusicCategory("NHood");
         }
 
         private void PlayNextSong()
         {
             var contentProvider = ContentProvider.Get();
             var currentSong = _currentMusicCategory.PopNextSong();
-            var songAsset = contentProvider.GetAsset<MP3AudioAsset>(currentSong.Key);
+            var songAsset = contentProvider.GetAsset<AudioAsset>(currentSong.Key);
             _tsAudioSource.Audio = songAsset;
             _tsAudioSource.Play();
         }
@@ -60,30 +64,6 @@ namespace OpenTS2.Audio
         private void OnSongEnd()
         {
             PlayNextSong();
-        }
-
-        
-
-        public static void FadeOutMusic()
-        {
-            Instance.StartCoroutine(Instance.FadeOut());
-        }
-
-        IEnumerator FadeOut()
-        {
-            var volume = _tsAudioSource.Volume;
-            while (volume > 0f)
-            {
-                volume -= 0.5f * Time.deltaTime;
-                _tsAudioSource.Volume = volume;
-                yield return null;
-            }
-            StopMusic();
-        }
-
-        void StopMusic()
-        {
-            _tsAudioSource.Stop();
         }
     }
 }
