@@ -16,8 +16,8 @@ namespace OpenTS2.UI
     public class UITextElement : UIElement
     {
         protected override Type UIComponentType => typeof(UITextComponent);
-        public HorizontalAlign HorizontalAlign = HorizontalAlign.Left;
-        public VerticalAlign VerticalAlign = VerticalAlign.Top;
+        public HorizontalAlign HorizontalAlign = HorizontalAlign.Center;
+        public VerticalAlign VerticalAlign = VerticalAlign.Middle;
         public Color32 ForeColor = Color.black;
 
         public override void ParseProperties(UIProperties properties)
