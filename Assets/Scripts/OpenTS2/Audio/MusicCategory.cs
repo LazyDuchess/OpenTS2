@@ -27,7 +27,11 @@ namespace OpenTS2.Audio
         {
             var song = CurrentPlaylist[0];
             if (CurrentPlaylist.Count <= 1)
+            {
                 InitializePlaylist();
+                if (CurrentPlaylist.Count <= 1)
+                    return song;
+            }
             CurrentPlaylist.Remove(song);
             return song;
         }
