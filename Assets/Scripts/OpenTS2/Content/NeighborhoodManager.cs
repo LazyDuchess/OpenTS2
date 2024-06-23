@@ -61,7 +61,6 @@ namespace OpenTS2.Content
             if (CurrentNeighborhood != null)
                 ContentLoading.UnloadNeighborhoodContentSync();
             ContentLoading.LoadNeighborhoodContentSync(neighborhood);
-            MusicController.FadeOutMusic();
             CurrentNeighborhood = neighborhood;
             SceneManager.LoadScene("Neighborhood");
             CursorController.Cursor = CursorController.CursorType.Default;

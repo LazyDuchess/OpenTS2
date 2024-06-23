@@ -15,6 +15,7 @@ using UnityEngine.UI;
 using System.Collections;
 using OpenTS2.UI.Layouts;
 using OpenTS2.Lua;
+using OpenTS2.Engine;
 
 namespace OpenTS2.Scenes
 {
@@ -81,7 +82,7 @@ namespace OpenTS2.Scenes
                 if (InitialLoadScreenReiaPlayer != null)
                     Destroy(InitialLoadScreenReiaPlayer.gameObject);
             }
-            MusicController.PlayMusic(AudioManager.SplashAudio);
+            Core.OnStartup?.Invoke();
         }
 
         private void Update()
@@ -121,6 +122,8 @@ namespace OpenTS2.Scenes
                 NeighborhoodManager.Initialize();
             CursorController.Cursor = CursorController.CursorType.Default;
             Debug.Log("All loaded");
+            if (!GameLoaded)
+                Core.OnFinishedLoading?.Invoke();
             FadeOutLoading();
             try
             {

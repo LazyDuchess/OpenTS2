@@ -9,21 +9,8 @@ using UnityEngine;
 
 namespace OpenTS2.Content.DBPF
 {
-    public class AudioAsset : AbstractAsset
+    public abstract class AudioAsset : AbstractAsset
     {
-        public byte[] AudioData;
-        public AudioClip Clip => _clip;
-        AudioClip _clip;
-        public AudioAsset(byte[] data)
-        {
-            AudioData = data;
-            _clip = WAV.ToAudioClip(AudioData, GlobalTGI.ToString());
-        }
-        public override void FreeUnmanagedResources()
-        {
-            if (_clip == null)
-                return;
-            _clip.Free();
-        }
+
     }
 }

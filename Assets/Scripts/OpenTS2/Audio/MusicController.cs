@@ -1,4 +1,5 @@
 ﻿using OpenTS2.Content.DBPF;
+using OpenTS2.Engine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,58 +7,63 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using NAudio;
+using NAudio.Wave;
+using OpenTS2.Content;
+using System.IO;
 
 namespace OpenTS2.Audio
 {
-    [RequireComponent(typeof(AudioSource))]
+    [RequireComponent(typeof(TSAudioSource))]
     public class MusicController : MonoBehaviour
     {
-        public static MusicController Singleton => s_singleton;
-        static MusicController s_singleton = null;
-        private AudioSource _audioSource;
-        private AudioAsset _currentAudioAsset;
+        public static MusicController Instance { get; private set; }
+        private TSAudioSource _tsAudioSource;
+        private MusicCategory _currentMusicCategory = null;
+
+        public void StartMusicCategory(string musicCategory)
+        {
+            _tsAudioSource.PlaybackFinished -= OnSongEnd;
+            _tsAudioSource.PlaybackFinished += OnSongEnd;
+            _tsAudioSource.Loop = false;
+            _tsAudioSource.Volume = 0.5f;
+            _currentMusicCategory = MusicManager.Instance.GetMusicCategory(musicCategory);
+            PlayNextSong();
+        }
 
         private void Awake()
         {
-            if (s_singleton != null)
-            {
-                Destroy(gameObject);
-                return;
-            }
-            s_singleton = this;
-            DontDestroyOnLoad(gameObject);
-            _audioSource = GetComponent<AudioSource>();
+            Instance = this;
+            _tsAudioSource = GetComponent<TSAudioSource>();
+            Core.OnNeighborhoodEntered += OnNeighborhoodEntered;
+            Core.OnStartup += OnStartup;
         }
 
-        public static void PlayMusic(AudioAsset music)
+        private void OnStartup()
         {
-            Singleton._currentAudioAsset = music;
-            Singleton._audioSource.clip = music.Clip;
-            Singleton._audioSource.volume = 1f;
-            Singleton._audioSource.Play();
+            _tsAudioSource.Audio = MusicManager.SplashAudio;
+            _tsAudioSource.Volume = 0.5f;
+            _tsAudioSource.Loop = true;
+            _tsAudioSource.Play();
         }
 
-        public static void FadeOutMusic()
+        private void OnNeighborhoodEntered()
         {
-            Singleton.StartCoroutine(Singleton.FadeOut());
+            StartMusicCategory("NHood");
         }
 
-        IEnumerator FadeOut()
+        private void PlayNextSong()
         {
-            var volume = _audioSource.volume;
-            while (volume > 0f)
-            {
-                volume -= 0.5f * Time.deltaTime;
-                _audioSource.volume = volume;
-                yield return null;
-            }
-            StopMusic();
+            var contentProvider = ContentProvider.Get();
+            var currentSong = _currentMusicCategory.PopNextSong();
+            var songAsset = contentProvider.GetAsset<AudioAsset>(currentSong.Key);
+            _tsAudioSource.Audio = songAsset;
+            _tsAudioSource.Play();
         }
 
-        void StopMusic()
+        private void OnSongEnd()
         {
-            _audioSource.Stop();
-            _currentAudioAsset = null;
+            PlayNextSong();
         }
     }
 }

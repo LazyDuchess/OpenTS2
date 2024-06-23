@@ -1,0 +1,51 @@
+Notes to make my life easier when it comes to trying to load all the radio stations and music from the game.
+
+-----------------------------------------------------------------------------------------------------------
+
+Music categories are in a Property Set XML resource
+
+Located at TSData/Res/Sound/Misc.package in SP9
+
+Resourcekey:
+
+Instance ID: 0xFFD3706D
+Instance (High): 0x38888A91
+Group ID: 0x4C1940C5
+Type ID: 0xEBFEE33F
+
+-----------------------------------------------------------------------------------------------------------------
+
+When adding songs to custom stations, they are referenced by their MP3 resource Instance ID and Instance ID (High)
+-----------------------------------------------------------------------------------------------------------------
+
+Asset with mp3/sound file type has instructions on adding new stations. These are actually ini files.
+
+Located at TSData/Res/Sound/Misc.package in SP9
+Real ini: TSData/Sys/TSAudioUnpackedEP9.ini
+
+Instance ID: 0xFF579C9A
+Instance (High): 0x8EA9CC5B
+Group ID: 0xADD550A7
+Type ID: 0x2026960B
+
+Another one:
+Real ini: TSData/Sys/TSAudioPackedEP9.ini
+
+Instance ID: 0xFFBCCA55
+Instance (High): 0xCD79214F
+Group ID: 0xADD550A7
+Type ID: 0x2026960B
+
+Locale ini is for locale-specific tracks.
+
+Group ID and hash for the radio station can be generated with the OpenTS2.IDGenerator tool (Editor -> OpenTS2 -> Resource Key -> From Filename). The resulting Instance ID is the hash you want.
+
+When adding custom songs to a .package file, use the hash for the radio station as the Group ID and a hash of what you want the song to be localized to in english as the Instance ID (lo and hi)
+
+When adding station and song names on stringsets, the text has to match the hash of the song and station in US english.
+
+-----------------------------------------------------------------------------------------------------------------
+
+Maybe editing just the ini files is ok and the packed .inis can be left alone? Dunno.
+
+-----------------------------------------------------------------------------------------------------------------
