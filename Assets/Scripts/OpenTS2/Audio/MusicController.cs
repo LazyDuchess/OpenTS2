@@ -17,10 +17,8 @@ namespace OpenTS2.Audio
     [RequireComponent(typeof(TSAudioSource))]
     public class MusicController : MonoBehaviour
     {
-        private WaveOutEvent _waveOut = null;
         public static MusicController Instance { get; private set; }
         private TSAudioSource _tsAudioSource;
-        private AudioAsset _currentAudioAsset;
         private MusicCategory _currentMusicCategory = null;
 
         private void Awake()

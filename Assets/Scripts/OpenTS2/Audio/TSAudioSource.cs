@@ -90,22 +90,22 @@ public class TSAudioSource : MonoBehaviour
 
     private void Update()
     {
-        if (_audioSource.clip != null && _audioClipPlaying)
+        _audioSource.loop = Loop;
+        _audioSource.volume = Volume;
+
+        if (_audioSource.clip != null && _audioClipPlaying && !Loop)
         {
             _timeAudioSourcePlaying += Time.unscaledDeltaTime;
-            if (_timeAudioSourcePlaying > _audioSource.clip.length)
+            if (_timeAudioSourcePlaying >= _audioSource.clip.length && !_audioSource.isPlaying)
             {
-                if (!Loop)
-                    _audioClipPlaying = false;
-                PlaybackFinished?.Invoke();
+                _audioClipPlaying = false;
                 _timeAudioSourcePlaying = 0f;
+                PlaybackFinished?.Invoke();
             }
         }
         else
             _timeAudioSourcePlaying = 0f;
-
-        _audioSource.volume = Volume;
-        _audioSource.loop = Loop;
+        
         if (_waveOutEv != null)
         {
             _waveOutEv.Volume = Volume;
@@ -114,9 +114,10 @@ public class TSAudioSource : MonoBehaviour
 
     private void WaveOutPlaybackStopped(object sender, StoppedEventArgs e)
     {
-        PlaybackFinished?.Invoke();
         if (Loop)
             Play();
+        else
+            PlaybackFinished?.Invoke();
     }
 
     private void OnDestroy()
