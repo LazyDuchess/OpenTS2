@@ -15,6 +15,7 @@ using OpenTS2.Content.DBPF;
 using System.Text;
 using OpenTS2.Files.Formats.XA;
 using OpenTS2.Files.Formats.UTK;
+using OpenTS2.Files.Formats.SPX;
 
 namespace OpenTS2.Files.Formats.DBPF
 {
@@ -52,6 +53,10 @@ namespace OpenTS2.Files.Formats.DBPF
                     var utk = new UTKFile(bytes);
                     utk.UTKDecode();
                     data = utk.DecompressedWav;
+                    return new WAVAudioAsset(data);
+                case "SP":
+                    var spx = new SPXFile(bytes);
+                    data = spx.DecompressedData;
                     return new WAVAudioAsset(data);
                 case "RI":
                     return new WAVAudioAsset(data);
