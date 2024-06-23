@@ -30,6 +30,7 @@ public class TSAudioSource : MonoBehaviour
     private WaveOutEvent _waveOutEv;
     private AudioSource _audioSource;
     private float _timeAudioSourcePlaying = 0f;
+    private bool _audioClipPlaying = false;
 
     public void Play()
     {
@@ -61,6 +62,8 @@ public class TSAudioSource : MonoBehaviour
         }
         _audioSource.Stop();
         _audioSource.clip = null;
+        _audioClipPlaying = false;
+        _timeAudioSourcePlaying = 0f;
     }
 
     private void PlayMP3()
@@ -76,6 +79,7 @@ public class TSAudioSource : MonoBehaviour
 
     private void PlayWAV()
     {
+        _audioClipPlaying = true;
         _timeAudioSourcePlaying = 0f;
         _audioSource.spatialBlend = 0f;
         _audioSource.volume = Volume;
@@ -86,11 +90,13 @@ public class TSAudioSource : MonoBehaviour
 
     private void Update()
     {
-        if (_audioSource.clip != null)
+        if (_audioSource.clip != null && _audioClipPlaying)
         {
             _timeAudioSourcePlaying += Time.unscaledDeltaTime;
             if (_timeAudioSourcePlaying > _audioSource.clip.length)
             {
+                if (!Loop)
+                    _audioClipPlaying = false;
                 PlaybackFinished?.Invoke();
                 _timeAudioSourcePlaying = 0f;
             }
