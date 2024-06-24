@@ -39,6 +39,12 @@ namespace OpenTS2.Audio
             OnInitialized?.Invoke();
         }
 
+        // TODO
+        public static float GetVolumeForMixer(Mixers mixer)
+        {
+            return 0.5f;
+        }
+
         public static ResourceKey GetAudioResourceKeyByInstanceID(uint instanceID)
         {
             if (AudioAssetByLowInstanceID.TryGetValue(instanceID, out var result))
@@ -65,6 +71,7 @@ namespace OpenTS2.Audio
             {
                 var audioSource = CreateOneShotAudioSource();
                 audioSource.Audio = asset;
+                audioSource.Mixer = Mixers.SoundEffects;
                 audioSource.Play();
             }
         }

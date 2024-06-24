@@ -1,3 +1,4 @@
+using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using OpenTS2.Audio;
@@ -26,6 +27,7 @@ public class TSAudioSource : MonoBehaviour
             CleanUp();
         }
     }
+    public Mixers Mixer = Mixers.SoundEffects;
     public bool Loop = false;
     public float Volume = 1f;
     public Action PlaybackFinished;
@@ -117,7 +119,7 @@ public class TSAudioSource : MonoBehaviour
         _sampleChannel = new SampleChannel(reader);
         _waveOutEv = new WaveOutEvent();
         _waveOutEv.Init(_sampleChannel);
-        _sampleChannel.Volume = Volume;
+        UpdateVolume();
         _waveOutEv.Play();
         _waveOutEv.PlaybackStopped += WaveOutPlaybackStopped;
     }
@@ -127,16 +129,26 @@ public class TSAudioSource : MonoBehaviour
         _audioClipPlaying = true;
         _timeAudioSourcePlaying = 0f;
         _audioSource.spatialBlend = 0f;
-        _audioSource.volume = Volume;
+        UpdateVolume();
         _audioSource.clip = (asset as WAVAudioAsset).Clip;
         _audioSource.loop = Loop;
         _audioSource.Play();
     }
 
+    private void UpdateVolume()
+    {
+        var volume = Volume * AudioManager.GetVolumeForMixer(Mixer);
+        if (_waveOutEv != null)
+        {
+            _sampleChannel.Volume = volume;
+        }
+        _audioSource.volume = volume;
+    }
+
     private void Update()
     {
         _audioSource.loop = Loop;
-        _audioSource.volume = Volume;
+        UpdateVolume();
 
         if (_audioSource.clip != null && _audioClipPlaying && !Loop)
         {
@@ -153,11 +165,6 @@ public class TSAudioSource : MonoBehaviour
         }
         else
             _timeAudioSourcePlaying = 0f;
-        
-        if (_waveOutEv != null && _waveOutEv.PlaybackState == PlaybackState.Playing)
-        {
-            _sampleChannel.Volume = Volume;
-        }
     }
 
     private void WaveOutPlaybackStopped(object sender, StoppedEventArgs e)

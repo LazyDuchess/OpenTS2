@@ -96,7 +96,7 @@ namespace OpenTS2.Audio
 
         private void UpdateVolume()
         {
-            _tsAudioSource.Volume = 0.5f * _currentVolumeMultiplier;
+            _tsAudioSource.Volume = _currentVolumeMultiplier;
         }
 
         public void StartMusicCategory(string musicCategory)
