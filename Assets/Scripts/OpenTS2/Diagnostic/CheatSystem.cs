@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenTS2.Engine;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -29,7 +30,7 @@ namespace OpenTS2.Diagnostic
             var props = type.GetProperties(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public);
             foreach (var field in fields)
             {
-                var attr = field.GetCustomAttribute<ConsolePropertyAttribute>();
+                var attr = field.GetCustomAttribute<GamePropertyAttribute>();
                 if (attr != null)
                 {
                     var name = attr.Name;
@@ -41,7 +42,7 @@ namespace OpenTS2.Diagnostic
             }
             foreach (var prop in fields)
             {
-                var attr = prop.GetCustomAttribute<ConsolePropertyAttribute>();
+                var attr = prop.GetCustomAttribute<GamePropertyAttribute>();
                 if (attr != null)
                 {
                     var name = attr.Name;

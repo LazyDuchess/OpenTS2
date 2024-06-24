@@ -69,7 +69,7 @@ namespace OpenTS2.Rendering
         }
 
         // Might not play nice with some hardware, maybe adjust conditionally.
-        [ConsoleProperty("ots2_batchingVertexLimit")]
+        [GameProperty("ots2_batchingVertexLimit")]
         public static int DefaultVertexLimit = 10000000;
         static Dictionary<Shader, bool> s_shadersCantBeBatched = new Dictionary<Shader, bool>();
 
