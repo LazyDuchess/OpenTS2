@@ -68,7 +68,7 @@ namespace OpenTS2.Audio
         {
             Instance = this;
             _contentProvider = ContentProvider.Get();
-            Core.OnFinishedLoading += OnFinishedLoading;
+            AudioManager.OnInitialized += Initialize;
         }
 
         private List<ResourceKey> GetMusicTitles()
@@ -88,7 +88,7 @@ namespace OpenTS2.Audio
 
         private void LoadPlaylists(List<ResourceKey> musicTitles)
         {
-            var audioResourceKeys = _contentProvider.ResourceMap.Keys.Where(x => x.TypeID == TypeIDs.AUDIO);
+            var audioResourceKeys = AudioManager.AudioAssets;
             foreach(var musicCategory in MusicCategoryByHash)
             {
                 var resourceKeys = audioResourceKeys.Where(x => x.GroupID == musicCategory.Key).ToList();
@@ -151,7 +151,7 @@ namespace OpenTS2.Audio
             }
         }
 
-        private void OnFinishedLoading()
+        private void Initialize()
         {
             var musicTitles = GetMusicTitles();
             LoadMusicCategories(musicTitles);
