@@ -17,11 +17,13 @@ namespace OpenTS2.UI
     public class UIButtonElement : UIElement
     {
         public ResourceKey Image = default;
+        public ResourceKey ClickSound = default;
         protected override Type UIComponentType => typeof(UIButtonComponent);
         public override void ParseProperties(UIProperties properties)
         {
             base.ParseProperties(properties);
             Image = properties.GetImageKeyProperty("image");
+            ClickSound = properties.GetSoundProperty("btnclicksnd");
         }
         public override UIComponent Instantiate(Transform parent)
         {
@@ -33,6 +35,7 @@ namespace OpenTS2.UI
             var imageAsset = contentProvider.GetAsset<TextureAsset>(Image);
             if (imageAsset != null)
                 uiComponent.SetTexture(imageAsset);
+            uiComponent.ClickSound = ClickSound;
             return uiComponent;
         }
     }

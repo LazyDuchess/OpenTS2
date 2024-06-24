@@ -1,5 +1,6 @@
 ﻿using OpenTS2.Common;
 using OpenTS2.Content;
+using OpenTS2.Content.DBPF;
 using OpenTS2.Engine;
 using OpenTS2.Files.Formats.DBPF;
 using System;
@@ -15,23 +16,69 @@ namespace OpenTS2.Audio
     {
         public static List<ResourceKey> AudioAssets { get; private set; }
         public static Action OnInitialized;
-        private static Dictionary<uint, ResourceKey> _audioAssetByLowInstanceID;
-        private static ContentProvider _contentProvider;
+        private static Dictionary<uint, ResourceKey> AudioAssetByLowInstanceID;
+        private static Dictionary<ResourceKey, ResourceKey> AudioAssetByInstanceID;
+        private static ContentProvider ContentProvider;
 
         private void Awake()
         {
-            _contentProvider = ContentProvider.Get();
+            ContentProvider = ContentProvider.Get();
             Core.OnFinishedLoading += Initialize;
         }
 
         private void Initialize()
         {
-            AudioAssets = _contentProvider.ResourceMap.Keys.Where(key => key.TypeID == TypeIDs.AUDIO || key.TypeID == TypeIDs.HITLIST).ToList();
+            AudioAssetByLowInstanceID = new Dictionary<uint, ResourceKey>();
+            AudioAssetByInstanceID = new Dictionary<ResourceKey, ResourceKey>();
+            AudioAssets = ContentProvider.ResourceMap.Keys.Where(key => key.TypeID == TypeIDs.AUDIO || key.TypeID == TypeIDs.HITLIST).ToList();
             foreach(var audioAsset in AudioAssets)
             {
-                _audioAssetByLowInstanceID[audioAsset.InstanceID] = audioAsset;
+                AudioAssetByLowInstanceID[audioAsset.InstanceID] = audioAsset;
+                AudioAssetByInstanceID[new ResourceKey(audioAsset.InstanceID, audioAsset.InstanceHigh, 0, 0)] = audioAsset;
             }
             OnInitialized?.Invoke();
+        }
+
+        public static ResourceKey GetAudioResourceKeyByInstanceID(uint instanceID)
+        {
+            if (AudioAssetByLowInstanceID.TryGetValue(instanceID, out var key))
+            {
+                return key;
+            }
+            return default;
+        }
+
+        public static ResourceKey GetAudioResourceKeyByInstanceID(uint instanceID, uint instanceIDHigh)
+        {
+            var key = new ResourceKey(instanceID, instanceIDHigh, 0, 0);
+            if (AudioAssetByInstanceID.TryGetValue(key, out var result))
+            {
+                return key;
+            }
+            return default;
+        }
+
+        public static void PlayUISound(ResourceKey audioKey)
+        {
+            var asset = ContentProvider.GetAsset<AudioAsset>(audioKey);
+            if (asset != null)
+            {
+                var audioSource = CreateOneShotAudioSource();
+                audioSource.Audio = asset;
+                audioSource.Play();
+            }
+        }
+
+        private static TSAudioSource CreateOneShotAudioSource()
+        {
+            var go = new GameObject("One Shot Audio Source");
+            var audioSource = go.AddComponent<TSAudioSource>();
+            audioSource.Loop = false;
+            audioSource.PlaybackFinished += () =>
+            {
+                Destroy(go);
+            };
+            return audioSource;
         }
     }
 }

@@ -8,6 +8,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using OpenTS2.Content.DBPF;
+using OpenTS2.Common;
+using OpenTS2.Content;
+using OpenTS2.Audio;
 
 namespace OpenTS2.UI
 {
@@ -18,6 +21,7 @@ namespace OpenTS2.UI
         /// </summary>
         public Action OnClick;
         public bool GreyedOut = false;
+        public ResourceKey ClickSound;
         private bool _hovering = false;
         private bool _held = false;
         private TextureAsset[] _textures;
@@ -99,6 +103,7 @@ namespace OpenTS2.UI
 
         void Click()
         {
+            AudioManager.PlayUISound(ClickSound);
             OnClick?.Invoke();
         }
     }

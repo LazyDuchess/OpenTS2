@@ -19,6 +19,16 @@ namespace OpenTS2.Common
     /// </summary>
     public struct ResourceKey
     {
+        public bool Valid
+        {
+            get
+            {
+                if (InstanceID == 0 && InstanceHigh == 0 && GroupID == 0 && TypeID == 0)
+                    return false;
+                return true;
+            }
+        }
+
         public static ResourceKey DIR
         {
             get { return s_dir; }
