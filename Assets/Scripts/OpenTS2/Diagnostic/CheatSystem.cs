@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Assets.Scripts.OpenTS2.Diagnostic;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -21,6 +22,9 @@ namespace OpenTS2.Diagnostic
             RegisterCheat<GoToShellCheat>();
             RegisterCheat<PlayMusicCategoryCheat>();
             Assemblies.AssemblyHelper.AssemblyProcesses += RegisterPropsForType;
+
+            //ConstrainFloorElevation
+            RegisterProperty(SimpleProperty<bool>.Create(false), "constrainfloorelevation");
         }
 
         private static void RegisterPropsForType(Type type, Assembly assembly)

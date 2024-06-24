@@ -47,7 +47,23 @@ namespace OpenTS2.Scenes.Lot
 
             BindMaterialAndTextures();
 
+            //Make Mesh Collider for terrain
+            SetTerrainCollider(_terrain.Component);
+
             return this;
+        }
+
+        /// <summary>
+        /// Adds a mesh collider matching the shape of the terrain to the current object
+        /// </summary>
+        /// <param name="TerrainComponent"></param>
+        /// <returns></returns>
+        private MeshCollider SetTerrainCollider(LotArchitectureMeshComponent TerrainComponent)
+        {
+            var gameobj = TerrainComponent.gameObject;
+            var comp = gameobj.AddComponent<MeshCollider>();
+            comp.isTrigger = false;
+            return comp;
         }
 
         private (ScenegraphTextureAsset color, ScenegraphTextureAsset bump) LoadTexture(ContentProvider contentProvider, string name)

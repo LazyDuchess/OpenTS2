@@ -24,6 +24,7 @@ namespace OpenTS2.UI
         public ResourceKey ClickSound;
         private bool _hovering = false;
         private bool _held = false;
+        private bool _toggled = false; // some buttons are toggle buttons -- adding this here to account for this scenario
         private TextureAsset[] _textures;
         public RawImage RawImageComponent => GetComponent<RawImage>();
         public void SetTexture(TextureAsset texture)
@@ -52,6 +53,11 @@ namespace OpenTS2.UI
                 RawImageComponent.texture = _textures[0].Texture;
             else
             {
+                if (_toggled) // Toggle Button texture here
+                {
+                    RawImageComponent.texture = _textures[2].Texture;
+                    return;
+                }
                 RawImageComponent.texture = _textures[1].Texture;
                 if (_hovering && !UIManager.AnyMouseButtonHeld)
                     RawImageComponent.texture = _textures[3].Texture;
@@ -105,6 +111,12 @@ namespace OpenTS2.UI
         {
             AudioManager.PlayUISound(ClickSound);
             OnClick?.Invoke();
+        }
+
+        public void SetToggled(bool Toggled)
+        {
+            _toggled = Toggled;
+            UpdateTexture();
         }
     }
 }
