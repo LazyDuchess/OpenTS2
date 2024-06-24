@@ -15,6 +15,12 @@ namespace OpenTS2.Engine
     {
         public string Name { get; private set; }
         public bool User { get; private set; }
+
+        public GamePropertyAttribute(bool userProp)
+        {
+            User = userProp;
+        }
+
         public GamePropertyAttribute(string name, bool userProp)
         {
             Name = name;

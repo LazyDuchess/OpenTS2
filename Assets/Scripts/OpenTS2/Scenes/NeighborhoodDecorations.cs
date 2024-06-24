@@ -18,8 +18,7 @@ namespace OpenTS2.Scenes
 {
     public class NeighborhoodDecorations : AssetReferenceComponent
     {
-        [GameProperty("ots2_HoodBatching")]
-        private static bool s_enableBatching = true;
+        private static bool EnableBatching = true;
         private Dictionary<string, Material> _roadMaterialLookup = new Dictionary<string, Material>();
         private Transform _decorationsParent;
         private Transform _roadsParent;
@@ -62,7 +61,7 @@ namespace OpenTS2.Scenes
                 }
             }
 
-            if (s_enableBatching)
+            if (EnableBatching)
             {
                 var batchedDeco = Batching.Batch(_decorationsParent, flipFaces: true);
                 var batchedLots = Batching.Batch(_lotsParent, flipFaces: true);

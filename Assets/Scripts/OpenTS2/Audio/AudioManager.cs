@@ -14,6 +14,15 @@ namespace OpenTS2.Audio
 {
     public class AudioManager : MonoBehaviour
     {
+        [GameProperty(true)]
+        public static uint FXVolume = 100;
+        [GameProperty(true)]
+        public static uint VOXVolume = 100;
+        [GameProperty(true)]
+        public static uint AmbienceVolume = 100;
+        [GameProperty(true)]
+        public static uint MusicVolume = 40;
+
         public static List<ResourceKey> AudioAssets { get; private set; }
         public static Action OnInitialized;
         private static Dictionary<uint, ResourceKey> AudioAssetByLowInstanceID;
@@ -42,7 +51,26 @@ namespace OpenTS2.Audio
         // TODO
         public static float GetVolumeForMixer(Mixers mixer)
         {
-            return 0.5f;
+            uint val = 100;
+            switch (mixer)
+            {
+                case Mixers.Voices:
+                    val = VOXVolume;
+                    break;
+
+                case Mixers.SoundEffects:
+                    val = FXVolume;
+                    break;
+
+                case Mixers.Music:
+                    val = MusicVolume;
+                    break;
+
+                case Mixers.Ambient:
+                    val = AmbienceVolume;
+                    break;
+            }
+            return val / 100f;
         }
 
         public static ResourceKey GetAudioResourceKeyByInstanceID(uint instanceID)
