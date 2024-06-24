@@ -1,0 +1,34 @@
+Sound research
+
+Track Settings Type: 0x0B9EB87E
+Binary file Type: 0x7B1ACFCD
+
+Track Settings file:
+
+XML with following properties in order:
+
+Sample Rate - eg 32000
+Unknown string - Always "Track"?
+
+There is also a binary resource with the same instance id as the Track Settings file. Does not seem to contain audio data. Maybe references the actual sound resource?
+
+These sounds should be loaded as AudioAssets so that they can be played like any other sound by TSAudioSource
+
+Replacing the Track settings file with an MP3 triggers a GetSoundDefinition error
+
+Replacing the binary file with an MP3 triggers a GetHitList error
+
+0x7B1ACFCD Must be a HitList resource. Likely contains references to sounds.
+
+Binary file 0x7B1ACFCD:
+
+4 bytes: Always 56?
+4 bytes: Count
+For Count loop
+	References to MP3/XA/etc audio assets
+	4 bytes: Instance Lo
+	4 bytes: Instance Hi
+End loop
+
+
+I wonder if the track settings file is optional? Seems odd to be able to override the sample rate and such when they're provided in the sounds themselves already.
