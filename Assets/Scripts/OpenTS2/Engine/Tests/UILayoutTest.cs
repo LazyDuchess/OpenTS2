@@ -35,24 +35,17 @@ namespace OpenTS2.Engine.Tests
 
         void CreateUI()
         {
-            try
+            var settings = Settings.Get();
+            settings.Language = Language;
+            foreach (var instance in _instances)
             {
-                var settings = Settings.Get();
-                settings.Language = Language;
-                foreach (var instance in _instances)
-                {
-                    Destroy(instance.gameObject);
-                }
-                _instances.Clear();
-                var contentProvider = ContentProvider.Get();
-                var key = new ResourceKey(Convert.ToUInt32(Key, 16), 0xA99D8A11, TypeIDs.UI);
-                var uiLayout = contentProvider.GetAsset<UILayout>(key);
-                _instances.AddRange(uiLayout.Instantiate(UIManager.MainCanvas.transform));
+                Destroy(instance.gameObject);
             }
-            catch(Exception e)
-            {
-                Debug.LogError(e);
-            }
+            _instances.Clear();
+            var contentProvider = ContentProvider.Get();
+            var key = new ResourceKey(Convert.ToUInt32(Key, 16), 0xA99D8A11, TypeIDs.UI);
+            var uiLayout = contentProvider.GetAsset<UILayout>(key);
+            _instances.AddRange(uiLayout.Instantiate(UIManager.MainCanvas.transform));
         }
 
         private void Update()
