@@ -108,32 +108,32 @@ namespace OpenTS2.Scenes
 
         private void OnFinishLoading()
         {
-            var luaMgr = LuaManager.Get();
-            luaMgr.InitializeObjectScripts();
-            CursorController.Cursor = CursorController.CursorType.Hourglass;
-            if (LoadObjects && !GameLoaded)
-            {
-                var oMgr = ObjectManager.Get();
-                oMgr.Initialize();
-
-                EffectsManager.Get().Initialize();
-            }
-            if (!GameLoaded)
-                NeighborhoodManager.Initialize();
-            CursorController.Cursor = CursorController.CursorType.Default;
-            Debug.Log("All loaded");
-            if (!GameLoaded)
-                Core.OnFinishedLoading?.Invoke();
-            FadeOutLoading();
             try
             {
+                var luaMgr = LuaManager.Get();
+                luaMgr.InitializeObjectScripts();
+                CursorController.Cursor = CursorController.CursorType.Hourglass;
+                if (LoadObjects && !GameLoaded)
+                {
+                    var oMgr = ObjectManager.Get();
+                    oMgr.Initialize();
+
+                    EffectsManager.Get().Initialize();
+                }
+                if (!GameLoaded)
+                    NeighborhoodManager.Initialize();
+                CursorController.Cursor = CursorController.CursorType.Default;
+                Debug.Log("All loaded");
+                if (!GameLoaded)
+                    Core.OnFinishedLoading?.Invoke();
+                FadeOutLoading();
                 var mainMenu = new MainMenu();
+                GameLoaded = true;
             }
             catch(Exception e)
             {
-                Debug.Log(e.ToString());
+                Debug.LogError(e);
             }
-            GameLoaded = true;
         }
 
         void FadeOutLoading()

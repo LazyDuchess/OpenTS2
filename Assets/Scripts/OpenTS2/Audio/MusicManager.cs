@@ -14,6 +14,8 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
+using OpenTS2.Files;
+using OpenTS2.Files.Formats.Ini;
 
 namespace OpenTS2.Audio
 {
@@ -118,22 +120,8 @@ namespace OpenTS2.Audio
             }
         }
 
-        private void LoadMusicCategories(List<ResourceKey> musicTitles)
+        private void LocalizeMusicCategories(List<ResourceKey> musicTitles)
         {
-            var musicCategoriesEntry = _contentProvider.GetEntry(MusicCategoriesXMLKey);
-            if (musicCategoriesEntry == null)
-                throw new IOException("Can't find Music Categories XML!");
-            var musicCategoriesBytes = musicCategoriesEntry.GetBytes();
-            var xml = new PropertySet(musicCategoriesBytes);
-            if (xml == null)
-                throw new IOException("Can't load Music Categories XML!");
-
-            foreach (var prop in xml.Properties)
-            {
-                var musicCategory = new MusicCategory(prop.Key, ((StringProp)prop.Value).Value.Split(','));
-                MusicCategoryByHash[musicCategory.Hash] = musicCategory;
-            }
-
             foreach (var stringSetKey in musicTitles)
             {
                 var stringSet = _contentProvider.GetAsset<StringSetAsset>(stringSetKey);
@@ -152,10 +140,57 @@ namespace OpenTS2.Audio
             }
         }
 
+        private void LoadIniMusicCategories()
+        {
+            var epManager = EPManager.Get();
+            var products = epManager.GetInstalledProducts();
+            foreach(var product in products)
+            {
+                var sysFolder = Path.Combine(Filesystem.GetDataPathForProduct(product), "Sys");
+                var unpackedAudioIni = Directory.GetFiles(sysFolder, "TSAudioUnpacked*.ini", SearchOption.TopDirectoryOnly).FirstOrDefault();
+                if (!string.IsNullOrEmpty(unpackedAudioIni))
+                {
+                    var iniFile = new IniFile(unpackedAudioIni);
+                    var musicSection = iniFile.GetSection("MusicDirectories");
+                    if (musicSection != null)
+                    {
+                        foreach(var prop in musicSection.KeyValues)
+                        {
+                            var name = prop.Key;
+                            var hash = Convert.ToUInt32(prop.Value, 16);
+                            if (MusicCategoryByHash.ContainsKey(hash)) continue;
+
+                            var musicCategory = new MusicCategory(name, hash);
+                            MusicCategoryByHash[musicCategory.Hash] = musicCategory;
+                        }
+                    }
+                }
+            }
+        }
+
+        private void LoadMusicCategories()
+        {
+            var musicCategoriesEntry = _contentProvider.GetEntry(MusicCategoriesXMLKey);
+            if (musicCategoriesEntry == null)
+                throw new IOException("Can't find Music Categories XML!");
+            var musicCategoriesBytes = musicCategoriesEntry.GetBytes();
+            var xml = new PropertySet(musicCategoriesBytes);
+            if (xml == null)
+                throw new IOException("Can't load Music Categories XML!");
+
+            foreach (var prop in xml.Properties)
+            {
+                var musicCategory = new MusicCategory(prop.Key, ((StringProp)prop.Value).Value.Split(','));
+                MusicCategoryByHash[musicCategory.Hash] = musicCategory;
+            }
+        }
+
         private void Initialize()
         {
             var musicTitles = GetMusicTitles();
-            LoadMusicCategories(musicTitles);
+            LoadMusicCategories();
+            LoadIniMusicCategories();
+            LocalizeMusicCategories(musicTitles);
             LoadPlaylists(musicTitles);
             InitializeMusicCategoryPlaylists();
         }
