@@ -1,4 +1,5 @@
 using NAudio.Wave;
+using NAudio.Wave.SampleProviders;
 using OpenTS2.Audio;
 using OpenTS2.Content;
 using OpenTS2.Content.DBPF;
@@ -30,6 +31,7 @@ public class TSAudioSource : MonoBehaviour
     public Action PlaybackFinished;
     private AudioAsset _audio;
     private WaveOutEvent _waveOutEv;
+    private SampleChannel _sampleChannel;
     private AudioSource _audioSource;
     private float _timeAudioSourcePlaying = 0f;
     private bool _audioClipPlaying = false;
@@ -112,9 +114,10 @@ public class TSAudioSource : MonoBehaviour
     {
         var stream = new MemoryStream((asset as MP3AudioAsset).AudioData);
         var reader = new Mp3FileReader(stream);
+        _sampleChannel = new SampleChannel(reader);
         _waveOutEv = new WaveOutEvent();
-        _waveOutEv.Init(reader);
-        _waveOutEv.Volume = Volume;
+        _waveOutEv.Init(_sampleChannel);
+        _sampleChannel.Volume = Volume;
         _waveOutEv.Play();
         _waveOutEv.PlaybackStopped += WaveOutPlaybackStopped;
     }
@@ -151,9 +154,9 @@ public class TSAudioSource : MonoBehaviour
         else
             _timeAudioSourcePlaying = 0f;
         
-        if (_waveOutEv != null)
+        if (_waveOutEv != null && _waveOutEv.PlaybackState == PlaybackState.Playing)
         {
-            _waveOutEv.Volume = Volume;
+            _sampleChannel.Volume = Volume;
         }
     }
 
