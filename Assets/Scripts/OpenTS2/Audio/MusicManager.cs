@@ -120,9 +120,10 @@ namespace OpenTS2.Audio
 
         private void LoadMusicCategories(List<ResourceKey> musicTitles)
         {
-            var musicCategoriesBytes = _contentProvider.GetEntry(MusicCategoriesXMLKey).GetBytes();
-            if (musicCategoriesBytes == null)
+            var musicCategoriesEntry = _contentProvider.GetEntry(MusicCategoriesXMLKey);
+            if (musicCategoriesEntry == null)
                 throw new IOException("Can't find Music Categories XML!");
+            var musicCategoriesBytes = musicCategoriesEntry.GetBytes();
             var xml = new PropertySet(musicCategoriesBytes);
             if (xml == null)
                 throw new IOException("Can't load Music Categories XML!");
