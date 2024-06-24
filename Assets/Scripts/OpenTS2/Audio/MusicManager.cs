@@ -88,7 +88,7 @@ namespace OpenTS2.Audio
 
         private void LoadPlaylists(List<ResourceKey> musicTitles)
         {
-            var audioResourceKeys = _contentProvider.ResourceMap.Keys.Where(x => x.TypeID == TypeIDs.MP3);
+            var audioResourceKeys = _contentProvider.ResourceMap.Keys.Where(x => x.TypeID == TypeIDs.AUDIO);
             foreach(var musicCategory in MusicCategoryByHash)
             {
                 var resourceKeys = audioResourceKeys.Where(x => x.GroupID == musicCategory.Key).ToList();
