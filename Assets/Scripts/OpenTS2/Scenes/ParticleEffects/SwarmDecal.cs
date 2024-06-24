@@ -16,10 +16,8 @@ namespace OpenTS2.Scenes.ParticleEffects
 {
     public class SwarmDecal : MonoBehaviour
     {
-        [ConsoleProperty("enableDecals")]
-        private static bool s_enableDecals = true;
-        private static int s_location = Shader.PropertyToID("_Location");
-        private static int s_rotation = Shader.PropertyToID("_Rotation");
+        private static int Location = Shader.PropertyToID("_Location");
+        private static int Rotation = Shader.PropertyToID("_Rotation");
         private ScenegraphTextureAsset _textureAsset;
         private Vector3 _position;
         private Vector3 _rotation;
@@ -27,8 +25,6 @@ namespace OpenTS2.Scenes.ParticleEffects
 
         private void Start()
         {
-            if (!s_enableDecals)
-                return;
             _position = transform.position;
             _rotation = transform.rotation.eulerAngles;
             Initialize();
@@ -55,8 +51,8 @@ namespace OpenTS2.Scenes.ParticleEffects
 
             _material = new Material(Shader.Find("OpenTS2/NeighborhoodDecal"));
             _material.mainTexture = _textureAsset.GetSelectedImageAsUnityTexture(ContentProvider.Get());
-            _material.SetVector(s_location, _position);
-            _material.SetVector(s_rotation, _rotation);
+            _material.SetVector(Location, _position);
+            _material.SetVector(Rotation, _rotation);
 
             meshRenderer.sharedMaterial = _material;
             transform.SetParent(null);
