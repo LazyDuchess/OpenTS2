@@ -33,6 +33,31 @@ public class TSAudioSource : MonoBehaviour
     private AudioSource _audioSource;
     private float _timeAudioSourcePlaying = 0f;
     private bool _audioClipPlaying = false;
+    private bool _paused = false;
+
+    public void Pause()
+    {
+        if (_paused)
+            return;
+        if (_waveOutEv != null)
+        {
+            _waveOutEv.Pause();
+        }
+        _audioSource.Pause();
+        _paused = true;
+    }
+
+    public void Resume()
+    {
+        if (!_paused)
+            return;
+        if (_waveOutEv != null)
+        {
+            _waveOutEv.Play();
+        }
+        _audioSource.UnPause();
+        _paused = false;
+    }
 
     public void Play()
     {
@@ -80,6 +105,7 @@ public class TSAudioSource : MonoBehaviour
         _audioSource.clip = null;
         _audioClipPlaying = false;
         _timeAudioSourcePlaying = 0f;
+        _paused = false;
     }
 
     private void PlayMP3(AudioAsset asset)
@@ -111,12 +137,15 @@ public class TSAudioSource : MonoBehaviour
 
         if (_audioSource.clip != null && _audioClipPlaying && !Loop)
         {
-            _timeAudioSourcePlaying += Time.unscaledDeltaTime;
-            if (_timeAudioSourcePlaying >= _audioSource.clip.length && !_audioSource.isPlaying)
+            if (!_paused)
             {
-                _audioClipPlaying = false;
-                _timeAudioSourcePlaying = 0f;
-                PlaybackFinished?.Invoke();
+                _timeAudioSourcePlaying += Time.unscaledDeltaTime;
+                if (_timeAudioSourcePlaying >= _audioSource.clip.length && !_audioSource.isPlaying)
+                {
+                    _audioClipPlaying = false;
+                    _timeAudioSourcePlaying = 0f;
+                    PlaybackFinished?.Invoke();
+                }
             }
         }
         else
@@ -130,6 +159,8 @@ public class TSAudioSource : MonoBehaviour
 
     private void WaveOutPlaybackStopped(object sender, StoppedEventArgs e)
     {
+        if (_paused)
+            return;
         if (Loop)
             Play();
         else

@@ -18,7 +18,7 @@ namespace OpenTS2.Diagnostic
             RegisterCheat<HelpCheat>();
             RegisterCheat<PropsCheat>();
             RegisterCheat<ClearCheat>();
-            RegisterCheat<GoToShellCheat>();
+            RegisterCheat<PauseMusicCheat>();
             RegisterCheat<PlayMusicCategoryCheat>();
             Assemblies.AssemblyHelper.AssemblyProcesses += RegisterPropsForType;
         }
