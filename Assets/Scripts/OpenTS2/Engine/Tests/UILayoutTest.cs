@@ -80,6 +80,7 @@ namespace OpenTS2.Engine.Tests
                 LoadAllUIPackages();
             else
                 LoadBGUIPackage();
+            Core.OnFinishedLoading?.Invoke();
             CreateUI();
             /*
             var contentProvider = ContentProvider.Get();

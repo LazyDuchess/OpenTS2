@@ -119,7 +119,7 @@ namespace OpenTS2.Audio
             _tsAudioSource = GetComponent<TSAudioSource>();
             UpdateVolume();
             Core.OnNeighborhoodEntered += OnNeighborhoodEntered;
-            Core.OnStartup += OnStartup;
+            Core.OnBeginLoadingScreen += OnBeginLoadingScreen;
         }
 
         private void Update()
@@ -128,7 +128,7 @@ namespace OpenTS2.Audio
             UpdateVolume();
         }
 
-        private void OnStartup()
+        private void OnBeginLoadingScreen()
         {
             _tsAudioSource.Audio = MusicManager.SplashAudio;
             _tsAudioSource.Loop = true;

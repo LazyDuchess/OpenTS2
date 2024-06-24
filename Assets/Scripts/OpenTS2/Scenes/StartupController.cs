@@ -82,7 +82,7 @@ namespace OpenTS2.Scenes
                 if (InitialLoadScreenReiaPlayer != null)
                     Destroy(InitialLoadScreenReiaPlayer.gameObject);
             }
-            Core.OnStartup?.Invoke();
+            Core.OnBeginLoadingScreen?.Invoke();
         }
 
         private void Update()
