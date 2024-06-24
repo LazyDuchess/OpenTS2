@@ -41,9 +41,9 @@ namespace OpenTS2.Audio
 
         public static ResourceKey GetAudioResourceKeyByInstanceID(uint instanceID)
         {
-            if (AudioAssetByLowInstanceID.TryGetValue(instanceID, out var key))
+            if (AudioAssetByLowInstanceID.TryGetValue(instanceID, out var result))
             {
-                return key;
+                return result;
             }
             return default;
         }
@@ -53,7 +53,7 @@ namespace OpenTS2.Audio
             var key = new ResourceKey(instanceID, instanceIDHigh, 0, 0);
             if (AudioAssetByInstanceID.TryGetValue(key, out var result))
             {
-                return key;
+                return result;
             }
             return default;
         }

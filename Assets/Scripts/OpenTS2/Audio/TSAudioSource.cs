@@ -1,4 +1,6 @@
 using NAudio.Wave;
+using OpenTS2.Audio;
+using OpenTS2.Content;
 using OpenTS2.Content.DBPF;
 using System;
 using System.Collections;
@@ -35,10 +37,21 @@ public class TSAudioSource : MonoBehaviour
     public void Play()
     {
         CleanUp();
-        if (Audio is MP3AudioAsset)
-            PlayMP3();
+        PlayInternal(Audio);
+    }
+
+    private void PlayInternal(AudioAsset asset)
+    {
+        if (asset is HitListAsset)
+        {
+            asset = (asset as HitListAsset).GetRandomAudioAsset();
+            PlayInternal(asset);
+            return;
+        }
+        if (asset is MP3AudioAsset)
+            PlayMP3(asset);
         else
-            PlayWAV();
+            PlayWAV(asset);
     }
 
     public void Stop()
@@ -69,9 +82,9 @@ public class TSAudioSource : MonoBehaviour
         _timeAudioSourcePlaying = 0f;
     }
 
-    private void PlayMP3()
+    private void PlayMP3(AudioAsset asset)
     {
-        var stream = new MemoryStream((_audio as MP3AudioAsset).AudioData);
+        var stream = new MemoryStream((asset as MP3AudioAsset).AudioData);
         var reader = new Mp3FileReader(stream);
         _waveOutEv = new WaveOutEvent();
         _waveOutEv.Init(reader);
@@ -80,13 +93,13 @@ public class TSAudioSource : MonoBehaviour
         _waveOutEv.PlaybackStopped += WaveOutPlaybackStopped;
     }
 
-    private void PlayWAV()
+    private void PlayWAV(AudioAsset asset)
     {
         _audioClipPlaying = true;
         _timeAudioSourcePlaying = 0f;
         _audioSource.spatialBlend = 0f;
         _audioSource.volume = Volume;
-        _audioSource.clip = (_audio as WAVAudioAsset).Clip;
+        _audioSource.clip = (asset as WAVAudioAsset).Clip;
         _audioSource.loop = Loop;
         _audioSource.Play();
     }
