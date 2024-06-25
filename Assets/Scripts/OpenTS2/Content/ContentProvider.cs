@@ -10,6 +10,7 @@ using OpenTS2.Files;
 using OpenTS2.Files.Formats.DBPF;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -34,6 +35,7 @@ namespace OpenTS2.Content
             get { return _contentEntries; }
         }
 
+        private readonly Dictionary<ResourceKey, string> _fileMap = new Dictionary<ResourceKey, string>();
         private readonly Dictionary<ResourceKey, DBPFEntry> _resourceMap = new Dictionary<ResourceKey, DBPFEntry>();
         private readonly List<DBPFFile> _contentEntries = new List<DBPFFile>();
         private readonly Dictionary<uint, DBPFFile> _entryByGroupID = new Dictionary<uint, DBPFFile>();
@@ -50,11 +52,31 @@ namespace OpenTS2.Content
             this.Cache = new ContentCache(this);
         }
 
+        public void MapFileToResource(string path, ResourceKey key)
+        {
+            _fileMap[key] = Filesystem.GetRealPath(path);
+            var entry = new DBPFEntry();
+            entry.TGI = key;
+            _resourceMap[key] = entry;
+        }
+
         AbstractAsset InternalLoadAsset(CacheKey key)
         {
-            if (key.File == null)
-                return null;
-            return key.File.GetAssetByTGI(key.TGI);
+            if (key.File != null)
+            {
+                return key.File.GetAssetByTGI(key.TGI);
+            }
+            else
+            {
+                if (_fileMap.TryGetValue(key.TGI, out var result))
+                {
+                    var codec = Codecs.Get(key.TGI.TypeID);
+                    var fileBytes = File.ReadAllBytes(result);
+                    var asset = codec.Deserialize(fileBytes, key.TGI, null);
+                    return asset;
+                }
+            }
+            return null;
         }
 
         /// <summary>

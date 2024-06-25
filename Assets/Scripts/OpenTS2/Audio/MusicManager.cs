@@ -98,18 +98,25 @@ namespace OpenTS2.Audio
                 foreach(var key in resourceKeys)
                 {
                     var localizedName = key.ToString();
-                    foreach(var musicTitle in musicTitles)
+                    if (AudioManager.CustomSongNames.TryGetValue(key, out var customSongName))
                     {
-                        var stringSet = _contentProvider.GetAsset<StringSetAsset>(musicTitle);
-                        var englishStrings = stringSet.StringData.Strings[Languages.USEnglish];
-
-                        for (var i = 0; i < englishStrings.Count; i++)
+                        localizedName = customSongName;
+                    }
+                    else
+                    {
+                        foreach (var musicTitle in musicTitles)
                         {
-                            var englishString = englishStrings[i].Value;
-                            var hiHash = FileUtils.HighHash(englishString);
-                            if (hiHash == key.InstanceHigh)
+                            var stringSet = _contentProvider.GetAsset<StringSetAsset>(musicTitle);
+                            var englishStrings = stringSet.StringData.Strings[Languages.USEnglish];
+
+                            for (var i = 0; i < englishStrings.Count; i++)
                             {
-                                localizedName = stringSet.GetString(i);
+                                var englishString = englishStrings[i].Value;
+                                var hiHash = FileUtils.HighHash(englishString);
+                                if (hiHash == key.InstanceHigh)
+                                {
+                                    localizedName = stringSet.GetString(i);
+                                }
                             }
                         }
                     }
