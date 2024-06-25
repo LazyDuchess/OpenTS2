@@ -22,6 +22,8 @@ namespace OpenTS2.Audio
         public static uint AmbienceVolume = 100;
         [GameProperty(true)]
         public static uint MusicVolume = 40;
+        [GameProperty(true)]
+        public static bool MuteAudioOnFocusLoss = true;
 
         public static List<ResourceKey> AudioAssets { get; private set; }
         public static Action OnInitialized;
@@ -48,9 +50,10 @@ namespace OpenTS2.Audio
             OnInitialized?.Invoke();
         }
 
-        // TODO
         public static float GetVolumeForMixer(Mixers mixer)
         {
+            if (MuteAudioOnFocusLoss && !Application.isFocused)
+                return 0f;
             uint val = 100;
             switch (mixer)
             {
