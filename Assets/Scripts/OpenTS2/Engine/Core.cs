@@ -18,10 +18,5 @@ namespace OpenTS2.Engine
         {
             DontDestroyOnLoad(gameObject);
         }
-
-        public void OnApplicationQuit()
-        {
-            ContentProvider.Get().Changes.SaveChanges();
-        }
     }
 }
