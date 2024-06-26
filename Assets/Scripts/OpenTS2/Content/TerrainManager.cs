@@ -11,7 +11,7 @@ namespace OpenTS2.Content
 {
     public static class TerrainManager
     {
-        private static Dictionary<string, TerrainType> s_terrainTypes = new Dictionary<string, TerrainType>();
+        private static Dictionary<string, TerrainType> TerrainTypes = new Dictionary<string, TerrainType>();
         public static void Initialize()
         {
             var temperate = new TerrainType
@@ -75,12 +75,12 @@ namespace OpenTS2.Content
 
         public static void RegisterTerrainType(TerrainType type)
         {
-            s_terrainTypes[type.Name] = type;
+            TerrainTypes[type.Name] = type;
         }
 
         public static TerrainType GetTerrainType(string key)
         {
-            if (!s_terrainTypes.TryGetValue(key, out TerrainType result))
+            if (!TerrainTypes.TryGetValue(key, out TerrainType result))
                 throw new KeyNotFoundException($"Can't find terrain type {key}");
             return result;
         }

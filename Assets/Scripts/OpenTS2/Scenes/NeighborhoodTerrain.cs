@@ -19,9 +19,9 @@ namespace OpenTS2.Scenes
     {
         public static NeighborhoodTerrain Instance;
         public Transform Sun;
-        private static ResourceKey s_matCapKey = new ResourceKey(0x0BE702EF, 0x8BA01057, TypeIDs.IMG);
-        private static ResourceKey s_cliffKey = new ResourceKey(0xFFF56CAE, 0x6E80B6A1, GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR);
-        private static ResourceKey s_shoreKey = new ResourceKey("nh-test-beach_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR);
+        private static ResourceKey MatCapKey = new ResourceKey(0x0BE702EF, 0x8BA01057, TypeIDs.IMG);
+        private static ResourceKey CliffKey = new ResourceKey(0xFFF56CAE, 0x6E80B6A1, GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR);
+        private static ResourceKey ShoreKey = new ResourceKey("nh-test-beach_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR);
         //private static ResourceKey TemperateWetKey = new ResourceKey(0xFF354609, 0x1A9C59CC, 0x1C0532FA, TypeIDs.SCENEGRAPH_TXTR);
         private Material _terrainMaterial;
         private MeshFilter _meshFilter;
@@ -41,12 +41,12 @@ namespace OpenTS2.Scenes
             _terrainMaterial.shader = terrainType.TerrainShader;
             _terrainMaterial.SetVector("_LightVector", Sun.forward);
 
-            var matCap = contentManager.GetAsset<TextureAsset>(s_matCapKey);
+            var matCap = contentManager.GetAsset<TextureAsset>(MatCapKey);
             var smooth = contentManager.GetAsset<ScenegraphTextureAsset>(terrainType.Texture);
             var variation1 = contentManager.GetAsset<ScenegraphTextureAsset>(terrainType.Texture1);
             var variation2 = contentManager.GetAsset<ScenegraphTextureAsset>(terrainType.Texture2);
-            var cliff = contentManager.GetAsset<ScenegraphTextureAsset>(s_cliffKey);
-            var shore = contentManager.GetAsset<ScenegraphTextureAsset>(s_shoreKey);
+            var cliff = contentManager.GetAsset<ScenegraphTextureAsset>(CliffKey);
+            var shore = contentManager.GetAsset<ScenegraphTextureAsset>(ShoreKey);
             var roughness = contentManager.GetAsset<ScenegraphTextureAsset>(terrainType.Roughness);
             var roughness1 = contentManager.GetAsset<ScenegraphTextureAsset>(terrainType.Roughness1);
             var roughness2 = contentManager.GetAsset<ScenegraphTextureAsset>(terrainType.Roughness2);

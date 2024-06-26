@@ -13,20 +13,18 @@ namespace OpenTS2.Rendering
     public static class LightmapManager
     {
         public const float HeightDivision = 1000f;
-        public static RenderTexture ShadowMap => s_shadowMap;
-        public static RenderTexture ShoreMap => s_shoreMap;
-        private static RenderTexture s_heightMap;
-        private static Shader s_heightMapShader = Shader.Find("OpenTS2/TerrainHeightmap");
-        private static Material s_heightMapMaterial = new Material(s_heightMapShader);
-        private static RenderTexture s_shadowMap;
-        private static Shader s_shadowMapShader = Shader.Find("OpenTS2/HeightMapShadows");
-        private static Material s_shadowMapMaterial = new Material(s_shadowMapShader);
-        private static RenderTexture s_shoreMap;
-        private static Shader s_shoreMapShader = Shader.Find("OpenTS2/ShoreMask");
-        private static Material s_shoreMapMaterial = new Material(s_shoreMapShader);
-        private static int s_shadowMapResolution = 256;
-        private static int s_heightMapResolution = 256;
-        private static int s_shoreResolution = 64;
+        public static RenderTexture ShadowMap { get; private set; }
+        public static RenderTexture ShoreMap { get; private set; }
+        private static RenderTexture HeightMap;
+        private static Shader HeightMapShader = Shader.Find("OpenTS2/TerrainHeightmap");
+        private static Material HeightMapMaterial = new Material(HeightMapShader);
+        private static Shader ShadowMapShader = Shader.Find("OpenTS2/HeightMapShadows");
+        private static Material ShadowMapMaterial = new Material(ShadowMapShader);
+        private static Shader ShoreMapShader = Shader.Find("OpenTS2/ShoreMask");
+        private static Material ShoreMapMaterial = new Material(ShoreMapShader);
+        private static int ShadowMapResolution = 256;
+        private static int HeightMapResolution = 256;
+        private static int ShoreResolution = 64;
 
         /// <summary>
         /// Renders lightmapping for the current neighborhood.
@@ -39,30 +37,30 @@ namespace OpenTS2.Rendering
             var mesh = meshFilter.sharedMesh;
             var neighborhood = NeighborhoodManager.CurrentNeighborhood;
 
-            if (s_heightMap == null)
-                s_heightMap = new RenderTexture(s_heightMapResolution, s_heightMapResolution, 16, RenderTextureFormat.R16);
-            RenderTexture.active = s_heightMap;
-            s_heightMapMaterial.SetPass(0);
-            s_heightMapMaterial.SetFloat("_HeightDivision", HeightDivision);
-            s_heightMapMaterial.SetFloat("_Width", neighborhood.Terrain.Width);
-            s_heightMapMaterial.SetFloat("_Height", neighborhood.Terrain.Height);
+            if (HeightMap == null)
+                HeightMap = new RenderTexture(HeightMapResolution, HeightMapResolution, 16, RenderTextureFormat.R16);
+            RenderTexture.active = HeightMap;
+            HeightMapMaterial.SetPass(0);
+            HeightMapMaterial.SetFloat("_HeightDivision", HeightDivision);
+            HeightMapMaterial.SetFloat("_Width", neighborhood.Terrain.Width);
+            HeightMapMaterial.SetFloat("_Height", neighborhood.Terrain.Height);
             Graphics.DrawMeshNow(mesh, Vector3.zero, Quaternion.identity);
             RenderTexture.active = null;
 
-            if (s_shadowMap == null)
-                s_shadowMap = new RenderTexture(s_shadowMapResolution, s_shadowMapResolution, 16, RenderTextureFormat.R16);
-            RenderTexture.active = s_shadowMap;
-            s_shadowMapMaterial.mainTexture = s_heightMap;
-            s_shadowMapMaterial.SetVector("_LightVector", sun.forward);
-            Graphics.Blit(s_heightMap, s_shadowMapMaterial);
+            if (ShadowMap == null)
+                ShadowMap = new RenderTexture(ShadowMapResolution, ShadowMapResolution, 16, RenderTextureFormat.R16);
+            RenderTexture.active = ShadowMap;
+            ShadowMapMaterial.mainTexture = HeightMap;
+            ShadowMapMaterial.SetVector("_LightVector", sun.forward);
+            Graphics.Blit(HeightMap, ShadowMapMaterial);
             RenderTexture.active = null;
 
-            if (s_shoreMap == null)
-                s_shoreMap = new RenderTexture(s_shoreResolution, s_shoreResolution, 16, RenderTextureFormat.R16);
-            RenderTexture.active = s_shoreMap;
-            s_shoreMapMaterial.mainTexture = s_heightMap;
-            s_shoreMapMaterial.SetFloat("_SeaLevel", neighborhood.Terrain.SeaLevel / HeightDivision);
-            Graphics.Blit(s_heightMap, s_shoreMapMaterial);
+            if (ShoreMap == null)
+                ShoreMap = new RenderTexture(ShoreResolution, ShoreResolution, 16, RenderTextureFormat.R16);
+            RenderTexture.active = ShoreMap;
+            ShoreMapMaterial.mainTexture = HeightMap;
+            ShoreMapMaterial.SetFloat("_SeaLevel", neighborhood.Terrain.SeaLevel / HeightDivision);
+            Graphics.Blit(HeightMap, ShoreMapMaterial);
             RenderTexture.active = null;
         }
     }

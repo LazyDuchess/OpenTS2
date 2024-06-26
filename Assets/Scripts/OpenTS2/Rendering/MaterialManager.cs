@@ -14,7 +14,7 @@ namespace OpenTS2.Rendering
     /// </summary>
     public static class MaterialManager
     {
-        private static Dictionary<string, AbstractMaterial> s_materials = new Dictionary<string, AbstractMaterial>();
+        private static Dictionary<string, AbstractMaterial> Materials = new Dictionary<string, AbstractMaterial>();
         public static void Initialize()
         {
             RegisterMaterial<StandardMaterial>();
@@ -47,7 +47,7 @@ namespace OpenTS2.Rendering
 
         public static Material Parse(ScenegraphMaterialDefinitionAsset definition, string forceType)
         {
-            if (!s_materials.TryGetValue(forceType ?? definition.MaterialDefinition.Type, out AbstractMaterial material))
+            if (!Materials.TryGetValue(forceType ?? definition.MaterialDefinition.Type, out AbstractMaterial material))
                 throw new KeyNotFoundException($"Can't find material type {definition.MaterialDefinition.Type} for {definition.MaterialDefinition.MaterialName}");
             return material.Parse(definition);
         }
@@ -55,7 +55,7 @@ namespace OpenTS2.Rendering
         public static void RegisterMaterial<T>() where T : AbstractMaterial
         {
             var mat = Activator.CreateInstance(typeof(T)) as AbstractMaterial;
-            s_materials[mat.Name] = mat;
+            Materials[mat.Name] = mat;
         }
     }
 }
