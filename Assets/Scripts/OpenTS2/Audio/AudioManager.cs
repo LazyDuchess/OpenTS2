@@ -36,11 +36,24 @@ namespace OpenTS2.Audio
 
         private void Awake()
         {
-            ContentManager = ContentManager.Instance;
             Core.OnFinishedLoading += Initialize;
         }
 
-        private void LoadCustomMusic()
+        public static void Initialize()
+        {
+            ContentManager = ContentManager.Instance;
+            LoadCustomMusic();
+            AudioAssetByInstanceID = new Dictionary<Tuple<uint, uint>, ResourceKey>();
+            AudioAssets = ContentManager.ResourceMap.Keys.Where(key => key.TypeID == TypeIDs.AUDIO || key.TypeID == TypeIDs.HITLIST).ToList();
+            foreach (var audioAsset in AudioAssets)
+            {
+                AudioAssetByInstanceID[new Tuple<uint, uint>(audioAsset.InstanceID, 0)] = audioAsset;
+                AudioAssetByInstanceID[new Tuple<uint, uint>(audioAsset.InstanceID, audioAsset.InstanceHigh)] = audioAsset;
+            }
+            OnInitialized?.Invoke();
+        }
+
+        private static void LoadCustomMusic()
         {
             CustomSongNames = new Dictionary<ResourceKey, string>();
             var musicDir = Path.Combine(Filesystem.GetUserPath(), "Music");
@@ -57,19 +70,6 @@ namespace OpenTS2.Audio
                     CustomSongNames[key] = songName;
                 }
             }
-        }
-
-        private void Initialize()
-        {
-            LoadCustomMusic();
-            AudioAssetByInstanceID = new Dictionary<Tuple<uint, uint>, ResourceKey>();
-            AudioAssets = ContentManager.ResourceMap.Keys.Where(key => key.TypeID == TypeIDs.AUDIO || key.TypeID == TypeIDs.HITLIST).ToList();
-            foreach(var audioAsset in AudioAssets)
-            {
-                AudioAssetByInstanceID[new Tuple<uint, uint>(audioAsset.InstanceID, 0)] = audioAsset;
-                AudioAssetByInstanceID[new Tuple<uint,uint>(audioAsset.InstanceID, audioAsset.InstanceHigh)] = audioAsset;
-            }
-            OnInitialized?.Invoke();
         }
 
         public static float GetVolumeForMixer(Mixers mixer)

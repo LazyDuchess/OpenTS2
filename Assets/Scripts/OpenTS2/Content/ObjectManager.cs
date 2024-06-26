@@ -21,14 +21,14 @@ namespace OpenTS2.Content
             }
         }
 
-        private static Dictionary<uint, ObjectDefinitionAsset> _objectByGUID = new Dictionary<uint, ObjectDefinitionAsset>();
+        private static Dictionary<uint, ObjectDefinitionAsset> _objectByGUID;
 
         private void Awake()
         {
-            Core.OnFinishedLoading += OnFinishedLoading;
+            Core.OnFinishedLoading += Initialize;
         }
 
-        private void OnFinishedLoading()
+        public static void Initialize()
         {
             _objectByGUID = new Dictionary<uint, ObjectDefinitionAsset>();
             var objectList = ContentManager.Instance.GetAssetsOfType<ObjectDefinitionAsset>(TypeIDs.OBJD); 
@@ -38,7 +38,7 @@ namespace OpenTS2.Content
             }
         }
 
-        private void RegisterObject(ObjectDefinitionAsset objd)
+        private static void RegisterObject(ObjectDefinitionAsset objd)
         {
             _objectByGUID[objd.GUID] = objd;
         }
