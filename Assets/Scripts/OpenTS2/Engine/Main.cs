@@ -28,7 +28,6 @@ namespace OpenTS2.Engine
             var settings = new Settings();
             var epManager = new EPManager();
             var contentProvider = new ContentProvider();
-            var objectManager = new ObjectManager(contentProvider);
             var effectsManager = new EffectsManager(contentProvider);
             var catalogManager = new CatalogManager(contentProvider);
             var luaManager = new LuaManager();

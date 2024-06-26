@@ -12,7 +12,7 @@ namespace OpenTS2.Engine
     public class Core : MonoBehaviour
     {
         public string TargetScene;
-        public static Action OnBeginLoadingScreen;
+        public static Action OnBeginLoading;
         public static Action OnFinishedLoading;
         public static Action OnNeighborhoodEntered;
 

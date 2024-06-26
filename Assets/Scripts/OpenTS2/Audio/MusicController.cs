@@ -119,7 +119,7 @@ namespace OpenTS2.Audio
             _tsAudioSource = GetComponent<TSAudioSource>();
             UpdateVolume();
             Core.OnNeighborhoodEntered += OnNeighborhoodEntered;
-            Core.OnBeginLoadingScreen += OnBeginLoadingScreen;
+            Core.OnBeginLoading += OnBeginLoadingScreen;
         }
 
         private void Update()

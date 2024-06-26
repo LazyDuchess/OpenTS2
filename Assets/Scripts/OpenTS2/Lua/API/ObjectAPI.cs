@@ -14,10 +14,7 @@ namespace OpenTS2.Lua.API
     {
         public bool isValidObjectGUID(uint guid)
         {
-            var objManager = ObjectManager.Get();
-            if (objManager == null)
-                throw new ScriptRuntimeException("ObjectManager has not been constructed!");
-            if (objManager.GetObjectByGUID(guid) != null)
+            if (ObjectManager.GetObjectByGUID(guid) != null)
                 return true;
             return false;
         }
@@ -26,10 +23,7 @@ namespace OpenTS2.Lua.API
     {
         void SetObjectDefinitionField(uint guid, int field, ushort value)
         {
-            var objManager = ObjectManager.Get();
-            if (objManager == null)
-                throw new ScriptRuntimeException("ObjectManager has not been constructed!");
-            var obj = objManager.GetObjectByGUID(guid);
+            var obj = ObjectManager.GetObjectByGUID(guid);
             if (obj == null)
                 throw new ScriptRuntimeException($"Object with GUID {guid} does not exist.");
             obj.Fields[field] = value;

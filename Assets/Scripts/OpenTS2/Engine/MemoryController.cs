@@ -13,14 +13,7 @@ namespace OpenTS2.Engine
     /// </summary>
     public class MemoryController : MonoBehaviour
     {
-        public static MemoryController Instance { get; private set; }
-
         private static Action MarkedForRemoval;
-
-        private void Awake()
-        {
-            Instance = this;
-        }
 
         public static void MarkForRemoval(Action action)
         {

@@ -60,7 +60,7 @@ namespace OpenTS2.Scenes
                 }
             }
             ContentLoading.LoadGameContentAsync(_loadProgress).ContinueWith((task) => { OnFinishLoading(); }, TaskScheduler.FromCurrentSynchronizationContext());
-            Core.OnBeginLoadingScreen?.Invoke();
+            Core.OnBeginLoading?.Invoke();
         }
 
         private void Update()
@@ -88,15 +88,13 @@ namespace OpenTS2.Scenes
         {
             try
             {
+                Core.OnFinishedLoading?.Invoke();
                 var luaMgr = LuaManager.Get();
                 luaMgr.InitializeObjectScripts();
                 CursorController.Cursor = CursorController.CursorType.Hourglass;
-                var oMgr = ObjectManager.Get();
-                oMgr.Initialize();
                 EffectsManager.Get().Initialize();
                 NeighborhoodManager.Initialize();
                 CursorController.Cursor = CursorController.CursorType.Default;
-                Core.OnFinishedLoading?.Invoke();
                 FadeOutLoading();
                 var mainMenu = new MainMenu();
             }

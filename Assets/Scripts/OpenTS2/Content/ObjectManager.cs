@@ -1,23 +1,19 @@
 ﻿using OpenTS2.Common;
 using OpenTS2.Content.DBPF;
+using OpenTS2.Engine;
 using OpenTS2.Files.Formats.DBPF;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace OpenTS2.Content
 {
-    public class ObjectManager
-    {
-        public static ObjectManager Get()
-        {
-            return s_instance;
-        }
-        
-        static ObjectManager s_instance;
-        public List<ObjectDefinitionAsset> Objects
+    public class ObjectManager : MonoBehaviour
+    {   
+        public static List<ObjectDefinitionAsset> Objects
         {
             get
             {
@@ -25,31 +21,29 @@ namespace OpenTS2.Content
             }
         }
 
-        Dictionary<uint, ObjectDefinitionAsset> _objectByGUID = new Dictionary<uint, ObjectDefinitionAsset>();
-        readonly ContentProvider _provider;
+        private static Dictionary<uint, ObjectDefinitionAsset> _objectByGUID = new Dictionary<uint, ObjectDefinitionAsset>();
 
-        public ObjectManager(ContentProvider provider)
+        private void Awake()
         {
-            s_instance = this;
-            _provider = provider;
+            Core.OnFinishedLoading += OnFinishedLoading;
         }
 
-        public void Initialize()
+        private void OnFinishedLoading()
         {
             _objectByGUID = new Dictionary<uint, ObjectDefinitionAsset>();
-            var objectList = _provider.GetAssetsOfType<ObjectDefinitionAsset>(TypeIDs.OBJD); 
+            var objectList = ContentProvider.Get().GetAssetsOfType<ObjectDefinitionAsset>(TypeIDs.OBJD); 
             foreach(ObjectDefinitionAsset element in objectList)
             {
                 RegisterObject(element);
             }
         }
 
-        void RegisterObject(ObjectDefinitionAsset objd)
+        private void RegisterObject(ObjectDefinitionAsset objd)
         {
             _objectByGUID[objd.GUID] = objd;
         }
 
-        public ObjectDefinitionAsset GetObjectByGUID(uint guid)
+        public static ObjectDefinitionAsset GetObjectByGUID(uint guid)
         {
             if (_objectByGUID.TryGetValue(guid, out ObjectDefinitionAsset obj))
                 return obj;
