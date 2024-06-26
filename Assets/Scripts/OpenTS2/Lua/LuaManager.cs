@@ -27,20 +27,15 @@ namespace OpenTS2.Lua
         /// </summary>
         public VMContext Context;
         
-        private static LuaManager _instance;
+        public static LuaManager Instance { get; private set; }
         private Script _script;
 
         private List<LuaAPI> _apis = new List<LuaAPI>();
         private Dictionary<string, LuaAsset> _objectScriptsByName = new Dictionary<string, LuaAsset>();
 
-        public static LuaManager Get()
-        {
-            return _instance;
-        }
-
         public LuaManager()
         {
-            _instance = this;
+            Instance = this;
             _script = new Script();
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
             foreach (var element in assemblies)

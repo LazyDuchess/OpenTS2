@@ -89,7 +89,7 @@ namespace OpenTS2.Scenes
             try
             {
                 Core.OnFinishedLoading?.Invoke();
-                var luaMgr = LuaManager.Get();
+                var luaMgr = LuaManager.Instance;
                 luaMgr.InitializeObjectScripts();
                 CursorController.Cursor = CursorController.CursorType.Hourglass;
                 EffectsManager.Instance.Initialize();

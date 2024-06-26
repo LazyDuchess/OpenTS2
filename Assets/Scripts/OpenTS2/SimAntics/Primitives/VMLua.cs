@@ -62,7 +62,7 @@ namespace OpenTS2.SimAntics.Primitives
 
             var scriptSource = scriptDesc;
 
-            var luaManager = LuaManager.Get();
+            var luaManager = LuaManager.Instance;
 
             if (useFile)
             {

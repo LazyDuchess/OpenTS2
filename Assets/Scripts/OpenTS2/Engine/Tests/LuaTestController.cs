@@ -18,14 +18,14 @@ namespace OpenTS2.Engine.Tests
         void Start()
         {
             // Initialize lua engine, register a test API so that we can use UnityLog and hook GetSimulatorGlobal to return 27 as day of the month, 8 as month and 2023 as year.
-            var luaManager = LuaManager.Get();
+            var luaManager = LuaManager.Instance;
             luaManager.RegisterAPI(new LuaTestAPI());
             luaManager.InitializeObjectScripts();
 
             // nTime is defined in the game's "Time" global Lua script.
             try
             {
-                LuaManager.Get().RunScript(@"local time = nTime.Now()
+                LuaManager.Instance.RunScript(@"local time = nTime.Now()
                                             UnityLog('Lua Year is ' .. time.mYears)
                                             UnityLog('Lua Month is ' .. time.mMonths)
                                             UnityLog('Lua Day is ' .. time.mDays)");
