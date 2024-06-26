@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using OpenTS2.Client;
+using OpenTS2.Game;
 
 namespace OpenTS2.Engine
 {
@@ -28,6 +29,7 @@ namespace OpenTS2.Engine
         public static void InitializeCore()
         {
             if (CoreInitialized) return;
+
             var settings = new Settings();
             var epManager = new EPManager();
             var contentManager = new ContentManager();
@@ -43,6 +45,7 @@ namespace OpenTS2.Engine
             VMPrimitiveRegistry.Initialize();
             //Initialize the game assembly, do all reflection things.
             AssemblyHelper.InitializeLoadedAssemblies();
+            PluginSupport.Initialize();
             CoreInitialized = true;
         }
 

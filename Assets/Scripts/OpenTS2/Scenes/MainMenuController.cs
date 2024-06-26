@@ -35,7 +35,6 @@ namespace OpenTS2.Scenes
         {
             var contentManager = ContentManager.Instance;
             ContentLoading.LoadContentStartup();
-            PluginSupport.Initialize();
             if (InitialLoadScreenReiaPlayer != null)
             {
                 InitialLoadScreenReiaPlayer.SetReia(_initialLoadScreenReiaKey, true);
