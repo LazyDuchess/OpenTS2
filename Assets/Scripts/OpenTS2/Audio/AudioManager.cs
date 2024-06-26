@@ -31,8 +31,7 @@ namespace OpenTS2.Audio
         public static Dictionary<ResourceKey, string> CustomSongNames;
         public static List<ResourceKey> AudioAssets { get; private set; }
         public static Action OnInitialized;
-        private static Dictionary<uint, ResourceKey> AudioAssetByLowInstanceID;
-        private static Dictionary<ResourceKey, ResourceKey> AudioAssetByInstanceID;
+        private static Dictionary<Tuple<uint,uint>, ResourceKey> AudioAssetByInstanceID;
         private static ContentProvider ContentProvider;
 
         private void Awake()
@@ -63,13 +62,12 @@ namespace OpenTS2.Audio
         private void Initialize()
         {
             LoadCustomMusic();
-            AudioAssetByLowInstanceID = new Dictionary<uint, ResourceKey>();
-            AudioAssetByInstanceID = new Dictionary<ResourceKey, ResourceKey>();
+            AudioAssetByInstanceID = new Dictionary<Tuple<uint, uint>, ResourceKey>();
             AudioAssets = ContentProvider.ResourceMap.Keys.Where(key => key.TypeID == TypeIDs.AUDIO || key.TypeID == TypeIDs.HITLIST).ToList();
             foreach(var audioAsset in AudioAssets)
             {
-                AudioAssetByLowInstanceID[audioAsset.InstanceID] = audioAsset;
-                AudioAssetByInstanceID[new ResourceKey(audioAsset.InstanceID, audioAsset.InstanceHigh, 0, 0)] = audioAsset;
+                AudioAssetByInstanceID[new Tuple<uint, uint>(audioAsset.InstanceID, 0)] = audioAsset;
+                AudioAssetByInstanceID[new Tuple<uint,uint>(audioAsset.InstanceID, audioAsset.InstanceHigh)] = audioAsset;
             }
             OnInitialized?.Invoke();
         }
@@ -100,19 +98,9 @@ namespace OpenTS2.Audio
             return val / 100f;
         }
 
-        public static ResourceKey GetAudioResourceKeyByInstanceID(uint instanceID)
+        public static ResourceKey GetAudioResourceKeyByInstanceID(uint instanceID, uint instanceIDHigh = 0)
         {
-            if (AudioAssetByLowInstanceID.TryGetValue(instanceID, out var result))
-            {
-                return result;
-            }
-            return default;
-        }
-
-        public static ResourceKey GetAudioResourceKeyByInstanceID(uint instanceID, uint instanceIDHigh)
-        {
-            var key = new ResourceKey(instanceID, instanceIDHigh, 0, 0);
-            if (AudioAssetByInstanceID.TryGetValue(key, out var result))
+            if (AudioAssetByInstanceID.TryGetValue(new Tuple<uint,uint>(instanceID, instanceIDHigh), out var result))
             {
                 return result;
             }
