@@ -29,10 +29,10 @@ namespace OpenTS2.Content
         Dictionary<uint, CatalogRoofAsset> _roofByGUID = new Dictionary<uint, CatalogRoofAsset>();
         readonly ContentManager _manager;
 
-        public CatalogManager(ContentManager manager)
+        public CatalogManager()
         {
             Instance = this;
-            _manager = manager;
+            _manager = ContentManager.Instance;
         }
 
         public void Initialize()

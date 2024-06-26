@@ -9,17 +9,12 @@ namespace OpenTS2.Content
 {
     public class EffectsManager
     {
-        private static EffectsManager _instance;
+        public static EffectsManager Instance { get; set; }
 
-        public static EffectsManager Get()
+        public EffectsManager()
         {
-            return _instance;
-        }
-
-        public EffectsManager(ContentManager manager)
-        {
-            _instance = this;
-            _manager = manager;
+            Instance = this;
+            _manager = ContentManager.Instance;
         }
 
         private EffectsAsset _effects;

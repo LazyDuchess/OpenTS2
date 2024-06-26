@@ -48,7 +48,7 @@ namespace OpenTS2.Engine.Tests
         private void Start()
         {
             // Load effects.
-            EffectsManager.Get().Initialize();
+            EffectsManager.Instance.Initialize();
 
             ContentLoading.LoadGameContentSync();
 

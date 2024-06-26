@@ -246,7 +246,7 @@ namespace OpenTS2.Components
                 var slotName = effectSlotToName.Name;
                 var effectName = effectSlotToName.Value;
                 // The game seriously has effects in the scenegraph that don't exist... ignore those
-                if (!EffectsManager.Get().Ready || !EffectsManager.Get().HasEffect(effectName))
+                if (!EffectsManager.Instance.Ready || !EffectsManager.Instance.HasEffect(effectName))
                 {
                     continue;
                 }
@@ -256,7 +256,7 @@ namespace OpenTS2.Components
                 // the scenegraph has its own MonoBehavior.
                 try
                 {
-                    var swarmParticleSystem = EffectsManager.Get().CreateEffect(effectName);
+                    var swarmParticleSystem = EffectsManager.Instance.CreateEffect(effectName);
                     swarmParticleSystem.transform.SetParent(parent.transform, worldPositionStays: false);
                     swarmParticleSystem.PlayEffect();
                 }

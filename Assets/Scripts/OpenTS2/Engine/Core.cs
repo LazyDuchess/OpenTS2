@@ -31,8 +31,8 @@ namespace OpenTS2.Engine
             var settings = new Settings();
             var epManager = new EPManager();
             var contentManager = new ContentManager();
-            var effectsManager = new EffectsManager(contentManager);
-            var catalogManager = new CatalogManager(contentManager);
+            var effectsManager = new EffectsManager();
+            var catalogManager = new CatalogManager();
             var luaManager = new LuaManager();
 
             TerrainManager.Initialize();

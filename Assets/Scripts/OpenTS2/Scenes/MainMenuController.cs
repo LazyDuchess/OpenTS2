@@ -92,7 +92,7 @@ namespace OpenTS2.Scenes
                 var luaMgr = LuaManager.Get();
                 luaMgr.InitializeObjectScripts();
                 CursorController.Cursor = CursorController.CursorType.Hourglass;
-                EffectsManager.Get().Initialize();
+                EffectsManager.Instance.Initialize();
                 NeighborhoodManager.Initialize();
                 CursorController.Cursor = CursorController.CursorType.Default;
                 FadeOutLoading();

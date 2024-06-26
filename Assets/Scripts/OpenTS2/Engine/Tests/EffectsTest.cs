@@ -15,10 +15,10 @@ public class EffectsTest : MonoBehaviour
             Filesystem.GetPackagesInDirectory(Filesystem.GetDataPathForProduct(ProductFlags.BaseGame) + "/Res/Sims3D"));
 
         // Initialize effects manager manually since we aren't using startup controller.
-        EffectsManager.Get().Initialize();
+        EffectsManager.Instance.Initialize();
 
         //var effect = EffectsManager.Get().CreateEffectWithUnityTransform("neighborhood_house_smoking");
-        var effect = EffectsManager.Get().CreateEffectWithUnityTransform("neighborhood_hanggliders");
+        var effect = EffectsManager.Instance.CreateEffectWithUnityTransform("neighborhood_hanggliders");
         //var effect = EffectsManager.Get().CreateEffectWithUnityTransform("neighborhood_hotairballoon");
 
         effect.PlayEffect();
