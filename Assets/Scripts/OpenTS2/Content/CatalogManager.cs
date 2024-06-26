@@ -7,12 +7,7 @@ namespace OpenTS2.Content
 {
     public class CatalogManager
     {
-        public static CatalogManager Get()
-        {
-            return s_instance;
-        }
-
-        static CatalogManager s_instance;
+        public static CatalogManager Instance { get; private set; }
         public List<CatalogObjectAsset> Objects
         {
             get
@@ -36,7 +31,7 @@ namespace OpenTS2.Content
 
         public CatalogManager(ContentManager manager)
         {
-            s_instance = this;
+            Instance = this;
             _manager = manager;
         }
 

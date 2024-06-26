@@ -26,7 +26,7 @@ namespace OpenTS2.Scenes.Lot
 
         public FenceCollection(ContentManager contentManager, GameObject parent, uint guid)
         {
-            var catalog = CatalogManager.Get();
+            var catalog = CatalogManager.Instance;
 
             _asset = catalog.GetFenceById(guid);
 

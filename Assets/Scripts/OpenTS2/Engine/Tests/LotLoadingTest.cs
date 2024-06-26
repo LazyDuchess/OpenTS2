@@ -52,7 +52,7 @@ namespace OpenTS2.Engine.Tests
 
             ContentLoading.LoadGameContentSync();
 
-            CatalogManager.Get().Initialize();
+            CatalogManager.Instance.Initialize();
 
             LoadLot(NeighborhoodPrefix, LotID);
         }

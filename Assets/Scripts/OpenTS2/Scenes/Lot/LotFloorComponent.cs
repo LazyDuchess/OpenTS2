@@ -86,7 +86,7 @@ namespace OpenTS2.Scenes.Lot
             // Load the patterns. Some references are by asset name (do not exist in catalog), others are by catalog GUID.
 
             var contentManager = ContentManager.Instance;
-            var catalogManager = CatalogManager.Get();
+            var catalogManager = CatalogManager.Instance;
 
             Dictionary<ushort, StringMapEntry> patternMap = _architecture.FloorMap.Map;
 
