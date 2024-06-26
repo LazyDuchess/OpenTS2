@@ -9,16 +9,16 @@ using OpenTS2.SimAntics.Primitives;
 /// <summary>
 /// Main initialization class for OpenTS2 unit testing.
 /// </summary>
-public static class TestMain
+public static class TestCore
 {
-    static bool s_initialized = false;
+    static bool Initialized = false;
 
     /// <summary>
     /// Initializes all singletons, systems and the game assembly.
     /// </summary>
     public static void Initialize()
     {
-        if (s_initialized)
+        if (Initialized)
             Shutdown();
         var settings = new Settings()
         {
@@ -32,11 +32,11 @@ public static class TestMain
         CodecAttribute.Initialize();
         AssemblyHelper.InitializeLoadedAssemblies();
         VMPrimitiveRegistry.Initialize();
-        s_initialized = true;
+        Initialized = true;
     }
 
     public static void Shutdown()
     {
-        s_initialized = false;
+        Initialized = false;
     }
 }

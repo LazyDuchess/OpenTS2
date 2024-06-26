@@ -12,7 +12,7 @@ public class ContentManagerTest
     [Test]
     public void GetAssetByGlobalTGITest()
     {
-        TestMain.Initialize();
+        TestCore.Initialize();
         var contentManager = ContentManager.Instance;
         contentManager.AddPackage("TestAssets/TestPackage.package");
         var stringAsset = contentManager.GetAsset<StringSetAsset>(new ResourceKey(1, "testpackage", TypeIDs.STR));
@@ -22,7 +22,7 @@ public class ContentManagerTest
     [Test]
     public void ChangesEditAssetTest()
     {
-        TestMain.Initialize();
+        TestCore.Initialize();
         var contentManager = ContentManager.Instance;
         contentManager.AddPackage("TestAssets/TestPackage.package");
         var stringAsset = contentManager.GetAsset<StringSetAsset>(new ResourceKey(1, "testpackage", TypeIDs.STR));
@@ -39,7 +39,7 @@ public class ContentManagerTest
     [Test]
     public void ChangesDeleteAssetTest()
     {
-        TestMain.Initialize();
+        TestCore.Initialize();
         var contentManager = ContentManager.Instance;
         contentManager.AddPackage("TestAssets/TestPackage.package");
         var stringAsset = contentManager.GetAsset<StringSetAsset>(new ResourceKey(1, "testpackage", TypeIDs.STR));

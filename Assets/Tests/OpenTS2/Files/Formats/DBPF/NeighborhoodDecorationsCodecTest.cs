@@ -10,7 +10,7 @@ public class NeighborhoodDecorationsCodecTest
     [SetUp]
     public void SetUp()
     {
-        TestMain.Initialize();
+        TestCore.Initialize();
         ContentManager.Instance.AddPackage("TestAssets/Codecs/NeighborhoodDecorations.package");
     }
 

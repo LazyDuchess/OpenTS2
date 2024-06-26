@@ -10,7 +10,7 @@
         [SetUp]
         public void SetUp()
         {
-            TestMain.Initialize();
+            TestCore.Initialize();
             ContentManager.Instance.AddPackage("TestAssets/Scenegraph/teapot_model.package");
         }
         

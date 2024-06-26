@@ -12,7 +12,7 @@ public class LotObjectCodecTest
     [SetUp]
     public void SetUp()
     {
-        TestMain.Initialize();
+        TestCore.Initialize();
         _groupID = ContentManager.Instance.AddPackage("TestAssets/Codecs/LotObject.package").GroupID;
     }
 

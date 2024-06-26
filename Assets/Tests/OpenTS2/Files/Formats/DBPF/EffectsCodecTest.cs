@@ -12,7 +12,7 @@ public class EffectsCodecTest
     [OneTimeSetUp]
     public void SetUp()
     {
-        TestMain.Initialize();
+        TestCore.Initialize();
         ContentManager.Instance.AddPackage("TestAssets/Codecs/Effects.package");
         _effectsAsset = ContentManager.Instance
             .GetAsset<EffectsAsset>(new ResourceKey(instanceID: 1, groupID: GroupIDs.Effects, typeID: TypeIDs.EFFECTS));

@@ -18,7 +18,7 @@ public class SimAnticsLuaTest
     [SetUp]
     public void SetUp()
     {
-        TestMain.Initialize();
+        TestCore.Initialize();
         _groupID = ContentManager.Instance.AddPackage("TestAssets/SimAntics/lua.package").GroupID;
     }
 
