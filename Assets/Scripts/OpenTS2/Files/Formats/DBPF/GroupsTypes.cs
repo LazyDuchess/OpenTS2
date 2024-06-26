@@ -52,10 +52,7 @@ namespace OpenTS2.Files.Formats.DBPF
         public const uint IMG2 = 0x8C3CE95A;
         public const uint EFFECTS = 0xEA5118B0;
         public const uint DIR = 0xE86B1EEF;
-        /// <summary>
-        /// Can be XA or MP3.
-        /// </summary>
-        public const uint MP3 = 0x2026960B;
+        public const uint AUDIO = 0x2026960B;
         public const uint OBJD = 0x4F424A44;
         /// dynamiclinklibrary CRC32 hash
         public const uint DLL = 0x7582DEC6;
@@ -67,6 +64,7 @@ namespace OpenTS2.Files.Formats.DBPF
         public const uint LUA_GLOBAL = 0x9012468A;
         public const uint LUA_LOCAL = 0x9012468B;
         public const uint OBJF = 0x4F424A66;
+        public const uint HITLIST = 0x7B1ACFCD;
     }
     public static class GroupIDs
     {

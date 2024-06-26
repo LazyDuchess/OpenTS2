@@ -21,11 +21,11 @@ namespace OpenTS2.Rendering.Materials
             var shader = Shader.Find("OpenTS2/LotImposterBlend");
             var material = new Material(shader);
 
-            var texture = ContentProvider.Get().GetAsset<ScenegraphTextureAsset>(
+            var texture = ContentManager.Instance.GetAsset<ScenegraphTextureAsset>(
                 new ResourceKey(textureName, definition.GlobalTGI.GroupID, TypeIDs.SCENEGRAPH_TXTR)
             );
             definition.Textures.Add(texture);
-            material.mainTexture = texture.GetSelectedImageAsUnityTexture(ContentProvider.Get());
+            material.mainTexture = texture.GetSelectedImageAsUnityTexture();
             return material;
         }
     }

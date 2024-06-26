@@ -10,15 +10,15 @@
         [SetUp]
         public void SetUp()
         {
-            TestMain.Initialize();
-            ContentProvider.Get().AddPackage("TestAssets/Scenegraph/teapot_model.package");
+            TestCore.Initialize();
+            ContentManager.Instance.AddPackage("TestAssets/Scenegraph/teapot_model.package");
         }
         
         [Test]
         public void TestLoadsTeapotModelWithCorrectVerticesAndFaceCount()
         {
             var modelAsset =
-                ContentProvider.Get().GetAsset<ScenegraphModelAsset>(new ResourceKey("teapot_tslocator_gmdc", 0x1C0532FA,
+                ContentManager.Instance.GetAsset<ScenegraphModelAsset>(new ResourceKey("teapot_tslocator_gmdc", 0x1C0532FA,
                     TypeIDs.SCENEGRAPH_GMDC));
 
             // There are technically ways to compare meshes properly but just use the face/vertex count here as a

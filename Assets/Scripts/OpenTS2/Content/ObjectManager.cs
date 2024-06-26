@@ -1,22 +1,19 @@
 ﻿using OpenTS2.Common;
 using OpenTS2.Content.DBPF;
+using OpenTS2.Engine;
 using OpenTS2.Files.Formats.DBPF;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace OpenTS2.Content
 {
     public class ObjectManager
-    {
-        public static ObjectManager Get()
-        {
-            return s_instance;
-        }
-        
-        static ObjectManager s_instance;
+    {   
+        public static ObjectManager Instance { get; private set; }
         public List<ObjectDefinitionAsset> Objects
         {
             get
@@ -25,26 +22,26 @@ namespace OpenTS2.Content
             }
         }
 
-        Dictionary<uint, ObjectDefinitionAsset> _objectByGUID = new Dictionary<uint, ObjectDefinitionAsset>();
-        readonly ContentProvider _provider;
+        private Dictionary<uint, ObjectDefinitionAsset> _objectByGUID;
 
-        public ObjectManager(ContentProvider provider)
+        public ObjectManager()
         {
-            s_instance = this;
-            _provider = provider;
+            Instance = this;
+            Core.OnFinishedLoading += OnFinishedLoading;
         }
 
-        public void Initialize()
+
+        private void OnFinishedLoading()
         {
             _objectByGUID = new Dictionary<uint, ObjectDefinitionAsset>();
-            var objectList = _provider.GetAssetsOfType<ObjectDefinitionAsset>(TypeIDs.OBJD); 
-            foreach(ObjectDefinitionAsset element in objectList)
+            var objectList = ContentManager.Instance.GetAssetsOfType<ObjectDefinitionAsset>(TypeIDs.OBJD);
+            foreach (ObjectDefinitionAsset element in objectList)
             {
                 RegisterObject(element);
             }
         }
 
-        void RegisterObject(ObjectDefinitionAsset objd)
+        private void RegisterObject(ObjectDefinitionAsset objd)
         {
             _objectByGUID[objd.GUID] = objd;
         }

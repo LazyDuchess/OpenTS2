@@ -11,14 +11,14 @@ public class ScenegraphShapeCodecTest
     [SetUp]
     public void SetUp()
     {
-        TestMain.Initialize();
-        ContentProvider.Get().AddPackage("TestAssets/Scenegraph/teapot_model.package");
+        TestCore.Initialize();
+        ContentManager.Instance.AddPackage("TestAssets/Scenegraph/teapot_model.package");
     }
 
     [Test]
     public void TestLoadsShapeNode()
     {
-        var node = ContentProvider.Get()
+        var node = ContentManager.Instance
             .GetAsset<ScenegraphShapeAsset>(new ResourceKey("ufoCrash_ufo_shpe", 0x1C0532FA, TypeIDs.SCENEGRAPH_SHPE));
 
         Assert.That(node.ShapeBlock.Resource.ResourceName, Is.EqualTo("ufoCrash_ufo_shpe"));

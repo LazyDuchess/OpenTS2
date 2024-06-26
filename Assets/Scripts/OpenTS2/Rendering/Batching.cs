@@ -69,9 +69,8 @@ namespace OpenTS2.Rendering
         }
 
         // Might not play nice with some hardware, maybe adjust conditionally.
-        [ConsoleProperty("ots2_batchingVertexLimit")]
         public static int DefaultVertexLimit = 10000000;
-        static Dictionary<Shader, bool> s_shadersCantBeBatched = new Dictionary<Shader, bool>();
+        static Dictionary<Shader, bool> ShadersCantBeBatched = new Dictionary<Shader, bool>();
 
         /// <summary>
         /// Prevents specific shaders from getting batched.
@@ -93,12 +92,12 @@ namespace OpenTS2.Rendering
         public static void MarkShadersNoBatching(params Shader[] shaders)
         {
             foreach(var shader in shaders)
-                s_shadersCantBeBatched[shader] = true;
+                ShadersCantBeBatched[shader] = true;
         }
 
         static bool CanBatchShader(Shader shader)
         {
-            if (!s_shadersCantBeBatched.ContainsKey(shader))
+            if (!ShadersCantBeBatched.ContainsKey(shader))
                 return true;
             return false;
         }

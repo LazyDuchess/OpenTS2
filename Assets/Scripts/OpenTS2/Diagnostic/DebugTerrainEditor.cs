@@ -64,7 +64,7 @@ namespace OpenTS2.Diagnostic
                             meshFilter.sharedMesh.RecalculateNormals();
                         if (!UpdateColliderRealtime)
                             collider.sharedMesh = meshFilter.sharedMesh;
-                        var terrainAsset = NeighborhoodManager.CurrentNeighborhood.Terrain;
+                        var terrainAsset = NeighborhoodManager.Instance.CurrentNeighborhood.Terrain;
                         terrainAsset.FromMesh(meshFilter.sharedMesh);
                         terrainAsset.Compressed = true;
                         terrainAsset.Save();

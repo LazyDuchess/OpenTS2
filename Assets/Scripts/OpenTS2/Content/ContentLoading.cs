@@ -16,7 +16,7 @@ using OpenTS2.Files;
 namespace OpenTS2.Content
 {
     /// <summary>
-    /// Manages loading game content to the provider.
+    /// Manages loading game content to the manager.
     /// </summary>
     public static class ContentLoading
     {
@@ -26,9 +26,9 @@ namespace OpenTS2.Content
         public static void LoadContentStartup()
         {
             var startupPackages = Filesystem.GetStartupPackages();
-            if (Settings.Get().CustomContentEnabled)
+            if (Settings.Instance.CustomContentEnabled)
                 startupPackages.AddRange(Filesystem.GetStartupDownloadPackages());
-            ContentProvider.Get().AddPackages(startupPackages);
+            ContentManager.Instance.AddPackages(startupPackages);
         }
 
         /// <summary>
@@ -39,9 +39,9 @@ namespace OpenTS2.Content
         {
             var gamePackages = Filesystem.GetMainPackages();
             gamePackages.AddRange(Filesystem.GetUserPackages());
-            if (Settings.Get().CustomContentEnabled)
+            if (Settings.Instance.CustomContentEnabled)
                 gamePackages.AddRange(Filesystem.GetStreamedDownloadPackages());
-            await ContentProvider.Get().AddPackagesAsync(gamePackages, loadProgress);
+            await ContentManager.Instance.AddPackagesAsync(gamePackages, loadProgress);
         }
 
         /// <summary>
@@ -51,26 +51,26 @@ namespace OpenTS2.Content
         {
             var gamePackages = Filesystem.GetMainPackages();
             gamePackages.AddRange(Filesystem.GetUserPackages());
-            if (Settings.Get().CustomContentEnabled)
+            if (Settings.Instance.CustomContentEnabled)
                 gamePackages.AddRange(Filesystem.GetStreamedDownloadPackages());
-            ContentProvider.Get().AddPackages(gamePackages);
+            ContentManager.Instance.AddPackages(gamePackages);
         }
 
         public static void LoadNeighborhoodContentSync(Neighborhood neighborhood)
         {
             var neighborhoodPackages = Filesystem.GetPackagesForNeighborhood(neighborhood);
-            ContentProvider.Get().AddPackages(neighborhoodPackages);
+            ContentManager.Instance.AddPackages(neighborhoodPackages);
         }
 
         public static void UnloadNeighborhoodContentSync()
         {
-            var contentProvider = ContentProvider.Get();
-            var neighborhoodPackages = Filesystem.GetPackagesForNeighborhood(NeighborhoodManager.CurrentNeighborhood);
+            var contentManager = ContentManager.Instance;
+            var neighborhoodPackages = Filesystem.GetPackagesForNeighborhood(NeighborhoodManager.Instance.CurrentNeighborhood);
             foreach(var packagePath in neighborhoodPackages)
             {
-                var package = contentProvider.GetPackageByPath(packagePath);
+                var package = contentManager.GetPackageByPath(packagePath);
                 if (package != null)
-                    contentProvider.RemovePackage(package);
+                    contentManager.RemovePackage(package);
             }
         }
     }

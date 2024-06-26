@@ -107,7 +107,7 @@ namespace OpenTS2.Scenes.Lot
 
             if (!_fenceByGuid.TryGetValue(guid, out FenceCollection result))
             {
-                result = new FenceCollection(ContentProvider.Get(), Object, guid);
+                result = new FenceCollection(ContentManager.Instance, Object, guid);
 
                 _fenceByGuid[guid] = result;
             }

@@ -19,16 +19,12 @@ using OpenTS2.Engine;
 
 namespace OpenTS2.Scenes
 {
-    public class StartupController : MonoBehaviour
+    public class MainMenuController : MonoBehaviour
     {
-        public static bool GameLoaded = false;
         public float FadeOutTime = 1f;
         public UIBMPComponent InitialLoadScreenBackgroundImage;
         public UIBMPComponent InitialLoadScreenLogoImage;
         public ReiaPlayer InitialLoadScreenReiaPlayer;
-        public bool EnableReia = true;
-        public bool LoadObjects = true;
-        public bool StreamReia = true;
         private ResourceKey _initialLoadScreenReiaKey = new ResourceKey(0x8DA3ADE7, 0x499DB772, TypeIDs.UI);
         private ResourceKey _initialLoadScreenBackgroundKey = new ResourceKey(0xCCC9AF80, 0x499DB772, TypeIDs.IMG);
         private ResourceKey _initialLoadScreenLogoKey = new ResourceKey(0x8CBB9323, 0x499DB772, TypeIDs.IMG);
@@ -37,52 +33,33 @@ namespace OpenTS2.Scenes
 
         private void Start()
         {
-            if (!GameLoaded)
+            var contentManager = ContentManager.Instance;
+            ContentLoading.LoadContentStartup();
+            if (InitialLoadScreenReiaPlayer != null)
             {
-                var contentProvider = ContentProvider.Get();
-                ContentLoading.LoadContentStartup();
-                PluginSupport.Initialize();
-                if (EnableReia)
-                {
-                    if (InitialLoadScreenReiaPlayer != null)
-                    {
-                        InitialLoadScreenReiaPlayer.SetReia(_initialLoadScreenReiaKey, StreamReia);
-                        InitialLoadScreenReiaPlayer.Speed = 0f;
-                    }
-                }
-                else
-                    InitialLoadScreenReiaPlayer.gameObject.SetActive(false);
-                if (InitialLoadScreenBackgroundImage != null)
-                {
-                    var bgAsset = contentProvider.GetAsset<TextureAsset>(_initialLoadScreenBackgroundKey);
-                    if (bgAsset != null)
-                    {
-                        InitialLoadScreenBackgroundImage.SetTexture(bgAsset);
-                        InitialLoadScreenBackgroundImage.SetNativeSize();
-                    }
-                }
-                if (InitialLoadScreenLogoImage != null)
-                {
-                    var fgAsset = contentProvider.GetAsset<TextureAsset>(_initialLoadScreenLogoKey);
-                    if (fgAsset != null)
-                    {
-                        InitialLoadScreenLogoImage.SetTexture(fgAsset);
-                        InitialLoadScreenLogoImage.SetNativeSize();
-                    }
-                }
-                ContentLoading.LoadGameContentAsync(_loadProgress).ContinueWith((task) => { OnFinishLoading(); }, TaskScheduler.FromCurrentSynchronizationContext());
+                InitialLoadScreenReiaPlayer.SetReia(_initialLoadScreenReiaKey, true);
+                InitialLoadScreenReiaPlayer.Speed = 0f;
             }
-            else
+            if (InitialLoadScreenBackgroundImage != null)
             {
-                OnFinishLoading();
-                if (InitialLoadScreenBackgroundImage != null)
-                    Destroy(InitialLoadScreenBackgroundImage.gameObject);
-                if (InitialLoadScreenLogoImage != null)
-                    Destroy(InitialLoadScreenLogoImage.gameObject);
-                if (InitialLoadScreenReiaPlayer != null)
-                    Destroy(InitialLoadScreenReiaPlayer.gameObject);
+                var bgAsset = contentManager.GetAsset<TextureAsset>(_initialLoadScreenBackgroundKey);
+                if (bgAsset != null)
+                {
+                    InitialLoadScreenBackgroundImage.SetTexture(bgAsset);
+                    InitialLoadScreenBackgroundImage.SetNativeSize();
+                }
             }
-            Core.OnStartup?.Invoke();
+            if (InitialLoadScreenLogoImage != null)
+            {
+                var fgAsset = contentManager.GetAsset<TextureAsset>(_initialLoadScreenLogoKey);
+                if (fgAsset != null)
+                {
+                    InitialLoadScreenLogoImage.SetTexture(fgAsset);
+                    InitialLoadScreenLogoImage.SetNativeSize();
+                }
+            }
+            ContentLoading.LoadGameContentAsync(_loadProgress).ContinueWith((task) => { OnFinishLoading(); }, TaskScheduler.FromCurrentSynchronizationContext());
+            Core.OnBeginLoading?.Invoke();
         }
 
         private void Update()
@@ -108,32 +85,18 @@ namespace OpenTS2.Scenes
 
         private void OnFinishLoading()
         {
-            var luaMgr = LuaManager.Get();
-            luaMgr.InitializeObjectScripts();
-            CursorController.Cursor = CursorController.CursorType.Hourglass;
-            if (LoadObjects && !GameLoaded)
-            {
-                var oMgr = ObjectManager.Get();
-                oMgr.Initialize();
-
-                EffectsManager.Get().Initialize();
-            }
-            if (!GameLoaded)
-                NeighborhoodManager.Initialize();
-            CursorController.Cursor = CursorController.CursorType.Default;
-            Debug.Log("All loaded");
-            if (!GameLoaded)
-                Core.OnFinishedLoading?.Invoke();
-            FadeOutLoading();
             try
             {
+                CursorController.Cursor = CursorController.CursorType.Hourglass;
+                Core.OnFinishedLoading?.Invoke();
+                CursorController.Cursor = CursorController.CursorType.Default;
+                FadeOutLoading();
                 var mainMenu = new MainMenu();
             }
             catch(Exception e)
             {
-                Debug.Log(e.ToString());
+                Debug.LogError(e);
             }
-            GameLoaded = true;
         }
 
         void FadeOutLoading()

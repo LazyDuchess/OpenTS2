@@ -11,14 +11,14 @@ public class LotInfoCodecTest
     [SetUp]
     public void SetUp()
     {
-        TestMain.Initialize();
-        _groupID = ContentProvider.Get().AddPackage("TestAssets/Codecs/LotInfo.package").GroupID;
+        TestCore.Initialize();
+        _groupID = ContentManager.Instance.AddPackage("TestAssets/Codecs/LotInfo.package").GroupID;
     }
 
     [Test]
     public void TestSuccessfullyLoadsRegularLot()
     {
-        var lotInfoAsset = ContentProvider.Get()
+        var lotInfoAsset = ContentManager.Instance
             .GetAsset<LotInfoAsset>(new ResourceKey(0x3, _groupID, TypeIDs.LOT_INFO));
 
         Assert.That(lotInfoAsset.LotId, Is.EqualTo(3));
@@ -37,7 +37,7 @@ public class LotInfoCodecTest
     [Test]
     public void TestSuccessfullyLoadsBusinessLot()
     {
-        var lotInfoAsset = ContentProvider.Get()
+        var lotInfoAsset = ContentManager.Instance
             .GetAsset<LotInfoAsset>(new ResourceKey(0x22, _groupID, TypeIDs.LOT_INFO));
 
         Assert.That(lotInfoAsset.LotId, Is.EqualTo(0x22));

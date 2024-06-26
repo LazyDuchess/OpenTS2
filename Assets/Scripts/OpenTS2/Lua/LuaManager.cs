@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MoonSharp.Interpreter;
+using OpenTS2.Engine;
 using OpenTS2.Files;
 using OpenTS2.Files.Formats.DBPF;
 using OpenTS2.Lua.API;
@@ -21,26 +22,21 @@ namespace OpenTS2.Lua
         /// <summary>
         /// Exit code of the current running Lua script called from SimAntics.
         /// </summary>
-        public VMExitCode ExitCode; 
+        public VMExitCode ExitCode;
         /// <summary>
         /// SimAntics context of the current Lua script.
         /// </summary>
         public VMContext Context;
         
-        private static LuaManager _instance;
+        public static LuaManager Instance { get; private set; }
         private Script _script;
 
         private List<LuaAPI> _apis = new List<LuaAPI>();
         private Dictionary<string, LuaAsset> _objectScriptsByName = new Dictionary<string, LuaAsset>();
 
-        public static LuaManager Get()
-        {
-            return _instance;
-        }
-
         public LuaManager()
         {
-            _instance = this;
+            Instance = this;
             _script = new Script();
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
             foreach (var element in assemblies)
@@ -48,6 +44,7 @@ namespace OpenTS2.Lua
                 UserData.RegisterAssembly(element);
             }
             LoadAPIs();
+            Core.OnFinishedLoading += InitializeObjectScripts;
         }
 
         void PrepGlobalsForPrimitive(short param0, short param1, short param2, VMContext ctx)

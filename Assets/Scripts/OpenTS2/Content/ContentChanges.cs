@@ -9,20 +9,12 @@ namespace OpenTS2.Content
 {
     public class ContentChanges
     {
-        private readonly ContentProvider _contentProvider;
-        //private Dictionary<string, bool> m_DeletedPackagesByName = new Dictionary<string, bool>();
-        //private List<string> m_DeletedPackages = new List<string>();
-
-        public ContentChanges(ContentProvider contentProvider)
-        {
-            this._contentProvider = contentProvider;
-        }
         /// <summary>
         /// Clear all runtime changes made to packages.
         /// </summary>
         public void Clear()
         {
-            var entries = _contentProvider.ContentEntries;
+            var entries = ContentManager.Instance.ContentEntries;
             foreach (var element in entries)
             {
                 if (element.Changes.Dirty)
@@ -36,7 +28,7 @@ namespace OpenTS2.Content
         /// </summary>
         public void SaveChanges()
         {
-            var entries = _contentProvider.ContentEntries;
+            var entries = ContentManager.Instance.ContentEntries;
             foreach(var element in entries)
             {
                 if (element.Changes.Dirty)

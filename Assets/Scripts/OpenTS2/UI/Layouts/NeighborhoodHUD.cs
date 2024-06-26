@@ -42,7 +42,7 @@ namespace OpenTS2.UI.Layouts
             mainMenu.OnClick += OnMainMenu;
 
             var largeCityName = primaryOptions.GetChildByID<UITextComponent>(LargeCityNameTextID);
-            largeCityName.Text = NeighborhoodManager.CurrentNeighborhood.GetLocalizedName();
+            largeCityName.Text = NeighborhoodManager.Instance.CurrentNeighborhood.GetLocalizedName();
         }
 
         void OnMainMenu()

@@ -8,7 +8,7 @@ namespace OpenTS2.SimAntics.Primitives
 {
     public static class VMPrimitiveRegistry
     {
-        private static Dictionary<ushort, VMPrimitive> s_primitiveByOpCode = new Dictionary<ushort, VMPrimitive>();
+        private static Dictionary<ushort, VMPrimitive> PrimitiveByOpCode = new Dictionary<ushort, VMPrimitive>();
         
         public static void Initialize()
         {
@@ -23,7 +23,7 @@ namespace OpenTS2.SimAntics.Primitives
         
         public static void RegisterPrimitive<T>(ushort opcode) where T : VMPrimitive
         {
-            s_primitiveByOpCode[opcode] = Activator.CreateInstance(typeof(T)) as VMPrimitive;
+            PrimitiveByOpCode[opcode] = Activator.CreateInstance(typeof(T)) as VMPrimitive;
         }
 
         public static T GetPrimitive<T>(ushort opcode) where T : VMPrimitive
@@ -33,7 +33,7 @@ namespace OpenTS2.SimAntics.Primitives
 
         public static VMPrimitive GetPrimitive(ushort opcode)
         {
-            if (s_primitiveByOpCode.TryGetValue(opcode, out VMPrimitive returnPrim))
+            if (PrimitiveByOpCode.TryGetValue(opcode, out VMPrimitive returnPrim))
                 return returnPrim;
             return null;
         }

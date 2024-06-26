@@ -19,37 +19,26 @@ namespace OpenTS2.Common
     /// </summary>
     public struct ResourceKey
     {
-        public static ResourceKey DIR
+        public bool Valid
         {
-            get { return s_dir; }
+            get
+            {
+                if (InstanceID == 0 && InstanceHigh == 0 && GroupID == 0 && TypeID == 0)
+                    return false;
+                return true;
+            }
         }
 
-        public uint InstanceID
-        {
-            get { return _instanceID; }
-        }
+        public static ResourceKey DIR { get; private set; } = new ResourceKey(0x286B1F03, 0xE86B1EEF, 0xE86B1EEF);
 
-        public uint InstanceHigh
-        {
-            get { return _instanceHigh; }
-        }
+        public uint InstanceID { get; private set; }
 
-        public uint GroupID
-        {
-            get { return _groupID; }
-        }
+        public uint InstanceHigh { get; private set; }
 
-        public uint TypeID
-        {
-            get { return _typeID; }
-        }
+        public uint GroupID { get; private set; }
 
-        static readonly ResourceKey s_dir = new ResourceKey(0x286B1F03, 0xE86B1EEF, 0xE86B1EEF);
+        public uint TypeID { get; private set; }
 
-        private readonly uint _instanceID;
-        private readonly uint _instanceHigh;
-        private readonly uint _groupID;
-        private readonly uint _typeID;
 
         /// <summary>
         /// Returns new TGI with its Group ID replaced with Groups.Local, but only if our Group ID equals localGroupID
@@ -87,10 +76,10 @@ namespace OpenTS2.Common
         /// <param name="typeID">Type ID</param>
         public ResourceKey(uint instanceID, uint groupID, uint typeID)
         {
-            this._instanceID = instanceID;
-            this._instanceHigh = 0x00000000;
-            this._groupID = groupID;
-            this._typeID = typeID;
+            this.InstanceID = instanceID;
+            this.InstanceHigh = 0x00000000;
+            this.GroupID = groupID;
+            this.TypeID = typeID;
         }
 
         /// <summary>
@@ -102,10 +91,10 @@ namespace OpenTS2.Common
         /// <param name="typeID">Type ID</param>
         public ResourceKey(uint instanceID, uint instanceHigh, uint groupID, uint typeID)
         {
-            this._instanceID = instanceID;
-            this._instanceHigh = instanceHigh;
-            this._groupID = groupID;
-            this._typeID = typeID;
+            this.InstanceID = instanceID;
+            this.InstanceHigh = instanceHigh;
+            this.GroupID = groupID;
+            this.TypeID = typeID;
         }
 
         /// <summary>
@@ -117,10 +106,10 @@ namespace OpenTS2.Common
         /// <param name="typeID">Type ID</param>
         public ResourceKey(string filename, uint groupID, uint typeID)
         {
-            this._instanceID = FileUtils.LowHash(filename);
-            this._instanceHigh = FileUtils.HighHash(filename);
-            this._groupID = groupID;
-            this._typeID = typeID;
+            this.InstanceID = FileUtils.LowHash(filename);
+            this.InstanceHigh = FileUtils.HighHash(filename);
+            this.GroupID = groupID;
+            this.TypeID = typeID;
         }
         /// <summary>
         /// Creates a Instance ID, Instance (High), Group ID and Type ID reference.
@@ -131,10 +120,10 @@ namespace OpenTS2.Common
         /// <param name="typeID">Type ID</param>
         public ResourceKey(string filename, string groupName, uint typeID)
         {
-            this._instanceID = FileUtils.LowHash(filename);
-            this._instanceHigh = FileUtils.HighHash(filename);
-            this._groupID = FileUtils.GroupHash(groupName);
-            this._typeID = typeID;
+            this.InstanceID = FileUtils.LowHash(filename);
+            this.InstanceHigh = FileUtils.HighHash(filename);
+            this.GroupID = FileUtils.GroupHash(groupName);
+            this.TypeID = typeID;
         }
         /// <summary>
         /// Creates a Instance ID, Instance (High), Group ID and Type ID reference.
@@ -146,10 +135,10 @@ namespace OpenTS2.Common
         /// <param name="typeID">Type ID</param>
         public ResourceKey(uint instanceID, uint instanceHigh, string groupName, uint typeID)
         {
-            this._instanceID = instanceID;
-            this._instanceHigh = instanceHigh;
-            this._groupID = FileUtils.GroupHash(groupName);
-            this._typeID = typeID;
+            this.InstanceID = instanceID;
+            this.InstanceHigh = instanceHigh;
+            this.GroupID = FileUtils.GroupHash(groupName);
+            this.TypeID = typeID;
         }
         /// <summary>
         /// Creates a Instance ID, Group ID and Type ID reference.
@@ -160,10 +149,10 @@ namespace OpenTS2.Common
         /// <param name="typeID">Type ID</param>
         public ResourceKey(uint instanceID, string groupName, uint typeID)
         {
-            this._instanceID = instanceID;
-            this._instanceHigh = 0x00000000;
-            this._groupID = FileUtils.GroupHash(groupName);
-            this._typeID = typeID;
+            this.InstanceID = instanceID;
+            this.InstanceHigh = 0x00000000;
+            this.GroupID = FileUtils.GroupHash(groupName);
+            this.TypeID = typeID;
         }
 
         /// <summary>
@@ -188,10 +177,10 @@ namespace OpenTS2.Common
             unchecked // Overflow is fine, just wrap
             {
                 int hash = 17;
-                hash = hash * 23 + _instanceID.GetHashCode();
-                hash = hash * 23 + _instanceHigh.GetHashCode();
-                hash = hash * 23 + _typeID.GetHashCode();
-                hash = hash * 23 + _groupID.GetHashCode();
+                hash = hash * 23 + InstanceID.GetHashCode();
+                hash = hash * 23 + InstanceHigh.GetHashCode();
+                hash = hash * 23 + TypeID.GetHashCode();
+                hash = hash * 23 + GroupID.GetHashCode();
                 return hash;
             }
         }

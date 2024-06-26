@@ -14,7 +14,7 @@ namespace OpenTS2.Diagnostic
 
         public override void Execute(CheatArguments arguments, IConsoleOutput output = null)
         {
-            NeighborhoodManager.LeaveNeighborhood();
+            NeighborhoodManager.Instance.LeaveNeighborhood();
         }
     }
 }

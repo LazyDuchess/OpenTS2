@@ -16,14 +16,14 @@ public class TerrainTestScript : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        var contentProvider = ContentProvider.Get();
-        contentProvider.AddPackage(PackageToLoad);
+        var contentManager = ContentManager.Instance;
+        contentManager.AddPackage(PackageToLoad);
 
         // Use N001_Neighborhood etc as the group name.
         var groupName = Path.GetFileNameWithoutExtension(PackageToLoad);
 
         var terrainAsset =
-            contentProvider.GetAsset<NeighborhoodTerrainAsset>(
+            contentManager.GetAsset<NeighborhoodTerrainAsset>(
                 new ResourceKey(0x0, groupName, TypeIDs.NHOOD_TERRAIN));
         //terrainAsset.ApplyToTerrain(terrain);
         terrainMeshFilter.sharedMesh = terrainAsset.MakeMesh();

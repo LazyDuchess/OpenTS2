@@ -23,36 +23,29 @@ namespace OpenTS2.Engine.Tests
         private List<UIComponent> _instances = new List<UIComponent>();
         void LoadAllUIPackages()
         {
-            EPManager.Get().InstalledProducts = 0x3EFFF;
+            EPManager.Instance.InstalledProducts = 0x3EFFF;
             ContentLoading.LoadContentStartup();
         }
 
         void LoadBGUIPackage()
         {
-            EPManager.Get().InstalledProducts = (int)ProductFlags.BaseGame;
+            EPManager.Instance.InstalledProducts = (int)ProductFlags.BaseGame;
             ContentLoading.LoadContentStartup();
         }
 
         void CreateUI()
         {
-            try
+            var settings = Settings.Instance;
+            settings.Language = Language;
+            foreach (var instance in _instances)
             {
-                var settings = Settings.Get();
-                settings.Language = Language;
-                foreach (var instance in _instances)
-                {
-                    Destroy(instance.gameObject);
-                }
-                _instances.Clear();
-                var contentProvider = ContentProvider.Get();
-                var key = new ResourceKey(Convert.ToUInt32(Key, 16), 0xA99D8A11, TypeIDs.UI);
-                var uiLayout = contentProvider.GetAsset<UILayout>(key);
-                _instances.AddRange(uiLayout.Instantiate(UIManager.MainCanvas.transform));
+                Destroy(instance.gameObject);
             }
-            catch(Exception e)
-            {
-                Debug.LogError(e);
-            }
+            _instances.Clear();
+            var contentManager = ContentManager.Instance;
+            var key = new ResourceKey(Convert.ToUInt32(Key, 16), 0xA99D8A11, TypeIDs.UI);
+            var uiLayout = contentManager.GetAsset<UILayout>(key);
+            _instances.AddRange(uiLayout.Instantiate(UIManager.MainCanvas.transform));
         }
 
         private void Update()
@@ -74,15 +67,16 @@ namespace OpenTS2.Engine.Tests
 
         private void Start()
         {
-            var settings = Settings.Get();
+            var settings = Settings.Instance;
             settings.CustomContentEnabled = false;
             if (LoadPackagesFromAllEPs)
                 LoadAllUIPackages();
             else
                 LoadBGUIPackage();
+            Core.OnFinishedLoading?.Invoke();
             CreateUI();
             /*
-            var contentProvider = ContentProvider.Get();
+            var contentManager = ContentManager.Get();
             // Main Menu
             //var key = new ResourceKey(0x49001017, 0xA99D8A11, TypeIDs.UI);
             // Neighborhood View
@@ -90,7 +84,7 @@ namespace OpenTS2.Engine.Tests
             //var key = new ResourceKey(0x49001010, 0xA99D8A11, TypeIDs.UI);
             //var key = new ResourceKey(0x49060005, 0xA99D8A11, TypeIDs.UI);
             //var key = new ResourceKey(0x49001024, 0xA99D8A11, TypeIDs.UI);
-            var mainMenuUILayout = contentProvider.GetAsset<UILayout>(key);
+            var mainMenuUILayout = contentManager.GetAsset<UILayout>(key);
             _instances.AddRange(mainMenuUILayout.Instantiate(Canvas));*/
         }
     }

@@ -23,6 +23,13 @@ namespace OpenTS2.Audio
             _rawPlaylist = playlist;
         }
 
+        public MusicCategory(string name, uint hash)
+        {
+            Name = name;
+            Hash = hash;
+            _rawPlaylist = new string[] { name };
+        }
+
         public Song PopNextSong()
         {
             var song = CurrentPlaylist[0];

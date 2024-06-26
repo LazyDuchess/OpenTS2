@@ -12,41 +12,49 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using OpenTS2.Rendering;
+using OpenTS2.Engine;
 
 namespace OpenTS2.Content
 {
-    public static class NeighborhoodManager
+    public class NeighborhoodManager
     {
-        public static Dictionary<uint, string> NeighborhoodObjects = new Dictionary<uint, string>();
+        public static NeighborhoodManager Instance { get; private set; }
+        public Dictionary<uint, string> NeighborhoodObjects { get; private set; }
+        public List<Neighborhood> Neighborhoods { get; private set; }
 
-        public static Neighborhood CurrentNeighborhood = null;
-        public static List<Neighborhood> Neighborhoods => _neighborHoods;
-        static List<Neighborhood> _neighborHoods = new List<Neighborhood>();
-        public static void Initialize()
+        public Neighborhood CurrentNeighborhood = null;
+        public NeighborhoodManager()
         {
-            _neighborHoods.Clear();
-            var contentProvider = ContentProvider.Get();
-            var allInfos = contentProvider.GetAssetsOfType<NeighborhoodInfoAsset>(TypeIDs.NHOOD_INFO);
-            foreach(var ninfo in allInfos)
+            Instance = this;
+            Core.OnFinishedLoading += OnFinishedLoading;
+        }
+
+        private void OnFinishedLoading()
+        {
+            Neighborhoods = new List<Neighborhood>();
+            NeighborhoodObjects = new Dictionary<uint, string>();
+            var contentManager = ContentManager.Instance;
+            var allInfos = contentManager.GetAssetsOfType<NeighborhoodInfoAsset>(TypeIDs.NHOOD_INFO);
+            foreach (var ninfo in allInfos)
             {
                 var nhood = new Neighborhood(ninfo);
-                _neighborHoods.Add(nhood);
+                Neighborhoods.Add(nhood);
             }
 
             // Create a mapping of GUID -> cres files for neighborhood objects.
-            var hoodObjects = contentProvider.GetAssetsOfType<NeighborhoodObjectAsset>(TypeIDs.NHOOD_OBJECT);
+            var hoodObjects = contentManager.GetAssetsOfType<NeighborhoodObjectAsset>(TypeIDs.NHOOD_OBJECT);
             foreach (var objectAsset in hoodObjects)
             {
                 NeighborhoodObjects[objectAsset.Guid] = objectAsset.ModelName;
             }
         }
 
-        public static void LeaveNeighborhood()
+        public void LeaveNeighborhood()
         {
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.None;
             CursorController.Cursor = CursorController.CursorType.Hourglass;
-            ContentProvider.Get().Changes.SaveChanges();
+            ContentManager.Instance.Changes.SaveChanges();
             if (CurrentNeighborhood != null)
                 ContentLoading.UnloadNeighborhoodContentSync();
             CurrentNeighborhood = null;
@@ -54,10 +62,10 @@ namespace OpenTS2.Content
             CursorController.Cursor = CursorController.CursorType.Default;
         }
 
-        public static void EnterNeighborhood(Neighborhood neighborhood)
+        public void EnterNeighborhood(Neighborhood neighborhood)
         {
             CursorController.Cursor = CursorController.CursorType.Hourglass;
-            ContentProvider.Get().Changes.SaveChanges();
+            ContentManager.Instance.Changes.SaveChanges();
             if (CurrentNeighborhood != null)
                 ContentLoading.UnloadNeighborhoodContentSync();
             ContentLoading.LoadNeighborhoodContentSync(neighborhood);

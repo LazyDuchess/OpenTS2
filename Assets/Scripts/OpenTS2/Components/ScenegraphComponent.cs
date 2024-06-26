@@ -246,7 +246,7 @@ namespace OpenTS2.Components
                 var slotName = effectSlotToName.Name;
                 var effectName = effectSlotToName.Value;
                 // The game seriously has effects in the scenegraph that don't exist... ignore those
-                if (!EffectsManager.Get().Ready || !EffectsManager.Get().HasEffect(effectName))
+                if (!EffectsManager.Instance.Ready || !EffectsManager.Instance.HasEffect(effectName))
                 {
                     continue;
                 }
@@ -256,7 +256,7 @@ namespace OpenTS2.Components
                 // the scenegraph has its own MonoBehavior.
                 try
                 {
-                    var swarmParticleSystem = EffectsManager.Get().CreateEffect(effectName);
+                    var swarmParticleSystem = EffectsManager.Instance.CreateEffect(effectName);
                     swarmParticleSystem.transform.SetParent(parent.transform, worldPositionStays: false);
                     swarmParticleSystem.PlayEffect();
                 }
@@ -338,7 +338,7 @@ namespace OpenTS2.Components
             Debug.Assert(resourceRef is ExternalReference);
             var key = rCol.FileLinks[((ExternalReference)resourceRef).FileLinksIndex];
 
-            var resourceAsset = ContentProvider.Get().GetAsset<ScenegraphResourceAsset>(key);
+            var resourceAsset = ContentManager.Instance.GetAsset<ScenegraphResourceAsset>(key);
             if (resourceAsset == null)
             {
                 Debug.LogWarning($"Unable to find cResourceNode with key {key} and name {resource.ResourceName}");
@@ -367,7 +367,7 @@ namespace OpenTS2.Components
                 // Use our groupId if the reference has a local group id.
                 shapeKey = shapeKey.WithGroupID(_resourceAssetKey.GroupID);
             }
-            var shape = ContentProvider.Get().GetAsset<ScenegraphShapeAsset>(shapeKey);
+            var shape = ContentManager.Instance.GetAsset<ScenegraphShapeAsset>(shapeKey);
 
             // Hold a strong reference to the shape.
             parent.GetComponent<AssetReferenceComponent>().AddReference(shape);

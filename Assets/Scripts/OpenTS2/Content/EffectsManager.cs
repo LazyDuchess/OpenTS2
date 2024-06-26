@@ -1,5 +1,6 @@
 ﻿using OpenTS2.Common;
 using OpenTS2.Content.DBPF;
+using OpenTS2.Engine;
 using OpenTS2.Files;
 using OpenTS2.Files.Formats.DBPF;
 using OpenTS2.Scenes.ParticleEffects;
@@ -9,31 +10,27 @@ namespace OpenTS2.Content
 {
     public class EffectsManager
     {
-        private static EffectsManager _instance;
+        public static EffectsManager Instance { get; set; }
 
-        public static EffectsManager Get()
+        public EffectsManager()
         {
-            return _instance;
-        }
-
-        public EffectsManager(ContentProvider provider)
-        {
-            _instance = this;
-            _provider = provider;
+            Instance = this;
+            _manager = ContentManager.Instance;
+            Core.OnFinishedLoading += Initialize;
         }
 
         private EffectsAsset _effects;
-        private readonly ContentProvider _provider;
+        private readonly ContentManager _manager;
 
         public bool Ready { get; private set; }
 
         public void Initialize()
         {
             // Load effects package.
-            _provider.AddPackages(
+            _manager.AddPackages(
                 Filesystem.GetPackagesInDirectory(Filesystem.GetDataPathForProduct(ProductFlags.BaseGame) +
                                                   "/Res/Effects"));
-            _effects = _provider.GetAsset<EffectsAsset>(new ResourceKey(instanceID: 1, groupID: GroupIDs.Effects,
+            _effects = _manager.GetAsset<EffectsAsset>(new ResourceKey(instanceID: 1, groupID: GroupIDs.Effects,
                 typeID: TypeIDs.EFFECTS));
 
             Debug.Assert(_effects != null, "Couldn't find effects");

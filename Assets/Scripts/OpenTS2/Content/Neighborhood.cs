@@ -15,9 +15,9 @@ namespace OpenTS2.Content
 {
     public class Neighborhood
     {
-        public NeighborhoodDecorationsAsset Decorations => ContentProvider.Get()
+        public NeighborhoodDecorationsAsset Decorations => ContentManager.Instance
             .GetAsset<NeighborhoodDecorationsAsset>(new ResourceKey(0, GroupID, TypeIDs.NHOOD_DECORATIONS));
-        public NeighborhoodTerrainAsset Terrain => ContentProvider.Get().GetAsset<NeighborhoodTerrainAsset>(new ResourceKey(0, GroupID, TypeIDs.NHOOD_TERRAIN));
+        public NeighborhoodTerrainAsset Terrain => ContentManager.Instance.GetAsset<NeighborhoodTerrainAsset>(new ResourceKey(0, GroupID, TypeIDs.NHOOD_TERRAIN));
         public Type NeighborhoodType => _info.NeighborhoodType;
         public string Prefix => _info.MainPrefix;
         public string PackageFilePath => _info.Package.FilePath;
@@ -42,9 +42,9 @@ namespace OpenTS2.Content
         public Neighborhood(NeighborhoodInfoAsset infoAsset)
         {
             _info = infoAsset;
-            var contentProvider = ContentProvider.Get();
+            var contentManager = ContentManager.Instance;
             var stringSetKey = new ResourceKey(1, GroupID, TypeIDs.CTSS);
-            _stringSet = contentProvider.GetAsset<StringSetAsset>(stringSetKey);
+            _stringSet = contentManager.GetAsset<StringSetAsset>(stringSetKey);
             _thumbnail = new Texture2D(1, 1);
             var thumbnailPath = Path.ChangeExtension(PackageFilePath, ".png");
             if (File.Exists(thumbnailPath))

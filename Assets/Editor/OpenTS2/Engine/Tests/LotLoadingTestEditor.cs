@@ -77,7 +77,7 @@ namespace OpenTS2.Engine.Tests
         {
             var test = target as LotLoadingTest;
 
-            Main.Initialize();
+            Core.InitializeCore();
 
             string[] noptions = NhoodNames.ToArray();
             int nindex = EditorGUILayout.Popup("Neighborhood", NhoodNames.IndexOf(test.NeighborhoodPrefix), noptions);

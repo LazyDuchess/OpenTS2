@@ -24,9 +24,9 @@ namespace OpenTS2.Scenes.Lot
 
         private bool _isVisible = true;
 
-        public FenceCollection(ContentProvider contentProvider, GameObject parent, uint guid)
+        public FenceCollection(ContentManager contentManager, GameObject parent, uint guid)
         {
-            var catalog = CatalogManager.Get();
+            var catalog = CatalogManager.Instance;
 
             _asset = catalog.GetFenceById(guid);
 
@@ -38,15 +38,15 @@ namespace OpenTS2.Scenes.Lot
             _hasDiag = _asset.DiagRail != null;
             _parent = parent;
 
-            _railCres = contentProvider.GetAsset<ScenegraphResourceAsset>(
+            _railCres = contentManager.GetAsset<ScenegraphResourceAsset>(
                 new ResourceKey(_asset.Rail + "_cres", GroupIDs.Scenegraph,
                     TypeIDs.SCENEGRAPH_CRES));
 
-            _diagRailCres = _hasDiag ? contentProvider.GetAsset<ScenegraphResourceAsset>(
+            _diagRailCres = _hasDiag ? contentManager.GetAsset<ScenegraphResourceAsset>(
                 new ResourceKey(_asset.DiagRail + "_cres", GroupIDs.Scenegraph,
                     TypeIDs.SCENEGRAPH_CRES)) : null;
 
-            _postCres = contentProvider.GetAsset<ScenegraphResourceAsset>(
+            _postCres = contentManager.GetAsset<ScenegraphResourceAsset>(
                 new ResourceKey(_asset.Post + "_cres", GroupIDs.Scenegraph,
                     TypeIDs.SCENEGRAPH_CRES));
 

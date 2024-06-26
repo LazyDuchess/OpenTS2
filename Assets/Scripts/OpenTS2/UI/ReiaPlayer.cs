@@ -41,8 +41,8 @@ namespace OpenTS2.UI
 
         public void SetReia(ResourceKey key, bool stream)
         {
-            var contentProvider = ContentProvider.Get();
-            var bytes = contentProvider.GetEntry(key).GetBytes();
+            var contentManager = ContentManager.Instance;
+            var bytes = contentManager.GetEntry(key).GetBytes();
             var memStream = new MemoryStream(bytes);
             SetReia(memStream, stream);
         }

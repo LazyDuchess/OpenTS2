@@ -12,14 +12,14 @@ public class LotObjectCodecTest
     [SetUp]
     public void SetUp()
     {
-        TestMain.Initialize();
-        _groupID = ContentProvider.Get().AddPackage("TestAssets/Codecs/LotObject.package").GroupID;
+        TestCore.Initialize();
+        _groupID = ContentManager.Instance.AddPackage("TestAssets/Codecs/LotObject.package").GroupID;
     }
 
     [Test]
     public void TestSuccessfullyLoadsLotObject()
     {
-        var lotObjectAsset = ContentProvider.Get()
+        var lotObjectAsset = ContentManager.Instance
             .GetAsset<LotObjectAsset>(new ResourceKey(199, _groupID, TypeIDs.LOT_OBJECT));
 
         Assert.IsNotNull(lotObjectAsset);
@@ -38,7 +38,7 @@ public class LotObjectCodecTest
     [Test]
     public void TestSuccessfullyLoadsAnimatableObject()
     {
-        var lotObjectAsset = ContentProvider.Get()
+        var lotObjectAsset = ContentManager.Instance
             .GetAsset<LotObjectAsset>(new ResourceKey(255, _groupID, TypeIDs.LOT_OBJECT));
 
         var lotObject = lotObjectAsset.Object;

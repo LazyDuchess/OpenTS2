@@ -46,11 +46,7 @@ namespace OpenTS2.Game
 
         private void CreateGlobalObjects()
         {
-            var objManager = ObjectManager.Get();
-            if (objManager == null)
-                throw new NullReferenceException("Can't create global objects, Object Manager not constructed!");
-
-            var objects = objManager.Objects;
+            var objects = ObjectManager.Instance.Objects;
 
             foreach(var obj in objects)
             {

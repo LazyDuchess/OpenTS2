@@ -18,8 +18,7 @@ namespace OpenTS2.Scenes
 {
     public class NeighborhoodDecorations : AssetReferenceComponent
     {
-        [ConsoleProperty("ots2_HoodBatching")]
-        private static bool s_enableBatching = true;
+        private static bool EnableBatching = true;
         private Dictionary<string, Material> _roadMaterialLookup = new Dictionary<string, Material>();
         private Transform _decorationsParent;
         private Transform _roadsParent;
@@ -34,7 +33,7 @@ namespace OpenTS2.Scenes
             _roadsParent.SetParent(transform);
             _lotsParent.SetParent(transform);
 
-            var decorations = NeighborhoodManager.CurrentNeighborhood.Decorations;
+            var decorations = NeighborhoodManager.Instance.CurrentNeighborhood.Decorations;
 
             // Render trees.
             RenderDecorationWithModels(decorations.FloraDecorations);
@@ -49,7 +48,7 @@ namespace OpenTS2.Scenes
             RenderDecorationWithModels(decorations.PropDecorations);
 
             // Render lot imposters.
-            foreach (var lot in NeighborhoodManager.CurrentNeighborhood.Lots)
+            foreach (var lot in NeighborhoodManager.Instance.CurrentNeighborhood.Lots)
             {
                 try
                 {
@@ -62,7 +61,7 @@ namespace OpenTS2.Scenes
                 }
             }
 
-            if (s_enableBatching)
+            if (EnableBatching)
             {
                 var batchedDeco = Batching.Batch(_decorationsParent, flipFaces: true);
                 var batchedLots = Batching.Batch(_lotsParent, flipFaces: true);
@@ -81,7 +80,7 @@ namespace OpenTS2.Scenes
 
         private void RenderRoad(RoadDecoration road)
         {
-            var roadTextureUnformatted = NeighborhoodManager.CurrentNeighborhood.Terrain.TerrainType.RoadTextureName;
+            var roadTextureUnformatted = NeighborhoodManager.Instance.CurrentNeighborhood.Terrain.TerrainType.RoadTextureName;
             var roadTextureName = road.GetTextureName(roadTextureUnformatted);
             var roadObject = new GameObject("road", typeof(MeshFilter), typeof(MeshRenderer))
             {
@@ -108,7 +107,7 @@ namespace OpenTS2.Scenes
 
             if (!_roadMaterialLookup.TryGetValue(roadTextureName, out Material roadMaterial))
             {
-                var texture = ContentProvider.Get().GetAsset<ScenegraphTextureAsset>(new ResourceKey(roadTextureName,
+                var texture = ContentManager.Instance.GetAsset<ScenegraphTextureAsset>(new ResourceKey(roadTextureName,
                 GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR));
 
                 if (texture == null)
@@ -119,7 +118,7 @@ namespace OpenTS2.Scenes
 
                 roadMaterial = new Material(Shader.Find("OpenTS2/Road"))
                 {
-                    mainTexture = texture.GetSelectedImageAsUnityTexture(ContentProvider.Get())
+                    mainTexture = texture.GetSelectedImageAsUnityTexture()
                 };
 
                 roadMaterial.mainTexture.wrapMode = TextureWrapMode.Clamp;
@@ -204,7 +203,7 @@ namespace OpenTS2.Scenes
             {
                 // Render the road
                 // RenderRoad(bridge.Road)
-                var model = ContentProvider.Get().GetAsset<ScenegraphResourceAsset>(new ResourceKey(bridge.ResourceName,
+                var model = ContentManager.Instance.GetAsset<ScenegraphResourceAsset>(new ResourceKey(bridge.ResourceName,
                     GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_CRES));
 
                 var bridgeObject = model.CreateRootGameObject();
@@ -223,13 +222,13 @@ namespace OpenTS2.Scenes
         {
             foreach (var decoration in decorations)
             {
-                if (!NeighborhoodManager.NeighborhoodObjects.TryGetValue(decoration.ObjectId, out var resourceName))
+                if (!NeighborhoodManager.Instance.NeighborhoodObjects.TryGetValue(decoration.ObjectId, out var resourceName))
                 {
                     Debug.Log($"Can't find model for decoration with guid 0x{decoration.ObjectId:X}");
                     return;
                 }
 
-                var model = ContentProvider.Get().GetAsset<ScenegraphResourceAsset>(new ResourceKey(resourceName,
+                var model = ContentManager.Instance.GetAsset<ScenegraphResourceAsset>(new ResourceKey(resourceName,
                     GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_CRES));
 
                 var decorationObject = model.CreateRootGameObject();

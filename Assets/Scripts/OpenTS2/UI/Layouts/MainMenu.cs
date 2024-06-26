@@ -130,7 +130,7 @@ namespace OpenTS2.UI.Layouts
                     }
                 }
 
-                var contentProvider = ContentProvider.Get();
+                var contentManager = ContentManager.Instance;
 
                 // Assign random images to the Sims.
                 var keyAmount = Mathf.Min(upperLeftKeys.Count, lowerRightKeys.Count);
@@ -139,8 +139,8 @@ namespace OpenTS2.UI.Layouts
                 var upperLeftKey = upperLeftKeys[simTextureIndex];
                 var lowerRightKey = lowerRightKeys[simTextureIndex];
 
-                upperLeftSim.SetTexture(contentProvider.GetAsset<TextureAsset>(upperLeftKey));
-                lowerRightSim.SetTexture(contentProvider.GetAsset<TextureAsset>(lowerRightKey));
+                upperLeftSim.SetTexture(contentManager.GetAsset<TextureAsset>(upperLeftKey));
+                lowerRightSim.SetTexture(contentManager.GetAsset<TextureAsset>(lowerRightKey));
                 upperLeftSim.Color = Color.white;
                 lowerRightSim.Color = Color.white;
             }
@@ -182,7 +182,7 @@ namespace OpenTS2.UI.Layouts
         // Set up the neighborhood icon grid and controls.
         void CreateNeighborhoodIcons()
         {
-            _neighborHoods = NeighborhoodManager.Neighborhoods.Where(ShouldNeighborhoodDisplayInChooser).ToList();
+            _neighborHoods = NeighborhoodManager.Instance.Neighborhoods.Where(ShouldNeighborhoodDisplayInChooser).ToList();
 
             var thumbsRectangle = Components[0].GetChildByID(ThumbsRectangleID);
             var thumbsCenter = thumbsRectangle.GetCenter();
@@ -224,7 +224,7 @@ namespace OpenTS2.UI.Layouts
 
         void OnQuit()
         {
-            ContentProvider.Get().Changes.SaveChanges();
+            ContentManager.Instance.Changes.SaveChanges();
             Application.Quit();
         }
 

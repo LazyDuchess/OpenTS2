@@ -72,9 +72,9 @@ namespace OpenTS2.Scenes.Lot
             return mat;
         }
 
-        private ScenegraphMaterialDefinitionAsset LoadMaterial(ContentProvider contentProvider, string name)
+        private ScenegraphMaterialDefinitionAsset LoadMaterial(ContentManager contentManager, string name)
         {
-            var material = contentProvider.GetAsset<ScenegraphMaterialDefinitionAsset>(new ResourceKey($"{name}_txmt", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXMT));
+            var material = contentManager.GetAsset<ScenegraphMaterialDefinitionAsset>(new ResourceKey($"{name}_txmt", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXMT));
 
             AddReference(material);
 
@@ -85,8 +85,8 @@ namespace OpenTS2.Scenes.Lot
         {
             // Load the patterns. Some references are by asset name (do not exist in catalog), others are by catalog GUID.
 
-            var contentProvider = ContentProvider.Get();
-            var catalogManager = CatalogManager.Get();
+            var contentManager = ContentManager.Instance;
+            var catalogManager = CatalogManager.Instance;
 
             Dictionary<ushort, StringMapEntry> patternMap = _architecture.FloorMap.Map;
 
@@ -110,7 +110,7 @@ namespace OpenTS2.Scenes.Lot
 
                 // Try fetch the texture using the material name.
 
-                var material = LoadMaterial(contentProvider, materialName);
+                var material = LoadMaterial(contentManager, materialName);
 
                 patterns[entry.Id + 1] = new PatternDescriptor(
                     materialName,

@@ -16,13 +16,13 @@ public class LotImposterGMDCTest : MonoBehaviour
     public int LotID = 11;
     private void Start()
     {
-        var contentProvider = ContentProvider.Get();
+        var contentManager = ContentManager.Instance;
         var lotsFolderPath = Path.Combine(Filesystem.GetUserPath(), $"Neighborhoods/{NeighborhoodPrefix}/Lots");
         var lotFilename = $"{NeighborhoodPrefix}_Lot{LotID}.package";
         var lotFullPath = Path.Combine(lotsFolderPath, lotFilename);
-        contentProvider.AddPackage(lotFullPath);
+        contentManager.AddPackage(lotFullPath);
 
-        var lotImposterResource = contentProvider.GetAssetsOfType<ScenegraphResourceAsset>(TypeIDs.SCENEGRAPH_CRES)[0];
+        var lotImposterResource = contentManager.GetAssetsOfType<ScenegraphResourceAsset>(TypeIDs.SCENEGRAPH_CRES)[0];
 
         var gameObject = lotImposterResource.CreateRootGameObject();
     }

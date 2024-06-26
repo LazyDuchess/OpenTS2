@@ -52,24 +52,13 @@ namespace OpenTS2.Engine.Tests
 
         void OnFinishLoading()
         {
-            var contentProvider = ContentProvider.Get();
-            var oMgr = ObjectManager.Get();
-            oMgr.Initialize();
+            var contentManager = ContentManager.Instance;
             stopW.Stop();
             UnityEngine.Debug.Log("Done loading packages!");
-            UnityEngine.Debug.Log(contentProvider.ContentEntries.Count + " packages loaded.");
+            UnityEngine.Debug.Log(contentManager.ContentEntries.Count + " packages loaded.");
             UnityEngine.Debug.Log("Package loading took " + (stopW.ElapsedTicks * 1000000 / Stopwatch.Frequency) + " microseconds");
-            var objectStr = "Object Amount: " + oMgr.Objects.Count + System.Environment.NewLine;
-            for(var i=0;i<200;i++)
-            {
-                if (i >= oMgr.Objects.Count)
-                    break;
-                var element = oMgr.Objects[(oMgr.Objects.Count-1)-i];
-                objectStr += element.FileName + " (" + "0x"+element.GUID.ToString("X8") + ")" + System.Environment.NewLine;
-            }
-            ObjectsText.text = objectStr;
-            PopupBackgroundImage.texture = contentProvider.GetAsset<TextureAsset>(new ResourceKey(0xA9600400, 0x499DB772, 0x856DDBAC)).Texture;
-            BackgroundImage.texture = contentProvider.GetAsset<TextureAsset>(new ResourceKey(0xCCC9AF70, 0x499DB772, 0x856DDBAC)).Texture;
+            PopupBackgroundImage.texture = contentManager.GetAsset<TextureAsset>(new ResourceKey(0xA9600400, 0x499DB772, 0x856DDBAC)).Texture;
+            BackgroundImage.texture = contentManager.GetAsset<TextureAsset>(new ResourceKey(0xCCC9AF70, 0x499DB772, 0x856DDBAC)).Texture;
         }
     }
 }

@@ -10,15 +10,15 @@ public class ScenegraphGMDCTest : MonoBehaviour
 {
     private void Start()
     {
-        var contentProvider = ContentProvider.Get();
+        var contentManager = ContentManager.Instance;
 
         // Load base game assets.
-        contentProvider.AddPackages(
+        contentManager.AddPackages(
             Filesystem.GetPackagesInDirectory(Filesystem.GetDataPathForProduct(ProductFlags.BaseGame) + "/Res/Sims3D"));
 
         //var resourceName = "vehiclePizza_cres";
         var resourceName = "chairReclinerPuffy_cres";
-        var resource = contentProvider.GetAsset<ScenegraphResourceAsset>(
+        var resource = contentManager.GetAsset<ScenegraphResourceAsset>(
             new ResourceKey(resourceName, GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_CRES));
 
         Debug.Log($"scenegraphModel: {resource.GlobalTGI}");
@@ -35,17 +35,17 @@ public class ScenegraphGMDCTest : MonoBehaviour
         var anim = gameObject.GetComponentInChildren<Animation>();
         var scenegraphComponent = gameObject.GetComponentInChildren<ScenegraphComponent>();
 
-        var driveOff = ContentProvider.Get().GetAsset<ScenegraphAnimationAsset>(
+        var driveOff = ContentManager.Instance.GetAsset<ScenegraphAnimationAsset>(
             new ResourceKey("o-vehiclePizza-driveOff_anim", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_ANIM));
         var clip = driveOff.CreateClipFromResource(scenegraphComponent.BoneNamesToRelativePaths, scenegraphComponent.BlendNamesToRelativePaths);
         anim.AddClip(clip, "driveOff");
 
-        var drive = ContentProvider.Get().GetAsset<ScenegraphAnimationAsset>(
+        var drive = ContentManager.Instance.GetAsset<ScenegraphAnimationAsset>(
             new ResourceKey("o-vehiclePizza-drive_anim", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_ANIM));
         clip = drive.CreateClipFromResource(scenegraphComponent.BoneNamesToRelativePaths, scenegraphComponent.BlendNamesToRelativePaths);
         anim.AddClip(clip, "drive");
 
-        var stop = ContentProvider.Get().GetAsset<ScenegraphAnimationAsset>(
+        var stop = ContentManager.Instance.GetAsset<ScenegraphAnimationAsset>(
             new ResourceKey("o-vehiclePizza-stop_anim", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_ANIM));
         clip = stop.CreateClipFromResource(scenegraphComponent.BoneNamesToRelativePaths, scenegraphComponent.BlendNamesToRelativePaths);
         anim.AddClip(clip, "stop");
@@ -56,7 +56,7 @@ public class ScenegraphGMDCTest : MonoBehaviour
         var anim = gameObject.GetComponentInChildren<Animation>();
         var scenegraphComponent = gameObject.GetComponentInChildren<ScenegraphComponent>();
 
-        var recline = ContentProvider.Get().GetAsset<ScenegraphAnimationAsset>(
+        var recline = ContentManager.Instance.GetAsset<ScenegraphAnimationAsset>(
             new ResourceKey("o2a-chairRecliner-recline_anim", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_ANIM));
         var clip = recline.CreateClipFromResource(scenegraphComponent.BoneNamesToRelativePaths, scenegraphComponent.BlendNamesToRelativePaths);
         anim.AddClip(clip, "recline");

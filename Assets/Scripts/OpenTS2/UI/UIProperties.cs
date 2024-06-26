@@ -1,4 +1,5 @@
-﻿using OpenTS2.Common;
+﻿using OpenTS2.Audio;
+using OpenTS2.Common;
 using OpenTS2.Content;
 using OpenTS2.Content.DBPF;
 using OpenTS2.Files.Formats.DBPF;
@@ -27,8 +28,8 @@ namespace OpenTS2.UI
             }
             public string GetLocalizedString()
             {
-                var contentProvider = ContentProvider.Get();
-                var stringSet = contentProvider.GetAsset<StringSetAsset>(StringSet);
+                var contentManager = ContentManager.Instance;
+                var stringSet = contentManager.GetAsset<StringSetAsset>(StringSet);
                 if (stringSet == null)
                     return "";
                 return stringSet.GetString(StringID);
@@ -94,6 +95,14 @@ namespace OpenTS2.UI
                 list.Add(element);
             }
             return list;
+        }
+
+        public ResourceKey GetSoundProperty(string property)
+        {
+            var hexList = GetHexListProperty(property);
+            if (hexList.Count < 2)
+                return default;
+            return AudioManager.Instance.GetAudioResourceKeyByInstanceID(hexList[1]);
         }
 
         public List<uint> GetHexListProperty(string property)

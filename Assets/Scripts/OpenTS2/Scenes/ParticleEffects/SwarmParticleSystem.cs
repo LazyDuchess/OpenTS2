@@ -43,7 +43,7 @@ namespace OpenTS2.Scenes.ParticleEffects
                         metaParticleSystem.transform.SetParent(transform, worldPositionStays: false);
                         break;
                     case ModelEffect e:
-                        var model = ContentProvider.Get()
+                        var model = ContentManager.Instance
                             .GetAsset<ScenegraphResourceAsset>(new ResourceKey(e.ModelName, GroupIDs.Scenegraph,
                                 TypeIDs.SCENEGRAPH_CRES));
                         var modelObject = model.CreateGameObject();
@@ -122,10 +122,10 @@ namespace OpenTS2.Scenes.ParticleEffects
 
             if (effect.Drawing.MaterialName != "")
             {
-                var textureAsset = ContentProvider.Get().GetAsset<ScenegraphTextureAsset>(new ResourceKey(
+                var textureAsset = ContentManager.Instance.GetAsset<ScenegraphTextureAsset>(new ResourceKey(
                     $"{effect.Drawing.MaterialName}_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR));
 
-                var material = MakeParticleMaterial(textureAsset.GetSelectedImageAsUnityTexture(ContentProvider.Get()),
+                var material = MakeParticleMaterial(textureAsset.GetSelectedImageAsUnityTexture(),
                     effect.Drawing.ParticleDrawType);
                 system.GetComponent<Renderer>().sharedMaterial = material;
                 particleObject.GetComponent<AssetReferenceComponent>().AddReference(textureAsset);

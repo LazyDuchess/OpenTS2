@@ -32,8 +32,8 @@ namespace OpenTS2.UI
         public override UIComponent Instantiate(Transform parent)
         {
             var uiComponent = base.Instantiate(parent) as UIBMPComponent;
-            var contentProvider = ContentProvider.Get();
-            var imageAsset = contentProvider.GetAsset<TextureAsset>(Image);
+            var contentManager = ContentManager.Instance;
+            var imageAsset = contentManager.GetAsset<TextureAsset>(Image);
             var rawImage = uiComponent.gameObject.AddComponent<RawImage>();
             if (IgnoreMouse)
                 rawImage.raycastTarget = false;

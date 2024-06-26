@@ -27,10 +27,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             _texture.Free();
         }
 
-        // TODO: Maybe we should just use `ContentProvider.Get` and compute this eagerly instead of having a
-        //       ContentProvider passed in here. That way we could also drop having to store the full ImageDataBlock
-        //       and just have the more compact Texture2D.
-        public Texture2D GetSelectedImageAsUnityTexture(ContentProvider provider)
+        public Texture2D GetSelectedImageAsUnityTexture()
         {
             if (_texture != null)
             {
@@ -38,14 +35,14 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             }
 
             var subImage = ImageDataBlock.SubImages[ImageDataBlock.SelectedImage];
-            _texture = SubImageToTexture(provider, ImageDataBlock.ColorFormat, ImageDataBlock.Width, ImageDataBlock.Height, subImage);
+            _texture = SubImageToTexture(ImageDataBlock.ColorFormat, ImageDataBlock.Width, ImageDataBlock.Height, subImage);
             return _texture;
         }
 
         /// <summary>
         /// Compute the full Texture2D with mipmaps using the SubImage data.
         /// </summary>
-        public static Texture2D SubImageToTexture(ContentProvider provider, ScenegraphTextureFormat colorFormat, int width, int height, SubImage subImage)
+        public static Texture2D SubImageToTexture(ScenegraphTextureFormat colorFormat, int width, int height, SubImage subImage)
         {
             var format = ScenegraphTextureFormatToUnity(colorFormat);
             var texture = new Texture2D(width, height, format, mipChain: true);
@@ -59,7 +56,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
                 {
                     case LifoReferenceMip lifoReferenceMip:
                     {
-                        var lifoAsset = provider.GetAsset<ScenegraphMipLevelInfoAsset>(
+                        var lifoAsset = ContentManager.Instance.GetAsset<ScenegraphMipLevelInfoAsset>(
                             new ResourceKey(lifoReferenceMip.LifoName, GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_LIFO));
                         mipData = lifoAsset.MipData;
                         break;

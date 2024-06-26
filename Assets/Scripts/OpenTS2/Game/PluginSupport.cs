@@ -19,8 +19,8 @@ namespace OpenTS2.Game
         /// </summary>
         public static void Initialize()
         {
-            var contentProvider = ContentProvider.Get();
-            var assemblyAssets = contentProvider.GetAssetsOfType<AssemblyAsset>(TypeIDs.DLL);
+            var contentManager = ContentManager.Instance;
+            var assemblyAssets = contentManager.GetAssetsOfType<AssemblyAsset>(TypeIDs.DLL);
             var loadedAssemblies = new List<Assembly>();
             foreach(var element in assemblyAssets)
             {

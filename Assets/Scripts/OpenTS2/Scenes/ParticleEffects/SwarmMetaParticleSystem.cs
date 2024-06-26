@@ -34,7 +34,7 @@ namespace OpenTS2.Scenes.ParticleEffects
 
             // Kinda hacky but for now we just render out the scenegraph and get the first mesh and material out of it.
             // Unity's built-in particle system can't spawn full GameObjects but it can handle meshes.
-            _model = ContentProvider.Get().GetAsset<ScenegraphResourceAsset>(new ResourceKey(baseModelEffect.ModelName,
+            _model = ContentManager.Instance.GetAsset<ScenegraphResourceAsset>(new ResourceKey(baseModelEffect.ModelName,
                 GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_CRES));
             var modelObject = _model.CreateRootGameObject();
             modelObject.SetActive(false);

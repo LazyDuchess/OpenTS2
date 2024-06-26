@@ -23,7 +23,7 @@ namespace OpenTS2.Content
         /// </summary>
         public string LotPackagePath { get; }
 
-        private DBPFFile Package => ContentProvider.Get().GetPackageByPath(LotPackagePath);
+        private DBPFFile Package => ContentManager.Instance.GetPackageByPath(LotPackagePath);
 
         public Lot(LotInfoAsset lotInfo, string lotPackage)
         {

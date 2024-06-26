@@ -60,7 +60,7 @@ public class DPBFFileTest
     [Test]
     public void DBPPFFileSaveCompressedEntryTest()
     {
-        TestMain.Initialize();
+        TestCore.Initialize();
         var packageSavePath = "TestFiles/TestPackage.package";
         var packageLoadPath = "TestAssets/TestPackage.package";
         var package = new DBPFFile(packageLoadPath);

@@ -19,9 +19,9 @@ namespace OpenTS2.Scenes
     {
         public static NeighborhoodTerrain Instance;
         public Transform Sun;
-        private static ResourceKey s_matCapKey = new ResourceKey(0x0BE702EF, 0x8BA01057, TypeIDs.IMG);
-        private static ResourceKey s_cliffKey = new ResourceKey(0xFFF56CAE, 0x6E80B6A1, GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR);
-        private static ResourceKey s_shoreKey = new ResourceKey("nh-test-beach_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR);
+        private static ResourceKey MatCapKey = new ResourceKey(0x0BE702EF, 0x8BA01057, TypeIDs.IMG);
+        private static ResourceKey CliffKey = new ResourceKey(0xFFF56CAE, 0x6E80B6A1, GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR);
+        private static ResourceKey ShoreKey = new ResourceKey("nh-test-beach_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR);
         //private static ResourceKey TemperateWetKey = new ResourceKey(0xFF354609, 0x1A9C59CC, 0x1C0532FA, TypeIDs.SCENEGRAPH_TXTR);
         private Material _terrainMaterial;
         private MeshFilter _meshFilter;
@@ -30,40 +30,40 @@ namespace OpenTS2.Scenes
         {
             Instance = this;
 
-            var terrain = NeighborhoodManager.CurrentNeighborhood.Terrain;
+            var terrain = NeighborhoodManager.Instance.CurrentNeighborhood.Terrain;
             var terrainType = terrain.TerrainType;
 
             _meshFilter = GetComponent<MeshFilter>();
-            var contentProvider = ContentProvider.Get();
+            var contentManager = ContentManager.Instance;
             var meshRenderer = GetComponent<MeshRenderer>();
             // Using .material here cause i want to instantiate it
             _terrainMaterial = meshRenderer.material;
             _terrainMaterial.shader = terrainType.TerrainShader;
             _terrainMaterial.SetVector("_LightVector", Sun.forward);
 
-            var matCap = contentProvider.GetAsset<TextureAsset>(s_matCapKey);
-            var smooth = contentProvider.GetAsset<ScenegraphTextureAsset>(terrainType.Texture);
-            var variation1 = contentProvider.GetAsset<ScenegraphTextureAsset>(terrainType.Texture1);
-            var variation2 = contentProvider.GetAsset<ScenegraphTextureAsset>(terrainType.Texture2);
-            var cliff = contentProvider.GetAsset<ScenegraphTextureAsset>(s_cliffKey);
-            var shore = contentProvider.GetAsset<ScenegraphTextureAsset>(s_shoreKey);
-            var roughness = contentProvider.GetAsset<ScenegraphTextureAsset>(terrainType.Roughness);
-            var roughness1 = contentProvider.GetAsset<ScenegraphTextureAsset>(terrainType.Roughness1);
-            var roughness2 = contentProvider.GetAsset<ScenegraphTextureAsset>(terrainType.Roughness2);
+            var matCap = contentManager.GetAsset<TextureAsset>(MatCapKey);
+            var smooth = contentManager.GetAsset<ScenegraphTextureAsset>(terrainType.Texture);
+            var variation1 = contentManager.GetAsset<ScenegraphTextureAsset>(terrainType.Texture1);
+            var variation2 = contentManager.GetAsset<ScenegraphTextureAsset>(terrainType.Texture2);
+            var cliff = contentManager.GetAsset<ScenegraphTextureAsset>(CliffKey);
+            var shore = contentManager.GetAsset<ScenegraphTextureAsset>(ShoreKey);
+            var roughness = contentManager.GetAsset<ScenegraphTextureAsset>(terrainType.Roughness);
+            var roughness1 = contentManager.GetAsset<ScenegraphTextureAsset>(terrainType.Roughness1);
+            var roughness2 = contentManager.GetAsset<ScenegraphTextureAsset>(terrainType.Roughness2);
             AddReference(matCap, smooth, variation1, variation2, cliff, shore, roughness1, roughness2);
             if (matCap != null)
             {
                 matCap.Texture.wrapMode = TextureWrapMode.Clamp;
                 _terrainMaterial.SetTexture("_MatCap", matCap.Texture);
             }
-            _terrainMaterial.mainTexture = smooth.GetSelectedImageAsUnityTexture(contentProvider);
-            _terrainMaterial.SetTexture("_Variation1", variation1.GetSelectedImageAsUnityTexture(contentProvider));
-            _terrainMaterial.SetTexture("_Variation2", variation2.GetSelectedImageAsUnityTexture(contentProvider));
-            _terrainMaterial.SetTexture("_CliffTex", cliff.GetSelectedImageAsUnityTexture(contentProvider));
-            _terrainMaterial.SetTexture("_Shore", shore.GetSelectedImageAsUnityTexture(contentProvider));
-            _terrainMaterial.SetTexture("_Roughness", roughness.GetSelectedImageAsUnityTexture(contentProvider));
-            _terrainMaterial.SetTexture("_Roughness1", roughness1.GetSelectedImageAsUnityTexture(contentProvider));
-            _terrainMaterial.SetTexture("_Roughness2", roughness2.GetSelectedImageAsUnityTexture(contentProvider));
+            _terrainMaterial.mainTexture = smooth.GetSelectedImageAsUnityTexture();
+            _terrainMaterial.SetTexture("_Variation1", variation1.GetSelectedImageAsUnityTexture());
+            _terrainMaterial.SetTexture("_Variation2", variation2.GetSelectedImageAsUnityTexture());
+            _terrainMaterial.SetTexture("_CliffTex", cliff.GetSelectedImageAsUnityTexture());
+            _terrainMaterial.SetTexture("_Shore", shore.GetSelectedImageAsUnityTexture());
+            _terrainMaterial.SetTexture("_Roughness", roughness.GetSelectedImageAsUnityTexture());
+            _terrainMaterial.SetTexture("_Roughness1", roughness1.GetSelectedImageAsUnityTexture());
+            _terrainMaterial.SetTexture("_Roughness2", roughness2.GetSelectedImageAsUnityTexture());
             SetTerrainMesh();
         }
 
@@ -75,7 +75,7 @@ namespace OpenTS2.Scenes
 
         void SetTerrainMesh()
         {
-            var terrainAsset = NeighborhoodManager.CurrentNeighborhood.Terrain;
+            var terrainAsset = NeighborhoodManager.Instance.CurrentNeighborhood.Terrain;
             var terrainMesh = terrainAsset.MakeMesh();
             var meshCollider = GetComponent<MeshCollider>();
             var meshRenderer = GetComponent<MeshRenderer>();
@@ -143,12 +143,12 @@ namespace OpenTS2.Scenes
         // TODO: Optimize, maybe multithread.
         void MakeRoughness(Mesh terrainMesh)
         {
-            var terrainType = NeighborhoodManager.CurrentNeighborhood.Terrain.TerrainType;
+            var terrainType = NeighborhoodManager.Instance.CurrentNeighborhood.Terrain.TerrainType;
             var roadDistanceForRoughness = terrainType.RoadDistanceForRoughness;
             var roughnessFalloff = terrainType.RoughnessFalloff;
             var vertices = terrainMesh.vertices;
             var colors = terrainMesh.colors;
-            var roads = NeighborhoodManager.CurrentNeighborhood.Decorations.RoadDecorations;
+            var roads = NeighborhoodManager.Instance.CurrentNeighborhood.Decorations.RoadDecorations;
             for (var i = 0; i < vertices.Length; i++)
             {
                 var vertex = vertices[i];

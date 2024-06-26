@@ -14,17 +14,19 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
+using OpenTS2.Files;
+using OpenTS2.Files.Formats.Ini;
 
 namespace OpenTS2.Audio
 {
-    public class MusicManager : MonoBehaviour
+    public class MusicManager
     {
         public static AudioAsset SplashAudio
         {
             get
             {
-                var contentProvider = ContentProvider.Get();
-                return contentProvider.GetAsset<AudioAsset>(SplashKey);
+                var contentManager = ContentManager.Instance;
+                return contentManager.GetAsset<AudioAsset>(SplashKey);
             }
         }
 
@@ -36,7 +38,7 @@ namespace OpenTS2.Audio
         public Dictionary<uint, MusicCategory> MusicCategoryByHash = new Dictionary<uint, MusicCategory>();
         public Dictionary<uint, List<Song>> PlaylistByHash = new Dictionary<uint, List<Song>>();
 
-        private ContentProvider _contentProvider;
+        private ContentManager _contentManager;
 
         public MusicCategory GetMusicCategory (string name)
         {
@@ -64,17 +66,10 @@ namespace OpenTS2.Audio
             return null;
         }
 
-        private void Awake()
-        {
-            Instance = this;
-            _contentProvider = ContentProvider.Get();
-            Core.OnFinishedLoading += OnFinishedLoading;
-        }
-
         private List<ResourceKey> GetMusicTitles()
         {
             var musicTitlesGroupID = FileUtils.GroupHash("MusicTitles");
-            var musicStringSets = _contentProvider.ResourceMap.Keys.Where(x => x.GroupID == musicTitlesGroupID && x.TypeID == TypeIDs.STR).ToList();
+            var musicStringSets = _contentManager.ResourceMap.Keys.Where(x => x.GroupID == musicTitlesGroupID && x.TypeID == TypeIDs.STR).ToList();
             return musicStringSets;
         }
 
@@ -88,7 +83,7 @@ namespace OpenTS2.Audio
 
         private void LoadPlaylists(List<ResourceKey> musicTitles)
         {
-            var audioResourceKeys = _contentProvider.ResourceMap.Keys.Where(x => x.TypeID == TypeIDs.MP3);
+            var audioResourceKeys = AudioManager.Instance.AudioAssets;
             foreach(var musicCategory in MusicCategoryByHash)
             {
                 var resourceKeys = audioResourceKeys.Where(x => x.GroupID == musicCategory.Key).ToList();
@@ -96,18 +91,25 @@ namespace OpenTS2.Audio
                 foreach(var key in resourceKeys)
                 {
                     var localizedName = key.ToString();
-                    foreach(var musicTitle in musicTitles)
+                    if (AudioManager.Instance.CustomSongNames.TryGetValue(key, out var customSongName))
                     {
-                        var stringSet = _contentProvider.GetAsset<StringSetAsset>(musicTitle);
-                        var englishStrings = stringSet.StringData.Strings[Languages.USEnglish];
-
-                        for (var i = 0; i < englishStrings.Count; i++)
+                        localizedName = customSongName;
+                    }
+                    else
+                    {
+                        foreach (var musicTitle in musicTitles)
                         {
-                            var englishString = englishStrings[i].Value;
-                            var hiHash = FileUtils.HighHash(englishString);
-                            if (hiHash == key.InstanceHigh)
+                            var stringSet = _contentManager.GetAsset<StringSetAsset>(musicTitle);
+                            var englishStrings = stringSet.StringData.Strings[Languages.USEnglish];
+
+                            for (var i = 0; i < englishStrings.Count; i++)
                             {
-                                localizedName = stringSet.GetString(i);
+                                var englishString = englishStrings[i].Value;
+                                var hiHash = FileUtils.HighHash(englishString);
+                                if (hiHash == key.InstanceHigh)
+                                {
+                                    localizedName = stringSet.GetString(i);
+                                }
                             }
                         }
                     }
@@ -118,24 +120,11 @@ namespace OpenTS2.Audio
             }
         }
 
-        private void LoadMusicCategories(List<ResourceKey> musicTitles)
+        private void LocalizeMusicCategories(List<ResourceKey> musicTitles)
         {
-            var musicCategoriesBytes = _contentProvider.GetEntry(MusicCategoriesXMLKey).GetBytes();
-            if (musicCategoriesBytes == null)
-                throw new IOException("Can't find Music Categories XML!");
-            var xml = new PropertySet(musicCategoriesBytes);
-            if (xml == null)
-                throw new IOException("Can't load Music Categories XML!");
-
-            foreach (var prop in xml.Properties)
-            {
-                var musicCategory = new MusicCategory(prop.Key, ((StringProp)prop.Value).Value.Split(','));
-                MusicCategoryByHash[musicCategory.Hash] = musicCategory;
-            }
-
             foreach (var stringSetKey in musicTitles)
             {
-                var stringSet = _contentProvider.GetAsset<StringSetAsset>(stringSetKey);
+                var stringSet = _contentManager.GetAsset<StringSetAsset>(stringSetKey);
 
                 var englishStrings = stringSet.StringData.Strings[Languages.USEnglish];
 
@@ -151,10 +140,64 @@ namespace OpenTS2.Audio
             }
         }
 
-        private void OnFinishedLoading()
+        private void LoadIniMusicCategories()
+        {
+            var epManager = EPManager.Instance;
+            var products = epManager.GetInstalledProducts();
+            foreach(var product in products)
+            {
+                var sysFolder = Path.Combine(Filesystem.GetDataPathForProduct(product), "Sys");
+                var unpackedAudioIni = Directory.GetFiles(sysFolder, "TSAudioUnpacked*.ini", SearchOption.TopDirectoryOnly).FirstOrDefault();
+                if (!string.IsNullOrEmpty(unpackedAudioIni))
+                {
+                    var iniFile = new IniFile(unpackedAudioIni);
+                    var musicSection = iniFile.GetSection("MusicDirectories");
+                    if (musicSection != null)
+                    {
+                        foreach(var prop in musicSection.KeyValues)
+                        {
+                            var name = prop.Key;
+                            var hash = Convert.ToUInt32(prop.Value, 16);
+                            if (MusicCategoryByHash.ContainsKey(hash)) continue;
+
+                            var musicCategory = new MusicCategory(name, hash);
+                            MusicCategoryByHash[musicCategory.Hash] = musicCategory;
+                        }
+                    }
+                }
+            }
+        }
+
+        private void LoadMusicCategories()
+        {
+            var musicCategoriesEntry = _contentManager.GetEntry(MusicCategoriesXMLKey);
+            if (musicCategoriesEntry == null)
+                throw new IOException("Can't find Music Categories XML!");
+            var musicCategoriesBytes = musicCategoriesEntry.GetBytes();
+            var xml = new PropertySet(musicCategoriesBytes);
+            if (xml == null)
+                throw new IOException("Can't load Music Categories XML!");
+
+            foreach (var prop in xml.Properties)
+            {
+                var musicCategory = new MusicCategory(prop.Key, ((StringProp)prop.Value).Value.Split(','));
+                MusicCategoryByHash[musicCategory.Hash] = musicCategory;
+            }
+        }
+
+        public MusicManager()
+        {
+            Instance = this;
+            _contentManager = ContentManager.Instance;
+            AudioManager.OnInitialized += Initialize;
+        }
+
+        private void Initialize()
         {
             var musicTitles = GetMusicTitles();
-            LoadMusicCategories(musicTitles);
+            LoadMusicCategories();
+            LoadIniMusicCategories();
+            LocalizeMusicCategories(musicTitles);
             LoadPlaylists(musicTitles);
             InitializeMusicCategoryPlaylists();
         }

@@ -51,7 +51,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             for (var i = 0; i < meshes.Count; i++)
             {
                 var resourceKey = ResourceKey.ScenegraphResourceKey(meshes[i], GlobalTGI.GroupID, TypeIDs.SCENEGRAPH_GMND);
-                var geometryNode = ContentProvider.Get().GetAsset<ScenegraphGeometryNodeAsset>(resourceKey);
+                var geometryNode = ContentManager.Instance.GetAsset<ScenegraphGeometryNodeAsset>(resourceKey);
                 Debug.Assert(geometryNode != null, $"Got null geometry for mesh: {meshes[i]}, key: {resourceKey}");
                 _models[i] = geometryNode.GetModelAsset(GlobalTGI.GroupID);
             }
@@ -61,7 +61,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             foreach (var materialPair in ShapeBlock.Materials)
             {
                 var materialKey = ResourceKey.ScenegraphResourceKey($"{materialPair.Value}_txmt", GlobalTGI.GroupID, TypeIDs.SCENEGRAPH_TXMT);
-                var material = ContentProvider.Get().GetAsset<ScenegraphMaterialDefinitionAsset>(materialKey);
+                var material = ContentManager.Instance.GetAsset<ScenegraphMaterialDefinitionAsset>(materialKey);
                 _materials[materialPair.Key] = material;
             }
         }

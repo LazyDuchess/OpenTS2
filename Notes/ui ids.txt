@@ -1,0 +1,2 @@
+settings: 0x49001028
+audio settings: 0x49060F01
