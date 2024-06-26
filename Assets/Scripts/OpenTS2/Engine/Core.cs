@@ -48,6 +48,8 @@ namespace OpenTS2.Engine
 
         private void Awake()
         {
+            OnFinishedLoading += NeighborhoodManager.Initialize;
+
             DontDestroyOnLoad(gameObject);
             if (!string.IsNullOrEmpty(TargetScene))
                 SceneManager.LoadScene(TargetScene);

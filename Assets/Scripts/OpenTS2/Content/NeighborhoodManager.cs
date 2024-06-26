@@ -17,20 +17,20 @@ namespace OpenTS2.Content
 {
     public static class NeighborhoodManager
     {
-        public static Dictionary<uint, string> NeighborhoodObjects = new Dictionary<uint, string>();
+        public static Dictionary<uint, string> NeighborhoodObjects { get; private set; }
+        public static List<Neighborhood> Neighborhoods { get; private set; }
 
         public static Neighborhood CurrentNeighborhood = null;
-        public static List<Neighborhood> Neighborhoods => _neighborHoods;
-        static List<Neighborhood> _neighborHoods = new List<Neighborhood>();
         public static void Initialize()
         {
-            _neighborHoods.Clear();
+            Neighborhoods = new List<Neighborhood>();
+            NeighborhoodObjects = new Dictionary<uint, string>();
             var contentManager = ContentManager.Instance;
             var allInfos = contentManager.GetAssetsOfType<NeighborhoodInfoAsset>(TypeIDs.NHOOD_INFO);
             foreach(var ninfo in allInfos)
             {
                 var nhood = new Neighborhood(ninfo);
-                _neighborHoods.Add(nhood);
+                Neighborhoods.Add(nhood);
             }
 
             // Create a mapping of GUID -> cres files for neighborhood objects.

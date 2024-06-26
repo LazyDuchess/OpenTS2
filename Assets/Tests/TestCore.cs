@@ -1,10 +1,12 @@
 ﻿using OpenTS2.Assemblies;
 using OpenTS2.Client;
 using OpenTS2.Content;
+using OpenTS2.Engine;
 using OpenTS2.Files;
 using OpenTS2.Files.Formats.DBPF;
 using OpenTS2.Lua;
 using OpenTS2.SimAntics.Primitives;
+using UnityEngine;
 
 /// <summary>
 /// Main initialization class for OpenTS2 unit testing.
@@ -19,7 +21,7 @@ public static class TestCore
     public static void Initialize()
     {
         if (Initialized)
-            Shutdown();
+            return;
         var settings = new Settings()
         {
             CustomContentEnabled = false,
@@ -28,15 +30,11 @@ public static class TestCore
         var epManager = new EPManager((int)ProductFlags.BaseGame);
         var contentManager = new ContentManager();
         var luaManager = new LuaManager();
+
         Filesystem.Initialize(new TestPathManager(), epManager);
         CodecAttribute.Initialize();
         AssemblyHelper.InitializeLoadedAssemblies();
         VMPrimitiveRegistry.Initialize();
         Initialized = true;
-    }
-
-    public static void Shutdown()
-    {
-        Initialized = false;
     }
 }

@@ -1,5 +1,6 @@
 ﻿using OpenTS2.Common;
 using OpenTS2.Content.DBPF;
+using OpenTS2.Engine;
 using OpenTS2.Files;
 using OpenTS2.Files.Formats.DBPF;
 using OpenTS2.Scenes.ParticleEffects;
@@ -15,6 +16,7 @@ namespace OpenTS2.Content
         {
             Instance = this;
             _manager = ContentManager.Instance;
+            Core.OnFinishedLoading += Initialize;
         }
 
         private EffectsAsset _effects;

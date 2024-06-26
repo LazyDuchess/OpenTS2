@@ -88,12 +88,8 @@ namespace OpenTS2.Scenes
         {
             try
             {
-                Core.OnFinishedLoading?.Invoke();
-                var luaMgr = LuaManager.Instance;
-                luaMgr.InitializeObjectScripts();
                 CursorController.Cursor = CursorController.CursorType.Hourglass;
-                EffectsManager.Instance.Initialize();
-                NeighborhoodManager.Initialize();
+                Core.OnFinishedLoading?.Invoke();
                 CursorController.Cursor = CursorController.CursorType.Default;
                 FadeOutLoading();
                 var mainMenu = new MainMenu();
