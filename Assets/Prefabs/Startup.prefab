@@ -75,7 +75,7 @@ GameObject:
   - component: {fileID: 4586108812010598809}
   - component: {fileID: 1443268385892374946}
   m_Layer: 0
-  m_Name: Scene Startup
+  m_Name: Startup
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -108,6 +108,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad304d4d34fd4274e943ffc0fc2d0436, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  TargetScene: Main Menu
 --- !u!114 &1681581118
 MonoBehaviour:
   m_ObjectHideFlags: 0
