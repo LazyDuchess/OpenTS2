@@ -122,12 +122,12 @@ namespace OpenTS2.Content.DBPF
         /// <returns>Localized string</returns>
         public string GetString(int id)
         {
-            return _stringData.GetString(id, Settings.Get().Language);
+            return _stringData.GetString(id, Settings.Instance.Language);
         }
 
         public string GetDescription(int id)
         {
-            return _stringData.GetDescription(id, Settings.Get().Language);
+            return _stringData.GetDescription(id, Settings.Instance.Language);
         }
 
         /// <summary>
@@ -138,7 +138,7 @@ namespace OpenTS2.Content.DBPF
         /// <param name="language">Language of string to replace.</param>
         public void SetString(string str, int id)
         {
-            var lang = Settings.Get().Language;
+            var lang = Settings.Instance.Language;
             if (!StringData.HasLanguage(lang))
                 lang = Languages.USEnglish;
             StringData.SetString(str, id, lang);

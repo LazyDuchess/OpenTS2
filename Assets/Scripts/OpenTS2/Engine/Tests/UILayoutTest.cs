@@ -35,7 +35,7 @@ namespace OpenTS2.Engine.Tests
 
         void CreateUI()
         {
-            var settings = Settings.Get();
+            var settings = Settings.Instance;
             settings.Language = Language;
             foreach (var instance in _instances)
             {
@@ -67,7 +67,7 @@ namespace OpenTS2.Engine.Tests
 
         private void Start()
         {
-            var settings = Settings.Get();
+            var settings = Settings.Instance;
             settings.CustomContentEnabled = false;
             if (LoadPackagesFromAllEPs)
                 LoadAllUIPackages();

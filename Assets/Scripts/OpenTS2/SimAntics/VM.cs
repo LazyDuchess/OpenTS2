@@ -54,7 +54,7 @@ namespace OpenTS2.SimAntics
             var epFlags2 = (short)(epManager.InstalledProducts >> 16);
             SetGlobal(VMGlobals.GameEditionFlags1, epFlags1);
             SetGlobal(VMGlobals.GameEditionFlags2, epFlags2);
-            var settings = Settings.Get();
+            var settings = Settings.Instance;
             SetGlobal(VMGlobals.CurrentLanguage, (short)settings.Language);
         }
 

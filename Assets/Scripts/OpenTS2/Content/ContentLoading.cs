@@ -26,7 +26,7 @@ namespace OpenTS2.Content
         public static void LoadContentStartup()
         {
             var startupPackages = Filesystem.GetStartupPackages();
-            if (Settings.Get().CustomContentEnabled)
+            if (Settings.Instance.CustomContentEnabled)
                 startupPackages.AddRange(Filesystem.GetStartupDownloadPackages());
             ContentManager.Instance.AddPackages(startupPackages);
         }
@@ -39,7 +39,7 @@ namespace OpenTS2.Content
         {
             var gamePackages = Filesystem.GetMainPackages();
             gamePackages.AddRange(Filesystem.GetUserPackages());
-            if (Settings.Get().CustomContentEnabled)
+            if (Settings.Instance.CustomContentEnabled)
                 gamePackages.AddRange(Filesystem.GetStreamedDownloadPackages());
             await ContentManager.Instance.AddPackagesAsync(gamePackages, loadProgress);
         }
@@ -51,7 +51,7 @@ namespace OpenTS2.Content
         {
             var gamePackages = Filesystem.GetMainPackages();
             gamePackages.AddRange(Filesystem.GetUserPackages());
-            if (Settings.Get().CustomContentEnabled)
+            if (Settings.Instance.CustomContentEnabled)
                 gamePackages.AddRange(Filesystem.GetStreamedDownloadPackages());
             ContentManager.Instance.AddPackages(gamePackages);
         }

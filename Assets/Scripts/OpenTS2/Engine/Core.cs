@@ -23,9 +23,11 @@ namespace OpenTS2.Engine
         public static Action OnBeginLoading;
         public static Action OnFinishedLoading;
         public static Action OnNeighborhoodEntered;
+        public static bool CoreInitialized = false;
 
-        private void InitializeCore()
+        public static void InitializeCore()
         {
+            if (CoreInitialized) return;
             var settings = new Settings();
             var epManager = new EPManager();
             var contentManager = new ContentManager();
@@ -41,6 +43,7 @@ namespace OpenTS2.Engine
             VMPrimitiveRegistry.Initialize();
             //Initialize the game assembly, do all reflection things.
             AssemblyHelper.InitializeLoadedAssemblies();
+            CoreInitialized = true;
         }
 
         private void Awake()
