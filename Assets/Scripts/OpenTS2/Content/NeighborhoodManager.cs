@@ -12,22 +12,30 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using OpenTS2.Rendering;
+using OpenTS2.Engine;
 
 namespace OpenTS2.Content
 {
-    public static class NeighborhoodManager
+    public class NeighborhoodManager
     {
-        public static Dictionary<uint, string> NeighborhoodObjects { get; private set; }
-        public static List<Neighborhood> Neighborhoods { get; private set; }
+        public static NeighborhoodManager Instance { get; private set; }
+        public Dictionary<uint, string> NeighborhoodObjects { get; private set; }
+        public List<Neighborhood> Neighborhoods { get; private set; }
 
-        public static Neighborhood CurrentNeighborhood = null;
-        public static void Initialize()
+        public Neighborhood CurrentNeighborhood = null;
+        public NeighborhoodManager()
+        {
+            Instance = this;
+            Core.OnFinishedLoading += OnFinishedLoading;
+        }
+
+        private void OnFinishedLoading()
         {
             Neighborhoods = new List<Neighborhood>();
             NeighborhoodObjects = new Dictionary<uint, string>();
             var contentManager = ContentManager.Instance;
             var allInfos = contentManager.GetAssetsOfType<NeighborhoodInfoAsset>(TypeIDs.NHOOD_INFO);
-            foreach(var ninfo in allInfos)
+            foreach (var ninfo in allInfos)
             {
                 var nhood = new Neighborhood(ninfo);
                 Neighborhoods.Add(nhood);
@@ -41,7 +49,7 @@ namespace OpenTS2.Content
             }
         }
 
-        public static void LeaveNeighborhood()
+        public void LeaveNeighborhood()
         {
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.None;
@@ -54,7 +62,7 @@ namespace OpenTS2.Content
             CursorController.Cursor = CursorController.CursorType.Default;
         }
 
-        public static void EnterNeighborhood(Neighborhood neighborhood)
+        public void EnterNeighborhood(Neighborhood neighborhood)
         {
             CursorController.Cursor = CursorController.CursorType.Hourglass;
             ContentManager.Instance.Changes.SaveChanges();

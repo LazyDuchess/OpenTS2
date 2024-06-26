@@ -30,7 +30,7 @@ namespace OpenTS2.Scenes
         {
             Instance = this;
 
-            var terrain = NeighborhoodManager.CurrentNeighborhood.Terrain;
+            var terrain = NeighborhoodManager.Instance.CurrentNeighborhood.Terrain;
             var terrainType = terrain.TerrainType;
 
             _meshFilter = GetComponent<MeshFilter>();
@@ -75,7 +75,7 @@ namespace OpenTS2.Scenes
 
         void SetTerrainMesh()
         {
-            var terrainAsset = NeighborhoodManager.CurrentNeighborhood.Terrain;
+            var terrainAsset = NeighborhoodManager.Instance.CurrentNeighborhood.Terrain;
             var terrainMesh = terrainAsset.MakeMesh();
             var meshCollider = GetComponent<MeshCollider>();
             var meshRenderer = GetComponent<MeshRenderer>();
@@ -143,12 +143,12 @@ namespace OpenTS2.Scenes
         // TODO: Optimize, maybe multithread.
         void MakeRoughness(Mesh terrainMesh)
         {
-            var terrainType = NeighborhoodManager.CurrentNeighborhood.Terrain.TerrainType;
+            var terrainType = NeighborhoodManager.Instance.CurrentNeighborhood.Terrain.TerrainType;
             var roadDistanceForRoughness = terrainType.RoadDistanceForRoughness;
             var roughnessFalloff = terrainType.RoughnessFalloff;
             var vertices = terrainMesh.vertices;
             var colors = terrainMesh.colors;
-            var roads = NeighborhoodManager.CurrentNeighborhood.Decorations.RoadDecorations;
+            var roads = NeighborhoodManager.Instance.CurrentNeighborhood.Decorations.RoadDecorations;
             for (var i = 0; i < vertices.Length; i++)
             {
                 var vertex = vertices[i];

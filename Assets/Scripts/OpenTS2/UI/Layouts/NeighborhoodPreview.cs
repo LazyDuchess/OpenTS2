@@ -68,13 +68,13 @@ namespace OpenTS2.UI.Layouts
         {
             if (_neighborhood == null)
                 return;
-            if (NeighborhoodManager.CurrentNeighborhood == _neighborhood)
+            if (NeighborhoodManager.Instance.CurrentNeighborhood == _neighborhood)
             {
                 Hide();
                 OnTryEnterActiveNeighborhood?.Invoke();
                 return;
             }
-            NeighborhoodManager.EnterNeighborhood(_neighborhood);
+            NeighborhoodManager.Instance.EnterNeighborhood(_neighborhood);
         }
 
         public void Hide()

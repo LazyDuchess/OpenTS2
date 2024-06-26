@@ -137,7 +137,7 @@ public class TSAudioSource : MonoBehaviour
 
     private void UpdateVolume()
     {
-        var volume = Volume * AudioManager.GetVolumeForMixer(Mixer);
+        var volume = Volume * AudioManager.Instance.GetVolumeForMixer(Mixer);
         if (_waveOutEv != null)
         {
             _sampleChannel.Volume = volume;

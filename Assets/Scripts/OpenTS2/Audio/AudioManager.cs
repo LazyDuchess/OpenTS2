@@ -15,8 +15,9 @@ using UnityEngine;
 
 namespace OpenTS2.Audio
 {
-    public class AudioManager : MonoBehaviour
+    public class AudioManager
     {
+        public static AudioManager Instance { get; private set; }
         [GameProperty(true)]
         public static uint FXVolume = 100;
         [GameProperty(true)]
@@ -27,33 +28,33 @@ namespace OpenTS2.Audio
         public static uint MusicVolume = 40;
         [GameProperty(true)]
         public static bool MuteAudioOnFocusLoss = true;
-
-        public static Dictionary<ResourceKey, string> CustomSongNames;
-        public static List<ResourceKey> AudioAssets { get; private set; }
         public static Action OnInitialized;
-        private static Dictionary<Tuple<uint,uint>, ResourceKey> AudioAssetByInstanceID;
-        private static ContentManager ContentManager;
+        public Dictionary<ResourceKey, string> CustomSongNames;
+        public List<ResourceKey> AudioAssets { get; private set; }
+        private Dictionary<Tuple<uint,uint>, ResourceKey> _audioAssetByInstanceID;
+        private ContentManager _contentManager;
 
-        private void Awake()
+        public AudioManager()
         {
-            Core.OnFinishedLoading += Initialize;
+            Instance = this;
+            Core.OnFinishedLoading += OnFinishedLoading;
         }
 
-        public static void Initialize()
+        private void OnFinishedLoading()
         {
-            ContentManager = ContentManager.Instance;
+            _contentManager = ContentManager.Instance;
             LoadCustomMusic();
-            AudioAssetByInstanceID = new Dictionary<Tuple<uint, uint>, ResourceKey>();
-            AudioAssets = ContentManager.ResourceMap.Keys.Where(key => key.TypeID == TypeIDs.AUDIO || key.TypeID == TypeIDs.HITLIST).ToList();
+            _audioAssetByInstanceID = new Dictionary<Tuple<uint, uint>, ResourceKey>();
+            AudioAssets = _contentManager.ResourceMap.Keys.Where(key => key.TypeID == TypeIDs.AUDIO || key.TypeID == TypeIDs.HITLIST).ToList();
             foreach (var audioAsset in AudioAssets)
             {
-                AudioAssetByInstanceID[new Tuple<uint, uint>(audioAsset.InstanceID, 0)] = audioAsset;
-                AudioAssetByInstanceID[new Tuple<uint, uint>(audioAsset.InstanceID, audioAsset.InstanceHigh)] = audioAsset;
+                _audioAssetByInstanceID[new Tuple<uint, uint>(audioAsset.InstanceID, 0)] = audioAsset;
+                _audioAssetByInstanceID[new Tuple<uint, uint>(audioAsset.InstanceID, audioAsset.InstanceHigh)] = audioAsset;
             }
             OnInitialized?.Invoke();
         }
 
-        private static void LoadCustomMusic()
+        private void LoadCustomMusic()
         {
             CustomSongNames = new Dictionary<ResourceKey, string>();
             var musicDir = Path.Combine(Filesystem.GetUserPath(), "Music");
@@ -66,13 +67,13 @@ namespace OpenTS2.Audio
                 {
                     var songName = Path.GetFileNameWithoutExtension(audioFile);
                     var key = new ResourceKey(songName, FileUtils.LowHash(stationName), TypeIDs.AUDIO);
-                    ContentManager.MapFileToResource(audioFile, key);
+                    _contentManager.MapFileToResource(audioFile, key);
                     CustomSongNames[key] = songName;
                 }
             }
         }
 
-        public static float GetVolumeForMixer(Mixers mixer)
+        public float GetVolumeForMixer(Mixers mixer)
         {
             if (MuteAudioOnFocusLoss && !Application.isFocused)
                 return 0f;
@@ -98,18 +99,18 @@ namespace OpenTS2.Audio
             return val / 100f;
         }
 
-        public static ResourceKey GetAudioResourceKeyByInstanceID(uint instanceID, uint instanceIDHigh = 0)
+        public ResourceKey GetAudioResourceKeyByInstanceID(uint instanceID, uint instanceIDHigh = 0)
         {
-            if (AudioAssetByInstanceID.TryGetValue(new Tuple<uint,uint>(instanceID, instanceIDHigh), out var result))
+            if (_audioAssetByInstanceID.TryGetValue(new Tuple<uint,uint>(instanceID, instanceIDHigh), out var result))
             {
                 return result;
             }
             return default;
         }
 
-        public static void PlayUISound(ResourceKey audioKey)
+        public void PlayUISound(ResourceKey audioKey)
         {
-            var asset = ContentManager.GetAsset<AudioAsset>(audioKey);
+            var asset = _contentManager.GetAsset<AudioAsset>(audioKey);
             if (asset != null)
             {
                 var audioSource = CreateOneShotAudioSource();
@@ -119,14 +120,14 @@ namespace OpenTS2.Audio
             }
         }
 
-        private static TSAudioSource CreateOneShotAudioSource()
+        private TSAudioSource CreateOneShotAudioSource()
         {
             var go = new GameObject("One Shot Audio Source");
             var audioSource = go.AddComponent<TSAudioSource>();
             audioSource.Loop = false;
             audioSource.PlaybackFinished += () =>
             {
-                Destroy(go);
+                UnityEngine.Object.Destroy(go);
             };
             return audioSource;
         }

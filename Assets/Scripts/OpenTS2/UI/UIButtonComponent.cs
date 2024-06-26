@@ -103,7 +103,7 @@ namespace OpenTS2.UI
 
         void Click()
         {
-            AudioManager.PlayUISound(ClickSound);
+            AudioManager.Instance.PlayUISound(ClickSound);
             OnClick?.Invoke();
         }
     }

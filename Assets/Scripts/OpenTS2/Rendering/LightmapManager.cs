@@ -35,7 +35,7 @@ namespace OpenTS2.Rendering
             var meshFilter = terrain.GetComponent<MeshFilter>();
             var sun = terrain.Sun;
             var mesh = meshFilter.sharedMesh;
-            var neighborhood = NeighborhoodManager.CurrentNeighborhood;
+            var neighborhood = NeighborhoodManager.Instance.CurrentNeighborhood;
 
             if (HeightMap == null)
                 HeightMap = new RenderTexture(HeightMapResolution, HeightMapResolution, 16, RenderTextureFormat.R16);

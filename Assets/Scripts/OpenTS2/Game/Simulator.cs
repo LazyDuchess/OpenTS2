@@ -46,7 +46,7 @@ namespace OpenTS2.Game
 
         private void CreateGlobalObjects()
         {
-            var objects = ObjectManager.Objects;
+            var objects = ObjectManager.Instance.Objects;
 
             foreach(var obj in objects)
             {

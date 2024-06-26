@@ -15,6 +15,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using OpenTS2.Client;
 using OpenTS2.Game;
+using OpenTS2.Audio;
 
 namespace OpenTS2.Engine
 {
@@ -36,6 +37,10 @@ namespace OpenTS2.Engine
             var effectsManager = new EffectsManager();
             var catalogManager = new CatalogManager();
             var luaManager = new LuaManager();
+            var musicManager = new MusicManager();
+            var audioManager = new AudioManager();
+            var objectManager = new ObjectManager();
+            var nhoodManager = new NeighborhoodManager();
 
             TerrainManager.Initialize();
             MaterialManager.Initialize();
@@ -46,13 +51,13 @@ namespace OpenTS2.Engine
             //Initialize the game assembly, do all reflection things.
             AssemblyHelper.InitializeLoadedAssemblies();
             PluginSupport.Initialize();
+
             CoreInitialized = true;
         }
 
         private void Awake()
         {
-            OnFinishedLoading += NeighborhoodManager.Initialize;
-
+            InitializeCore();
             DontDestroyOnLoad(gameObject);
             if (!string.IsNullOrEmpty(TargetScene))
                 SceneManager.LoadScene(TargetScene);

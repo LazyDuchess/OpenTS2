@@ -11,9 +11,10 @@ using UnityEngine;
 
 namespace OpenTS2.Content
 {
-    public class ObjectManager : MonoBehaviour
+    public class ObjectManager
     {   
-        public static List<ObjectDefinitionAsset> Objects
+        public static ObjectManager Instance { get; private set; }
+        public List<ObjectDefinitionAsset> Objects
         {
             get
             {
@@ -21,29 +22,31 @@ namespace OpenTS2.Content
             }
         }
 
-        private static Dictionary<uint, ObjectDefinitionAsset> _objectByGUID;
+        private Dictionary<uint, ObjectDefinitionAsset> _objectByGUID;
 
-        private void Awake()
+        public ObjectManager()
         {
-            Core.OnFinishedLoading += Initialize;
+            Instance = this;
+            Core.OnFinishedLoading += OnFinishedLoading;
         }
 
-        public static void Initialize()
+
+        private void OnFinishedLoading()
         {
             _objectByGUID = new Dictionary<uint, ObjectDefinitionAsset>();
-            var objectList = ContentManager.Instance.GetAssetsOfType<ObjectDefinitionAsset>(TypeIDs.OBJD); 
-            foreach(ObjectDefinitionAsset element in objectList)
+            var objectList = ContentManager.Instance.GetAssetsOfType<ObjectDefinitionAsset>(TypeIDs.OBJD);
+            foreach (ObjectDefinitionAsset element in objectList)
             {
                 RegisterObject(element);
             }
         }
 
-        private static void RegisterObject(ObjectDefinitionAsset objd)
+        private void RegisterObject(ObjectDefinitionAsset objd)
         {
             _objectByGUID[objd.GUID] = objd;
         }
 
-        public static ObjectDefinitionAsset GetObjectByGUID(uint guid)
+        public ObjectDefinitionAsset GetObjectByGUID(uint guid)
         {
             if (_objectByGUID.TryGetValue(guid, out ObjectDefinitionAsset obj))
                 return obj;

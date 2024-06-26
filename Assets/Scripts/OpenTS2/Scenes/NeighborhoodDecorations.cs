@@ -33,7 +33,7 @@ namespace OpenTS2.Scenes
             _roadsParent.SetParent(transform);
             _lotsParent.SetParent(transform);
 
-            var decorations = NeighborhoodManager.CurrentNeighborhood.Decorations;
+            var decorations = NeighborhoodManager.Instance.CurrentNeighborhood.Decorations;
 
             // Render trees.
             RenderDecorationWithModels(decorations.FloraDecorations);
@@ -48,7 +48,7 @@ namespace OpenTS2.Scenes
             RenderDecorationWithModels(decorations.PropDecorations);
 
             // Render lot imposters.
-            foreach (var lot in NeighborhoodManager.CurrentNeighborhood.Lots)
+            foreach (var lot in NeighborhoodManager.Instance.CurrentNeighborhood.Lots)
             {
                 try
                 {
@@ -80,7 +80,7 @@ namespace OpenTS2.Scenes
 
         private void RenderRoad(RoadDecoration road)
         {
-            var roadTextureUnformatted = NeighborhoodManager.CurrentNeighborhood.Terrain.TerrainType.RoadTextureName;
+            var roadTextureUnformatted = NeighborhoodManager.Instance.CurrentNeighborhood.Terrain.TerrainType.RoadTextureName;
             var roadTextureName = road.GetTextureName(roadTextureUnformatted);
             var roadObject = new GameObject("road", typeof(MeshFilter), typeof(MeshRenderer))
             {
@@ -222,7 +222,7 @@ namespace OpenTS2.Scenes
         {
             foreach (var decoration in decorations)
             {
-                if (!NeighborhoodManager.NeighborhoodObjects.TryGetValue(decoration.ObjectId, out var resourceName))
+                if (!NeighborhoodManager.Instance.NeighborhoodObjects.TryGetValue(decoration.ObjectId, out var resourceName))
                 {
                     Debug.Log($"Can't find model for decoration with guid 0x{decoration.ObjectId:X}");
                     return;

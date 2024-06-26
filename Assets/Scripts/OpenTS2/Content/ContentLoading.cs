@@ -65,7 +65,7 @@ namespace OpenTS2.Content
         public static void UnloadNeighborhoodContentSync()
         {
             var contentManager = ContentManager.Instance;
-            var neighborhoodPackages = Filesystem.GetPackagesForNeighborhood(NeighborhoodManager.CurrentNeighborhood);
+            var neighborhoodPackages = Filesystem.GetPackagesForNeighborhood(NeighborhoodManager.Instance.CurrentNeighborhood);
             foreach(var packagePath in neighborhoodPackages)
             {
                 var package = contentManager.GetPackageByPath(packagePath);

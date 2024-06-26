@@ -182,7 +182,7 @@ namespace OpenTS2.UI.Layouts
         // Set up the neighborhood icon grid and controls.
         void CreateNeighborhoodIcons()
         {
-            _neighborHoods = NeighborhoodManager.Neighborhoods.Where(ShouldNeighborhoodDisplayInChooser).ToList();
+            _neighborHoods = NeighborhoodManager.Instance.Neighborhoods.Where(ShouldNeighborhoodDisplayInChooser).ToList();
 
             var thumbsRectangle = Components[0].GetChildByID(ThumbsRectangleID);
             var thumbsCenter = thumbsRectangle.GetCenter();

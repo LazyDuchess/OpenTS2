@@ -105,10 +105,10 @@ namespace OpenTS2.Rendering.Materials
                 material.SetTexture(BumpMap, bumpMapTexture.GetSelectedImageAsUnityTexture());
             }
 
-            var neighborhood = NeighborhoodManager.CurrentNeighborhood;
+            var neighborhood = NeighborhoodManager.Instance.CurrentNeighborhood;
             if (neighborhood != null)
             {
-                material.SetFloat(SeaLevel, NeighborhoodManager.CurrentNeighborhood.Terrain.SeaLevel);
+                material.SetFloat(SeaLevel, NeighborhoodManager.Instance.CurrentNeighborhood.Terrain.SeaLevel);
             }
 
             return material;

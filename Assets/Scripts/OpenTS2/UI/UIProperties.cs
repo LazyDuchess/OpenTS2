@@ -102,7 +102,7 @@ namespace OpenTS2.UI
             var hexList = GetHexListProperty(property);
             if (hexList.Count < 2)
                 return default;
-            return AudioManager.GetAudioResourceKeyByInstanceID(hexList[1]);
+            return AudioManager.Instance.GetAudioResourceKeyByInstanceID(hexList[1]);
         }
 
         public List<uint> GetHexListProperty(string property)

@@ -20,7 +20,7 @@ namespace OpenTS2.Rendering
         /// </summary>
         public static void SetNeighborhoodParameters(Material material)
         {
-            var ngbh = NeighborhoodManager.CurrentNeighborhood;
+            var ngbh = NeighborhoodManager.Instance.CurrentNeighborhood;
             if (ngbh != null)
             {
                 material.SetTexture(ShadowMap, LightmapManager.ShadowMap);

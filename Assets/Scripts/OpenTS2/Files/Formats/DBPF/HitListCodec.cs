@@ -31,7 +31,7 @@ namespace OpenTS2.Files.Formats.DBPF
             {
                 var lowID = reader.ReadUInt32();
                 var highID = reader.ReadUInt32();
-                var key = AudioManager.GetAudioResourceKeyByInstanceID(lowID, highID);
+                var key = AudioManager.Instance.GetAudioResourceKeyByInstanceID(lowID, highID);
                 sounds[i] = key;
             }
             return new HitListAsset(sounds);

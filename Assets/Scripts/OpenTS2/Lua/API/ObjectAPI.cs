@@ -14,7 +14,7 @@ namespace OpenTS2.Lua.API
     {
         public bool isValidObjectGUID(uint guid)
         {
-            if (ObjectManager.GetObjectByGUID(guid) != null)
+            if (ObjectManager.Instance.GetObjectByGUID(guid) != null)
                 return true;
             return false;
         }
@@ -23,7 +23,7 @@ namespace OpenTS2.Lua.API
     {
         void SetObjectDefinitionField(uint guid, int field, ushort value)
         {
-            var obj = ObjectManager.GetObjectByGUID(guid);
+            var obj = ObjectManager.Instance.GetObjectByGUID(guid);
             if (obj == null)
                 throw new ScriptRuntimeException($"Object with GUID {guid} does not exist.");
             obj.Fields[field] = value;

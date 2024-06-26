@@ -19,7 +19,7 @@ using OpenTS2.Files.Formats.Ini;
 
 namespace OpenTS2.Audio
 {
-    public class MusicManager : MonoBehaviour
+    public class MusicManager
     {
         public static AudioAsset SplashAudio
         {
@@ -66,13 +66,6 @@ namespace OpenTS2.Audio
             return null;
         }
 
-        private void Awake()
-        {
-            Instance = this;
-            _contentManager = ContentManager.Instance;
-            AudioManager.OnInitialized += Initialize;
-        }
-
         private List<ResourceKey> GetMusicTitles()
         {
             var musicTitlesGroupID = FileUtils.GroupHash("MusicTitles");
@@ -90,7 +83,7 @@ namespace OpenTS2.Audio
 
         private void LoadPlaylists(List<ResourceKey> musicTitles)
         {
-            var audioResourceKeys = AudioManager.AudioAssets;
+            var audioResourceKeys = AudioManager.Instance.AudioAssets;
             foreach(var musicCategory in MusicCategoryByHash)
             {
                 var resourceKeys = audioResourceKeys.Where(x => x.GroupID == musicCategory.Key).ToList();
@@ -98,7 +91,7 @@ namespace OpenTS2.Audio
                 foreach(var key in resourceKeys)
                 {
                     var localizedName = key.ToString();
-                    if (AudioManager.CustomSongNames.TryGetValue(key, out var customSongName))
+                    if (AudioManager.Instance.CustomSongNames.TryGetValue(key, out var customSongName))
                     {
                         localizedName = customSongName;
                     }
@@ -190,6 +183,13 @@ namespace OpenTS2.Audio
                 var musicCategory = new MusicCategory(prop.Key, ((StringProp)prop.Value).Value.Split(','));
                 MusicCategoryByHash[musicCategory.Hash] = musicCategory;
             }
+        }
+
+        public MusicManager()
+        {
+            Instance = this;
+            _contentManager = ContentManager.Instance;
+            AudioManager.OnInitialized += Initialize;
         }
 
         private void Initialize()
