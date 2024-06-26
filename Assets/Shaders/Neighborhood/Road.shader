@@ -10,7 +10,7 @@ Shader "OpenTS2/Road"
     }
     SubShader
     {
-        Tags { "Queue"="Transparent" "RenderType"="Transparent" }
+        Tags { "Queue"="Transparent" "RenderType"="Transparent" "ForceNoShadowCasting"="True" }
         LOD 200
         ZWrite Off
         Blend SrcAlpha OneMinusSrcAlpha

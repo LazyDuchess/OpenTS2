@@ -35,15 +35,18 @@ Shader "OpenTS2/ClassicTerrain"
 
         Pass
         {
+            Tags {"LightMode"="ForwardBase"}
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
-            // make fog work
-            #pragma multi_compile_fog
+            #include "Lighting.cginc"
+
+            #pragma multi_compile_fwdbase nolightmap nodirlightmap nodynlightmap novertexlight
 
             #include "Assets/Shaders/opents2_common.cginc"
             #include "UnityCG.cginc"
             #include "opents2_terrain_common.cginc"
+            #include "AutoLight.cginc"
 
             struct appdata {
                 TERRAIN_APPDATA;
@@ -51,12 +54,12 @@ Shader "OpenTS2/ClassicTerrain"
 
             struct v2f
             {
-                TERRAIN_V2F;
+                TERRAIN_V2F
             };
 
             v2f vert(appdata v)
             {
-                TERRAIN_VERT;
+                TERRAIN_VERT
                 return o;
             }
 
@@ -78,8 +81,20 @@ Shader "OpenTS2/ClassicTerrain"
                 col = lerp(col, rCol, i.roughness);
                 fixed4 cliffCol = tex2D(_CliffTex, i.uv);
 
+                float realTimeShadows = SHADOW_ATTENUATION(i);
+                float iShadowUv = i.matcapUv;
+                /*
+                if (iShadowUv < 0.35)
+                    iShadowUv = 1.0;
+                    else
+                    iShadowUv = 0;*/
+
                 fixed4 shadowMapCol = tex2D(_ShadowMap, i.shadowUv);
                 i.matcapUv *= shadowMapCol.r;
+
+                
+                realTimeShadows = lerp(iShadowUv, 1, realTimeShadows);
+                i.matcapUv *= realTimeShadows;
                 float shoreAmount = tex2D(_ShoreMask, i.shadowUv);
                 shoreAmount = min(1,shoreAmount + i.color.b);
 
@@ -95,12 +110,10 @@ Shader "OpenTS2/ClassicTerrain"
                 seaAmount = min(1, seaAmount);
 
                 col = lerp(col, seaColor, seaAmount);
-
-                // apply fog
-                UNITY_APPLY_FOG(i.fogCoord, col);
                 return col;
             }
             ENDCG
         }
+        UsePass "Legacy Shaders/VertexLit/SHADOWCASTER"
     }
 }

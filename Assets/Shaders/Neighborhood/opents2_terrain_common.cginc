@@ -14,6 +14,8 @@ float _Subtract;
 float _Ambient;
 float _SeaLevel;
 
+
+
 #define TERRAIN_APPDATA \
 float4 vertex : POSITION; \
 float2 uv : TEXCOORD0; \
@@ -23,19 +25,18 @@ float4 color : COLOR
 #define TERRAIN_V2F \
 float2 uv : TEXCOORD0; \
 float2 matcapUv : TEXCOORD1; \
-UNITY_FOG_COORDS(1) \
-float4 vertex : SV_POSITION; \
+float4 pos : SV_POSITION; \
 float4 color : COLOR; \
 float cliff : TEXCOORD2; \
 float2 shadowUv : TEXCOORD3; \
 float height : TEXCOORD4; \
-float roughness : TEXCOORD5
+float roughness : TEXCOORD5; \
+SHADOW_COORDS(6)
 
 #define TERRAIN_VERT \
 v2f o; \
-o.vertex = UnityObjectToClipPos(v.vertex); \
+o.pos = UnityObjectToClipPos(v.vertex); \
 o.uv = TRANSFORM_TEX(v.uv, _MainTex); \
-UNITY_TRANSFER_FOG(o, o.vertex); \
 float3 lightingDirection = -normalize(_LightVector.xyz); \
 float3 lightCross = cross(lightingDirection, float3(0.0, 1.0, 0.0)); \
 float3 worldNormal = mul(unity_ObjectToWorld, float4(v.normal, 0.0)).xyz; \
@@ -52,4 +53,5 @@ o.cliff = max(0, min(1, pow(-(dot(worldNormal, float3(0.0, 1.0, 0.0)) - 1), 2) *
 o.shadowUv = getNeighborhoodUV(v.vertex); \
 o.height = v.vertex.y; \
 if (v.vertex.y <= _SeaLevel) \
-o.color.b = 1
+o.color.b = 1; \
+TRANSFER_SHADOW(o)
