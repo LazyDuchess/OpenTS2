@@ -10,29 +10,14 @@ namespace OpenTS2.Content
 {
     public class EPManager
     {
-        public static EPManager Get()
-        {
-            return s_instance;
-        }
-        static EPManager s_instance;
+        public static EPManager Instance { get; private set; }
 
-        public int InstalledProducts
-        {
-            get
-            {
-                return _installedProducts;
-            }
-            set
-            {
-                _installedProducts = value;
-            }
-        }
+        // All products
+        public int InstalledProducts { get; set; } = 0x3FFFF;
 
-        //mask of all products
-        int _installedProducts = 0x3FFFF;
         public EPManager()
         {
-            s_instance = this;
+            Instance = this;
         }
         public EPManager(int installedProducts) : this()
         {
@@ -51,7 +36,7 @@ namespace OpenTS2.Content
         }
         public bool IsEPInstalled(ProductFlags product)
         {
-            if (BitUtils.AllBitsSet(_installedProducts, (int)product))
+            if (BitUtils.AllBitsSet(InstalledProducts, (int)product))
                 return true;
             return false;
         }

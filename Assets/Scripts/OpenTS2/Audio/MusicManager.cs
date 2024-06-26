@@ -149,7 +149,7 @@ namespace OpenTS2.Audio
 
         private void LoadIniMusicCategories()
         {
-            var epManager = EPManager.Get();
+            var epManager = EPManager.Instance;
             var products = epManager.GetInstalledProducts();
             foreach(var product in products)
             {

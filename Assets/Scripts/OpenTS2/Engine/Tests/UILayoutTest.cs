@@ -23,13 +23,13 @@ namespace OpenTS2.Engine.Tests
         private List<UIComponent> _instances = new List<UIComponent>();
         void LoadAllUIPackages()
         {
-            EPManager.Get().InstalledProducts = 0x3EFFF;
+            EPManager.Instance.InstalledProducts = 0x3EFFF;
             ContentLoading.LoadContentStartup();
         }
 
         void LoadBGUIPackage()
         {
-            EPManager.Get().InstalledProducts = (int)ProductFlags.BaseGame;
+            EPManager.Instance.InstalledProducts = (int)ProductFlags.BaseGame;
             ContentLoading.LoadContentStartup();
         }
 

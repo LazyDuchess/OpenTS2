@@ -49,7 +49,7 @@ namespace OpenTS2.SimAntics
 
         void InitializeGlobalState()
         {
-            var epManager = EPManager.Get();
+            var epManager = EPManager.Instance;
             var epFlags1 = (short)(epManager.InstalledProducts & 0xFFFF);
             var epFlags2 = (short)(epManager.InstalledProducts >> 16);
             SetGlobal(VMGlobals.GameEditionFlags1, epFlags1);
