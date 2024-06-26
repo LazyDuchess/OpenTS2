@@ -25,6 +25,10 @@ public class ContentManagerTest
         TestCore.Initialize();
         var contentManager = ContentManager.Instance;
         contentManager.AddPackage("TestAssets/TestPackage.package");
+        foreach(var entry in contentManager.ContentEntries)
+        {
+            UnityEngine.Debug.Log(entry.FilePath);
+        }
         var stringAsset = contentManager.GetAsset<StringSetAsset>(new ResourceKey(1, "testpackage", TypeIDs.STR));
         Assert.IsNotNull(stringAsset);
 

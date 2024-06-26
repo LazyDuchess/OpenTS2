@@ -13,15 +13,11 @@ using UnityEngine;
 /// </summary>
 public static class TestCore
 {
-    static bool Initialized = false;
-
     /// <summary>
     /// Initializes all singletons, systems and the game assembly.
     /// </summary>
     public static void Initialize()
     {
-        if (Initialized)
-            return;
         var settings = new Settings()
         {
             CustomContentEnabled = false,
@@ -35,6 +31,5 @@ public static class TestCore
         CodecAttribute.Initialize();
         AssemblyHelper.InitializeLoadedAssemblies();
         VMPrimitiveRegistry.Initialize();
-        Initialized = true;
     }
 }
