@@ -31,7 +31,7 @@ namespace OpenTS2.Content
         private void OnFinishedLoading()
         {
             _objectByGUID = new Dictionary<uint, ObjectDefinitionAsset>();
-            var objectList = ContentProvider.Get().GetAssetsOfType<ObjectDefinitionAsset>(TypeIDs.OBJD); 
+            var objectList = ContentManager.Instance.GetAssetsOfType<ObjectDefinitionAsset>(TypeIDs.OBJD); 
             foreach(ObjectDefinitionAsset element in objectList)
             {
                 RegisterObject(element);

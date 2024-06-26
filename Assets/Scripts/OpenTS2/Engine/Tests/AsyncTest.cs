@@ -52,13 +52,13 @@ namespace OpenTS2.Engine.Tests
 
         void OnFinishLoading()
         {
-            var contentProvider = ContentProvider.Get();
+            var contentManager = ContentManager.Instance;
             stopW.Stop();
             UnityEngine.Debug.Log("Done loading packages!");
-            UnityEngine.Debug.Log(contentProvider.ContentEntries.Count + " packages loaded.");
+            UnityEngine.Debug.Log(contentManager.ContentEntries.Count + " packages loaded.");
             UnityEngine.Debug.Log("Package loading took " + (stopW.ElapsedTicks * 1000000 / Stopwatch.Frequency) + " microseconds");
-            PopupBackgroundImage.texture = contentProvider.GetAsset<TextureAsset>(new ResourceKey(0xA9600400, 0x499DB772, 0x856DDBAC)).Texture;
-            BackgroundImage.texture = contentProvider.GetAsset<TextureAsset>(new ResourceKey(0xCCC9AF70, 0x499DB772, 0x856DDBAC)).Texture;
+            PopupBackgroundImage.texture = contentManager.GetAsset<TextureAsset>(new ResourceKey(0xA9600400, 0x499DB772, 0x856DDBAC)).Texture;
+            BackgroundImage.texture = contentManager.GetAsset<TextureAsset>(new ResourceKey(0xCCC9AF70, 0x499DB772, 0x856DDBAC)).Texture;
         }
     }
 }

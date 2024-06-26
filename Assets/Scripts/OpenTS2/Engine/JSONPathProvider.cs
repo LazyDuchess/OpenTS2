@@ -27,10 +27,10 @@ namespace OpenTS2.Engine
     /// <summary>
     /// Provides game paths from a config.json file.
     /// </summary>
-    public class JSONPathProvider : IPathProvider
+    public class JSONPathManager : IPathManager
     {
         readonly JSONConfig _config;
-        public JSONPathProvider()
+        public JSONPathManager()
         {
             var dir = new DirectoryInfo(Application.dataPath).Parent.FullName;
             _config = JsonUtility.FromJson<JSONConfig>(File.ReadAllText(Path.Combine(dir, "config.json")));

@@ -107,7 +107,7 @@ namespace OpenTS2.Scenes
 
             if (!_roadMaterialLookup.TryGetValue(roadTextureName, out Material roadMaterial))
             {
-                var texture = ContentProvider.Get().GetAsset<ScenegraphTextureAsset>(new ResourceKey(roadTextureName,
+                var texture = ContentManager.Instance.GetAsset<ScenegraphTextureAsset>(new ResourceKey(roadTextureName,
                 GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR));
 
                 if (texture == null)
@@ -118,7 +118,7 @@ namespace OpenTS2.Scenes
 
                 roadMaterial = new Material(Shader.Find("OpenTS2/Road"))
                 {
-                    mainTexture = texture.GetSelectedImageAsUnityTexture(ContentProvider.Get())
+                    mainTexture = texture.GetSelectedImageAsUnityTexture()
                 };
 
                 roadMaterial.mainTexture.wrapMode = TextureWrapMode.Clamp;
@@ -203,7 +203,7 @@ namespace OpenTS2.Scenes
             {
                 // Render the road
                 // RenderRoad(bridge.Road)
-                var model = ContentProvider.Get().GetAsset<ScenegraphResourceAsset>(new ResourceKey(bridge.ResourceName,
+                var model = ContentManager.Instance.GetAsset<ScenegraphResourceAsset>(new ResourceKey(bridge.ResourceName,
                     GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_CRES));
 
                 var bridgeObject = model.CreateRootGameObject();
@@ -228,7 +228,7 @@ namespace OpenTS2.Scenes
                     return;
                 }
 
-                var model = ContentProvider.Get().GetAsset<ScenegraphResourceAsset>(new ResourceKey(resourceName,
+                var model = ContentManager.Instance.GetAsset<ScenegraphResourceAsset>(new ResourceKey(resourceName,
                     GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_CRES));
 
                 var decorationObject = model.CreateRootGameObject();

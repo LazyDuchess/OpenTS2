@@ -58,7 +58,7 @@ namespace OpenTS2.Rendering.Materials
                             bumpMapEnabled = true;
                         break;
                     case "stdMatNormalMapTextureName":
-                        bumpMapTexture = ContentProvider.Get().GetAsset<ScenegraphTextureAsset>(
+                        bumpMapTexture = ContentManager.Instance.GetAsset<ScenegraphTextureAsset>(
                             new ResourceKey(property.Value + "_txtr", definition.GlobalTGI.GroupID, TypeIDs.SCENEGRAPH_TXTR)
                         );
                         if (bumpMapTexture == null)
@@ -73,7 +73,7 @@ namespace OpenTS2.Rendering.Materials
                         break;
                     case "stdMatBaseTextureName":
                         var textureName = property.Value;
-                        var texture = ContentProvider.Get().GetAsset<ScenegraphTextureAsset>(
+                        var texture = ContentManager.Instance.GetAsset<ScenegraphTextureAsset>(
                             new ResourceKey(textureName + "_txtr", definition.GlobalTGI.GroupID, TypeIDs.SCENEGRAPH_TXTR)
                         );
                         if (texture == null)
@@ -82,7 +82,7 @@ namespace OpenTS2.Rendering.Materials
                             break;
                         }
                         definition.Textures.Add(texture);
-                        material.mainTexture = texture.GetSelectedImageAsUnityTexture(ContentProvider.Get());
+                        material.mainTexture = texture.GetSelectedImageAsUnityTexture();
                         break;
                     case "stdMatAlphaMultiplier":
                         alphaMul = float.Parse(property.Value);
@@ -102,7 +102,7 @@ namespace OpenTS2.Rendering.Materials
             if (bumpMapEnabled && bumpMapTexture != null)
             {
                 definition.Textures.Add(bumpMapTexture);
-                material.SetTexture(BumpMap, bumpMapTexture.GetSelectedImageAsUnityTexture(ContentProvider.Get()));
+                material.SetTexture(BumpMap, bumpMapTexture.GetSelectedImageAsUnityTexture());
             }
 
             var neighborhood = NeighborhoodManager.CurrentNeighborhood;

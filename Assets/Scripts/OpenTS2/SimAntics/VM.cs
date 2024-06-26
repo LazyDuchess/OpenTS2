@@ -77,7 +77,7 @@ namespace OpenTS2.SimAntics
         /// </summary>
         public static BHAVAsset GetBHAV(ushort id, uint groupID)
         {
-            return ContentProvider.Get().GetAsset<BHAVAsset>(new ResourceKey(id, groupID, TypeIDs.BHAV));
+            return ContentManager.Instance.GetAsset<BHAVAsset>(new ResourceKey(id, groupID, TypeIDs.BHAV));
         }
 
         public VMEntity GetEntityByID(short id)

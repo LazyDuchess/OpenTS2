@@ -34,36 +34,36 @@ namespace OpenTS2.Scenes
             var terrainType = terrain.TerrainType;
 
             _meshFilter = GetComponent<MeshFilter>();
-            var contentProvider = ContentProvider.Get();
+            var contentManager = ContentManager.Instance;
             var meshRenderer = GetComponent<MeshRenderer>();
             // Using .material here cause i want to instantiate it
             _terrainMaterial = meshRenderer.material;
             _terrainMaterial.shader = terrainType.TerrainShader;
             _terrainMaterial.SetVector("_LightVector", Sun.forward);
 
-            var matCap = contentProvider.GetAsset<TextureAsset>(s_matCapKey);
-            var smooth = contentProvider.GetAsset<ScenegraphTextureAsset>(terrainType.Texture);
-            var variation1 = contentProvider.GetAsset<ScenegraphTextureAsset>(terrainType.Texture1);
-            var variation2 = contentProvider.GetAsset<ScenegraphTextureAsset>(terrainType.Texture2);
-            var cliff = contentProvider.GetAsset<ScenegraphTextureAsset>(s_cliffKey);
-            var shore = contentProvider.GetAsset<ScenegraphTextureAsset>(s_shoreKey);
-            var roughness = contentProvider.GetAsset<ScenegraphTextureAsset>(terrainType.Roughness);
-            var roughness1 = contentProvider.GetAsset<ScenegraphTextureAsset>(terrainType.Roughness1);
-            var roughness2 = contentProvider.GetAsset<ScenegraphTextureAsset>(terrainType.Roughness2);
+            var matCap = contentManager.GetAsset<TextureAsset>(s_matCapKey);
+            var smooth = contentManager.GetAsset<ScenegraphTextureAsset>(terrainType.Texture);
+            var variation1 = contentManager.GetAsset<ScenegraphTextureAsset>(terrainType.Texture1);
+            var variation2 = contentManager.GetAsset<ScenegraphTextureAsset>(terrainType.Texture2);
+            var cliff = contentManager.GetAsset<ScenegraphTextureAsset>(s_cliffKey);
+            var shore = contentManager.GetAsset<ScenegraphTextureAsset>(s_shoreKey);
+            var roughness = contentManager.GetAsset<ScenegraphTextureAsset>(terrainType.Roughness);
+            var roughness1 = contentManager.GetAsset<ScenegraphTextureAsset>(terrainType.Roughness1);
+            var roughness2 = contentManager.GetAsset<ScenegraphTextureAsset>(terrainType.Roughness2);
             AddReference(matCap, smooth, variation1, variation2, cliff, shore, roughness1, roughness2);
             if (matCap != null)
             {
                 matCap.Texture.wrapMode = TextureWrapMode.Clamp;
                 _terrainMaterial.SetTexture("_MatCap", matCap.Texture);
             }
-            _terrainMaterial.mainTexture = smooth.GetSelectedImageAsUnityTexture(contentProvider);
-            _terrainMaterial.SetTexture("_Variation1", variation1.GetSelectedImageAsUnityTexture(contentProvider));
-            _terrainMaterial.SetTexture("_Variation2", variation2.GetSelectedImageAsUnityTexture(contentProvider));
-            _terrainMaterial.SetTexture("_CliffTex", cliff.GetSelectedImageAsUnityTexture(contentProvider));
-            _terrainMaterial.SetTexture("_Shore", shore.GetSelectedImageAsUnityTexture(contentProvider));
-            _terrainMaterial.SetTexture("_Roughness", roughness.GetSelectedImageAsUnityTexture(contentProvider));
-            _terrainMaterial.SetTexture("_Roughness1", roughness1.GetSelectedImageAsUnityTexture(contentProvider));
-            _terrainMaterial.SetTexture("_Roughness2", roughness2.GetSelectedImageAsUnityTexture(contentProvider));
+            _terrainMaterial.mainTexture = smooth.GetSelectedImageAsUnityTexture();
+            _terrainMaterial.SetTexture("_Variation1", variation1.GetSelectedImageAsUnityTexture());
+            _terrainMaterial.SetTexture("_Variation2", variation2.GetSelectedImageAsUnityTexture());
+            _terrainMaterial.SetTexture("_CliffTex", cliff.GetSelectedImageAsUnityTexture());
+            _terrainMaterial.SetTexture("_Shore", shore.GetSelectedImageAsUnityTexture());
+            _terrainMaterial.SetTexture("_Roughness", roughness.GetSelectedImageAsUnityTexture());
+            _terrainMaterial.SetTexture("_Roughness1", roughness1.GetSelectedImageAsUnityTexture());
+            _terrainMaterial.SetTexture("_Roughness2", roughness2.GetSelectedImageAsUnityTexture());
             SetTerrainMesh();
         }
 

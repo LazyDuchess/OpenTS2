@@ -25,8 +25,8 @@ namespace OpenTS2.Content
         public static void Initialize()
         {
             _neighborHoods.Clear();
-            var contentProvider = ContentProvider.Get();
-            var allInfos = contentProvider.GetAssetsOfType<NeighborhoodInfoAsset>(TypeIDs.NHOOD_INFO);
+            var contentManager = ContentManager.Instance;
+            var allInfos = contentManager.GetAssetsOfType<NeighborhoodInfoAsset>(TypeIDs.NHOOD_INFO);
             foreach(var ninfo in allInfos)
             {
                 var nhood = new Neighborhood(ninfo);
@@ -34,7 +34,7 @@ namespace OpenTS2.Content
             }
 
             // Create a mapping of GUID -> cres files for neighborhood objects.
-            var hoodObjects = contentProvider.GetAssetsOfType<NeighborhoodObjectAsset>(TypeIDs.NHOOD_OBJECT);
+            var hoodObjects = contentManager.GetAssetsOfType<NeighborhoodObjectAsset>(TypeIDs.NHOOD_OBJECT);
             foreach (var objectAsset in hoodObjects)
             {
                 NeighborhoodObjects[objectAsset.Guid] = objectAsset.ModelName;
@@ -46,7 +46,7 @@ namespace OpenTS2.Content
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.None;
             CursorController.Cursor = CursorController.CursorType.Hourglass;
-            ContentProvider.Get().Changes.SaveChanges();
+            ContentManager.Instance.Changes.SaveChanges();
             if (CurrentNeighborhood != null)
                 ContentLoading.UnloadNeighborhoodContentSync();
             CurrentNeighborhood = null;
@@ -57,7 +57,7 @@ namespace OpenTS2.Content
         public static void EnterNeighborhood(Neighborhood neighborhood)
         {
             CursorController.Cursor = CursorController.CursorType.Hourglass;
-            ContentProvider.Get().Changes.SaveChanges();
+            ContentManager.Instance.Changes.SaveChanges();
             if (CurrentNeighborhood != null)
                 ContentLoading.UnloadNeighborhoodContentSync();
             ContentLoading.LoadNeighborhoodContentSync(neighborhood);

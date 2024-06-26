@@ -1,7 +1,7 @@
 ﻿using OpenTS2.Content;
 using OpenTS2.Content.Interfaces;
 
-public class TestPathProvider : IPathProvider
+public class TestPathManager : IPathManager
 {
     public string GetBinPathForProduct(ProductFlags productFlag)
     {

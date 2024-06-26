@@ -29,7 +29,7 @@ namespace OpenTS2.Content.DBPF.Scenegraph
             if (groupId != 0)
                 key = key.WithGroupID(groupId);
 
-            var model = ContentProvider.Get().GetAsset<ScenegraphModelAsset>(key);
+            var model = ContentManager.Instance.GetAsset<ScenegraphModelAsset>(key);
             Debug.Assert(model != null);
             return model;
         }

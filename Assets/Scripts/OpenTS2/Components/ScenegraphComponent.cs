@@ -338,7 +338,7 @@ namespace OpenTS2.Components
             Debug.Assert(resourceRef is ExternalReference);
             var key = rCol.FileLinks[((ExternalReference)resourceRef).FileLinksIndex];
 
-            var resourceAsset = ContentProvider.Get().GetAsset<ScenegraphResourceAsset>(key);
+            var resourceAsset = ContentManager.Instance.GetAsset<ScenegraphResourceAsset>(key);
             if (resourceAsset == null)
             {
                 Debug.LogWarning($"Unable to find cResourceNode with key {key} and name {resource.ResourceName}");
@@ -367,7 +367,7 @@ namespace OpenTS2.Components
                 // Use our groupId if the reference has a local group id.
                 shapeKey = shapeKey.WithGroupID(_resourceAssetKey.GroupID);
             }
-            var shape = ContentProvider.Get().GetAsset<ScenegraphShapeAsset>(shapeKey);
+            var shape = ContentManager.Instance.GetAsset<ScenegraphShapeAsset>(shapeKey);
 
             // Hold a strong reference to the shape.
             parent.GetComponent<AssetReferenceComponent>().AddReference(shape);

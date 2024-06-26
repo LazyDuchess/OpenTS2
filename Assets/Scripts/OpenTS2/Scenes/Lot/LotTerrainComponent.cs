@@ -50,11 +50,11 @@ namespace OpenTS2.Scenes.Lot
             return this;
         }
 
-        private (ScenegraphTextureAsset color, ScenegraphTextureAsset bump) LoadTexture(ContentProvider contentProvider, string name)
+        private (ScenegraphTextureAsset color, ScenegraphTextureAsset bump) LoadTexture(ContentManager contentManager, string name)
         {
             var result = (
-                contentProvider.GetAsset<ScenegraphTextureAsset>(new ResourceKey($"{name}_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR)),
-                contentProvider.GetAsset<ScenegraphTextureAsset>(new ResourceKey($"{name}-bump_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR))
+                contentManager.GetAsset<ScenegraphTextureAsset>(new ResourceKey($"{name}_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR)),
+                contentManager.GetAsset<ScenegraphTextureAsset>(new ResourceKey($"{name}-bump_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR))
             );
 
             AddReference(result.Item1, result.Item2);
@@ -67,11 +67,11 @@ namespace OpenTS2.Scenes.Lot
             _2DArrayView<byte>[] blendMaskData = _architecture.BlendMasks;
             LotTexturesAsset textures = _architecture.BlendTextures;
 
-            var contentProvider = ContentProvider.Get();
+            var contentManager = ContentManager.Instance;
 
-            var baseTexture = LoadTexture(contentProvider, textures.BaseTexture);
+            var baseTexture = LoadTexture(contentManager, textures.BaseTexture);
 
-            _baseTexture = baseTexture.color.GetSelectedImageAsUnityTexture(contentProvider);
+            _baseTexture = baseTexture.color.GetSelectedImageAsUnityTexture();
 
             var blendTextures = new (Texture2D color, Texture2D bump)[textures.BlendTextures.Length];
 
@@ -81,8 +81,8 @@ namespace OpenTS2.Scenes.Lot
             int i = 0;
             foreach (string name in textures.BlendTextures)
             {
-                var texture = LoadTexture(contentProvider, name);
-                blendTextures[i] = (texture.color?.GetSelectedImageAsUnityTexture(contentProvider) ?? Texture2D.whiteTexture, texture.bump?.GetSelectedImageAsUnityTexture(contentProvider) ?? Texture2D.whiteTexture);
+                var texture = LoadTexture(contentManager, name);
+                blendTextures[i] = (texture.color?.GetSelectedImageAsUnityTexture() ?? Texture2D.whiteTexture, texture.bump?.GetSelectedImageAsUnityTexture() ?? Texture2D.whiteTexture);
 
                 maxWidth = Math.Max(Math.Max(maxWidth, blendTextures[i].color?.width ?? 0), blendTextures[i].bump?.width ?? 0);
                 maxHeight = Math.Max(Math.Max(maxHeight, blendTextures[i].color?.height ?? 0), blendTextures[i].bump?.height ?? 0);

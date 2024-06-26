@@ -31,8 +31,8 @@ namespace OpenTS2.UI
             var rawImage = uiComponent.gameObject.AddComponent<RawImage>();
             if (IgnoreMouse)
                 rawImage.raycastTarget = false;
-            var contentProvider = ContentProvider.Get();
-            var imageAsset = contentProvider.GetAsset<TextureAsset>(Image);
+            var contentManager = ContentManager.Instance;
+            var imageAsset = contentManager.GetAsset<TextureAsset>(Image);
             if (imageAsset != null)
                 uiComponent.SetTexture(imageAsset);
             uiComponent.ClickSound = ClickSound;

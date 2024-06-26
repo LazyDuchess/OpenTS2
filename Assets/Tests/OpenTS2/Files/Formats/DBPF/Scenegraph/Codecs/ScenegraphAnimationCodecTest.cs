@@ -15,13 +15,13 @@ public class ScenegraphAnimationCodecTest
     public void SetUp()
     {
         TestMain.Initialize();
-        ContentProvider.Get().AddPackage("TestAssets/Scenegraph/animation.package");
+        ContentManager.Instance.AddPackage("TestAssets/Scenegraph/animation.package");
     }
 
     [Test]
     public void TestLoadsAnimationNode()
     {
-        var animationAsset = ContentProvider.Get()
+        var animationAsset = ContentManager.Instance
             .GetAsset<ScenegraphAnimationAsset>(new ResourceKey("a2o-pinball-play-lose_anim", GroupIDs.Scenegraph,
                 TypeIDs.SCENEGRAPH_ANIM));
         Assert.IsNotNull(animationAsset);
@@ -36,7 +36,7 @@ public class ScenegraphAnimationCodecTest
     [Test]
     public void TestLoadsAnimationAndHasCorrectChannels()
     {
-        var animationAsset = ContentProvider.Get()
+        var animationAsset = ContentManager.Instance
             .GetAsset<ScenegraphAnimationAsset>(new ResourceKey("o-vehiclePizza-driveOff_anim", GroupIDs.Scenegraph,
                 TypeIDs.SCENEGRAPH_ANIM));
 
@@ -116,7 +116,7 @@ public class ScenegraphAnimationCodecTest
     [Test]
     public void TestInverseKinematicChainChannelsAreCorrect()
     {
-        var animationAsset = ContentProvider.Get()
+        var animationAsset = ContentManager.Instance
             .GetAsset<ScenegraphAnimationAsset>(new ResourceKey("a2o-exerciseMachine-benchPress-start_anim", GroupIDs.Scenegraph,
                 TypeIDs.SCENEGRAPH_ANIM));
 
@@ -168,7 +168,7 @@ public class ScenegraphAnimationCodecTest
     [Test]
     public void TestLoadsInverseKinematicChains()
     {
-        var animationAsset = ContentProvider.Get()
+        var animationAsset = ContentManager.Instance
             .GetAsset<ScenegraphAnimationAsset>(new ResourceKey("a2o-pinball-play-lose_anim", GroupIDs.Scenegraph,
                 TypeIDs.SCENEGRAPH_ANIM));
 
@@ -261,7 +261,7 @@ public class ScenegraphAnimationCodecTest
     [Test]
     public void LoadsInverseKinematicChainsWithMultipleTargets()
     {
-        var animationAsset = ContentProvider.Get()
+        var animationAsset = ContentManager.Instance
             .GetAsset<ScenegraphAnimationAsset>(new ResourceKey("a2o-exerciseMachine-benchPress-start_anim", GroupIDs.Scenegraph,
                 TypeIDs.SCENEGRAPH_ANIM));
 

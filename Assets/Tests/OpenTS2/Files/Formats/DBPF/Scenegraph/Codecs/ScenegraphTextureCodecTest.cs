@@ -14,16 +14,16 @@ public class ScenegraphTextureCodecTest
     public void SetUp()
     {
         TestMain.Initialize();
-        ContentProvider.Get().AddPackage("TestAssets/Scenegraph/textures.package");
+        ContentManager.Instance.AddPackage("TestAssets/Scenegraph/textures.package");
     }
 
     [Test]
     public void TestLoadsTexturesWithNoLifo()
     {
         var textureAsset =
-            ContentProvider.Get().GetAsset<ScenegraphTextureAsset>(new ResourceKey("brick_dxt1_no_lifo_txtr", 0x1C0532FA,
+            ContentManager.Instance.GetAsset<ScenegraphTextureAsset>(new ResourceKey("brick_dxt1_no_lifo_txtr", 0x1C0532FA,
                 TypeIDs.SCENEGRAPH_TXTR));
-        var texture = textureAsset.GetSelectedImageAsUnityTexture(ContentProvider.Get());
+        var texture = textureAsset.GetSelectedImageAsUnityTexture();
 
         Assert.That(texture.width, Is.EqualTo(128));
         Assert.That(texture.height, Is.EqualTo(128));
@@ -33,7 +33,7 @@ public class ScenegraphTextureCodecTest
     public void TestLoadedImageBlockWithNoLifoHasCorrectDetails()
     {
         var textureAsset =
-            ContentProvider.Get().GetAsset<ScenegraphTextureAsset>(new ResourceKey("brick_dxt1_no_lifo_txtr", 0x1C0532FA,
+            ContentManager.Instance.GetAsset<ScenegraphTextureAsset>(new ResourceKey("brick_dxt1_no_lifo_txtr", 0x1C0532FA,
                 TypeIDs.SCENEGRAPH_TXTR));
         var imageBlock = textureAsset.ImageDataBlock;
         
@@ -54,9 +54,9 @@ public class ScenegraphTextureCodecTest
     public void TestLoadsTextureWithLifo()
     {
         var textureAsset =
-            ContentProvider.Get().GetAsset<ScenegraphTextureAsset>(new ResourceKey("brick_dxt1_txtr", 0x1C0532FA,
+            ContentManager.Instance.GetAsset<ScenegraphTextureAsset>(new ResourceKey("brick_dxt1_txtr", 0x1C0532FA,
                 TypeIDs.SCENEGRAPH_TXTR));
-        var texture = textureAsset.GetSelectedImageAsUnityTexture(ContentProvider.Get());
+        var texture = textureAsset.GetSelectedImageAsUnityTexture();
 
         Assert.That(texture.width, Is.EqualTo(256));
         Assert.That(texture.height, Is.EqualTo(256));
@@ -66,7 +66,7 @@ public class ScenegraphTextureCodecTest
     public void TestLoadedImageBlockWithLifoHasCorrectDetails()
     {
         var textureAsset =
-            ContentProvider.Get().GetAsset<ScenegraphTextureAsset>(new ResourceKey("brick_dxt1_txtr", 0x1C0532FA,
+            ContentManager.Instance.GetAsset<ScenegraphTextureAsset>(new ResourceKey("brick_dxt1_txtr", 0x1C0532FA,
                 TypeIDs.SCENEGRAPH_TXTR));
         var imageBlock = textureAsset.ImageDataBlock;
         
@@ -97,11 +97,11 @@ public class ScenegraphTextureCodecTest
         // but we can't have a 1x0 resolution texture, so gotta make sure we clamp that lower value to at least 1
         // pixel :)
         var textureAsset =
-            ContentProvider.Get().GetAsset<ScenegraphTextureAsset>(new ResourceKey("small_non_square_txtr", 0x1C0532FA,
+            ContentManager.Instance.GetAsset<ScenegraphTextureAsset>(new ResourceKey("small_non_square_txtr", 0x1C0532FA,
                 TypeIDs.SCENEGRAPH_TXTR));
 
         // Check that the smallest mip is a 1x1 image.
-        var texture = textureAsset.GetSelectedImageAsUnityTexture(ContentProvider.Get());
+        var texture = textureAsset.GetSelectedImageAsUnityTexture();
         Assert.That(texture.GetPixels32(5).Length, Is.EqualTo(1));
     }
 
@@ -110,10 +110,10 @@ public class ScenegraphTextureCodecTest
     {
         // DXT3 blocks are 4x4 but in this situation we end up with a width of 2 and height of 8. Make sure our block
         // iteration loop can handle that.
-        var textureAsset = ContentProvider.Get().GetAsset<ScenegraphTextureAsset>(new ResourceKey("neighborhood-stopsign_txtr", 0x1C0532FA,
+        var textureAsset = ContentManager.Instance.GetAsset<ScenegraphTextureAsset>(new ResourceKey("neighborhood-stopsign_txtr", 0x1C0532FA,
             TypeIDs.SCENEGRAPH_TXTR));
 
-        var texture = textureAsset.GetSelectedImageAsUnityTexture(ContentProvider.Get());
+        var texture = textureAsset.GetSelectedImageAsUnityTexture();
         Assert.That(texture.GetPixels32(6).Length, Is.EqualTo(1));
     }
 }

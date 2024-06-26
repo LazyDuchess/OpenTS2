@@ -143,9 +143,9 @@ namespace OpenTS2.Audio
 
         private void PlayNextSong()
         {
-            var contentProvider = ContentProvider.Get();
+            var contentManager = ContentManager.Instance;
             var currentSong = _currentMusicCategory.PopNextSong();
-            var songAsset = contentProvider.GetAsset<AudioAsset>(currentSong.Key);
+            var songAsset = contentManager.GetAsset<AudioAsset>(currentSong.Key);
             _tsAudioSource.Audio = songAsset;
             _tsAudioSource.Play();
         }

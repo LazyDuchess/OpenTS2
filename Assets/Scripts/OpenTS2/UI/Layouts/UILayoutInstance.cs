@@ -19,8 +19,8 @@ namespace OpenTS2.UI.Layouts
         protected abstract ResourceKey UILayoutResourceKey { get; }
         public UILayoutInstance(Transform parent)
         {
-            var contentProvider = ContentProvider.Get();
-            var layout = contentProvider.GetAsset<UILayout>(UILayoutResourceKey);
+            var contentManager = ContentManager.Instance;
+            var layout = contentManager.GetAsset<UILayout>(UILayoutResourceKey);
             Components = layout.Instantiate(parent);
         }
     }

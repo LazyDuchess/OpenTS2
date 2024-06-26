@@ -32,11 +32,11 @@ namespace OpenTS2.Audio
         public static List<ResourceKey> AudioAssets { get; private set; }
         public static Action OnInitialized;
         private static Dictionary<Tuple<uint,uint>, ResourceKey> AudioAssetByInstanceID;
-        private static ContentProvider ContentProvider;
+        private static ContentManager ContentManager;
 
         private void Awake()
         {
-            ContentProvider = ContentProvider.Get();
+            ContentManager = ContentManager.Instance;
             Core.OnFinishedLoading += Initialize;
         }
 
@@ -53,7 +53,7 @@ namespace OpenTS2.Audio
                 {
                     var songName = Path.GetFileNameWithoutExtension(audioFile);
                     var key = new ResourceKey(songName, FileUtils.LowHash(stationName), TypeIDs.AUDIO);
-                    ContentProvider.MapFileToResource(audioFile, key);
+                    ContentManager.MapFileToResource(audioFile, key);
                     CustomSongNames[key] = songName;
                 }
             }
@@ -63,7 +63,7 @@ namespace OpenTS2.Audio
         {
             LoadCustomMusic();
             AudioAssetByInstanceID = new Dictionary<Tuple<uint, uint>, ResourceKey>();
-            AudioAssets = ContentProvider.ResourceMap.Keys.Where(key => key.TypeID == TypeIDs.AUDIO || key.TypeID == TypeIDs.HITLIST).ToList();
+            AudioAssets = ContentManager.ResourceMap.Keys.Where(key => key.TypeID == TypeIDs.AUDIO || key.TypeID == TypeIDs.HITLIST).ToList();
             foreach(var audioAsset in AudioAssets)
             {
                 AudioAssetByInstanceID[new Tuple<uint, uint>(audioAsset.InstanceID, 0)] = audioAsset;
@@ -109,7 +109,7 @@ namespace OpenTS2.Audio
 
         public static void PlayUISound(ResourceKey audioKey)
         {
-            var asset = ContentProvider.GetAsset<AudioAsset>(audioKey);
+            var asset = ContentManager.GetAsset<AudioAsset>(audioKey);
             if (asset != null)
             {
                 var audioSource = CreateOneShotAudioSource();

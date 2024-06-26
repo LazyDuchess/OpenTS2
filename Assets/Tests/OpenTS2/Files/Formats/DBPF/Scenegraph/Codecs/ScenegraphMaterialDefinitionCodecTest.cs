@@ -11,13 +11,13 @@ public class ScenegraphMaterialDefinitionCodecTest
     public void SetUp()
     {
         TestMain.Initialize();
-        ContentProvider.Get().AddPackage("TestAssets/Scenegraph/material_definition.package");
+        ContentManager.Instance.AddPackage("TestAssets/Scenegraph/material_definition.package");
     }
 
     [Test]
     public void TestLoadsMaterialDefinitionSuccessfully()
     {
-        var materialAsset = ContentProvider.Get()
+        var materialAsset = ContentManager.Instance
             .GetAsset<ScenegraphMaterialDefinitionAsset>(new ResourceKey("ufocrash_cabin_txmt", 0x1C0532FA,
                 TypeIDs.SCENEGRAPH_TXMT));
 

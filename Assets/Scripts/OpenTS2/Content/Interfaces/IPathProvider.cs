@@ -16,7 +16,7 @@ namespace OpenTS2.Content.Interfaces
     /// <summary>
     /// Interface for providing paths to the game's user data and game folders.
     /// </summary>
-    public interface IPathProvider
+    public interface IPathManager
     {
         public string GetPathForProduct(ProductFlags productFlag);
         public string GetDataPathForProduct(ProductFlags productFlag);

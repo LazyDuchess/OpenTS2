@@ -11,13 +11,13 @@ public class NeighborhoodDecorationsCodecTest
     public void SetUp()
     {
         TestMain.Initialize();
-        ContentProvider.Get().AddPackage("TestAssets/Codecs/NeighborhoodDecorations.package");
+        ContentManager.Instance.AddPackage("TestAssets/Codecs/NeighborhoodDecorations.package");
     }
 
     [Test]
     public void TestSuccessfullyLoadsDecorations()
     {
-        var decorationsAsset = ContentProvider.Get()
+        var decorationsAsset = ContentManager.Instance
             .GetAssetsOfType<NeighborhoodDecorationsAsset>(TypeIDs.NHOOD_DECORATIONS).Single();
 
         Assert.That(decorationsAsset.FloraDecorations.Length, Is.EqualTo(1208));

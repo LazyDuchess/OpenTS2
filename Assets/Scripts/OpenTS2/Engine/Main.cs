@@ -27,14 +27,14 @@ namespace OpenTS2.Engine
                 return;
             var settings = new Settings();
             var epManager = new EPManager();
-            var contentProvider = new ContentProvider();
-            var effectsManager = new EffectsManager(contentProvider);
-            var catalogManager = new CatalogManager(contentProvider);
+            var contentManager = new ContentManager();
+            var effectsManager = new EffectsManager(contentManager);
+            var catalogManager = new CatalogManager(contentManager);
             var luaManager = new LuaManager();
 
             TerrainManager.Initialize();
             MaterialManager.Initialize();
-            Filesystem.Initialize(new JSONPathProvider(), epManager);
+            Filesystem.Initialize(new JSONPathManager(), epManager);
             CodecAttribute.Initialize();
             CheatSystem.Initialize();
             VMPrimitiveRegistry.Initialize();

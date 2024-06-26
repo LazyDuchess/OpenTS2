@@ -28,8 +28,8 @@ namespace OpenTS2.UI
             }
             public string GetLocalizedString()
             {
-                var contentProvider = ContentProvider.Get();
-                var stringSet = contentProvider.GetAsset<StringSetAsset>(StringSet);
+                var contentManager = ContentManager.Instance;
+                var stringSet = contentManager.GetAsset<StringSetAsset>(StringSet);
                 if (stringSet == null)
                     return "";
                 return stringSet.GetString(StringID);

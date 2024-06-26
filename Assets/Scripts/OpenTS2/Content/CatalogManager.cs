@@ -32,12 +32,12 @@ namespace OpenTS2.Content
         Dictionary<uint, CatalogObjectAsset> _entryByGUID = new Dictionary<uint, CatalogObjectAsset>();
         Dictionary<uint, CatalogFenceAsset> _fenceByGUID = new Dictionary<uint, CatalogFenceAsset>();
         Dictionary<uint, CatalogRoofAsset> _roofByGUID = new Dictionary<uint, CatalogRoofAsset>();
-        readonly ContentProvider _provider;
+        readonly ContentManager _manager;
 
-        public CatalogManager(ContentProvider provider)
+        public CatalogManager(ContentManager manager)
         {
             s_instance = this;
-            _provider = provider;
+            _manager = manager;
         }
 
         public void Initialize()
@@ -46,19 +46,19 @@ namespace OpenTS2.Content
             _fenceByGUID = new Dictionary<uint, CatalogFenceAsset>();
             _roofByGUID = new Dictionary<uint, CatalogRoofAsset>();
 
-            var objectList = _provider.GetAssetsOfType<CatalogObjectAsset>(TypeIDs.CATALOG_OBJECT);
+            var objectList = _manager.GetAssetsOfType<CatalogObjectAsset>(TypeIDs.CATALOG_OBJECT);
             foreach (CatalogObjectAsset element in objectList)
             {
                 RegisterObject(element);
             }
 
-            var fenceList = _provider.GetAssetsOfType<CatalogFenceAsset>(TypeIDs.CATALOG_FENCE);
+            var fenceList = _manager.GetAssetsOfType<CatalogFenceAsset>(TypeIDs.CATALOG_FENCE);
             foreach (CatalogFenceAsset element in fenceList)
             {
                 RegisterFence(element);
             }
 
-            var roofList = _provider.GetAssetsOfType<CatalogRoofAsset>(TypeIDs.CATALOG_ROOF);
+            var roofList = _manager.GetAssetsOfType<CatalogRoofAsset>(TypeIDs.CATALOG_ROOF);
             foreach (CatalogRoofAsset element in roofList)
             {
                 RegisterRoof(element);

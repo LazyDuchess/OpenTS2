@@ -26,9 +26,9 @@ public static class TestMain
             Language = Languages.USEnglish
         };
         var epManager = new EPManager((int)ProductFlags.BaseGame);
-        var contentProvider = new ContentProvider();
+        var contentManager = new ContentManager();
         var luaManager = new LuaManager();
-        Filesystem.Initialize(new TestPathProvider(), epManager);
+        Filesystem.Initialize(new TestPathManager(), epManager);
         CodecAttribute.Initialize();
         AssemblyHelper.InitializeLoadedAssemblies();
         VMPrimitiveRegistry.Initialize();

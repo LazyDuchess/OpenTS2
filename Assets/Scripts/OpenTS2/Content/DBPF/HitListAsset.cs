@@ -18,7 +18,7 @@ namespace OpenTS2.Content.DBPF
 
         public AudioAsset GetRandomAudioAsset()
         {
-            return ContentProvider.Get().GetAsset<AudioAsset>(Sounds[UnityEngine.Random.Range(0, Sounds.Length)]);
+            return ContentManager.Instance.GetAsset<AudioAsset>(Sounds[UnityEngine.Random.Range(0, Sounds.Length)]);
         }
     }
 }

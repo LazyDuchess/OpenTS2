@@ -118,7 +118,7 @@ namespace OpenTS2.Engine.Tests
             _nhood = neighborhoodPrefix;
             _lotId = id;
 
-            var contentProvider = ContentProvider.Get();
+            var contentManager = ContentManager.Instance;
 
             var lotsFolderPath = Path.Combine(Filesystem.GetUserPath(), $"Neighborhoods/{NeighborhoodPrefix}/Lots");
             var lotFilename = $"{NeighborhoodPrefix}_Lot{LotID}.package";
@@ -129,7 +129,7 @@ namespace OpenTS2.Engine.Tests
                 return;
             }
 
-            var lotPackage = contentProvider.AddPackage(lotFullPath);
+            var lotPackage = contentManager.AddPackage(lotFullPath);
 
             // Go through each lot object.
             foreach (var entry in lotPackage.Entries)
@@ -142,7 +142,7 @@ namespace OpenTS2.Engine.Tests
                 try
                 {
                     var lotObject = entry.GetAsset<LotObjectAsset>();
-                    var resource = contentProvider.GetAsset<ScenegraphResourceAsset>(
+                    var resource = contentManager.GetAsset<ScenegraphResourceAsset>(
                         new ResourceKey(lotObject.Object.ResourceName + "_cres", GroupIDs.Scenegraph,
                             TypeIDs.SCENEGRAPH_CRES));
                     if (resource == null)

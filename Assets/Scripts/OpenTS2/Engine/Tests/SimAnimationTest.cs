@@ -24,15 +24,15 @@ namespace OpenTS2.Engine.Tests
 
         private void Start()
         {
-            var contentProvider = ContentProvider.Get();
+            var contentManager = ContentManager.Instance;
 
             // Load base game assets.
-            contentProvider.AddPackages(
+            contentManager.AddPackages(
                 Filesystem.GetPackagesInDirectory(Filesystem.GetDataPathForProduct(ProductFlags.BaseGame) +
                                                   "/Res/Sims3D"));
 
             // Load all animations involving auskel and put them in the dictionary.
-            foreach (var animationAsset in contentProvider.GetAssetsOfType<ScenegraphAnimationAsset>(TypeIDs.SCENEGRAPH_ANIM))
+            foreach (var animationAsset in contentManager.GetAssetsOfType<ScenegraphAnimationAsset>(TypeIDs.SCENEGRAPH_ANIM))
             {
                 var auSkelTarget = animationAsset.AnimResource.AnimTargets.FirstOrDefault(t => t.TagName.ToLower() == "auskel");
                 if (auSkelTarget == null)
@@ -47,7 +47,7 @@ namespace OpenTS2.Engine.Tests
             _sim = SimCharacterComponent.CreateNakedBaseSim();
 
             const string animationName = "a-pose-neutral-stand_anim";
-            var anim = contentProvider.GetAsset<ScenegraphAnimationAsset>(
+            var anim = contentManager.GetAsset<ScenegraphAnimationAsset>(
                 new ResourceKey(animationName, GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_ANIM));
             _sim.AdjustInverseKinematicWeightsForAnimation(anim.AnimResource);
 
@@ -58,7 +58,7 @@ namespace OpenTS2.Engine.Tests
 
             //const string testAnimation = "a-blowHorn_anim";
             const string testAnimation = "a2o-punchingBag-punch-start_anim";
-            anim = contentProvider.GetAsset<ScenegraphAnimationAsset>(
+            anim = contentManager.GetAsset<ScenegraphAnimationAsset>(
                 new ResourceKey(testAnimation, GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_ANIM));
             clip = anim.CreateClipFromResource(_sim.Scenegraph.BoneNamesToRelativePaths, _sim.Scenegraph.BlendNamesToRelativePaths);
             _animationObj.AddClip(clip, testAnimation);

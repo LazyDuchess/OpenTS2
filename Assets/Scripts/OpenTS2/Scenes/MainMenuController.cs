@@ -33,7 +33,7 @@ namespace OpenTS2.Scenes
 
         private void Start()
         {
-            var contentProvider = ContentProvider.Get();
+            var contentManager = ContentManager.Instance;
             ContentLoading.LoadContentStartup();
             PluginSupport.Initialize();
             if (InitialLoadScreenReiaPlayer != null)
@@ -43,7 +43,7 @@ namespace OpenTS2.Scenes
             }
             if (InitialLoadScreenBackgroundImage != null)
             {
-                var bgAsset = contentProvider.GetAsset<TextureAsset>(_initialLoadScreenBackgroundKey);
+                var bgAsset = contentManager.GetAsset<TextureAsset>(_initialLoadScreenBackgroundKey);
                 if (bgAsset != null)
                 {
                     InitialLoadScreenBackgroundImage.SetTexture(bgAsset);
@@ -52,7 +52,7 @@ namespace OpenTS2.Scenes
             }
             if (InitialLoadScreenLogoImage != null)
             {
-                var fgAsset = contentProvider.GetAsset<TextureAsset>(_initialLoadScreenLogoKey);
+                var fgAsset = contentManager.GetAsset<TextureAsset>(_initialLoadScreenLogoKey);
                 if (fgAsset != null)
                 {
                     InitialLoadScreenLogoImage.SetTexture(fgAsset);

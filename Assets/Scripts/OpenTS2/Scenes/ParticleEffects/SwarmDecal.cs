@@ -32,7 +32,7 @@ namespace OpenTS2.Scenes.ParticleEffects
 
         public void SetDecal(DecalEffect effect)
         {
-            _textureAsset = ContentProvider.Get().GetAsset<ScenegraphTextureAsset>(new ResourceKey($"{effect.TextureName}_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR));
+            _textureAsset = ContentManager.Instance.GetAsset<ScenegraphTextureAsset>(new ResourceKey($"{effect.TextureName}_txtr", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXTR));
         }
 
         public void Initialize()
@@ -50,7 +50,7 @@ namespace OpenTS2.Scenes.ParticleEffects
             meshFilter.sharedMesh = terrainMeshFilter.sharedMesh;
 
             _material = new Material(Shader.Find("OpenTS2/NeighborhoodDecal"));
-            _material.mainTexture = _textureAsset.GetSelectedImageAsUnityTexture(ContentProvider.Get());
+            _material.mainTexture = _textureAsset.GetSelectedImageAsUnityTexture();
             _material.SetVector(Location, _position);
             _material.SetVector(Rotation, _rotation);
 

@@ -10,13 +10,13 @@ public class NeighborhoodObjectCodecTest
     public void SetUp()
     {
         TestMain.Initialize();
-        ContentProvider.Get().AddPackage("TestAssets/Codecs/NeighborhoodDecorations.package");
+        ContentManager.Instance.AddPackage("TestAssets/Codecs/NeighborhoodDecorations.package");
     }
 
     [Test]
     public void TestSuccessfullyLoadsNeighborhoodObject()
     {
-        var objectAsset = ContentProvider.Get()
+        var objectAsset = ContentManager.Instance
             .GetAssetsOfType<NeighborhoodObjectAsset>(TypeIDs.NHOOD_OBJECT).Single();
 
         Assert.That(objectAsset.ModelName, Is.EqualTo("ufoCrash_cres"));

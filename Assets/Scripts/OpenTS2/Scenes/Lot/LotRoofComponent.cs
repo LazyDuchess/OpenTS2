@@ -67,7 +67,7 @@ namespace OpenTS2.Scenes.Lot
 
         public void LoadPatterns(uint guid)
         {
-            var contentProvider = ContentProvider.Get();
+            var contentManager = ContentManager.Instance;
             var catalogManager = CatalogManager.Get();
 
             CatalogRoofAsset roof = catalogManager.GetRoofById(guid);

@@ -8,10 +8,10 @@ public class EffectsTest : MonoBehaviour
 {
     private void Start()
     {
-        var contentProvider = ContentProvider.Get();
+        var contentManager = ContentManager.Instance;
 
         // Load base game assets.
-        contentProvider.AddPackages(
+        contentManager.AddPackages(
             Filesystem.GetPackagesInDirectory(Filesystem.GetDataPathForProduct(ProductFlags.BaseGame) + "/Res/Sims3D"));
 
         // Initialize effects manager manually since we aren't using startup controller.

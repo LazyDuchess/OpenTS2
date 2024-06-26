@@ -42,9 +42,9 @@ namespace OpenTS2.Engine.Tests
                 Destroy(instance.gameObject);
             }
             _instances.Clear();
-            var contentProvider = ContentProvider.Get();
+            var contentManager = ContentManager.Instance;
             var key = new ResourceKey(Convert.ToUInt32(Key, 16), 0xA99D8A11, TypeIDs.UI);
-            var uiLayout = contentProvider.GetAsset<UILayout>(key);
+            var uiLayout = contentManager.GetAsset<UILayout>(key);
             _instances.AddRange(uiLayout.Instantiate(UIManager.MainCanvas.transform));
         }
 
@@ -76,7 +76,7 @@ namespace OpenTS2.Engine.Tests
             Core.OnFinishedLoading?.Invoke();
             CreateUI();
             /*
-            var contentProvider = ContentProvider.Get();
+            var contentManager = ContentManager.Get();
             // Main Menu
             //var key = new ResourceKey(0x49001017, 0xA99D8A11, TypeIDs.UI);
             // Neighborhood View
@@ -84,7 +84,7 @@ namespace OpenTS2.Engine.Tests
             //var key = new ResourceKey(0x49001010, 0xA99D8A11, TypeIDs.UI);
             //var key = new ResourceKey(0x49060005, 0xA99D8A11, TypeIDs.UI);
             //var key = new ResourceKey(0x49001024, 0xA99D8A11, TypeIDs.UI);
-            var mainMenuUILayout = contentProvider.GetAsset<UILayout>(key);
+            var mainMenuUILayout = contentManager.GetAsset<UILayout>(key);
             _instances.AddRange(mainMenuUILayout.Instantiate(Canvas));*/
         }
     }

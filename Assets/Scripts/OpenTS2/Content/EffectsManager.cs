@@ -16,24 +16,24 @@ namespace OpenTS2.Content
             return _instance;
         }
 
-        public EffectsManager(ContentProvider provider)
+        public EffectsManager(ContentManager manager)
         {
             _instance = this;
-            _provider = provider;
+            _manager = manager;
         }
 
         private EffectsAsset _effects;
-        private readonly ContentProvider _provider;
+        private readonly ContentManager _manager;
 
         public bool Ready { get; private set; }
 
         public void Initialize()
         {
             // Load effects package.
-            _provider.AddPackages(
+            _manager.AddPackages(
                 Filesystem.GetPackagesInDirectory(Filesystem.GetDataPathForProduct(ProductFlags.BaseGame) +
                                                   "/Res/Effects"));
-            _effects = _provider.GetAsset<EffectsAsset>(new ResourceKey(instanceID: 1, groupID: GroupIDs.Effects,
+            _effects = _manager.GetAsset<EffectsAsset>(new ResourceKey(instanceID: 1, groupID: GroupIDs.Effects,
                 typeID: TypeIDs.EFFECTS));
 
             Debug.Assert(_effects != null, "Couldn't find effects");

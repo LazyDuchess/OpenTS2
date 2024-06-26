@@ -19,25 +19,13 @@ namespace OpenTS2.Content
     /// <summary>
     /// Provides access to reading and writing to assets in packages.
     /// </summary>
-    public class ContentProvider : IDisposable
+    public class ContentManager : IDisposable
     {
-        static ContentProvider s_instance;
-        public static ContentProvider Get()
-        {
-            return s_instance;
-        }
-        public Dictionary<ResourceKey, DBPFEntry> ResourceMap
-        {
-            get { return _resourceMap; }
-        }
-        public List<DBPFFile> ContentEntries
-        {
-            get { return _contentEntries; }
-        }
+        public static ContentManager Instance { get; private set; }
+        public Dictionary<ResourceKey, DBPFEntry> ResourceMap { get; private set; } = new Dictionary<ResourceKey, DBPFEntry>();
+        public List<DBPFFile> ContentEntries { get; private set; } = new List<DBPFFile>();
 
         private readonly Dictionary<ResourceKey, string> _fileMap = new Dictionary<ResourceKey, string>();
-        private readonly Dictionary<ResourceKey, DBPFEntry> _resourceMap = new Dictionary<ResourceKey, DBPFEntry>();
-        private readonly List<DBPFFile> _contentEntries = new List<DBPFFile>();
         private readonly Dictionary<uint, DBPFFile> _entryByGroupID = new Dictionary<uint, DBPFFile>();
         private readonly Dictionary<string, DBPFFile> _entryByPath = new Dictionary<string, DBPFFile>();
         private readonly Dictionary<DBPFFile, DBPFFile> _entryByFile = new Dictionary<DBPFFile, DBPFFile>();
@@ -45,11 +33,11 @@ namespace OpenTS2.Content
         public ContentChanges Changes;
         public Action<ResourceKey> OnContentChangedEventHandler;
 
-        public ContentProvider()
+        public ContentManager()
         {
-            s_instance = this;
-            this.Changes = new ContentChanges(this);
-            this.Cache = new ContentCache(this);
+            Instance = this;
+            Changes = new ContentChanges();
+            Cache = new ContentCache();
         }
 
         public void MapFileToResource(string path, ResourceKey key)
@@ -57,7 +45,7 @@ namespace OpenTS2.Content
             _fileMap[key] = Filesystem.GetRealPath(path);
             var entry = new DBPFEntry();
             entry.TGI = key;
-            _resourceMap[key] = entry;
+            ResourceMap[key] = entry;
         }
 
         AbstractAsset InternalLoadAsset(CacheKey key)
@@ -86,7 +74,7 @@ namespace OpenTS2.Content
         /// <returns>List of DBPFEntries of specified type.</returns>
         public List<DBPFEntry> GetEntriesOfType(uint typeID)
         {
-            return _resourceMap.Where(map => map.Value.GlobalTGI.TypeID == typeID).ToDictionary(x => x.Key, x => x.Value).Values.ToList();
+            return ResourceMap.Where(map => map.Value.GlobalTGI.TypeID == typeID).ToDictionary(x => x.Key, x => x.Value).Values.ToList();
         }
 
         /// <summary>
@@ -238,9 +226,9 @@ namespace OpenTS2.Content
 
         void InternalAddPackage(DBPFFile package)
         {
-            package.Provider = this;
+            package.Manager = this;
             //Resource map goes from first to last, keeps the first resource it finds with the requested TGI.
-            _contentEntries.Insert(0, package);
+            ContentEntries.Insert(0, package);
             AddToTopOfResourceMap(package);
             _entryByGroupID[package.GroupID] = package;
             _entryByPath[package.FilePath] = package;
@@ -254,7 +242,7 @@ namespace OpenTS2.Content
         /// <returns></returns>
         public DBPFEntry GetEntry(ResourceKey key)
         {
-            if (_resourceMap.TryGetValue(key, out DBPFEntry output))
+            if (ResourceMap.TryGetValue(key, out DBPFEntry output))
                 return output;
             return null;
         }
@@ -278,7 +266,7 @@ namespace OpenTS2.Content
         /// <param name="entry">Entry to add</param>
         public void AddToTopOfResourceMap(DBPFEntry entry)
         {
-            _resourceMap[entry.GlobalTGI] = entry;
+            ResourceMap[entry.GlobalTGI] = entry;
             OnContentChangedEventHandler?.Invoke(entry.GlobalTGI);
         }
 
@@ -301,11 +289,11 @@ namespace OpenTS2.Content
         /// <param name="entry">Entry to add to resource map</param>
         public void UpdateOrAddToResourceMap(DBPFEntry entry)
         {
-            if (_resourceMap.TryGetValue(entry.GlobalTGI, out DBPFEntry output))
+            if (ResourceMap.TryGetValue(entry.GlobalTGI, out DBPFEntry output))
             {
                 if (entry.Package == output.Package)
                 {
-                    _resourceMap[entry.GlobalTGI] = entry;
+                    ResourceMap[entry.GlobalTGI] = entry;
                 }
                 else
                 {
@@ -345,11 +333,11 @@ namespace OpenTS2.Content
         /// <param name="package">Package</param>
         public void RemoveFromResourceMap(ResourceKey tgi, DBPFFile package)
         {
-            if (_resourceMap.TryGetValue(tgi, out DBPFEntry output))
+            if (ResourceMap.TryGetValue(tgi, out DBPFEntry output))
             {
                 if (package == output.Package)
                 {
-                    _resourceMap.Remove(tgi);
+                    ResourceMap.Remove(tgi);
                     FindEntryForMap(tgi);
                     OnContentChangedEventHandler?.Invoke(tgi);
                 }
@@ -362,19 +350,19 @@ namespace OpenTS2.Content
         /// <param name="tgi">TGI</param>
         void FindEntryForMap(ResourceKey tgi)
         {
-            foreach (var element in _contentEntries)
+            foreach (var element in ContentEntries)
             {
                 var localTGI = tgi.GlobalGroupID(element.GroupID);
                 var entryByTGI = element.GetEntryByTGI(localTGI);
                 if (entryByTGI != null)
                 {
-                    _resourceMap[tgi] = entryByTGI;
+                    ResourceMap[tgi] = entryByTGI;
                     return;
                 }
                 entryByTGI = element.GetEntryByTGI(tgi);
                 if (entryByTGI != null)
                 {
-                    _resourceMap[tgi] = entryByTGI;
+                    ResourceMap[tgi] = entryByTGI;
                     return;
                 }
             }
@@ -403,10 +391,10 @@ namespace OpenTS2.Content
             //package.Dispose();
             if (_entryByFile.ContainsKey(package))
             {
-                package.Provider = null;
+                package.Manager = null;
                 RemoveFromResourceMap(package);
                 Cache.RemoveAllForPackage(package);
-                _contentEntries.Remove(package);
+                ContentEntries.Remove(package);
                 _entryByGroupID.Remove(package.GroupID);
                 _entryByPath.Remove(package.FilePath);
                 _entryByFile.Remove(package);
@@ -456,7 +444,7 @@ namespace OpenTS2.Content
 
         public void Dispose()
         {
-            foreach(var element in _contentEntries)
+            foreach(var element in ContentEntries)
             {
                 element.Dispose();
             }

@@ -25,8 +25,8 @@ namespace OpenTS2.Audio
         {
             get
             {
-                var contentProvider = ContentProvider.Get();
-                return contentProvider.GetAsset<AudioAsset>(SplashKey);
+                var contentManager = ContentManager.Instance;
+                return contentManager.GetAsset<AudioAsset>(SplashKey);
             }
         }
 
@@ -38,7 +38,7 @@ namespace OpenTS2.Audio
         public Dictionary<uint, MusicCategory> MusicCategoryByHash = new Dictionary<uint, MusicCategory>();
         public Dictionary<uint, List<Song>> PlaylistByHash = new Dictionary<uint, List<Song>>();
 
-        private ContentProvider _contentProvider;
+        private ContentManager _contentManager;
 
         public MusicCategory GetMusicCategory (string name)
         {
@@ -69,14 +69,14 @@ namespace OpenTS2.Audio
         private void Awake()
         {
             Instance = this;
-            _contentProvider = ContentProvider.Get();
+            _contentManager = ContentManager.Instance;
             AudioManager.OnInitialized += Initialize;
         }
 
         private List<ResourceKey> GetMusicTitles()
         {
             var musicTitlesGroupID = FileUtils.GroupHash("MusicTitles");
-            var musicStringSets = _contentProvider.ResourceMap.Keys.Where(x => x.GroupID == musicTitlesGroupID && x.TypeID == TypeIDs.STR).ToList();
+            var musicStringSets = _contentManager.ResourceMap.Keys.Where(x => x.GroupID == musicTitlesGroupID && x.TypeID == TypeIDs.STR).ToList();
             return musicStringSets;
         }
 
@@ -106,7 +106,7 @@ namespace OpenTS2.Audio
                     {
                         foreach (var musicTitle in musicTitles)
                         {
-                            var stringSet = _contentProvider.GetAsset<StringSetAsset>(musicTitle);
+                            var stringSet = _contentManager.GetAsset<StringSetAsset>(musicTitle);
                             var englishStrings = stringSet.StringData.Strings[Languages.USEnglish];
 
                             for (var i = 0; i < englishStrings.Count; i++)
@@ -131,7 +131,7 @@ namespace OpenTS2.Audio
         {
             foreach (var stringSetKey in musicTitles)
             {
-                var stringSet = _contentProvider.GetAsset<StringSetAsset>(stringSetKey);
+                var stringSet = _contentManager.GetAsset<StringSetAsset>(stringSetKey);
 
                 var englishStrings = stringSet.StringData.Strings[Languages.USEnglish];
 
@@ -177,7 +177,7 @@ namespace OpenTS2.Audio
 
         private void LoadMusicCategories()
         {
-            var musicCategoriesEntry = _contentProvider.GetEntry(MusicCategoriesXMLKey);
+            var musicCategoriesEntry = _contentManager.GetEntry(MusicCategoriesXMLKey);
             if (musicCategoriesEntry == null)
                 throw new IOException("Can't find Music Categories XML!");
             var musicCategoriesBytes = musicCategoriesEntry.GetBytes();

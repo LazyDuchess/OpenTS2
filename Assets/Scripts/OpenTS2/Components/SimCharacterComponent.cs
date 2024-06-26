@@ -24,16 +24,16 @@ namespace OpenTS2.Components
         {
             // Load the skeleton, body, hair and face resources.
             const string skeletonResourceName = "auskel_cres";
-            var skeletonAsset = ContentProvider.Get().GetAsset<ScenegraphResourceAsset>(
+            var skeletonAsset = ContentManager.Instance.GetAsset<ScenegraphResourceAsset>(
                 new ResourceKey(skeletonResourceName, GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_CRES));
             const string bodyResourceName = "amBodyNaked_cres";
-            var bodyAsset = ContentProvider.Get().GetAsset<ScenegraphResourceAsset>(
+            var bodyAsset = ContentManager.Instance.GetAsset<ScenegraphResourceAsset>(
                 new ResourceKey(bodyResourceName, GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_CRES));
             const string baldHairResourceName = "amHairBald_cres";
-            var baldHairAsset = ContentProvider.Get().GetAsset<ScenegraphResourceAsset>(
+            var baldHairAsset = ContentManager.Instance.GetAsset<ScenegraphResourceAsset>(
                 new ResourceKey(baldHairResourceName, GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_CRES));
             const string baseFaceResourceName = "amFace_cres";
-            var baseFaceAsset = ContentProvider.Get().GetAsset<ScenegraphResourceAsset>(
+            var baseFaceAsset = ContentManager.Instance.GetAsset<ScenegraphResourceAsset>(
                 new ResourceKey(baseFaceResourceName, GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_CRES));
 
             // Create a scenegraph with all 3 resources.

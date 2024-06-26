@@ -55,7 +55,7 @@ namespace OpenTS2.SimAntics.Primitives
                 param2 = ctx.GetData(param2DataSource, param2DataValue);
             }
 
-            var luaStringSet = ContentProvider.Get().GetAsset<StringSetAsset>(new ResourceKey(stringSetID, stringGroupID, TypeIDs.STR));
+            var luaStringSet = ContentManager.Instance.GetAsset<StringSetAsset>(new ResourceKey(stringSetID, stringGroupID, TypeIDs.STR));
 
             var scriptName = luaStringSet.StringData.GetString(stringIndex, Languages.USEnglish);
             var scriptDesc = luaStringSet.StringData.GetDescription(stringIndex, Languages.USEnglish);
