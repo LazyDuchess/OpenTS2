@@ -73,5 +73,12 @@ namespace OpenTS2.Content
             SceneManager.LoadScene("Neighborhood");
             CursorController.Cursor = CursorController.CursorType.Default;
         }
+
+        public void EnterLot(BaseLotInfoAsset baseLotInfo)
+        {
+            if (CurrentNeighborhood == null)
+                throw new Exception("Must be in a neighborhood to enter a lot");
+            ContentManager.Instance.Changes.SaveChanges();
+        }
     }
 }

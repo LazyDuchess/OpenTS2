@@ -25,7 +25,7 @@ namespace OpenTS2.Files.Formats.DBPF
 
             // Inside the lotInfo is a nested baseLotInfo that carries information about the original lot.
             var baseLotInfo = new BaseLotInfo();
-            baseLotInfo.Read(reader);
+            baseLotInfo.Read(reader, true);
             // Back to the outer LotInfo.
             var locationX = reader.ReadUInt32();
             var locationY = reader.ReadUInt32();

@@ -120,6 +120,7 @@ namespace OpenTS2.Audio
             UpdateVolume();
             Core.OnNeighborhoodEntered += OnNeighborhoodEntered;
             Core.OnBeginLoading += OnBeginLoadingScreen;
+            Core.OnLotLoaded += OnLotLoaded;
         }
 
         private void Update()
@@ -139,6 +140,14 @@ namespace OpenTS2.Audio
         private void OnNeighborhoodEntered()
         {
             StartMusicCategory("NHood");
+        }
+
+        private void OnLotLoaded()
+        {
+            if (CASController.Instance.InCAS)
+                StartMusicCategory("CAS");
+            else
+                Stop();
         }
 
         private void PlayNextSong()

@@ -16,6 +16,7 @@ using UnityEngine.SceneManagement;
 using OpenTS2.Client;
 using OpenTS2.Game;
 using OpenTS2.Audio;
+using OpenTS2.Content.DBPF;
 
 namespace OpenTS2.Engine
 {
@@ -25,6 +26,7 @@ namespace OpenTS2.Engine
         public static Action OnBeginLoading;
         public static Action OnFinishedLoading;
         public static Action OnNeighborhoodEntered;
+        public static Action OnLotLoaded;
         public static bool CoreInitialized = false;
 
         public static void InitializeCore()
@@ -41,6 +43,7 @@ namespace OpenTS2.Engine
             var audioManager = new AudioManager();
             var objectManager = new ObjectManager();
             var nhoodManager = new NeighborhoodManager();
+            var casController = new CASController();
 
             TerrainManager.Initialize();
             MaterialManager.Initialize();
@@ -61,6 +64,12 @@ namespace OpenTS2.Engine
             DontDestroyOnLoad(gameObject);
             if (!string.IsNullOrEmpty(TargetScene))
                 SceneManager.LoadScene(TargetScene);
+            OnFinishedLoading += () =>
+            {
+                var casLotAsset = ContentManager.Instance.GetAsset<BaseLotInfoAsset>(new Common.ResourceKey(0, "CAS!", TypeIDs.BASE_LOT_INFO));
+                Debug.Log($"CAS Lot Asset: {casLotAsset}");
+                Debug.Log($"CAS Lot Name: {casLotAsset.BaseLotInfo.LotName}");
+            };
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using OpenTS2.Files.Utils;
+﻿using Codice.Client.Common.GameUI;
+using OpenTS2.Files.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,8 +19,16 @@ namespace OpenTS2.Content
         public byte RoadsAlongEdges { get; private set; }
         public byte CreationFrontEdge { get; private set; }
 
-        public void Read(IoBuffer reader)
+        public void Read(IoBuffer reader, bool forNeighborhood)
         {
+            string ReadString()
+            {
+                // Why is this even different...
+                if (forNeighborhood)
+                    return reader.ReadUint32PrefixedString();
+                else
+                    return reader.ReadVariableLengthPascalString();
+            }
             var baseLotInfoVersion = reader.ReadUInt16();
             var creationWidth = reader.ReadUInt32();
             var creationDepth = reader.ReadUInt32();
@@ -31,8 +40,8 @@ namespace OpenTS2.Content
             var lotDescription = "";
             if (baseLotInfoVersion > 5)
             {
-                lotName = reader.ReadUint32PrefixedString();
-                lotDescription = reader.ReadUint32PrefixedString();
+                lotName = ReadString();
+                lotDescription = ReadString();
             }
             if (baseLotInfoVersion > 3)
             {
