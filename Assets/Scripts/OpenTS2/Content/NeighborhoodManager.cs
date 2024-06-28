@@ -79,6 +79,7 @@ namespace OpenTS2.Content
             if (CurrentNeighborhood == null)
                 throw new Exception("Must be in a neighborhood to enter a lot");
             ContentManager.Instance.Changes.SaveChanges();
+            Core.OnLotLoaded?.Invoke();
         }
     }
 }
