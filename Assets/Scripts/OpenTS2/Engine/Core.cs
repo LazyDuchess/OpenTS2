@@ -64,12 +64,6 @@ namespace OpenTS2.Engine
             DontDestroyOnLoad(gameObject);
             if (!string.IsNullOrEmpty(TargetScene))
                 SceneManager.LoadScene(TargetScene);
-            OnFinishedLoading += () =>
-            {
-                var casLotAsset = ContentManager.Instance.GetAsset<BaseLotInfoAsset>(new Common.ResourceKey(0, "CAS!", TypeIDs.BASE_LOT_INFO));
-                Debug.Log($"CAS Lot Asset: {casLotAsset}");
-                Debug.Log($"CAS Lot Name: {casLotAsset.BaseLotInfo.LotName}");
-            };
         }
     }
 }
