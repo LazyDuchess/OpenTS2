@@ -26,7 +26,7 @@ namespace OpenTS2.Content
             if (NeighborhoodManager.Instance.CurrentNeighborhood == null)
                 throw new Exception("Must be in a neighborhood to enter CAS!");
             InCAS = true;
-            NeighborhoodManager.Instance.EnterLot(ContentManager.Instance.GetAsset<BaseLotInfoAsset>(CASLotKey));
+            LotManager.Instance.EnterLot(ContentManager.Instance.GetAsset<BaseLotInfoAsset>(CASLotKey));
         }
     }
 }

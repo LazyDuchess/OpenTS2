@@ -13,6 +13,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using OpenTS2.Rendering;
 using OpenTS2.Engine;
+using OpenTS2.Game;
 
 namespace OpenTS2.Content
 {
@@ -72,14 +73,6 @@ namespace OpenTS2.Content
             CurrentNeighborhood = neighborhood;
             SceneManager.LoadScene("Neighborhood");
             CursorController.Cursor = CursorController.CursorType.Default;
-        }
-
-        public void EnterLot(BaseLotInfoAsset baseLotInfo)
-        {
-            if (CurrentNeighborhood == null)
-                throw new Exception("Must be in a neighborhood to enter a lot");
-            ContentManager.Instance.Changes.SaveChanges();
-            Core.OnLotLoaded?.Invoke();
         }
     }
 }

@@ -12,6 +12,7 @@ namespace OpenTS2.Game
 {
     public class Simulator : MonoBehaviour
     {
+        public static Simulator Instance { get; private set; }
         public VM VirtualMachine => _virtualMachine;
         private VM _virtualMachine;
         public Context SimulationContext = Context.Neighborhood;
@@ -24,24 +25,16 @@ namespace OpenTS2.Game
         /// Number of ticks to run per second.
         /// </summary>
         public int TickRate = 20;
-        private static Simulator _instance;
 
         private void Awake()
         {
-            _instance = this;
+            Instance = this;
             _virtualMachine = new VM();
         }
 
         private void Start()
         {
             CreateGlobalObjects();
-        }
-
-        public Simulator Get()
-        {
-            if (_instance != null)
-                return this;
-            return null;
         }
 
         private void CreateGlobalObjects()
@@ -87,6 +80,19 @@ namespace OpenTS2.Game
         public void HandleSimAnticsException(SimAnticsException exception)
         {
             Debug.LogError(exception.ToString());
+        }
+
+        public void Kill()
+        {
+            Destroy(gameObject);
+        }
+
+        public static Simulator Create(Context context)
+        {
+            var gameObject = new GameObject($"{context} Simulation");
+            var simulator = gameObject.AddComponent<Simulator>();
+            simulator.SimulationContext = context;
+            return simulator;
         }
     }
 }

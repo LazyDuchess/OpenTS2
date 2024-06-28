@@ -44,6 +44,7 @@ namespace OpenTS2.Engine
             var objectManager = new ObjectManager();
             var nhoodManager = new NeighborhoodManager();
             var casController = new CASController();
+            var lotManger = new LotManager();
 
             TerrainManager.Initialize();
             MaterialManager.Initialize();
