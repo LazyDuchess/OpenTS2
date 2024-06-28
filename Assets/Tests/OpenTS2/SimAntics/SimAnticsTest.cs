@@ -89,9 +89,14 @@ public class SimAnticsTest
         var stackFrame = new VMStackFrame(bhav, entity.MainThread);
         entity.MainThread.Frames.Push(stackFrame);
 
-        Assert.Throws<SimAnticsException>(() =>
+        Exception exception = null;
+        vm.ExceptionHandler += (Exception e, VMEntity ent) =>
         {
-            vm.Tick();
-        });
+            exception = e;
+        };
+
+        vm.Tick();
+
+        Assert.IsInstanceOf<SimAnticsException>(exception);
     }
 }
