@@ -2,6 +2,7 @@ using OpenTS2.Client;
 using OpenTS2.Common;
 using OpenTS2.Content;
 using OpenTS2.Files.Formats.DBPF;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +19,7 @@ namespace OpenTS2.SimAntics
         public VMScheduler Scheduler = new VMScheduler();
         public List<VMEntity> Entities = new List<VMEntity>();
         public uint CurrentTick = 0;
+        public Action<Exception, VMEntity> ExceptionHandler;
 
         private Dictionary<short, VMEntity> _entitiesByID = new Dictionary<short, VMEntity>();
 
@@ -66,7 +68,14 @@ namespace OpenTS2.SimAntics
             Scheduler.OnBeginTick(this);
             foreach(var entity in Entities)
             {
-                entity.Tick();
+                try
+                {
+                    entity.Tick();
+                }
+                catch(Exception e)
+                {
+                    ExceptionHandler?.Invoke(e, entity);
+                }
             }
             Scheduler.OnEndTick(this);
             CurrentTick++;

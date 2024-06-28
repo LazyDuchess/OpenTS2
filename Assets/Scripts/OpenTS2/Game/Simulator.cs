@@ -16,6 +16,7 @@ namespace OpenTS2.Game
         public VM VirtualMachine => _virtualMachine;
         private VM _virtualMachine;
         public Context SimulationContext = Context.Neighborhood;
+        public bool DeleteEntityOnError = true;
         public enum Context
         {
             Lot = 1,
@@ -25,16 +26,27 @@ namespace OpenTS2.Game
         /// Number of ticks to run per second.
         /// </summary>
         public int TickRate = 20;
+        private float _timer = 0f;
 
         private void Awake()
         {
             Instance = this;
             _virtualMachine = new VM();
+            _virtualMachine.ExceptionHandler += HandleException;
         }
 
         private void Start()
         {
             CreateGlobalObjects();
+        }
+
+        private void Update()
+        {
+            var rateSecs = (float)1 / TickRate;
+            _timer += Time.deltaTime;
+            var timesToTick = Mathf.FloorToInt(_timer / rateSecs);
+            _virtualMachine.Tick();
+            _timer -= timesToTick * rateSecs;
         }
 
         private void CreateGlobalObjects()
@@ -53,20 +65,26 @@ namespace OpenTS2.Game
         public VMEntity CreateObject(ObjectDefinitionAsset objectDefinition)
         {
             var entity = new VMEntity(objectDefinition);
+            _virtualMachine.AddEntity(entity);
+
             try
             {
-                _virtualMachine.AddEntity(entity);
-
                 UpdateObjectData(entity);
 
                 var initFunction = entity.ObjectDefinition.Functions.GetFunction(ObjectFunctionsAsset.FunctionNames.Init);
 
                 if (initFunction.ActionTree != 0)
                     entity.RunTreeImmediately(initFunction.ActionTree);
+
+                var mainFunction = entity.ObjectDefinition.Functions.GetFunction(ObjectFunctionsAsset.FunctionNames.Main);
+
+                if (mainFunction.ActionTree != 0) {
+                    entity.PushTreeToThread(entity.MainThread, mainFunction.ActionTree);
+                }
             }
-            catch(SimAnticsException e)
+            catch(Exception e)
             {
-                HandleSimAnticsException(e);
+                HandleException(e, entity);
             }
             return entity;
         }
@@ -77,9 +95,23 @@ namespace OpenTS2.Game
             entity.SetObjectData(VMObjectData.ObjectID, entity.ID);
         }
 
+        public void HandleException(Exception exception, VMEntity entity)
+        {
+            if (exception is SimAnticsException)
+            {
+                HandleSimAnticsException(exception as SimAnticsException);
+                return;
+            }
+            Debug.LogError($"Non-SimAntics exception caused by entity {entity.ID} - {entity.ObjectDefinition.FileName}\n{exception}");
+            if (DeleteEntityOnError)
+                entity.Delete();
+        }
+
         public void HandleSimAnticsException(SimAnticsException exception)
         {
             Debug.LogError(exception.ToString());
+            if (DeleteEntityOnError)
+                exception.StackFrame.Thread.Entity.Delete();
         }
 
         public void Kill()

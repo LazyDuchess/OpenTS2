@@ -95,6 +95,13 @@ namespace OpenTS2.SimAntics
             return VM.GetBHAV(treeID, groupid);
         }
 
+        public void PushTreeToThread(VMThread thread, ushort treeId)
+        {
+            var bhav = GetBHAV(treeId);
+            var stackFrame = new VMStackFrame(bhav, thread);
+            thread.Frames.Push(stackFrame);
+        }
+
         public VMExitCode RunTreeImmediately(ushort treeID)
         {
             var thread = new VMThread(this);
