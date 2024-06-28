@@ -61,6 +61,7 @@ namespace OpenTS2.Content
                     var codec = Codecs.Get(key.TGI.TypeID);
                     var fileBytes = File.ReadAllBytes(result);
                     var asset = codec.Deserialize(fileBytes, key.TGI, null);
+                    asset.TGI = key.TGI;
                     return asset;
                 }
             }
