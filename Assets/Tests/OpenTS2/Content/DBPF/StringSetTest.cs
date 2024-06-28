@@ -1,7 +1,7 @@
 ﻿using NUnit.Framework;
 using OpenTS2.Content.DBPF;
-using OpenTS2.Client;
 using System.Collections.Generic;
+using OpenTS2.Content;
 
 public class StringSetTest
 {

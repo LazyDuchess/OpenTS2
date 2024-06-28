@@ -1,5 +1,4 @@
 ﻿using OpenTS2.Assemblies;
-using OpenTS2.Client;
 using OpenTS2.Content;
 using OpenTS2.Engine;
 using OpenTS2.Files;
@@ -18,11 +17,8 @@ public static class TestCore
     /// </summary>
     public static void Initialize()
     {
-        var settings = new Settings()
-        {
-            CustomContentEnabled = false,
-            Language = Languages.USEnglish
-        };
+        var globals = new GameGlobals();
+        GameGlobals.allowCustomContent = false;
         var epManager = new EPManager((int)ProductFlags.BaseGame);
         var contentManager = new ContentManager();
         var luaManager = new LuaManager();

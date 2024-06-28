@@ -144,7 +144,7 @@ namespace OpenTS2.Audio
 
         private void OnLotLoaded()
         {
-            if (CASController.Instance.InCAS)
+            if (CASManager.Instance.InCAS)
                 StartMusicCategory("CAS");
             else
                 Stop();

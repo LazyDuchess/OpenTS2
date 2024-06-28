@@ -5,7 +5,6 @@ using OpenTS2.Content.DBPF;
 using OpenTS2.Engine;
 using OpenTS2.Files.Formats.DBPF;
 using OpenTS2.Files.Formats.XML;
-using OpenTS2.Client;
 using System;
 using System.Collections.Generic;
 using System.IO;

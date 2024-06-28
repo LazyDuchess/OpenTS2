@@ -1,5 +1,4 @@
 ﻿using NUnit.Framework;
-using OpenTS2.Client;
 using OpenTS2.Common;
 using OpenTS2.Content;
 using OpenTS2.Content.DBPF;

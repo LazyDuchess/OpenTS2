@@ -13,7 +13,6 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using OpenTS2.Client;
 using OpenTS2.Game;
 using OpenTS2.Audio;
 using OpenTS2.Content.DBPF;
@@ -33,7 +32,7 @@ namespace OpenTS2.Engine
         {
             if (CoreInitialized) return;
 
-            var settings = new Settings();
+            var gameGlobals = new GameGlobals();
             var epManager = new EPManager();
             var contentManager = new ContentManager();
             var effectsManager = new EffectsManager();
@@ -43,7 +42,7 @@ namespace OpenTS2.Engine
             var audioManager = new AudioManager();
             var objectManager = new ObjectManager();
             var nhoodManager = new NeighborhoodManager();
-            var casController = new CASController();
+            var casController = new CASManager();
             var lotManger = new LotManager();
             var asyncContentLoader = new AsyncContentManager();
 

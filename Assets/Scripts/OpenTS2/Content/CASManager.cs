@@ -9,14 +9,14 @@ using System.Threading.Tasks;
 
 namespace OpenTS2.Content
 {
-    public class CASController
+    public class CASManager
     {
-        public static CASController Instance { get; private set; }
+        public static CASManager Instance { get; private set; }
         public bool InCAS = false;
         private const string CASLotName = "CAS!";
         private static ResourceKey CASLotKey = new ResourceKey(0, CASLotName, TypeIDs.BASE_LOT_INFO);
 
-        public CASController()
+        public CASManager()
         {
             Instance = this;
         }
