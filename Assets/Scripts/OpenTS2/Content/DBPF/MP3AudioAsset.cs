@@ -19,7 +19,7 @@ namespace OpenTS2.Content.DBPF
             {
                 if (_clip == null)
                 {
-                    _clip = AudioClip.Create("MP3",
+                    _clip = AudioClip.Create(GlobalTGI.ToString(),
                         (int)(_mpegFile.Length / sizeof(float) / _mpegFile.Channels),
                         _mpegFile.Channels,
                         _mpegFile.SampleRate,

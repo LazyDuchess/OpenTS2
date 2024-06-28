@@ -7,8 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
-using NAudio;
-using NAudio.Wave;
 using OpenTS2.Content;
 using System.IO;
 using Unity.Collections;

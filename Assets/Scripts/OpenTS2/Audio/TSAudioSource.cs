@@ -1,6 +1,3 @@
-using NAudio.CoreAudioApi;
-using NAudio.Wave;
-using NAudio.Wave.SampleProviders;
 using OpenTS2.Audio;
 using OpenTS2.Common;
 using OpenTS2.Content;
@@ -33,8 +30,6 @@ public class TSAudioSource : MonoBehaviour
     public float Volume = 1f;
     public Action PlaybackFinished;
     private AudioAsset _audio;
-    private WaveOutEvent _waveOutEv;
-    private SampleChannel _sampleChannel;
     private AudioSource _audioSource;
     private float _timeAudioSourcePlaying = 0f;
     private bool _audioClipPlaying = false;
@@ -45,10 +40,6 @@ public class TSAudioSource : MonoBehaviour
     {
         if (_paused)
             return;
-        if (_waveOutEv != null)
-        {
-            _waveOutEv.Pause();
-        }
         _audioSource.Pause();
         _paused = true;
     }
@@ -57,10 +48,6 @@ public class TSAudioSource : MonoBehaviour
     {
         if (!_paused)
             return;
-        if (_waveOutEv != null)
-        {
-            _waveOutEv.Play();
-        }
         _audioSource.UnPause();
         _paused = false;
     }
@@ -96,7 +83,7 @@ public class TSAudioSource : MonoBehaviour
             PlayInternal(asset);
             return;
         }
-            PlayWAV(asset);
+        PlayWAV(asset);
     }
 
     public void Stop()
@@ -118,28 +105,11 @@ public class TSAudioSource : MonoBehaviour
     private void CleanUp()
     {
         StopAllCoroutines();
-        if (_waveOutEv != null)
-        {
-            _waveOutEv.PlaybackStopped -= WaveOutPlaybackStopped;
-            _waveOutEv.Dispose();
-        }
         _audioSource.Stop();
         _audioSource.clip = null;
         _audioClipPlaying = false;
         _timeAudioSourcePlaying = 0f;
         _paused = false;
-    }
-
-    private void PlayMP3(AudioAsset asset)
-    {
-        var stream = new MemoryStream((asset as MP3AudioAsset).AudioData);
-        var reader = new Mp3FileReader(stream);
-        _sampleChannel = new SampleChannel(reader);
-        _waveOutEv = new WaveOutEvent();
-        _waveOutEv.Init(_sampleChannel);
-        UpdateVolume();
-        _waveOutEv.Play();
-        _waveOutEv.PlaybackStopped += WaveOutPlaybackStopped;
     }
 
     private void PlayWAV(AudioAsset asset)
@@ -156,10 +126,6 @@ public class TSAudioSource : MonoBehaviour
     private void UpdateVolume()
     {
         var volume = Volume * AudioManager.Instance.GetVolumeForMixer(Mixer);
-        if (_waveOutEv != null)
-        {
-            _sampleChannel.Volume = volume;
-        }
         _audioSource.volume = volume;
     }
 
@@ -183,16 +149,6 @@ public class TSAudioSource : MonoBehaviour
         }
         else
             _timeAudioSourcePlaying = 0f;
-    }
-
-    private void WaveOutPlaybackStopped(object sender, StoppedEventArgs e)
-    {
-        if (_paused)
-            return;
-        if (Loop)
-            Play();
-        else
-            PlaybackFinished?.Invoke();
     }
 
     private void OnDestroy()
