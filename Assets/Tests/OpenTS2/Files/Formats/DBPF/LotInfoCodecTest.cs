@@ -23,8 +23,8 @@ public class LotInfoCodecTest
 
         Assert.That(lotInfoAsset.LotId, Is.EqualTo(3));
 
-        Assert.That(lotInfoAsset.LotName, Is.EqualTo("1 Tesla Court"));
-        Assert.That(lotInfoAsset.LotDescription, Is.EqualTo("1 Tesla Court"));
+        Assert.That(lotInfoAsset.BaseLotInfo.LotName, Is.EqualTo("1 Tesla Court"));
+        Assert.That(lotInfoAsset.BaseLotInfo.LotDescription, Is.EqualTo("1 Tesla Court"));
 
         Assert.That(lotInfoAsset.LocationX, Is.EqualTo(54));
         Assert.That(lotInfoAsset.LocationY, Is.EqualTo(71));
@@ -42,8 +42,8 @@ public class LotInfoCodecTest
 
         Assert.That(lotInfoAsset.LotId, Is.EqualTo(0x22));
 
-        Assert.That(lotInfoAsset.LotName, Is.EqualTo("153 Main Street"));
-        Assert.That(lotInfoAsset.LotDescription, Is.EqualTo(""));
+        Assert.That(lotInfoAsset.BaseLotInfo.LotName, Is.EqualTo("153 Main Street"));
+        Assert.That(lotInfoAsset.BaseLotInfo.LotDescription, Is.EqualTo(""));
 
         Assert.That(lotInfoAsset.LocationX, Is.EqualTo(41));
         Assert.That(lotInfoAsset.LocationY, Is.EqualTo(76));

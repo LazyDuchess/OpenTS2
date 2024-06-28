@@ -34,6 +34,7 @@ namespace OpenTS2.Files.Formats.DBPF
         public const uint NHOOD_OBJECT = 0x6D619378;
         // cTSLotInfo in game / Lot Description in SimsPE.
         public const uint LOT_INFO = 0x0BF999E7;
+        public const uint BASE_LOT_INFO = 0x6C589723;
         public const uint LOT_OBJECT = 0xFA1C39F7;
         public const uint LOT_TERRAIN = 0x6B943B43;
         public const uint LOT_TEXTURES = 0x4B58975B;
