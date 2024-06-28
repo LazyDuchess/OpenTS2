@@ -2,6 +2,7 @@ using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using OpenTS2.Audio;
+using OpenTS2.Common;
 using OpenTS2.Content;
 using OpenTS2.Content.DBPF;
 using System;
@@ -38,6 +39,7 @@ public class TSAudioSource : MonoBehaviour
     private float _timeAudioSourcePlaying = 0f;
     private bool _audioClipPlaying = false;
     private bool _paused = false;
+    private AsyncContentManager _asyncContentLoader;
 
     public void Pause()
     {
@@ -69,6 +71,23 @@ public class TSAudioSource : MonoBehaviour
         PlayInternal(Audio);
     }
 
+    public void PlayAsync(ResourceKey audioResourceKey)
+    {
+        CleanUp();
+        StartCoroutine(PlayAsyncInternal(audioResourceKey));
+    }
+
+    private IEnumerator PlayAsyncInternal(ResourceKey key)
+    {
+        var audioRequest = _asyncContentLoader.RequestAsset(key);
+        while (!audioRequest.Finished)
+            yield return null;
+        if (audioRequest.Result == AsyncContentManager.Results.Success)
+            PlayInternal(audioRequest.Asset as AudioAsset);
+        else
+            Stop();
+    }
+
     private void PlayInternal(AudioAsset asset)
     {
         if (asset is HitListAsset)
@@ -90,6 +109,7 @@ public class TSAudioSource : MonoBehaviour
 
     private void Awake()
     {
+        _asyncContentLoader = AsyncContentManager.Instance;
         _audioSource = GetComponent<AudioSource>();
         if (_audioSource == null)
         {
@@ -100,6 +120,7 @@ public class TSAudioSource : MonoBehaviour
 
     private void CleanUp()
     {
+        StopAllCoroutines();
         if (_waveOutEv != null)
         {
             _waveOutEv.PlaybackStopped -= WaveOutPlaybackStopped;

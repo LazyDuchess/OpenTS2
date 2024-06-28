@@ -11,18 +11,28 @@ namespace OpenTS2.Content.DBPF
 {
     public class WAVAudioAsset : AudioAsset
     {
-        public AudioClip Clip { get; private set; }
+        public AudioClip Clip
+        {
+            get
+            {
+                if (_clip == null)
+                    _clip = WAV.ToAudioClip(_data, GlobalTGI.ToString());
+                return _clip;
+            }
+        }
+        private AudioClip _clip;
+        private byte[] _data;
 
         public WAVAudioAsset(byte[] data)
         {
-            Clip = WAV.ToAudioClip(data, GlobalTGI.ToString());
+            _data = data;
         }
 
         public override void FreeUnmanagedResources()
         {
-            if (Clip == null)
+            if (_clip == null)
                 return;
-            Clip.Free();
+            _clip.Free();
         }
     }
 }

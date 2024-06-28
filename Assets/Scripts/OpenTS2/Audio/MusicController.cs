@@ -152,11 +152,10 @@ namespace OpenTS2.Audio
 
         private void PlayNextSong()
         {
+            StopAllCoroutines();
             var contentManager = ContentManager.Instance;
             var currentSong = _currentMusicCategory.PopNextSong();
-            var songAsset = contentManager.GetAsset<AudioAsset>(currentSong.Key);
-            _tsAudioSource.Audio = songAsset;
-            _tsAudioSource.Play();
+            _tsAudioSource.PlayAsync(currentSong.Key);
         }
 
         private void OnSongEnd()
