@@ -96,9 +96,6 @@ public class TSAudioSource : MonoBehaviour
             PlayInternal(asset);
             return;
         }
-        if (asset is MP3AudioAsset)
-            PlayMP3(asset);
-        else
             PlayWAV(asset);
     }
 
