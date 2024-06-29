@@ -41,6 +41,7 @@ namespace OpenTS2.Content
             var request = new Request();
             request.Key = key;
             _requests.Enqueue(request);
+            _thread.Interrupt();
             return request;
         }
 
@@ -57,7 +58,13 @@ namespace OpenTS2.Content
                     _requests.Dequeue();
                 }
                 else
-                    Thread.Sleep(1);
+                {
+                    try
+                    {
+                        Thread.Sleep(Timeout.Infinite);
+                    }
+                    catch (ThreadInterruptedException) { }
+                }
             }
         }
     }
