@@ -207,7 +207,7 @@ namespace OpenTS2.Content
                     AddPackage(element.file);
                 }
                 loadProgress.Percentage = 1f;
-            }, TaskScheduler.FromCurrentSynchronizationContext());
+            });
         }
 
         /// <summary>
