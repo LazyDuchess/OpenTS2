@@ -10,11 +10,10 @@ namespace OpenTS2.Content
 {
     public class AsyncContentManager
     {
-        public class Request
+        public class AssetRequest
         {
             public bool Finished = false;
             public Results Result;
-            public ResourceKey Key;
             public AbstractAsset Asset;
         }
         public enum Results
@@ -24,7 +23,7 @@ namespace OpenTS2.Content
         }
         public static AsyncContentManager Instance { get; private set; }
         private Thread _thread;
-        private Queue<Request> _requests = new Queue<Request>();
+        private Queue<Action> _requests = new Queue<Action>();
         private ContentManager _contentManager;
         public AsyncContentManager()
         {
@@ -36,13 +35,18 @@ namespace OpenTS2.Content
             _thread.Start();
         }
 
-        public Request RequestAsset(ResourceKey key)
+        public AssetRequest RequestAsset(ResourceKey key)
         {
-            var request = new Request();
-            request.Key = key;
-            _requests.Enqueue(request);
+            var requestResult = new AssetRequest();
+            _requests.Enqueue(() =>
+            {
+                var asset = _contentManager.GetAsset(key);
+                requestResult.Asset = asset;
+                requestResult.Finished = true;
+                requestResult.Result = asset != null ? Results.Success : Results.Failed;
+            });
             _thread.Interrupt();
-            return request;
+            return requestResult;
         }
 
         private void ThreadLoop()
@@ -51,11 +55,8 @@ namespace OpenTS2.Content
             {
                 if (_requests.Count > 0)
                 {
-                    var request = _requests.Peek();
-                    request.Asset = _contentManager.GetAsset(request.Key);
-                    request.Result = request.Asset != null ? Results.Success : Results.Failed;
-                    request.Finished = true;
-                    _requests.Dequeue();
+                    var request = _requests.Dequeue();
+                    request.Invoke();
                 }
                 else
                 {
