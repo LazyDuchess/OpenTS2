@@ -13,7 +13,7 @@ Currently a basic main menu with a neighborhood chooser is implemented. Neighbor
 * [MoonSharp](https://github.com/moonsharp-devs/moonsharp/)
 * [FreeSO](https://github.com/RHY3756547/FreeSO)
 * [DBPFSharp](https://github.com/0xC0000054/DBPFSharp/blob/main/src/DBPFSharp)
-* [NLayer](https://github.com/naudio/NLayer)
+* [NAudio](https://github.com/naudio/NAudio)
 * [NSpeex](https://github.com/aijingsun6/NSpeex)
 
 ## Similar Projects

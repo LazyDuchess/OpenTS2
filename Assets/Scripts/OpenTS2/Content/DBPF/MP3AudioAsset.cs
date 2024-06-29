@@ -6,8 +6,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
-using NLayer;
 using System.IO;
+using NAudio;
+using NAudio.Wave;
+using System.Collections;
 
 namespace OpenTS2.Content.DBPF
 {
@@ -20,9 +22,9 @@ namespace OpenTS2.Content.DBPF
                 if (_clip == null)
                 {
                     _clip = AudioClip.Create(GlobalTGI.ToString(),
-                        (int)(_mpegFile.Length / sizeof(float) / _mpegFile.Channels),
-                        _mpegFile.Channels,
-                        _mpegFile.SampleRate,
+                        (int)(_mp3Reader.Length / sizeof(float)),
+                        _sampleProvider.WaveFormat.Channels,
+                        _sampleProvider.WaveFormat.SampleRate,
                         true,
                         OnMp3Read,
                         OnClipPositionSet);
@@ -32,13 +34,14 @@ namespace OpenTS2.Content.DBPF
         }
         public byte[] AudioData;
         private AudioClip _clip;
-        private MpegFile _mpegFile;
-        private MemoryStream _stream;
+        private Mp3FileReader _mp3Reader;
+        private ISampleProvider _sampleProvider;
 
         public MP3AudioAsset(byte[] data) : base(data)
         {
-            _stream = new MemoryStream(data);
-            _mpegFile = new MpegFile(_stream);
+            var stream = new MemoryStream(data);
+            _mp3Reader = new Mp3FileReader(stream);
+            _sampleProvider = _mp3Reader.ToSampleProvider();
         }
 
         public override void FreeUnmanagedResources()
@@ -48,16 +51,15 @@ namespace OpenTS2.Content.DBPF
             _clip.Free();
         }
 
-        // PCMReaderCallback will called each time AudioClip reads data.
         private void OnMp3Read(float[] data)
         {
-            int actualReadCount = _mpegFile.ReadSamples(data, 0, data.Length);
+            _sampleProvider.Read(data, 0, data.Length);
         }
 
-        // PCMSetPositionCallback will called when first loading this audioclip
         private void OnClipPositionSet(int position)
         {
-            _mpegFile = new MpegFile(_stream);
+            // Hallo :3
+            //_mp3Reader = new Mp3FileReader(_stream);
         }
     }
 }
