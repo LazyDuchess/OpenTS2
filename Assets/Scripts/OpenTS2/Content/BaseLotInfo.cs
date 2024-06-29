@@ -1,5 +1,4 @@
-﻿using Codice.Client.Common.GameUI;
-using OpenTS2.Files.Utils;
+﻿using OpenTS2.Files.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;

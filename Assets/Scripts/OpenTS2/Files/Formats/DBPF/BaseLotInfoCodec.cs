@@ -8,7 +8,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using UnityEditor.VersionControl;
 
 namespace OpenTS2.Files.Formats.DBPF
 {
