@@ -24,13 +24,20 @@ namespace OpenTS2
             foreach (var shaderPath in allshaders)
             {
                 var shader = AssetDatabase.LoadAssetAtPath<Shader>(shaderPath);
-                if (shader == null) continue;
+                if (shader == null) 
+                    continue;
+                var alreadyInList = false;
                 for (var i = 0; i < alwaysIncludedShadersProp.arraySize; i++)
                 {
                     var elem = alwaysIncludedShadersProp.GetArrayElementAtIndex(i);
                     if (elem.objectReferenceValue == shader)
-                        continue;
+                    {
+                        alreadyInList = true;
+                        break;
+                    }
                 }
+                if (alreadyInList)
+                    continue;
                 alwaysIncludedShadersProp.InsertArrayElementAtIndex(0);
                 var arrayElem = alwaysIncludedShadersProp.GetArrayElementAtIndex(0);
                 arrayElem.objectReferenceValue = shader;
