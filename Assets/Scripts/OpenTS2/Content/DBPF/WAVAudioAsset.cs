@@ -34,5 +34,12 @@ namespace OpenTS2.Content.DBPF
                 return;
             _clip.Free();
         }
+
+#if UNITY_EDITOR
+        public byte[] GetWAVData()
+        {
+            return Data;
+        }
+#endif
     }
 }
