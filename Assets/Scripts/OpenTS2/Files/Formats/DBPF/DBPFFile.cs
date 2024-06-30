@@ -569,8 +569,9 @@ namespace OpenTS2.Files.Formats.DBPF
                         {
                             var lastPosition = stream.Position;
                             stream.Position = entryOffset[i] + 4;
-                            writer.Write(entryData.Length);
+                            writer.Write(compressedEntryData.Length);
                             stream.Position = lastPosition;
+                            writer.Write(compressedEntryData, 0, compressedEntryData.Length);
                         }
                         else
                         {
