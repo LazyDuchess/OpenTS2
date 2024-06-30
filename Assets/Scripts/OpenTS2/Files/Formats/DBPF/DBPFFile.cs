@@ -471,8 +471,14 @@ namespace OpenTS2.Files.Formats.DBPF
         {
             UpdateDIR();
             using var writer = new BinaryWriter(stream);
+            var dirEntry = GetEntryByTGI(ResourceKey.DIR);
             var dirAsset = GetAssetByTGI<DIRAsset>(ResourceKey.DIR);
             var entries = Entries;
+            if (dirEntry != null)
+            {
+                entries.Remove(dirEntry);
+                entries.Add(dirEntry);
+            }
             //HeeeADER
             writer.Write(new char[] { 'D', 'B', 'P', 'F' });
             //major version
@@ -558,13 +564,23 @@ namespace OpenTS2.Files.Formats.DBPF
                     var entryData = entry.GetBytes();
                     if (dirAsset != null && dirAsset.GetUncompressedSize(entry.TGI) != 0)
                     {
-                        entryData = QfsCompression.Compress(entryData, true);
-                        var lastPosition = stream.Position;
-                        stream.Position = entryOffset[i] + 4;
-                        writer.Write(entryData.Length);
-                        stream.Position = lastPosition;
+                        var compressedEntryData = QfsCompression.Compress(entryData, true);
+                        if (compressedEntryData != null)
+                        {
+                            var lastPosition = stream.Position;
+                            stream.Position = entryOffset[i] + 4;
+                            writer.Write(entryData.Length);
+                            stream.Position = lastPosition;
+                        }
+                        else
+                        {
+                            Debug.LogWarning($"Failed to compress resource {entry.TGI} in package {FilePath}. Writing uncompressed.");
+                            writer.Write(entryData, 0, entryData.Length);
+                            dirAsset.SizeByInternalTGI[entry.TGI] = 0;
+                        }
                     }
-                    writer.Write(entryData, 0, entryData.Length);
+                    else
+                        writer.Write(entryData, 0, entryData.Length);
                 }
             }
         }
