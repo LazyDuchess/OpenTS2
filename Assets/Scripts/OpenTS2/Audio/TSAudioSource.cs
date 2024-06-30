@@ -6,6 +6,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using UnityEngine;
 
 /// <summary>
@@ -34,7 +35,7 @@ public class TSAudioSource : MonoBehaviour
     private float _timeAudioSourcePlaying = 0f;
     private bool _audioClipPlaying = false;
     private bool _paused = false;
-    private AsyncContentManager _asyncContentLoader;
+    private ContentManager _contentManager;
 
     public void Pause()
     {
@@ -61,18 +62,13 @@ public class TSAudioSource : MonoBehaviour
     public void PlayAsync(ResourceKey audioResourceKey)
     {
         CleanUp();
-        StartCoroutine(PlayAsyncInternal(audioResourceKey));
-    }
-
-    private IEnumerator PlayAsyncInternal(ResourceKey key)
-    {
-        var audioRequest = _asyncContentLoader.RequestAsset(key);
-        while (!audioRequest.Finished)
-            yield return null;
-        if (audioRequest.Result == AsyncContentManager.Results.Success)
-            PlayInternal(audioRequest.Asset as AudioAsset);
-        else
-            Stop();
+        Task.Run(() =>
+        {
+            _audio = _contentManager.GetAsset<AudioAsset>(audioResourceKey);
+        }).ContinueWith(task =>
+        {
+            PlayInternal(_audio);
+        }, TaskScheduler.FromCurrentSynchronizationContext());
     }
 
     private void PlayInternal(AudioAsset asset)
@@ -93,7 +89,7 @@ public class TSAudioSource : MonoBehaviour
 
     private void Awake()
     {
-        _asyncContentLoader = AsyncContentManager.Instance;
+        _contentManager = ContentManager.Instance;
         _audioSource = GetComponent<AudioSource>();
         if (_audioSource == null)
         {
