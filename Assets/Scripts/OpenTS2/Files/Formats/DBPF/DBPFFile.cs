@@ -436,9 +436,11 @@ namespace OpenTS2.Files.Formats.DBPF
                 _deleted = true;
                 return;
             }
-            var data = Serialize();
+            var dir = Path.GetDirectoryName(FilePath);
+            if (!Directory.Exists(dir) && !string.IsNullOrEmpty(dir))
+                Directory.CreateDirectory(dir);
+            Serialize();
             Dispose();
-            Filesystem.Write(FilePath, data);
             var stream = File.OpenRead(FilePath);
             Read(stream);
             _changes = new DBPFFileChanges(this);
@@ -449,11 +451,11 @@ namespace OpenTS2.Files.Formats.DBPF
         /// Serializes package with all resource changes, additions and deletions.
         /// </summary>
         /// <returns>Package bytes</returns>
-        public byte[] Serialize()
+        public void Serialize()
         {
             UpdateDIR();
-            var wStream = new MemoryStream(0);
-            var writer = new BinaryWriter(wStream);
+            using var wStream = new FileStream(FilePath, FileMode.Create);
+            using var writer = new BinaryWriter(wStream);
             var dirAsset = GetAssetByTGI<DIRAsset>(ResourceKey.DIR);
             var entries = Entries;
             //HeeeADER
@@ -550,11 +552,6 @@ namespace OpenTS2.Files.Formats.DBPF
                     writer.Write(entryData, 0, entryData.Length);
                 }
             }
-            
-            var buffer = StreamUtils.GetBuffer(wStream);
-            writer.Dispose();
-            wStream.Dispose();
-            return buffer;
         }
 
         void UpdateDIR()
@@ -593,21 +590,24 @@ namespace OpenTS2.Files.Formats.DBPF
         /// <returns>Data for entry.</returns>
         public byte[] GetBytes(DBPFEntry entry, bool ignoreChanges = false)
         {
-            if (!ignoreChanges)
+            lock (_reader)
             {
-                if (Changes.DeletedEntries.ContainsKey(entry.TGI))
-                    return null;
-                if (Changes.ChangedEntries.ContainsKey(entry.TGI))
-                    return Changes.ChangedEntries[entry.TGI].Change.Data.GetBytes();
+                if (!ignoreChanges)
+                {
+                    if (Changes.DeletedEntries.ContainsKey(entry.TGI))
+                        return null;
+                    if (Changes.ChangedEntries.ContainsKey(entry.TGI))
+                        return Changes.ChangedEntries[entry.TGI].Change.Data.GetBytes();
+                }
+                _reader.Seek(SeekOrigin.Begin, entry.FileOffset);
+                var fileBytes = _reader.ReadBytes((int)entry.FileSize);
+                var uncompressedSize = InternalGetUncompressedSize(entry);
+                if (uncompressedSize > 0)
+                {
+                    return QfsCompression.Decompress(fileBytes);
+                }
+                return fileBytes;
             }
-            _reader.Seek(SeekOrigin.Begin, entry.FileOffset);
-            var fileBytes = _reader.ReadBytes((int)entry.FileSize);
-            var uncompressedSize = InternalGetUncompressedSize(entry);
-            if (uncompressedSize > 0)
-            {
-                return QfsCompression.Decompress(fileBytes);
-            }
-            return fileBytes;
         }
 
         private byte[] GetRawBytes(DBPFEntry entry)
