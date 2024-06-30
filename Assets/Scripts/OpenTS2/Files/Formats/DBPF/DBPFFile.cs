@@ -427,6 +427,11 @@ namespace OpenTS2.Files.Formats.DBPF
         /// </summary>
         public void WriteToFile()
         {
+            // Can't read stuff from ourselves if we are writing into ourselves.
+            var writeDirectly = false;
+            if (OriginalEntries.Count == 0)
+                writeDirectly = true;
+
             if (DeleteIfEmpty && Empty)
             {
                 Dispose();
@@ -439,8 +444,19 @@ namespace OpenTS2.Files.Formats.DBPF
             var dir = Path.GetDirectoryName(FilePath);
             if (!Directory.Exists(dir) && !string.IsNullOrEmpty(dir))
                 Directory.CreateDirectory(dir);
-            Serialize();
-            Dispose();
+            if (writeDirectly)
+            {
+                using var fs = new FileStream(FilePath, FileMode.Create);
+                Serialize(fs);
+                Dispose();
+            }
+            else
+            {
+                using var ms = new MemoryStream();
+                Serialize(ms);
+                Dispose();
+                File.WriteAllBytes(FilePath, ms.ToArray());
+            }
             var stream = File.OpenRead(FilePath);
             Read(stream);
             _changes = new DBPFFileChanges(this);
@@ -451,11 +467,10 @@ namespace OpenTS2.Files.Formats.DBPF
         /// Serializes package with all resource changes, additions and deletions.
         /// </summary>
         /// <returns>Package bytes</returns>
-        public void Serialize()
+        public void Serialize(Stream stream)
         {
             UpdateDIR();
-            using var wStream = new FileStream(FilePath, FileMode.Create);
-            using var writer = new BinaryWriter(wStream);
+            using var writer = new BinaryWriter(stream);
             var dirAsset = GetAssetByTGI<DIRAsset>(ResourceKey.DIR);
             var entries = Entries;
             //HeeeADER
@@ -479,12 +494,12 @@ namespace OpenTS2.Files.Formats.DBPF
             writer.Write((int)entries.Count);
 
             //Index offset
-            var indexOff = wStream.Position;
+            var indexOff = stream.Position;
             //Placeholder
             writer.Write((int)0);
 
             //Index size
-            var indexSize = wStream.Position;
+            var indexSize = stream.Position;
             //Placeholder
             writer.Write((int)0);
 
@@ -499,10 +514,10 @@ namespace OpenTS2.Files.Formats.DBPF
             writer.Write(new byte[32]);
 
             //Go back and write index offset
-            var lastPos = wStream.Position;
-            wStream.Position = indexOff;
+            var lastPos = stream.Position;
+            stream.Position = indexOff;
             writer.Write((int)lastPos);
-            wStream.Position = lastPos;
+            stream.Position = lastPos;
 
             var entryOffset = new List<long>();
 
@@ -513,25 +528,25 @@ namespace OpenTS2.Files.Formats.DBPF
                 writer.Write(element.TGI.GroupID);
                 writer.Write(element.TGI.InstanceID);
                 writer.Write(element.TGI.InstanceHigh);
-                entryOffset.Add(wStream.Position);
+                entryOffset.Add(stream.Position);
                 writer.Write(0);
                 //File Size
                 writer.Write(element.FileSize);
             }
 
-            lastPos = wStream.Position;
+            lastPos = stream.Position;
             var siz = lastPos - indexOff;
-            wStream.Position = indexSize;
+            stream.Position = indexSize;
             writer.Write((int)siz);
-            wStream.Position = lastPos;
+            stream.Position = lastPos;
 
             //Write files
             for (var i = 0; i < entries.Count; i++)
             {
-                var filePosition = wStream.Position;
-                wStream.Position = entryOffset[i];
+                var filePosition = stream.Position;
+                stream.Position = entryOffset[i];
                 writer.Write((int)filePosition);
-                wStream.Position = filePosition;
+                stream.Position = filePosition;
                 var entry = entries[i];
                 if (!(entry is DynamicDBPFEntry))
                 {
@@ -544,10 +559,10 @@ namespace OpenTS2.Files.Formats.DBPF
                     if (dirAsset != null && dirAsset.GetUncompressedSize(entry.TGI) != 0)
                     {
                         entryData = QfsCompression.Compress(entryData, true);
-                        var lastPosition = wStream.Position;
-                        wStream.Position = entryOffset[i] + 4;
+                        var lastPosition = stream.Position;
+                        stream.Position = entryOffset[i] + 4;
                         writer.Write(entryData.Length);
-                        wStream.Position = lastPosition;
+                        stream.Position = lastPosition;
                     }
                     writer.Write(entryData, 0, entryData.Length);
                 }
