@@ -23,9 +23,9 @@ namespace OpenTS2.Game
             Neighborhood = 2
         }
         /// <summary>
-        /// Number of ticks to run per second.
+        /// Rate of simulator ticking, in seconds.
         /// </summary>
-        public int TickRate = 20;
+        public float TickRate = 0.05f;
         private float _timer = 0f;
 
         private void Awake()
@@ -42,11 +42,10 @@ namespace OpenTS2.Game
 
         private void Update()
         {
-            var rateSecs = (float)1 / TickRate;
             _timer += Time.deltaTime;
-            var timesToTick = Mathf.FloorToInt(_timer / rateSecs);
+            var timesToTick = Mathf.FloorToInt(_timer / TickRate);
             _virtualMachine.Tick();
-            _timer -= timesToTick * rateSecs;
+            _timer -= timesToTick * TickRate;
         }
 
         private void CreateGlobalObjects()
