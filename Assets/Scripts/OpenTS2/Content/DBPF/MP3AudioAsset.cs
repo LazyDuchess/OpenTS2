@@ -41,7 +41,7 @@ namespace OpenTS2.Content.DBPF
         public MP3AudioAsset(byte[] data) : base(data)
         {
             _stream = new MemoryStream(data);
-            _mp3Reader = new Mp3FileReader(stream);
+            _mp3Reader = new Mp3FileReader(_stream);
             _sampleProvider = _mp3Reader.ToSampleProvider();
         }
 
