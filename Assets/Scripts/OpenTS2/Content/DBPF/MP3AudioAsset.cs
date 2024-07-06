@@ -36,10 +36,11 @@ namespace OpenTS2.Content.DBPF
         private AudioClip _clip;
         private Mp3FileReader _mp3Reader;
         private ISampleProvider _sampleProvider;
+        private MemoryStream _stream;
 
         public MP3AudioAsset(byte[] data) : base(data)
         {
-            var stream = new MemoryStream(data);
+            _stream = new MemoryStream(data);
             _mp3Reader = new Mp3FileReader(stream);
             _sampleProvider = _mp3Reader.ToSampleProvider();
         }
@@ -58,8 +59,7 @@ namespace OpenTS2.Content.DBPF
 
         private void OnClipPositionSet(int position)
         {
-            // Hallo :3
-            //_mp3Reader = new Mp3FileReader(_stream);
+            _mp3Reader = new Mp3FileReader(_stream);
         }
     }
 }
