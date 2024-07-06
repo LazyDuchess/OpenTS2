@@ -59,7 +59,7 @@ namespace OpenTS2.Content.DBPF
 
         private void OnClipPositionSet(int position)
         {
-            _mp3Reader = new Mp3FileReader(_stream);
+            _stream.Position = 0;
         }
     }
 }
