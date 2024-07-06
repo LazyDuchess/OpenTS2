@@ -21,7 +21,8 @@ namespace OpenTS2.Engine.Tests
             var baseGamePath = Filesystem.GetDataPathForProduct(Content.ProductFlags.BaseGame);
             var fontPath = Path.Combine(baseGamePath, $"Res/UI/Fonts/{BaseGameFontToUse}");
             var mxf = new MXFFile(fontPath);
-            var font = new SkiaFont(mxf.DecodedData);
+            var otf = PFBFontConverter.ConvertData(mxf.DecodedData);
+            var font = new SkiaFont(otf);
             Label.Font = font;
         }
     }
