@@ -1,5 +1,4 @@
-﻿using OpenTS2.Client;
-using OpenTS2.Common;
+﻿using OpenTS2.Common;
 using OpenTS2.Content.DBPF;
 using OpenTS2.Files;
 using OpenTS2.Files.Formats.DBPF;

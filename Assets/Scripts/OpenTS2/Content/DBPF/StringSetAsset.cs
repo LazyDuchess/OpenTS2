@@ -10,7 +10,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OpenTS2.Files.Formats.DBPF;
-using OpenTS2.Client;
 
 namespace OpenTS2.Content.DBPF
 {
@@ -122,12 +121,12 @@ namespace OpenTS2.Content.DBPF
         /// <returns>Localized string</returns>
         public string GetString(int id)
         {
-            return _stringData.GetString(id, Settings.Instance.Language);
+            return _stringData.GetString(id, GameGlobals.Instance.Language);
         }
 
         public string GetDescription(int id)
         {
-            return _stringData.GetDescription(id, Settings.Instance.Language);
+            return _stringData.GetDescription(id, GameGlobals.Instance.Language);
         }
 
         /// <summary>
@@ -138,7 +137,7 @@ namespace OpenTS2.Content.DBPF
         /// <param name="language">Language of string to replace.</param>
         public void SetString(string str, int id)
         {
-            var lang = Settings.Instance.Language;
+            var lang = GameGlobals.Instance.Language;
             if (!StringData.HasLanguage(lang))
                 lang = Languages.USEnglish;
             StringData.SetString(str, id, lang);

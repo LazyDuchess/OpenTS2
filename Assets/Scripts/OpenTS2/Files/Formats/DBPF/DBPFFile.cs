@@ -427,6 +427,11 @@ namespace OpenTS2.Files.Formats.DBPF
         /// </summary>
         public void WriteToFile()
         {
+            // Can't read stuff from ourselves if we are writing into ourselves.
+            var writeDirectly = false;
+            if (OriginalEntries.Count == 0)
+                writeDirectly = true;
+
             if (DeleteIfEmpty && Empty)
             {
                 Dispose();
@@ -436,9 +441,22 @@ namespace OpenTS2.Files.Formats.DBPF
                 _deleted = true;
                 return;
             }
-            var data = Serialize();
-            Dispose();
-            Filesystem.Write(FilePath, data);
+            var dir = Path.GetDirectoryName(FilePath);
+            if (!Directory.Exists(dir) && !string.IsNullOrEmpty(dir))
+                Directory.CreateDirectory(dir);
+            if (writeDirectly)
+            {
+                using var fs = new FileStream(FilePath, FileMode.Create);
+                Serialize(fs);
+                Dispose();
+            }
+            else
+            {
+                using var ms = new MemoryStream();
+                Serialize(ms);
+                Dispose();
+                File.WriteAllBytes(FilePath, ms.ToArray());
+            }
             var stream = File.OpenRead(FilePath);
             Read(stream);
             _changes = new DBPFFileChanges(this);
@@ -449,13 +467,18 @@ namespace OpenTS2.Files.Formats.DBPF
         /// Serializes package with all resource changes, additions and deletions.
         /// </summary>
         /// <returns>Package bytes</returns>
-        public byte[] Serialize()
+        public void Serialize(Stream stream)
         {
             UpdateDIR();
-            var wStream = new MemoryStream(0);
-            var writer = new BinaryWriter(wStream);
+            using var writer = new BinaryWriter(stream);
+            var dirEntry = GetEntryByTGI(ResourceKey.DIR);
             var dirAsset = GetAssetByTGI<DIRAsset>(ResourceKey.DIR);
             var entries = Entries;
+            if (dirEntry != null)
+            {
+                entries.Remove(dirEntry);
+                entries.Add(dirEntry);
+            }
             //HeeeADER
             writer.Write(new char[] { 'D', 'B', 'P', 'F' });
             //major version
@@ -477,12 +500,12 @@ namespace OpenTS2.Files.Formats.DBPF
             writer.Write((int)entries.Count);
 
             //Index offset
-            var indexOff = wStream.Position;
+            var indexOff = stream.Position;
             //Placeholder
             writer.Write((int)0);
 
             //Index size
-            var indexSize = wStream.Position;
+            var indexSize = stream.Position;
             //Placeholder
             writer.Write((int)0);
 
@@ -497,10 +520,10 @@ namespace OpenTS2.Files.Formats.DBPF
             writer.Write(new byte[32]);
 
             //Go back and write index offset
-            var lastPos = wStream.Position;
-            wStream.Position = indexOff;
+            var lastPos = stream.Position;
+            stream.Position = indexOff;
             writer.Write((int)lastPos);
-            wStream.Position = lastPos;
+            stream.Position = lastPos;
 
             var entryOffset = new List<long>();
 
@@ -511,25 +534,25 @@ namespace OpenTS2.Files.Formats.DBPF
                 writer.Write(element.TGI.GroupID);
                 writer.Write(element.TGI.InstanceID);
                 writer.Write(element.TGI.InstanceHigh);
-                entryOffset.Add(wStream.Position);
+                entryOffset.Add(stream.Position);
                 writer.Write(0);
                 //File Size
                 writer.Write(element.FileSize);
             }
 
-            lastPos = wStream.Position;
+            lastPos = stream.Position;
             var siz = lastPos - indexOff;
-            wStream.Position = indexSize;
+            stream.Position = indexSize;
             writer.Write((int)siz);
-            wStream.Position = lastPos;
+            stream.Position = lastPos;
 
             //Write files
             for (var i = 0; i < entries.Count; i++)
             {
-                var filePosition = wStream.Position;
-                wStream.Position = entryOffset[i];
+                var filePosition = stream.Position;
+                stream.Position = entryOffset[i];
                 writer.Write((int)filePosition);
-                wStream.Position = filePosition;
+                stream.Position = filePosition;
                 var entry = entries[i];
                 if (!(entry is DynamicDBPFEntry))
                 {
@@ -541,20 +564,26 @@ namespace OpenTS2.Files.Formats.DBPF
                     var entryData = entry.GetBytes();
                     if (dirAsset != null && dirAsset.GetUncompressedSize(entry.TGI) != 0)
                     {
-                        entryData = QfsCompression.Compress(entryData, true);
-                        var lastPosition = wStream.Position;
-                        wStream.Position = entryOffset[i] + 4;
-                        writer.Write(entryData.Length);
-                        wStream.Position = lastPosition;
+                        var compressedEntryData = QfsCompression.Compress(entryData, true);
+                        if (compressedEntryData != null)
+                        {
+                            var lastPosition = stream.Position;
+                            stream.Position = entryOffset[i] + 4;
+                            writer.Write(compressedEntryData.Length);
+                            stream.Position = lastPosition;
+                            writer.Write(compressedEntryData, 0, compressedEntryData.Length);
+                        }
+                        else
+                        {
+                            Debug.LogWarning($"Failed to compress resource {entry.TGI} in package {FilePath}. Writing uncompressed.");
+                            writer.Write(entryData, 0, entryData.Length);
+                            dirAsset.SizeByInternalTGI[entry.TGI] = 0;
+                        }
                     }
-                    writer.Write(entryData, 0, entryData.Length);
+                    else
+                        writer.Write(entryData, 0, entryData.Length);
                 }
             }
-            
-            var buffer = StreamUtils.GetBuffer(wStream);
-            writer.Dispose();
-            wStream.Dispose();
-            return buffer;
         }
 
         void UpdateDIR()
@@ -593,21 +622,24 @@ namespace OpenTS2.Files.Formats.DBPF
         /// <returns>Data for entry.</returns>
         public byte[] GetBytes(DBPFEntry entry, bool ignoreChanges = false)
         {
-            if (!ignoreChanges)
+            lock (_reader)
             {
-                if (Changes.DeletedEntries.ContainsKey(entry.TGI))
-                    return null;
-                if (Changes.ChangedEntries.ContainsKey(entry.TGI))
-                    return Changes.ChangedEntries[entry.TGI].Change.Data.GetBytes();
+                if (!ignoreChanges)
+                {
+                    if (Changes.DeletedEntries.ContainsKey(entry.TGI))
+                        return null;
+                    if (Changes.ChangedEntries.ContainsKey(entry.TGI))
+                        return Changes.ChangedEntries[entry.TGI].Change.Data.GetBytes();
+                }
+                _reader.Seek(SeekOrigin.Begin, entry.FileOffset);
+                var fileBytes = _reader.ReadBytes((int)entry.FileSize);
+                var uncompressedSize = InternalGetUncompressedSize(entry);
+                if (uncompressedSize > 0)
+                {
+                    return QfsCompression.Decompress(fileBytes);
+                }
+                return fileBytes;
             }
-            _reader.Seek(SeekOrigin.Begin, entry.FileOffset);
-            var fileBytes = _reader.ReadBytes((int)entry.FileSize);
-            var uncompressedSize = InternalGetUncompressedSize(entry);
-            if (uncompressedSize > 0)
-            {
-                return QfsCompression.Decompress(fileBytes);
-            }
-            return fileBytes;
         }
 
         private byte[] GetRawBytes(DBPFEntry entry)

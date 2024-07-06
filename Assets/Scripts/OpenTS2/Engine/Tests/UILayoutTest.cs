@@ -1,5 +1,4 @@
-﻿using OpenTS2.Client;
-using OpenTS2.Common;
+﻿using OpenTS2.Common;
 using OpenTS2.Content;
 using OpenTS2.Files;
 using OpenTS2.Files.Formats.DBPF;
@@ -35,8 +34,8 @@ namespace OpenTS2.Engine.Tests
 
         void CreateUI()
         {
-            var settings = Settings.Instance;
-            settings.Language = Language;
+            var globals = GameGlobals.Instance;
+            globals.Language = Language;
             foreach (var instance in _instances)
             {
                 Destroy(instance.gameObject);
@@ -67,8 +66,7 @@ namespace OpenTS2.Engine.Tests
 
         private void Start()
         {
-            var settings = Settings.Instance;
-            settings.CustomContentEnabled = false;
+            GameGlobals.allowCustomContent = false;
             if (LoadPackagesFromAllEPs)
                 LoadAllUIPackages();
             else

@@ -13,6 +13,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using OpenTS2.Rendering;
 using OpenTS2.Engine;
+using OpenTS2.Game;
 
 namespace OpenTS2.Content
 {

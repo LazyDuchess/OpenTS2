@@ -58,7 +58,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Mixer: 2
   Loop: 1
-  Volume: 0.5
+  Volume: 1
 --- !u!1 &2467515431058217605
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,5 +1,4 @@
 ﻿using OpenTS2.Assemblies;
-using OpenTS2.Client;
 using OpenTS2.Content;
 using OpenTS2.Engine;
 using OpenTS2.Files;
@@ -13,20 +12,13 @@ using UnityEngine;
 /// </summary>
 public static class TestCore
 {
-    static bool Initialized = false;
-
     /// <summary>
     /// Initializes all singletons, systems and the game assembly.
     /// </summary>
     public static void Initialize()
     {
-        if (Initialized)
-            return;
-        var settings = new Settings()
-        {
-            CustomContentEnabled = false,
-            Language = Languages.USEnglish
-        };
+        var globals = new GameGlobals();
+        GameGlobals.allowCustomContent = false;
         var epManager = new EPManager((int)ProductFlags.BaseGame);
         var contentManager = new ContentManager();
         var luaManager = new LuaManager();
@@ -35,6 +27,5 @@ public static class TestCore
         CodecAttribute.Initialize();
         AssemblyHelper.InitializeLoadedAssemblies();
         VMPrimitiveRegistry.Initialize();
-        Initialized = true;
     }
 }

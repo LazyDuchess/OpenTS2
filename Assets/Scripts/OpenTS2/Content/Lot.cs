@@ -51,7 +51,7 @@ namespace OpenTS2.Content
             var gameObject = imposter.CreateRootGameObject();
 
             // Rotate based on the whether the frontEdge has changed from the lot's creation time.
-            var rotation = (_lotInfo.CreationFrontEdge - _lotInfo.FrontEdge) * -90;
+            var rotation = (_lotInfo.BaseLotInfo.CreationFrontEdge - _lotInfo.FrontEdge) * -90;
 
             // Lot imposters are always stored rotated as per their CreationFrontEdge. So a lot facing a road in the
             // positive x direction, i.e the "front" of the house is towards positive y will have its imposter model
@@ -60,7 +60,7 @@ namespace OpenTS2.Content
             // However, regardless of rotation, a lot in the neighborhood is stored with its grid coordinates
             // corresponding to the bottom-right of the grid. Thus when a lot is rotated, we need to rotate the imposter
             // from the correct pivot point.
-            var frontEdgeDiff = (_lotInfo.CreationFrontEdge - _lotInfo.FrontEdge) % 4;
+            var frontEdgeDiff = (_lotInfo.BaseLotInfo.CreationFrontEdge - _lotInfo.FrontEdge) % 4;
 
             Vector3 pivot;
             if (frontEdgeDiff == 0) // No rotation.
@@ -74,7 +74,7 @@ namespace OpenTS2.Content
             else
                 throw new IndexOutOfRangeException();
 
-            var position = new GameObject($"imposter_position_{_lotInfo.LotName}")
+            var position = new GameObject($"imposter_position_{_lotInfo.BaseLotInfo.LotName}")
             {
                 transform =
                 {

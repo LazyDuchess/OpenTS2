@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OpenTS2.Client
+namespace OpenTS2.Content
 {
     public enum Languages : byte
     {

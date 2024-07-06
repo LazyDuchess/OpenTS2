@@ -43,8 +43,6 @@ This Source Code Form is subject to the terms of the Mozilla Public License, v. 
 We follow the layout of a normal Unity project except:
 
 * `Assets/Scripts/OpenTS2` - Contains the bulk of the C# code that deals with TS2 formats and files.
-* `Assets/Scripts/OpenTS2/Engine` - Unity *specific* code tends to live in here to keep it
-  separate from the more language-independent code in the directory.
 * `Assets/Tests/OpenTS2/` - Unit tests following the same directory structure as the `Scripts` folder.
 
 ## Testing

@@ -7,8 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
-using NAudio;
-using NAudio.Wave;
 using OpenTS2.Content;
 using System.IO;
 using Unity.Collections;
@@ -120,6 +118,7 @@ namespace OpenTS2.Audio
             UpdateVolume();
             Core.OnNeighborhoodEntered += OnNeighborhoodEntered;
             Core.OnBeginLoading += OnBeginLoadingScreen;
+            Core.OnLotLoaded += OnLotLoaded;
         }
 
         private void Update()
@@ -141,13 +140,20 @@ namespace OpenTS2.Audio
             StartMusicCategory("NHood");
         }
 
+        private void OnLotLoaded()
+        {
+            if (CASManager.Instance.InCAS)
+                StartMusicCategory("CAS");
+            else
+                Stop();
+        }
+
         private void PlayNextSong()
         {
+            StopAllCoroutines();
             var contentManager = ContentManager.Instance;
             var currentSong = _currentMusicCategory.PopNextSong();
-            var songAsset = contentManager.GetAsset<AudioAsset>(currentSong.Key);
-            _tsAudioSource.Audio = songAsset;
-            _tsAudioSource.Play();
+            _tsAudioSource.PlayAsync(currentSong.Key);
         }
 
         private void OnSongEnd()
