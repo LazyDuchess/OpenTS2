@@ -44,7 +44,10 @@ namespace OpenTS2.Game
         {
             _timer += Time.deltaTime;
             var timesToTick = Mathf.FloorToInt(_timer / TickRate);
-            _virtualMachine.Tick();
+            for (var i = 0; i < timesToTick; i++)
+            {
+                _virtualMachine.Tick();
+            }
             _timer -= timesToTick * TickRate;
         }
 
