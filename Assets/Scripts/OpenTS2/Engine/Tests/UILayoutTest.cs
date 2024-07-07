@@ -59,8 +59,8 @@ namespace OpenTS2.Engine.Tests
             }
             if (Reload)
             {
-                CreateUI();
                 Reload = false;
+                CreateUI();
             }
         }
 
@@ -73,17 +73,6 @@ namespace OpenTS2.Engine.Tests
                 LoadBGUIPackage();
             Core.OnFinishedLoading?.Invoke();
             CreateUI();
-            /*
-            var contentManager = ContentManager.Get();
-            // Main Menu
-            //var key = new ResourceKey(0x49001017, 0xA99D8A11, TypeIDs.UI);
-            // Neighborhood View
-            var key = new ResourceKey(0x49000000, 0xA99D8A11, TypeIDs.UI);
-            //var key = new ResourceKey(0x49001010, 0xA99D8A11, TypeIDs.UI);
-            //var key = new ResourceKey(0x49060005, 0xA99D8A11, TypeIDs.UI);
-            //var key = new ResourceKey(0x49001024, 0xA99D8A11, TypeIDs.UI);
-            var mainMenuUILayout = contentManager.GetAsset<UILayout>(key);
-            _instances.AddRange(mainMenuUILayout.Instantiate(Canvas));*/
         }
     }
 }
