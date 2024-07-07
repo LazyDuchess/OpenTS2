@@ -25,6 +25,13 @@ namespace OpenTS2.UI
             LoadFontStyles();
         }
 
+        public FontStyle GetFontStyle(string name)
+        {
+            if (_fontStyleByName.TryGetValue(name, out var result))
+                return result;
+            return _fontStyleByName["Default"];
+        }
+
         private string GetValue(string val)
         {
             return val.Trim().Replace("\"", "");

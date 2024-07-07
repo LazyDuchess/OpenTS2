@@ -19,10 +19,15 @@ namespace OpenTS2.UI
         public HorizontalAlign HorizontalAlign = HorizontalAlign.Left;
         public VerticalAlign VerticalAlign = VerticalAlign.Top;
         public Color32 ForeColor = Color.black;
+        public string Font = "Default";
 
         public override void ParseProperties(UIProperties properties)
         {
             base.ParseProperties(properties);
+            if (properties.HasProperty("font"))
+            {
+                Font = properties.GetProperty("font");
+            }
             if (properties.HasProperty("captionres"))
             {
                 var captionRes = properties.GetStringSetProperty("captionres");
@@ -93,19 +98,10 @@ namespace OpenTS2.UI
 
             rect.offsetMin = Vector2.zero;
             rect.offsetMax = new Vector2(1f, 1f);
-            /*
-            var text = textGameObject.AddComponent<Text>();
-            text.color = ForeColor;
-            text.text = Caption;
-            text.font = AssetController.DefaultFont;
-            text.fontSize = 14;
-            text.alignment = Alignment;
-            var rect = text.GetComponent<RectTransform>();
-            rect.anchorMax = new Vector2(1f, 1f);
-            rect.anchorMin = Vector2.zero;
 
-            rect.offsetMin = Vector2.zero;
-            rect.offsetMax = new Vector2(1f, 1f);*/
+            var fontStyles = FontStyles.Instance;
+            fontStyles.GetFontStyle(Font).Apply(text);
+
             return uiComponent;
         }
     }
