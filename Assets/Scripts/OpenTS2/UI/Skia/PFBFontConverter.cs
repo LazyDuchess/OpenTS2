@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace OpenTS2.UI.Skia
 {
+    // TODO - Include builds for different architectures.
     public static class PFBFontConverter
     {
         private const string TXPath = "afdko/tx.exe";
