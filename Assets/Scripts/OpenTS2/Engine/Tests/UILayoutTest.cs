@@ -16,10 +16,10 @@ namespace OpenTS2.Engine.Tests
     public class UILayoutTest : MonoBehaviour
     {
         public Languages Language = Languages.USEnglish;
-        public string Key = "0x49001017";
-        public bool Reload = false;
         public bool LoadPackagesFromAllEPs = true;
-        private List<UIComponent> _instances = new List<UIComponent>();
+        [HideInInspector]
+        public int CurrentLayout = 0;
+        public List<ResourceKey> UILayouts;
         void LoadAllUIPackages()
         {
             EPManager.Instance.InstalledProducts = 0x3EFFF;
@@ -32,36 +32,42 @@ namespace OpenTS2.Engine.Tests
             ContentLoading.LoadContentStartup();
         }
 
-        void CreateUI()
+        private void LoadUILayouts()
         {
-            var globals = GameGlobals.Instance;
-            globals.Language = Language;
-            foreach (var instance in _instances)
-            {
-                Destroy(instance.gameObject);
-            }
-            _instances.Clear();
-            var contentManager = ContentManager.Instance;
-            var key = new ResourceKey(Convert.ToUInt32(Key, 16), 0xA99D8A11, TypeIDs.UI);
-            var uiLayout = contentManager.GetAsset<UILayout>(key);
-            _instances.AddRange(uiLayout.Instantiate(UIManager.MainCanvas.transform));
+            UILayouts = ContentManager.Instance.ResourceMap.Keys.Where(x => x.GroupID == 0xA99D8A11 && x.TypeID == TypeIDs.UI).ToList();
         }
 
-        private void Update()
+        public void Next()
         {
-            if (Input.GetKeyDown(KeyCode.Space))
+            CurrentLayout++;
+            if (CurrentLayout >= UILayouts.Count)
+                CurrentLayout = 0;
+            CreateUI();
+        }
+
+        public void Previous()
+        {
+            CurrentLayout--;
+            if (CurrentLayout < 0)
+                CurrentLayout = UILayouts.Count - 1;
+            CreateUI();
+        }
+
+        void CreateUI()
+        {
+            var canvas = UIManager.MainCanvas.transform;
+            var canvasChildren = canvas.GetComponentsInChildren<Transform>(true);
+            foreach(var child in canvasChildren)
             {
-                var currentCursor = CursorController.Cursor;
-                currentCursor++;
-                if ((int)currentCursor >= Enum.GetValues(typeof(CursorController.CursorType)).Length)
-                    currentCursor = 0;
-                CursorController.Cursor = currentCursor;
+                if (child == canvas) continue;
+                Destroy(child.gameObject);
             }
-            if (Reload)
-            {
-                Reload = false;
-                CreateUI();
-            }
+            var globals = GameGlobals.Instance;
+            globals.Language = Language;
+            var key = UILayouts[CurrentLayout];
+            var contentManager = ContentManager.Instance;
+            var uiLayout = contentManager.GetAsset<UILayout>(key);
+            uiLayout.Instantiate(UIManager.MainCanvas.transform);
         }
 
         private void Start()
@@ -71,6 +77,7 @@ namespace OpenTS2.Engine.Tests
                 LoadAllUIPackages();
             else
                 LoadBGUIPackage();
+            LoadUILayouts();
             Core.OnFinishedLoading?.Invoke();
             CreateUI();
         }
