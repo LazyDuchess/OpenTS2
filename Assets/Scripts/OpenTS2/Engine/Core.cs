@@ -16,6 +16,7 @@ using UnityEngine.SceneManagement;
 using OpenTS2.Game;
 using OpenTS2.Audio;
 using OpenTS2.Content.DBPF;
+using OpenTS2.UI;
 
 namespace OpenTS2.Engine
 {
@@ -43,7 +44,8 @@ namespace OpenTS2.Engine
             var objectManager = new ObjectManager();
             var nhoodManager = new NeighborhoodManager();
             var casController = new CASManager();
-            var lotManger = new LotManager();
+            var lotManager = new LotManager();
+            
 
             TerrainManager.Initialize();
             MaterialManager.Initialize();
@@ -54,6 +56,8 @@ namespace OpenTS2.Engine
             //Initialize the game assembly, do all reflection things.
             AssemblyHelper.InitializeLoadedAssemblies();
             PluginSupport.Initialize();
+
+            var fontStyles = new FontStyles();
 
             CoreInitialized = true;
         }
