@@ -16,6 +16,7 @@ Currently a basic main menu with a neighborhood chooser is implemented. Neighbor
 * [SkiaSharp](https://github.com/mono/SkiaSharp)
 * [NAudio](https://github.com/naudio/NAudio)
 * [NSpeex](https://github.com/aijingsun6/NSpeex)
+* [AFDKO](https://github.com/adobe-type-tools/afdko)
 
 ## Similar Projects
 * [FreeSO](https://github.com/RHY3756547/FreeSO) - Open Source reimplementation of The Sims Online using C# and Monogame. OpenTS2 borrows a lot of code and structure from this project.
