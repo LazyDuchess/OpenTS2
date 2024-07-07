@@ -15,6 +15,17 @@ namespace OpenTS2.UI.Skia
         private const string TXPath = "afdko/tx.exe";
         private const string MakeOTFPath = "afdko/makeotfexe.exe";
         private static string TempPath = Path.Combine(Application.persistentDataPath, "Temp");
+        
+        private static void RunProcess(string path, string args)
+        {
+            var proc = new Process();
+            proc.StartInfo.FileName = path;
+            proc.StartInfo.Arguments = args;
+            proc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            proc.Start();
+            proc.WaitForExit();
+        }
+        
         public static bool ConvertFiles(string pfbPath, string otfPath)
         {
             var txPath = Path.Combine(Environment.CurrentDirectory, TXPath);
@@ -24,12 +35,9 @@ namespace OpenTS2.UI.Skia
             Directory.CreateDirectory(TempPath);
             var temp1Path = Path.Combine(TempPath, "temp.font");
             var temp2Path = Path.Combine(TempPath, "temp.font2");
-            var proc = Process.Start(txPath, $"-cff -Z +b \"{pfbPath}\" \"{temp1Path}\"");
-            proc.WaitForExit();
-            proc = Process.Start(txPath, $"-t1 \"{temp1Path}\" \"{temp2Path}\"");
-            proc.WaitForExit();
-            proc = Process.Start(makeOtfPath, $"-f \"{temp2Path}\" -o \"{otfPath}\"");
-            proc.WaitForExit();
+            RunProcess(txPath, $"-cff -Z +b \"{pfbPath}\" \"{temp1Path}\"");
+            RunProcess(txPath, $"-t1 \"{temp1Path}\" \"{temp2Path}\"");
+            RunProcess(makeOtfPath, $"-f \"{temp2Path}\" -o \"{otfPath}\"");
 
             if (File.Exists(temp1Path))
                 File.Delete(temp1Path);
