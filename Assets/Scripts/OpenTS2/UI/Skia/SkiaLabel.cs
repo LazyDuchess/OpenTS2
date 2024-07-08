@@ -464,6 +464,8 @@ namespace OpenTS2.UI.Skia
         {
             var parsedText = new ParsedLabelText();
             var text = m_Text;
+            if (string.IsNullOrEmpty(text))
+                text = "";
             parsedText.OriginalText = text;
             text = text.Replace('\t', ' ');
 
