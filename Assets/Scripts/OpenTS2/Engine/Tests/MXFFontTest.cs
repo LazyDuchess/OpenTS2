@@ -1,4 +1,5 @@
-﻿using OpenTS2.Files;
+﻿using OpenTS2.Content;
+using OpenTS2.Files;
 using OpenTS2.Files.Formats.Font;
 using OpenTS2.UI.Skia;
 using System;
@@ -18,8 +19,8 @@ namespace OpenTS2.Engine.Tests
 
         private void Start()
         {
-            var baseGamePath = Filesystem.GetDataPathForProduct(Content.ProductFlags.BaseGame);
-            var fontPath = Path.Combine(baseGamePath, $"Res/UI/Fonts/{BaseGameFontToUse}");
+            var baseGamePath = Filesystem.GetPathForProduct(ProductFlags.BaseGame);
+            var fontPath = Path.Combine(baseGamePath, $"TSData/Res/UI/Fonts/{BaseGameFontToUse}");
             var mxf = new MXFFile(fontPath);
             var data = mxf.DecodedData;
             if (PFBFontConverter.IsPFB(data))

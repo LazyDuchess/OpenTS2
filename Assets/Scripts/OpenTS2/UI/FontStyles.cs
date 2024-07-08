@@ -66,11 +66,11 @@ namespace OpenTS2.UI
         private void LoadFonts()
         {
             var epManager = EPManager.Instance;
-            var products = epManager.GetInstalledProducts();
+            var products = Filesystem.GetProductDirectories();
 
             foreach(var product in products)
             {
-                var fontsPath = Path.Combine(Filesystem.GetDataPathForProduct(product), "Res/UI/Fonts");
+                var fontsPath = Path.Combine(product, "TSData/Res/UI/Fonts");
                 if (!Directory.Exists(fontsPath)) continue;
                 var fontFiles = Directory.GetFiles(fontsPath, "*.*", SearchOption.TopDirectoryOnly);
                 foreach(var fontFile in fontFiles)
