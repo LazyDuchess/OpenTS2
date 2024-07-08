@@ -39,7 +39,7 @@ namespace OpenTS2.UI
 
         private void LoadFontStyles()
         {
-            var fontStylePath = Filesystem.GetLatestFilePath("Res/UI/Fonts/FontStyle.ini");
+            var fontStylePath = Filesystem.GetLatestFilePath("TSData/Res/UI/Fonts/FontStyle.ini");
             if (string.IsNullOrEmpty(fontStylePath)) return;
             var iniFile = new IniFile(fontStylePath);
             var fontStyles = iniFile.GetSection("Font Styles");
