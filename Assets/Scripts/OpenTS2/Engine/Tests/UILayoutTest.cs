@@ -34,7 +34,16 @@ namespace OpenTS2.Engine.Tests
 
         private void LoadUILayouts()
         {
-            UILayouts = ContentManager.Instance.ResourceMap.Keys.Where(x => x.GroupID == 0xA99D8A11 && x.TypeID == TypeIDs.UI).ToList();
+            UILayouts = ContentManager.Instance.ResourceMap.Keys.Where(x => {
+                if (x.TypeID != TypeIDs.UI)
+                    return false;
+                var bytes = ContentManager.Instance.GetEntry(x).GetBytes();
+                var magic = Encoding.UTF8.GetString(bytes, 0, 4);
+                if (magic == "RIFF")
+                    return false;
+                return true;
+            }).ToList();
+            UILayouts.Sort((k1, k2) => k1.InstanceID.CompareTo(k2.InstanceID));
         }
 
         public void Next()
