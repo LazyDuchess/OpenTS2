@@ -47,7 +47,7 @@ namespace OpenTS2.Engine
 
             TerrainManager.Initialize();
             MaterialManager.Initialize();
-            Filesystem.Initialize(new JSONPathManager(), epManager);
+            Filesystem.InitializeFromJSON("config.json");
             CodecAttribute.Initialize();
             CheatSystem.Initialize();
             VMPrimitiveRegistry.Initialize();

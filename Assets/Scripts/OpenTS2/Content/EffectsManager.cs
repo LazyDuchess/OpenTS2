@@ -28,8 +28,8 @@ namespace OpenTS2.Content
         {
             // Load effects package.
             _manager.AddPackages(
-                Filesystem.GetPackagesInDirectory(Filesystem.GetDataPathForProduct(ProductFlags.BaseGame) +
-                                                  "/Res/Effects"));
+                Filesystem.GetPackagesInDirectory(Filesystem.GetPathForProduct(ProductFlags.BaseGame) +
+                                                  "TSData/Res/Effects"));
             _effects = _manager.GetAsset<EffectsAsset>(new ResourceKey(instanceID: 1, groupID: GroupIDs.Effects,
                 typeID: TypeIDs.EFFECTS));
 

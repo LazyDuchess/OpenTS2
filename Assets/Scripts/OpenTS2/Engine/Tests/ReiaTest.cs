@@ -29,16 +29,14 @@ namespace OpenTS2.Engine.Tests
 
         private void Start()
         {
-            var realPath = Filesystem.GetRealPath(reiaPath);
-            var streamFs = File.OpenRead(realPath);
+            var streamFs = File.OpenRead(reiaPath);
             reia = ReiaFile.Read(streamFs, stream);
         }
 
         void Reload()
         {
             reia.Dispose();
-            var realPath = Filesystem.GetRealPath(reiaPath);
-            var streamFs = File.OpenRead(realPath);
+            var streamFs = File.OpenRead(reiaPath);
             reia = ReiaFile.Read(streamFs, stream);
             reload = false;
             frameCounter = 0f;

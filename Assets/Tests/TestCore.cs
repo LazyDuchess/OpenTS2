@@ -23,7 +23,7 @@ public static class TestCore
         var contentManager = new ContentManager();
         var luaManager = new LuaManager();
 
-        Filesystem.Initialize(new TestPathManager(), epManager);
+        Filesystem.Initialize();
         CodecAttribute.Initialize();
         AssemblyHelper.InitializeLoadedAssemblies();
         VMPrimitiveRegistry.Initialize();

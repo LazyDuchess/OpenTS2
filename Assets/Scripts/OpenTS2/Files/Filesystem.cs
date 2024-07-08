@@ -13,6 +13,8 @@ using System.IO;
 using OpenTS2.Content.Interfaces;
 using OpenTS2.Common.Utils;
 using OpenTS2.Content;
+using OpenTS2.Lua.Disassembly.OpCodes;
+using UnityEngine;
 
 namespace OpenTS2.Files
 {
@@ -21,34 +23,57 @@ namespace OpenTS2.Files
     /// </summary>
     public static class Filesystem
     {
-        public static IPathManager PathManager { get; private set; }
-        private static EPManager EPManager;
-
-        static string UserDataDirectory
+        [Serializable]
+        private class JSONConfig
         {
-            get { return "%UserDataDir%"; }
+            public string game_dir;
+            public string user_dir;
+            public List<string> dlc;
         }
 
-        static string DataDirectory
+        public static string GameDirectory { get; private set; }
+        public static string UserDataDirectory { get; private set; }
+        public static List<string> ProductDirectories { get; private set; }
+
+        public static void Initialize()
         {
-            get { return "%DataDirectory%"; }
+            ProductDirectories = new List<string>();
         }
 
-        static string BinDirectory
+        public static void InitializeFromJSON(string jsonPath)
         {
-            get { return "%BinDirectory%"; }
+            ProductDirectories = new List<string>();
+            var config = JsonUtility.FromJson<JSONConfig>(File.ReadAllText(jsonPath));
+            GameDirectory = config.game_dir;
+            UserDataDirectory = config.user_dir;
+            foreach(var product in config.dlc)
+            {
+                ProductDirectories.Add(Path.Combine(config.game_dir, product));
+            }
         }
 
-        public static void Initialize(IPathManager pathManager, EPManager EPManager)
+        public static List<string> GetProductDirectories()
         {
-            PathManager = pathManager;
-            Filesystem.EPManager = EPManager;
+            var epManager = EPManager.Instance;
+            var products = epManager.GetInstalledProducts();
+            var result = new List<string>();
+            foreach(var product in products)
+            {
+                result.Add(GetPathForProduct(product));
+            }
+            result.Add(Environment.CurrentDirectory);
+            return result;
+        }
+
+        public static string GetPathForProduct(ProductFlags productFlag)
+        {
+            var index = Array.IndexOf(Enum.GetValues(productFlag.GetType()), productFlag);
+            return ProductDirectories[index];
         }
 
         public static List<string> GetStartupDownloadPackages()
         {
-            var userPath = PathManager.GetUserPath();
-            var downloadsPath = Path.Combine(userPath, "Downloads");
+            var downloadsPath = Path.Combine(UserDataDirectory, "Downloads");
             var packages = GetPackagesInDirectory(downloadsPath);
             packages = packages.Where(x => FileUtils.CleanPath(x).ToLowerInvariant().Contains("/startup/")).ToList();
             return packages;
@@ -56,8 +81,7 @@ namespace OpenTS2.Files
 
         public static List<string> GetStreamedDownloadPackages()
         {
-            var userPath = PathManager.GetUserPath();
-            var downloadsPath = Path.Combine(userPath, "Downloads");
+            var downloadsPath = Path.Combine(UserDataDirectory, "Downloads");
             var packages = GetPackagesInDirectory(downloadsPath);
             packages = packages.Where(x => !FileUtils.CleanPath(x).ToLowerInvariant().Contains("/startup/")).ToList();
             return packages;
@@ -65,8 +89,7 @@ namespace OpenTS2.Files
 
         public static List<string> GetUserPackages()
         {
-            var userPath = PathManager.GetUserPath();
-            var packageList = RemoveNeighborhoodAndCCPackagesFromList(GetPackagesInDirectory(userPath));
+            var packageList = RemoveNeighborhoodAndCCPackagesFromList(GetPackagesInDirectory(UserDataDirectory));
             return packageList;
         }
 
@@ -78,12 +101,12 @@ namespace OpenTS2.Files
             return packages;
         }
 
-        static List<string> RemoveNeighborhoodAndCCPackagesFromList(List<string> packages)
+        private static List<string> RemoveNeighborhoodAndCCPackagesFromList(List<string> packages)
         {
             return packages.Where(x => !IsNeighborhoodPackage(x) && !IsDownloadPackage(x)).ToList();
         }
 
-        static bool IsDownloadPackage(string filename)
+        private static bool IsDownloadPackage(string filename)
         {
             var clean = FileUtils.CleanPath(filename).ToLowerInvariant();
             if (clean.Contains("/downloads/"))
@@ -91,7 +114,7 @@ namespace OpenTS2.Files
             return false;
         }
 
-        static bool IsNeighborhoodPackage(string filename)
+        private static bool IsNeighborhoodPackage(string filename)
         {
             var clean = FileUtils.CleanPath(filename).ToLowerInvariant();
             if (clean.Contains("/neighborhoods/"))
@@ -111,13 +134,12 @@ namespace OpenTS2.Files
         public static List<string> GetStartupPackages()
         {
             var startupList = new List<string>();
-            var productList = EPManager.GetInstalledProducts();
+            var productList = GetProductDirectories();
             foreach(var product in productList)
             {
-                var dataPath = PathManager.GetDataPathForProduct(product);
-                var uiPath = Path.Combine(dataPath, "Res/UI");
-                var textPath = Path.Combine(dataPath, "Res/Text");
-                var soundPath = Path.Combine(dataPath, "Res/Sound");
+                var uiPath = Path.Combine(product, "TSData/Res/UI");
+                var textPath = Path.Combine(product, "TSData/Res/Text");
+                var soundPath = Path.Combine(product, "TSData/Res/Sound");
                 startupList.AddRange(GetPackagesInDirectory(uiPath));
                 startupList.AddRange(GetPackagesInDirectory(textPath));
                 startupList.AddRange(GetPackagesInDirectory(soundPath));
@@ -128,21 +150,29 @@ namespace OpenTS2.Files
         public static List<string> GetMainPackages()
         {
             var mainList = new List<string>();
-            var productList = EPManager.GetInstalledProducts();
+            var productList = GetProductDirectories();
+            var curProduct = 0;
+
+            var globalLots = new List<string>();
+            var lotTemplates = new List<string>();
+            var materials = new List<string>();
+            var objects = new List<string>();
+            var objectScripts = new List<string>();
+            var wants = new List<string>();
+
             foreach (var product in productList)
             {
+                curProduct++;
+                var catalogPath = Path.Combine(product, "TSData/Res/Catalog");
+                var effectsPath = Path.Combine(product, "TSData/Res/Effects");
                 
-                var dataPath = PathManager.GetDataPathForProduct(product);
-                var catalogPath = Path.Combine(dataPath, "Res/Catalog");
-                var effectsPath = Path.Combine(dataPath, "Res/Effects");
-                
-                var sims3dPath = Path.Combine(dataPath, "Res/Sims3D");
-                var threedPath = Path.Combine(dataPath, "Res/3D");
-                var terrainPath = Path.Combine(dataPath, "Res/Terrain");
-                var overridesPath = Path.Combine(dataPath, "Res/Overrides");
-                var stuffPackPath = Path.Combine(dataPath, "Res/StuffPack");
+                var sims3dPath = Path.Combine(product, "TSData/Res/Sims3D");
+                var threedPath = Path.Combine(product, "TSData/Res/3D");
+                var terrainPath = Path.Combine(product, "TSData/Res/Terrain");
+                var overridesPath = Path.Combine(product, "TSData/Res/Overrides");
+                var stuffPackPath = Path.Combine(product, "TSData/Res/StuffPack");
 
-                var lightingPath = Path.Combine(dataPath, "Res/Lighting");
+                var lightingPath = Path.Combine(product, "TSData/Res/Lighting");
 
                 mainList.AddRange(GetPackagesInDirectory(catalogPath));
                 mainList.AddRange(GetPackagesInDirectory(effectsPath));
@@ -155,22 +185,36 @@ namespace OpenTS2.Files
 
                 mainList.AddRange(GetPackagesInDirectory(lightingPath));
 
-                if (EPManager.GetLatestProduct() == product)
-                {
-                    var globalLotsPath = Path.Combine(dataPath, "Res/GlobalLots");
-                    mainList.AddRange(GetPackagesInDirectory(globalLotsPath));
-                    var lotTemplatesPath = Path.Combine(dataPath, "Res/LotTemplates");
-                    mainList.AddRange(GetPackagesInDirectory(lotTemplatesPath));
-                    var materialsPath = Path.Combine(dataPath, "Res/Materials");
-                    mainList.AddRange(GetPackagesInDirectory(materialsPath));
-                    var objectsPath = Path.Combine(dataPath, "Res/Objects");
-                    mainList.AddRange(GetPackagesInDirectory(objectsPath));
-                    var objectScriptsPath = Path.Combine(dataPath, "Res/ObjectScripts");
-                    mainList.AddRange(GetPackagesInDirectory(objectScriptsPath));
-                    var wantsPath = Path.Combine(dataPath, "Res/Wants");
-                    mainList.AddRange(GetPackagesInDirectory(wantsPath));
-                }
+                var globalLotsPath = Path.Combine(product, "TSData/Res/GlobalLots");
+                if (Directory.Exists(globalLotsPath))
+                    globalLots = GetPackagesInDirectory(globalLotsPath);
+
+                var lotTemplatesPath = Path.Combine(product, "TSData/Res/LotTemplates");
+                if (Directory.Exists(lotTemplatesPath))
+                    lotTemplates = GetPackagesInDirectory(lotTemplatesPath);
+
+                var materialsPath = Path.Combine(product, "TSData/Res/Materials");
+                if (Directory.Exists(materialsPath))
+                    materials = GetPackagesInDirectory(materialsPath);
+
+                var objectsPath = Path.Combine(product, "TSData/Res/Objects");
+                if (Directory.Exists(objectsPath))
+                    objects = GetPackagesInDirectory(objectsPath);
+
+                var objectScriptsPath = Path.Combine(product, "TSData/Res/ObjectScripts");
+                if (Directory.Exists(objectScriptsPath))
+                    objectScripts = GetPackagesInDirectory(objectScriptsPath);
+
+                var wantsPath = Path.Combine(product, "TSData/Res/Wants");
+                if (Directory.Exists(wantsPath))
+                    wants = GetPackagesInDirectory(wantsPath);
             }
+            mainList.AddRange(globalLots);
+            mainList.AddRange(lotTemplates);
+            mainList.AddRange(materials);
+            mainList.AddRange(objects);
+            mainList.AddRange(objectScripts);
+            mainList.AddRange(wants);
             return mainList;
         }
 
@@ -198,109 +242,23 @@ namespace OpenTS2.Files
             return GetFilesInPath(".package", directory);
         }
 
-        public static string GetPathForProduct(ProductFlags product)
-        {
-            return PathManager.GetPathForProduct(product);
-        }
-
-        public static string GetDataPathForProduct(ProductFlags product)
-        {
-            return PathManager.GetDataPathForProduct(product);
-        }
-
-        public static string GetBinPathForProduct(ProductFlags product)
-        {
-            return PathManager.GetBinPathForProduct(product);
-        }
-
-        public static string GetUserPath()
-        {
-            return PathManager.GetUserPath();
-        }
-
         /// <summary>
-        /// Given a file path relative to TSData, tries to find the absolute path to the file in the latest installed product where the file is available.
-        /// For example, given "Res/UI/Fonts/FontStyle.ini" in an unmodified installation with all products, this would return the University path, as it's the newest EP that has this file.
+        /// Given a file path relative to a product, tries to find the absolute path to the file in the latest installed product where the file is available.
+        /// For example, given "TSData/Res/UI/Fonts/FontStyle.ini" in an unmodified installation with all products, this would return the University path, as it's the newest EP that has this file.
         /// </summary>
         /// <param name="filepath">File path relative to TSData</param>
         /// <returns>Absolute file path. Null if file can't be found in any Product.</returns>
         public static string GetLatestFilePath(string filepath)
         {
-            var installedProducts = EPManager.GetInstalledProducts();
+            var installedProducts = GetProductDirectories();
             for (var i = installedProducts.Count - 1; i >= 0; i--)
             {
-                var dataPath = GetDataPathForProduct(installedProducts[i]);
+                var dataPath = installedProducts[i];
                 var absolutePath = Path.Combine(dataPath, filepath);
                 if (File.Exists(absolutePath))
                     return absolutePath;
             }
             return null;
-        }
-
-        /// <summary>
-        /// Checks if two paths, unparsed or parsed, are equal.
-        /// </summary>
-        /// <param name="path1">Path to check</param>
-        /// <param name="path2">Path to check against</param>
-        /// <returns>True if equal, false if not.</returns>
-        public static bool PathsEqual(string path1, string path2)
-        {
-            path1 = GetRealPath(path1).ToLowerInvariant();
-            path2 = GetRealPath(path2).ToLowerInvariant();
-            return (path1 == path2);
-        }
-        /// <summary>
-        /// Returns short relative path. (Eg. Replaces the game's directory with the %DataDirectory% shorthand)
-        /// </summary>
-        /// <param name="path">Path to shorten</param>
-        /// <returns>Fake short path</returns>
-        public static string GetShortPath(string path)
-        {
-            path = FileUtils.CleanPath(path) + "/";
-            path = path.Replace(PathManager.GetDataPathForProduct(EPManager.GetLatestProduct()), DataDirectory);
-            path = path.Replace(PathManager.GetUserPath(), UserDataDirectory);
-            path = path.Replace(PathManager.GetBinPathForProduct(EPManager.GetLatestProduct()), BinDirectory);
-            path = FileUtils.CleanPath(path);
-            return path;
-        }
-
-        /// <summary>
-        /// Returns fully parsed path. (Eg. Replaces %DataDirectory% with actual data directory path)
-        /// </summary>
-        /// <param name="path">Path to parse</param>
-        /// <returns>Real path</returns>
-        public static string GetRealPath(string path)
-        {
-            path = path.Replace(DataDirectory, PathManager.GetDataPathForProduct(EPManager.GetLatestProduct()));
-            path = path.Replace(UserDataDirectory, PathManager.GetUserPath());
-            path = path.Replace(BinDirectory, PathManager.GetBinPathForProduct(EPManager.GetLatestProduct()));
-            path = FileUtils.CleanPath(path);
-            return path;
-        }
-
-        /// <summary>
-        /// Writes a byte array into a file, creating all necessary directories.
-        /// </summary>
-        /// <param name="path">Path to output file.</param>
-        /// <param name="bytes">Byte array to write.</param>
-        public static void Write(string path, byte[] bytes)
-        {
-            Write(path, bytes, bytes.Length);
-        }
-
-        /// <summary>
-        /// Writes a byte array into a file, creating all necessary directories.
-        /// </summary>
-        /// <param name="path">Path to output file.</param>
-        /// <param name="bytes">Byte array to write.</param>
-        public static void Write(string path, byte[] bytes, int size)
-        {
-            var dir = Path.GetDirectoryName(path);
-            if (!Directory.Exists(dir) && !string.IsNullOrEmpty(dir))
-                Directory.CreateDirectory(dir);
-            var fStream = new FileStream(path, FileMode.Create, FileAccess.Write);
-            fStream.Write(bytes, 0, size);
-            fStream.Dispose();
         }
     }
 }
