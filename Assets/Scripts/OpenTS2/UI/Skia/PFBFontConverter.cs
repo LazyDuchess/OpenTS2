@@ -69,10 +69,7 @@ namespace OpenTS2.UI.Skia
 
         public static bool IsPFB(byte[] data)
         {
-            using var stream = new MemoryStream(data);
-            using var reader = new BinaryReader(stream);
-            var magic = reader.ReadBytes(2);
-            if (magic[0] == 0x80 && magic[1] == 0x01)
+            if (data[0] == 0x80 && data[1] == 0x01)
                 return true;
             return false;
         }
