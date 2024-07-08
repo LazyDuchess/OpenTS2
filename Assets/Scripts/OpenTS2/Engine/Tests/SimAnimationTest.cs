@@ -28,8 +28,8 @@ namespace OpenTS2.Engine.Tests
 
             // Load base game assets.
             contentManager.AddPackages(
-                Filesystem.GetPackagesInDirectory(Filesystem.GetDataPathForProduct(ProductFlags.BaseGame) +
-                                                  "/Res/Sims3D"));
+                Filesystem.GetPackagesInDirectory(Filesystem.GetPathForProduct(ProductFlags.BaseGame) +
+                                                  "TSData/Res/Sims3D"));
 
             // Load all animations involving auskel and put them in the dictionary.
             foreach (var animationAsset in contentManager.GetAssetsOfType<ScenegraphAnimationAsset>(TypeIDs.SCENEGRAPH_ANIM))

@@ -120,7 +120,7 @@ namespace OpenTS2.Engine.Tests
 
             var contentManager = ContentManager.Instance;
 
-            var lotsFolderPath = Path.Combine(Filesystem.GetUserPath(), $"Neighborhoods/{NeighborhoodPrefix}/Lots");
+            var lotsFolderPath = Path.Combine(Filesystem.UserDataDirectory, $"Neighborhoods/{NeighborhoodPrefix}/Lots");
             var lotFilename = $"{NeighborhoodPrefix}_Lot{LotID}.package";
             var lotFullPath = Path.Combine(lotsFolderPath, lotFilename);
 

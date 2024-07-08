@@ -65,7 +65,7 @@ namespace OpenTS2.Lua
         /// </summary>
         public void InitializeObjectScripts()
         {
-            var objectScripts = Filesystem.GetLatestFilePath("Res/ObjectScripts/ObjectScripts.package");
+            var objectScripts = Filesystem.GetLatestFilePath("TSData/Res/ObjectScripts/ObjectScripts.package");
             if (objectScripts == null)
             {
                 Debug.Log("LuaManager: No object scripts in current product.");

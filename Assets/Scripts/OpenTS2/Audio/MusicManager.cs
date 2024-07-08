@@ -141,11 +141,11 @@ namespace OpenTS2.Audio
 
         private void LoadIniMusicCategories()
         {
-            var epManager = EPManager.Instance;
-            var products = epManager.GetInstalledProducts();
+            var products = Filesystem.GetProductDirectories();
             foreach(var product in products)
             {
-                var sysFolder = Path.Combine(Filesystem.GetDataPathForProduct(product), "Sys");
+                var sysFolder = Path.Combine(product, "TSData/Sys");
+                if (!Directory.Exists(sysFolder)) continue;
                 var unpackedAudioIni = Directory.GetFiles(sysFolder, "TSAudioUnpacked*.ini", SearchOption.TopDirectoryOnly).FirstOrDefault();
                 if (!string.IsNullOrEmpty(unpackedAudioIni))
                 {

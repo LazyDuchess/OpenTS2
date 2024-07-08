@@ -28,7 +28,7 @@ namespace OpenTS2.Engine.Tests
         {
             NhoodNames.Clear();
 
-            var nhoodFolderPath = Path.Combine(Filesystem.GetUserPath(), $"Neighborhoods");
+            var nhoodFolderPath = Path.Combine(Filesystem.UserDataDirectory, $"Neighborhoods");
 
             foreach (var nhood in Directory.GetDirectories(nhoodFolderPath))
             {
@@ -44,7 +44,7 @@ namespace OpenTS2.Engine.Tests
         private void PopulateLotList(string nhood)
         {
             _cachedNhood = nhood;
-            var lotsFolderPath = Path.Combine(Filesystem.GetUserPath(), $"Neighborhoods/{nhood}/Lots");
+            var lotsFolderPath = Path.Combine(Filesystem.UserDataDirectory, $"Neighborhoods/{nhood}/Lots");
 
             LotIds.Clear();
 

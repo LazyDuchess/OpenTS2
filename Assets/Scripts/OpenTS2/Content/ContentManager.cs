@@ -42,7 +42,7 @@ namespace OpenTS2.Content
 
         public void MapFileToResource(string path, ResourceKey key)
         {
-            _fileMap[key] = Filesystem.GetRealPath(path);
+            _fileMap[key] = FileUtils.CleanPath(path);
             var entry = new DBPFEntry();
             entry.TGI = key;
             ResourceMap[key] = entry;
@@ -217,7 +217,7 @@ namespace OpenTS2.Content
         /// <returns>Package.</returns>
         public DBPFFile AddPackage(string path)
         {
-            path = Filesystem.GetRealPath(path);
+            path = FileUtils.CleanPath(path);
             if (_entryByPath.ContainsKey(path))
                 return _entryByPath[path];
             var package = new DBPFFile(path);
@@ -436,7 +436,7 @@ namespace OpenTS2.Content
         /// <returns>Content entry for package.</returns>
         public DBPFFile GetPackageByPath(string path)
         {
-            path = Filesystem.GetRealPath(path);
+            path = FileUtils.CleanPath(path);
             if (_entryByPath.ContainsKey(path))
                 return _entryByPath[path];
             else

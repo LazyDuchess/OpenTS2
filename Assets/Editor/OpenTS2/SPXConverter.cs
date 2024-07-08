@@ -33,12 +33,12 @@ namespace OpenTS2
             if (baseGameOnly)
                 EPManager.Instance.InstalledProducts = (int)ProductFlags.BaseGame;
             var epManager = EPManager.Instance;
-            var products = epManager.GetInstalledProducts();
+            var products = Filesystem.GetProductDirectories();
             var contentManager = ContentManager.Instance;
 
             foreach (var product in products)
             {
-                var packages = Filesystem.GetPackagesInDirectory(Path.Combine(Filesystem.GetDataPathForProduct(product), "Res/Sound"));
+                var packages = Filesystem.GetPackagesInDirectory(Path.Combine(product, "TSData/Res/Sound"));
                 contentManager.AddPackages(packages);
             }
 

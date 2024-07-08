@@ -40,7 +40,7 @@ namespace OpenTS2.Engine.Tests
 
             if (DumpLuaScripts)
             {
-                var objectScriptsPath = Filesystem.GetLatestFilePath("Res/ObjectScripts/ObjectScripts.package");
+                var objectScriptsPath = Filesystem.GetLatestFilePath("TSData/Res/ObjectScripts/ObjectScripts.package");
                 var objectScriptsFile = new DBPFFile(objectScriptsPath);
 
                 foreach(var entry in objectScriptsFile.Entries)

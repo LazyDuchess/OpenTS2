@@ -57,7 +57,7 @@ namespace OpenTS2.Audio
         private void LoadCustomMusic()
         {
             CustomSongNames = new Dictionary<ResourceKey, string>();
-            var musicDir = Path.Combine(Filesystem.GetUserPath(), "Music");
+            var musicDir = Path.Combine(Filesystem.UserDataDirectory, "Music");
             var stationDirs = Directory.GetDirectories(musicDir);
             foreach(var stationDir in stationDirs)
             {
