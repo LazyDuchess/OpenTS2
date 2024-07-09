@@ -62,6 +62,9 @@ namespace OpenTS2.SimAntics
                     case VMDataSource.MyObjectsAttributes:
                         Entity.Attributes[dataIndex] = value;
                         return;
+                    case VMDataSource.MyObjectsSemiAttributes:
+                        Entity.SemiAttributes[dataIndex] = value;
+                        return;
                     case VMDataSource.MyObject:
                         Entity.ObjectData[dataIndex] = value;
                         return;
@@ -88,6 +91,12 @@ namespace OpenTS2.SimAntics
                         return;
                     case VMDataSource.StackObjectsAttributes:
                         StackObjectEntity.Attributes[dataIndex] = value;
+                        return;
+                    case VMDataSource.StackObjectsSemiAttributes:
+                        StackObjectEntity.SemiAttributes[dataIndex] = value;
+                        return;
+                    case VMDataSource.StackObjectsSemiAttributeByParam:
+                        StackObjectEntity.SemiAttributes[StackFrame.Arguments[dataIndex]] = value;
                         return;
                 }
                 throw new SimAnticsException($"Attempted to modify a variable from an out of range data source ({source}[{dataIndex}]).", StackFrame);
