@@ -101,7 +101,7 @@ namespace OpenTS2.SimAntics
                 }
                 throw new SimAnticsException($"Attempted to modify a variable from an out of range data source ({source}[{dataIndex}]).", StackFrame);
             }
-            catch (ArgumentOutOfRangeException)
+            catch (IndexOutOfRangeException)
             {
                 throw new SimAnticsException($"Attempted to modify a variable from an out of range data index ({source}[{dataIndex}]).", StackFrame);
             }
