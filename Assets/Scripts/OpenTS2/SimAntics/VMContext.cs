@@ -27,6 +27,7 @@ namespace OpenTS2.SimAntics
                 {
                     VMDataSource.Globals => VM.GetGlobal((ushort)dataIndex),
                     VMDataSource.MyObjectsAttributes => Entity.Attributes[dataIndex],
+                    VMDataSource.MyObjectsSemiAttributes => Entity.SemiAttributes[dataIndex],
                     VMDataSource.MyObject => Entity.ObjectData[dataIndex],
                     VMDataSource.StackObject => StackObjectEntity.ObjectData[dataIndex],
                     VMDataSource.Literal => dataIndex,
@@ -38,10 +39,12 @@ namespace OpenTS2.SimAntics
                     VMDataSource.Local => StackFrame.Locals[dataIndex],
                     VMDataSource.StackObjectsDefinition => (short)StackObjectEntity.ObjectDefinition.Fields[dataIndex],
                     VMDataSource.StackObjectsAttributes => StackObjectEntity.Attributes[dataIndex],
+                    VMDataSource.StackObjectsSemiAttributes => StackObjectEntity.SemiAttributes[dataIndex],
+                    VMDataSource.StackObjectsSemiAttributeByParam => StackObjectEntity.SemiAttributes[StackFrame.Arguments[dataIndex]],
                     _ => throw new SimAnticsException($"Attempted to retrieve a variable from an out of range data source ({source}[{dataIndex}]).", StackFrame)
                 };
             }
-            catch (ArgumentOutOfRangeException)
+            catch (IndexOutOfRangeException)
             {
                 throw new SimAnticsException($"Attempted to retrieve a variable from an out of range data index ({source}[{dataIndex}]).", StackFrame);
             }
