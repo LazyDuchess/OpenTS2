@@ -75,7 +75,7 @@ namespace OpenTS2.Content
         /// <returns>List of DBPFEntries of specified type.</returns>
         public List<DBPFEntry> GetEntriesOfType(uint typeID)
         {
-            return ResourceMap.Where(map => map.Value.GlobalTGI.TypeID == typeID).ToDictionary(x => x.Key, x => x.Value).Values.ToList();
+            return ResourceMap.Values.Where(x => x.GlobalTGI.TypeID == typeID).ToList();
         }
 
         /// <summary>
