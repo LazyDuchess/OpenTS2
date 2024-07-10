@@ -57,6 +57,7 @@ namespace OpenTS2.SimAntics
             SetGlobal(VMGlobals.GameEditionFlags2, epFlags2);
             var globals = GameGlobals.Instance;
             SetGlobal(VMGlobals.CurrentLanguage, (short)globals.Language);
+            SetGlobal(VMGlobals.Year, 1997);
         }
 
         /// <summary>
