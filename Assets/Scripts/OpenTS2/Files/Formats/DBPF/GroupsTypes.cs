@@ -66,6 +66,7 @@ namespace OpenTS2.Files.Formats.DBPF
         public const uint LUA_LOCAL = 0x9012468B;
         public const uint OBJF = 0x4F424A66;
         public const uint HITLIST = 0x7B1ACFCD;
+        public const uint NEIGHBOR = 0xAACE2EFB;
     }
     public static class GroupIDs
     {
