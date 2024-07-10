@@ -32,14 +32,12 @@ namespace OpenTS2
                 {
                     GUILayout.BeginVertical("box");
                     var globalName = ((SimAntics.VMGlobals)i).ToString();
-                    GUILayout.BeginHorizontal();
                     var editedGlobal = EditorGUILayout.TextField(globalName, vm.GlobalState[i].ToString(CultureInfo.InvariantCulture));
                     if (short.TryParse(editedGlobal,NumberStyles.Integer, CultureInfo.InvariantCulture, out var res))
                     {
                         if (res != vm.GlobalState[i])
                             vm.SetGlobal((ushort)i, res);
                     }
-                    GUILayout.EndHorizontal();
                     GUILayout.EndVertical();
                 }
                 EditorGUI.indentLevel--;
@@ -54,10 +52,16 @@ namespace OpenTS2
                     GUILayout.BeginVertical("box");
                     GUILayout.Label($"{entity.ID} - {entity.ObjectDefinition.FileName}");
                     EditorGUILayout.Separator();
+                    GUILayout.BeginHorizontal();
                     if (GUILayout.Button("Kill"))
                     {
                         entity.Delete();
                     }
+                    if (GUILayout.Button("Inspect"))
+                    {
+                        VMEntityWindow.Show(entity);
+                    }
+                    GUILayout.EndHorizontal();
                     GUILayout.EndVertical();
                 }
                 EditorGUI.indentLevel--;
