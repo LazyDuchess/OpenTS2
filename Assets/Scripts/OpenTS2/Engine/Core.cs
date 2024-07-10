@@ -40,7 +40,6 @@ namespace OpenTS2.Engine
             var luaManager = new LuaManager();
             var musicManager = new MusicManager();
             var audioManager = new AudioManager();
-            var objectManager = new ObjectManager();
             var nhoodManager = new NeighborhoodManager();
             var casController = new CASManager();
             var lotManger = new LotManager();

@@ -13,15 +13,18 @@ namespace OpenTS2.Content
     {
         public static NeighborManager Instance { get; private set; }
         public Dictionary<short, NeighborAsset> NeighborById;
+        public List<NeighborAsset> Neighbors => NeighborById.Values.ToList();
         private ContentManager _contentManager;
 
         public void Initialize()
         {
+            var currentNeighborhood = NeighborhoodManager.Instance.CurrentNeighborhood;
             _contentManager = ContentManager.Instance;
             NeighborById = new Dictionary<short, NeighborAsset>();
-            var neighbors = _contentManager.GetAssetsOfType<NeighborAsset>(TypeIDs.NEIGHBOR);
-            foreach(var neighbor in neighbors)
+            var neighborEntries = _contentManager.ResourceMap.Values.Where(x => x.GlobalTGI.TypeID == TypeIDs.NEIGHBOR && x.GlobalTGI.GroupID == currentNeighborhood.GroupID);
+            foreach(var neighborEntry in neighborEntries)
             {
+                var neighbor = neighborEntry.GetAsset<NeighborAsset>();
                 NeighborById[neighbor.Id] = neighbor;
             }
         }

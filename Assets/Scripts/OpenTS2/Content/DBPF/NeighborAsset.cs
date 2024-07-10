@@ -9,5 +9,14 @@ namespace OpenTS2.Content.DBPF
     public class NeighborAsset : AbstractAsset
     {
         public short Id = 0;
+        public uint GUID;
+        public ObjectDefinitionAsset ObjectDefinition;
+
+        public NeighborAsset(short neighborId, uint objectGuid)
+        {
+            Id  = neighborId;
+            GUID = objectGuid;
+            ObjectDefinition = ObjectManager.Instance.GetObjectByGUID(GUID);
+        }
     }
 }

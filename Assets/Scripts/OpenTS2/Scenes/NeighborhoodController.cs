@@ -18,8 +18,9 @@ namespace OpenTS2.Scenes
             var simulator = Simulator.Instance;
             if (simulator != null)
                 simulator.Kill();
-            Simulator.Create(Simulator.Context.Neighborhood);
+            ObjectManager.Create();
             NeighborManager.Create();
+            Simulator.Create(Simulator.Context.Neighborhood);
         }
     }
 }
