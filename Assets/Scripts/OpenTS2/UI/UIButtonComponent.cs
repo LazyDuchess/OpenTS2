@@ -17,7 +17,7 @@ namespace OpenTS2.UI
     public class UIButtonComponent : UIComponent, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler
     {
         /// <summary>
-        /// Triggers when this button is clicked. Boolean argument specifies whether it was a double click.
+        /// Triggers when this button is clicked.
         /// </summary>
         public Action OnClick;
         public bool GreyedOut = false;
@@ -87,6 +87,7 @@ namespace OpenTS2.UI
         {
             if (eventData.button != PointerEventData.InputButton.Left && eventData.button != PointerEventData.InputButton.Right)
                 return;
+            AudioManager.Instance.PlayUISound(ClickSound);
             _held = true;
         }
 
@@ -95,16 +96,8 @@ namespace OpenTS2.UI
             if (eventData.button != PointerEventData.InputButton.Left && eventData.button != PointerEventData.InputButton.Right)
                 return;
             if (_held && _hovering)
-            {
-                Click();
-            }
+                OnClick?.Invoke();
             _held = false;
-        }
-
-        void Click()
-        {
-            AudioManager.Instance.PlayUISound(ClickSound);
-            OnClick?.Invoke();
         }
     }
 }

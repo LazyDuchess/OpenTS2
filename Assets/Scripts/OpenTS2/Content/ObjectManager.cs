@@ -11,46 +11,40 @@ using UnityEngine;
 
 namespace OpenTS2.Content
 {
-    public class ObjectManager
-    {   
+    public class ObjectManager : MonoBehaviour
+    {
         public static ObjectManager Instance { get; private set; }
-        public List<ObjectDefinitionAsset> Objects
+        public Dictionary<uint, ObjectDefinitionAsset> ObjectByGUID;
+        public List<ObjectDefinitionAsset> Objects => ObjectByGUID.Values.ToList();
+        private ContentManager _contentManager;
+
+        public void Initialize()
         {
-            get
+            _contentManager = ContentManager.Instance;
+            ObjectByGUID = new Dictionary<uint, ObjectDefinitionAsset>();
+            var objects = _contentManager.GetAssetsOfType<ObjectDefinitionAsset>(TypeIDs.OBJD);
+            foreach (var objd in objects)
             {
-                return _objectByGUID.Values.ToList();
+                ObjectByGUID[objd.GUID] = objd;
             }
-        }
-
-        private Dictionary<uint, ObjectDefinitionAsset> _objectByGUID;
-
-        public ObjectManager()
-        {
-            Instance = this;
-            Core.OnFinishedLoading += OnFinishedLoading;
-        }
-
-
-        private void OnFinishedLoading()
-        {
-            _objectByGUID = new Dictionary<uint, ObjectDefinitionAsset>();
-            var objectList = ContentManager.Instance.GetAssetsOfType<ObjectDefinitionAsset>(TypeIDs.OBJD);
-            foreach (ObjectDefinitionAsset element in objectList)
-            {
-                RegisterObject(element);
-            }
-        }
-
-        private void RegisterObject(ObjectDefinitionAsset objd)
-        {
-            _objectByGUID[objd.GUID] = objd;
         }
 
         public ObjectDefinitionAsset GetObjectByGUID(uint guid)
         {
-            if (_objectByGUID.TryGetValue(guid, out ObjectDefinitionAsset obj))
-                return obj;
+            if (ObjectByGUID.TryGetValue(guid, out var objd))
+                return objd;
             return null;
+        }
+
+        public static void Create()
+        {
+            if (Instance != null)
+            {
+                Destroy(Instance.gameObject);
+            }
+            var go = new GameObject("Object Manager");
+            Instance = go.AddComponent<ObjectManager>();
+            Instance.Initialize();
         }
     }
 }

@@ -1,5 +1,8 @@
-﻿using OpenTS2.Content.DBPF;
+﻿using OpenTS2.Common;
+using OpenTS2.Content;
+using OpenTS2.Content.DBPF;
 using OpenTS2.Files.Formats.DBPF;
+using OpenTS2.Lua.Disassembly.OpCodes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +24,7 @@ namespace OpenTS2.SimAntics
         public VM VM;
         public ObjectDefinitionAsset ObjectDefinition;
         public short[] Attributes;
+        public short[] SemiAttributes;
         public short[] ObjectData = new short[114];
         public uint PrivateGroupID => ObjectDefinition.GlobalTGI.GroupID;
         public uint SemiGlobalGroupID
@@ -42,7 +46,30 @@ namespace OpenTS2.SimAntics
         public VMEntity(ObjectDefinitionAsset objectDefinition) : this()
         {
             ObjectDefinition = objectDefinition;
-            Attributes = new short[objectDefinition.NumAttributes];
+            Attributes = new short[GetNumberOfAttributes()];
+            SemiAttributes = new short[GetNumberOfSemiGlobalAttributes()];
+        }
+
+        // TODO: Verify these two methods below are right. Sometimes objdefs have 0 attributes but do have attribute labels and get/set their attributes.
+        private int GetNumberOfAttributes()
+        {
+            var objDefAttributes = ObjectDefinition.NumAttributes;
+            var attrLabels = ContentManager.Instance.GetAsset<StringSetAsset>(new ResourceKey(0x100, PrivateGroupID, TypeIDs.STR));
+            if (attrLabels == null)
+                return objDefAttributes;
+            var attrLabelsCount = attrLabels.StringData.Strings[Languages.USEnglish].Count;
+            return attrLabelsCount > objDefAttributes ? attrLabelsCount : objDefAttributes;
+        }
+
+        private int GetNumberOfSemiGlobalAttributes()
+        {
+            var semiGlobal = ObjectDefinition.SemiGlobal;
+            if (semiGlobal == null)
+                return 0;
+            var semiAttributeLabels = ContentManager.Instance.GetAsset<StringSetAsset>(new ResourceKey(0x100, semiGlobal.SemiGlobalGroupID, TypeIDs.STR));
+            if (semiAttributeLabels == null)
+                return 0;
+            return semiAttributeLabels.StringData.Strings[Languages.USEnglish].Count;
         }
 
         public short GetObjectData(VMObjectData field)
