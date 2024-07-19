@@ -151,7 +151,7 @@ namespace OpenTS2.UI.Layouts
             // Unparent shade and move it to the top, so that it covers the main menu fully.
 
             _shade = Components[0].GetChildByID(ShadeID);
-            _shade.transform.parent = MainCanvas;
+            _shade.transform.SetParent(MainCanvas, false);
             _shade.transform.SetAsLastSibling();
             _shade.SetAnchor(UIComponent.AnchorType.Center);
 
