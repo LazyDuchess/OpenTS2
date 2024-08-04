@@ -11,6 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using static UnityEditor.FilePathAttribute;
 
 namespace OpenTS2.Scenes.ParticleEffects
 {
@@ -22,6 +23,7 @@ namespace OpenTS2.Scenes.ParticleEffects
         private Vector3 _position;
         private Vector3 _rotation;
         private Material _material;
+        private Mesh _decalMesh;
 
         private void Start()
         {
@@ -47,12 +49,11 @@ namespace OpenTS2.Scenes.ParticleEffects
             var meshFilter = GetComponent<MeshFilter>();
             var meshRenderer = GetComponent<MeshRenderer>();
 
-            meshFilter.sharedMesh = terrainMeshFilter.sharedMesh;
+            BuildDecalMesh(terrainMeshFilter.sharedMesh);
+            meshFilter.sharedMesh = _decalMesh;
 
-            _material = new Material(Shader.Find("OpenTS2/NeighborhoodDecal"));
+            _material = new Material(Shader.Find("OpenTS2/BakedDecal"));
             _material.mainTexture = _textureAsset.GetSelectedImageAsUnityTexture();
-            _material.SetVector(Location, _position);
-            _material.SetVector(Rotation, _rotation);
 
             meshRenderer.sharedMaterial = _material;
             transform.SetParent(null);
@@ -61,10 +62,89 @@ namespace OpenTS2.Scenes.ParticleEffects
             transform.localScale = Vector3.one;
         }
 
+        private Vector2 RotateUV(Vector2 uv, float angle)
+        {
+            var cos = Mathf.Cos(angle);
+            var sin = Mathf.Sin(angle);
+            var x = uv.x * cos - uv.y * sin;
+            var y = uv.x * sin + uv.y * cos;
+            return new Vector2(x, y);
+        }
+
+        private Vector2 GetUV(Vector3 point)
+        {
+            var radius = 80f;
+            var radiusHalf = radius * 0.5f;
+            var minPos = _position;
+            minPos -= new Vector3(radiusHalf, radiusHalf, radiusHalf);
+            var maxPos = minPos + new Vector3(radius, radius, radius);
+
+            point -= minPos;
+            point /= radius;
+
+            var uv = new Vector2(point.x - 0.5f, point.z - 0.5f);
+            uv = RotateUV(GetUV(uv), _rotation.y * Mathf.Deg2Rad);
+            uv += new Vector2(0.5f, 0.5f);
+            return uv;
+        }
+        private void BuildDecalMesh(Mesh terrainMesh)
+        {
+            _decalMesh = new Mesh();
+            var vertices = terrainMesh.vertices;
+            var uvs = new Vector2[terrainMesh.vertices.Length];
+
+            var oTriangles = terrainMesh.triangles;
+            var triangles = new List<int>();
+
+            var radius = 80f;
+            var radiusHalf = radius * 0.5f;
+            var decalPositionMatrix = Matrix4x4.Translate(new Vector3(-_position.x + radiusHalf, 0f, -_position.z + radiusHalf));
+            var decalRotationMatrix = Matrix4x4.Rotate(Quaternion.Euler(0f, _rotation.y, 0f));
+
+            for(var i = 0; i < vertices.Length; i++)
+            {
+                var v = decalPositionMatrix.MultiplyPoint(vertices[i]);
+                v /= radius;
+                v.x -= 0.5f;
+                v.z -= 0.5f;
+                v = decalRotationMatrix.MultiplyPoint(v);
+                v.x += 0.5f;
+                v.z += 0.5f;
+
+                uvs[i] = new Vector2(v.x, v.z);
+            }
+            
+            for (var i = 0; i < oTriangles.Length; i += 3)
+            {
+                var v1i = oTriangles[i];
+                var v2i = oTriangles[i + 1];
+                var v3i = oTriangles[i + 2];
+
+                var v1 = uvs[v1i];
+                var v2 = uvs[v2i];
+                var v3 = uvs[v3i];
+
+                if ((v1.x < 1f && v1.y < 1f && v1.x > 0f && v1.y > 0f) ||
+                    (v2.x < 1f && v2.y < 1f && v2.x > 0f && v2.y > 0f) ||
+                    (v3.x < 1f && v3.y < 1f && v3.x > 0f && v3.y > 0f))
+                {
+                    triangles.Add(v1i);
+                    triangles.Add(v2i);
+                    triangles.Add(v3i);
+                }
+            }
+
+            _decalMesh.SetVertices(vertices);
+            _decalMesh.SetUVs(0, uvs);
+            _decalMesh.SetTriangles(triangles, 0);
+        }
+
         private void OnDestroy()
         {
             if (_material != null)
                 _material.Free();
+            if (_decalMesh != null)
+                _decalMesh.Free();
         }
     }
 }
