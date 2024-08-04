@@ -61,31 +61,6 @@ namespace OpenTS2.Scenes.ParticleEffects
             transform.localScale = Vector3.one;
         }
 
-        private Vector2 RotateUV(Vector2 uv, float angle)
-        {
-            var cos = Mathf.Cos(angle);
-            var sin = Mathf.Sin(angle);
-            var x = uv.x * cos - uv.y * sin;
-            var y = uv.x * sin + uv.y * cos;
-            return new Vector2(x, y);
-        }
-
-        private Vector2 GetUV(Vector3 point)
-        {
-            var radius = 80f;
-            var radiusHalf = radius * 0.5f;
-            var minPos = _position;
-            minPos -= new Vector3(radiusHalf, radiusHalf, radiusHalf);
-            var maxPos = minPos + new Vector3(radius, radius, radius);
-
-            point -= minPos;
-            point /= radius;
-
-            var uv = new Vector2(point.x - 0.5f, point.z - 0.5f);
-            uv = RotateUV(GetUV(uv), _rotation.y * Mathf.Deg2Rad);
-            uv += new Vector2(0.5f, 0.5f);
-            return uv;
-        }
         private void BuildDecalMesh(Mesh terrainMesh)
         {
             _decalMesh = new Mesh();
@@ -98,7 +73,7 @@ namespace OpenTS2.Scenes.ParticleEffects
             var radius = 80f;
             var radiusHalf = radius * 0.5f;
             var decalPositionMatrix = Matrix4x4.Translate(new Vector3(-_position.x + radiusHalf, 0f, -_position.z + radiusHalf));
-            var decalRotationMatrix = Matrix4x4.Rotate(Quaternion.Euler(0f, _rotation.y, 0f));
+            var decalRotationMatrix = Matrix4x4.Rotate(Quaternion.Euler(0f, -_rotation.y, 0f));
 
             for(var i = 0; i < vertices.Length; i++)
             {
