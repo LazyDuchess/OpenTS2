@@ -18,6 +18,7 @@ namespace OpenTS2.Scenes
 {
     public class NeighborhoodDecorations : AssetReferenceComponent
     {
+        [GameProperty(false)]
         private static bool EnableBatching = true;
         private Dictionary<string, Material> _roadMaterialLookup = new Dictionary<string, Material>();
         private Transform _decorationsParent;
@@ -90,6 +91,7 @@ namespace OpenTS2.Scenes
                     parent = _roadsParent
                 }
             };
+            roadObject.layer = Layers.NonReflective;
 
             var roadMesh = new Mesh();
             roadMesh.SetVertices(road.RoadCorners);

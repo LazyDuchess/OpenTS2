@@ -1,3 +1,5 @@
+using OpenTS2.Content;
+using OpenTS2.Engine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,6 +7,8 @@ using UnityEngine;
 [RequireComponent(typeof(Camera))]
 public class CameraReflection : MonoBehaviour
 {
+    [GameProperty(false)]
+    public static float ReflectionResolutionFactor = 0.5f;
     public Color ReflectionSkyColor;
     public static CameraReflection Instance;
     public Camera reflectionCamera;
@@ -15,11 +19,13 @@ public class CameraReflection : MonoBehaviour
     private void Awake()
     {
         Instance = this;
-        ReflectionTexture = new RenderTexture(Screen.width, Screen.height, 24);
+        ReflectionTexture = new RenderTexture((int)(Screen.width * ReflectionResolutionFactor), (int)(Screen.height * ReflectionResolutionFactor), 24);
         var reflectionCameraGameObject = new GameObject("Reflection Camera");
         reflectionCamera = reflectionCameraGameObject.AddComponent<Camera>();
         _camera = GetComponent<Camera>();
         reflectionCamera.CopyFrom(_camera);
+        reflectionCamera.allowMSAA = false;
+        reflectionCamera.cullingMask = 1 << Layers.Default | 1 << Layers.Terrain;
         reflectionCamera.targetTexture = ReflectionTexture;
         reflectionCamera.enabled = false;
         reflectionCamera.backgroundColor = ReflectionSkyColor;

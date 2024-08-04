@@ -10,6 +10,8 @@ namespace OpenTS2.Content
 {
     public class EffectsManager
     {
+        [GameProperty(false)]
+        public static bool EnableEffects = true;
         public static EffectsManager Instance { get; set; }
 
         public EffectsManager()
@@ -44,6 +46,8 @@ namespace OpenTS2.Content
 
         public SwarmParticleSystem CreateEffect(string effectName)
         {
+            if (!EnableEffects) return null;
+
             var visualEffect = _effects.GetEffectByName(effectName);
 
             var system = new GameObject("SwarmParticleSystem", typeof(ParticleSystem), typeof(SwarmParticleSystem));
