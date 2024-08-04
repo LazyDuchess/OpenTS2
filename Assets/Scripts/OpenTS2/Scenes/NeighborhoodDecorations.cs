@@ -104,7 +104,8 @@ namespace OpenTS2.Scenes
 
             roadMesh.SetUVs(0, uvs);
             // TODO - Make this smoother, maybe generate a low res normal map from the terrain height map or calculate normals ourselves.
-            roadMesh.RecalculateNormals();
+            // roadMesh.RecalculateNormals();
+            roadMesh.SetNormals(new[] { Vector3.up, Vector3.up, Vector3.up, Vector3.up });
             roadObject.GetComponent<MeshFilter>().sharedMesh = roadMesh;
 
             if (!_roadMaterialLookup.TryGetValue(roadTextureName, out Material roadMaterial))
