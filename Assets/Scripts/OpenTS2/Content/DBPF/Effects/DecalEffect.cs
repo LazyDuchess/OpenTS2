@@ -22,6 +22,7 @@ namespace OpenTS2.Content.DBPF.Effects
         public GameObject CreateGameObject()
         {
             var gameObject = new GameObject(TextureName, typeof(SwarmDecal), typeof(MeshFilter), typeof(MeshRenderer));
+            gameObject.layer = Layers.NonReflective;
             var swarmDecal = gameObject.GetComponent<SwarmDecal>();
             swarmDecal.SetDecal(this);
             return gameObject;
