@@ -19,7 +19,7 @@ namespace OpenTS2.Scenes
     public class NeighborhoodDecorations : AssetReferenceComponent
     {
         [GameProperty(false)]
-        private static bool EnableBatching = true;
+        private static bool EnableBatching = false;
         private Dictionary<string, Material> _roadMaterialLookup = new Dictionary<string, Material>();
         private Transform _decorationsParent;
         private Transform _roadsParent;
