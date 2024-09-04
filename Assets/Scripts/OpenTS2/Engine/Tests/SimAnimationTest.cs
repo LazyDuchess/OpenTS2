@@ -8,6 +8,7 @@ using OpenTS2.Content.DBPF.Scenegraph;
 using OpenTS2.Files;
 using OpenTS2.Files.Formats.DBPF;
 using UnityEngine;
+using System.IO;
 
 namespace OpenTS2.Engine.Tests
 {
@@ -24,12 +25,13 @@ namespace OpenTS2.Engine.Tests
 
         private void Start()
         {
+            Core.InitializeCore();
             var contentManager = ContentManager.Instance;
 
             // Load base game assets.
             contentManager.AddPackages(
-                Filesystem.GetPackagesInDirectory(Filesystem.GetPathForProduct(ProductFlags.BaseGame) +
-                                                  "TSData/Res/Sims3D"));
+                Filesystem.GetPackagesInDirectory(Path.Combine(Filesystem.GetPathForProduct(ProductFlags.BaseGame),
+                                                  "TSData/Res/Sims3D")));
 
             // Load all animations involving auskel and put them in the dictionary.
             foreach (var animationAsset in contentManager.GetAssetsOfType<ScenegraphAnimationAsset>(TypeIDs.SCENEGRAPH_ANIM))
