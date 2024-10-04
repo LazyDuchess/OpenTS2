@@ -11,14 +11,14 @@ public class ObjectSaveTypeTableCodecTest
     [SetUp]
     public void SetUp()
     {
-        TestMain.Initialize();
-        _groupID = ContentProvider.Get().AddPackage("TestAssets/Codecs/ObjCodecs.package").GroupID;
+        TestCore.Initialize();
+        _groupID = ContentManager.Instance.AddPackage("TestAssets/Codecs/ObjCodecs.package").GroupID;
     }
 
     [Test]
     public void TestSuccessfullyLoadsSaveTypeTable()
     {
-        var tableAsset = ContentProvider.Get()
+        var tableAsset = ContentManager.Instance
             .GetAsset<ObjectSaveTypeTableAsset>(new ResourceKey(0x0, _groupID, TypeIDs.OBJ_SAVE_TYPE_TABLE));
 
         Assert.That(tableAsset, Is.Not.Null);

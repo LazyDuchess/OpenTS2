@@ -11,14 +11,14 @@ public class ObjectModuleCodecTest
     [SetUp]
     public void SetUp()
     {
-        TestMain.Initialize();
-        _groupID = ContentProvider.Get().AddPackage("TestAssets/Codecs/ObjCodecs.package").GroupID;
+        TestCore.Initialize();
+        _groupID = ContentManager.Instance.AddPackage("TestAssets/Codecs/ObjCodecs.package").GroupID;
     }
 
     [Test]
     public void TestSuccessfullyLoadsObjectModule()
     {
-        var objectModuleAsset = ContentProvider.Get()
+        var objectModuleAsset = ContentManager.Instance
             .GetAsset<ObjectModuleAsset>(new ResourceKey(0x1, _groupID, TypeIDs.OBJM));
 
         Assert.That(objectModuleAsset, Is.Not.Null);

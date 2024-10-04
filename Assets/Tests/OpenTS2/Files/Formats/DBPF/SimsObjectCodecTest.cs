@@ -12,14 +12,14 @@ public class SimsObjectCodecTest
     [SetUp]
     public void SetUp()
     {
-        TestMain.Initialize();
-        _groupID = ContentProvider.Get().AddPackage("TestAssets/Codecs/ObjCodecs.package").GroupID;
+        TestCore.Initialize();
+        _groupID = ContentManager.Instance.AddPackage("TestAssets/Codecs/ObjCodecs.package").GroupID;
     }
 
     [Test]
     public void TestSuccessfullyLoadsSimsObject()
     {
-        var objectAsset = ContentProvider.Get().GetAsset<SimsObjectAsset>(new ResourceKey(0x158, _groupID, TypeIDs.XOBJ));
+        var objectAsset = ContentManager.Instance.GetAsset<SimsObjectAsset>(new ResourceKey(0x158, _groupID, TypeIDs.XOBJ));
 
         Assert.That(objectAsset, Is.Not.Null);
     }
