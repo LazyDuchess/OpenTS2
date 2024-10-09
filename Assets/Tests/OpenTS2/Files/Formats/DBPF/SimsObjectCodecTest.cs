@@ -19,7 +19,9 @@ public class SimsObjectCodecTest
     [Test]
     public void TestSuccessfullyLoadsSimsObject()
     {
-        var objectAsset = ContentManager.Instance.GetAsset<SimsObjectAsset>(new ResourceKey(0x158, _groupID, TypeIDs.XOBJ));
+        // Pancake object.
+        var objectAsset = ContentManager.Instance.GetAsset<SimsObjectAsset>(
+            new ResourceKey(163, _groupID, TypeIDs.XOBJ));
 
         Assert.That(objectAsset, Is.Not.Null);
     }

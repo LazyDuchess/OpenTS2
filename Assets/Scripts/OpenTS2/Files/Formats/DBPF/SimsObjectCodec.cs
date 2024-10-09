@@ -62,7 +62,6 @@ namespace OpenTS2.Files.Formats.DBPF
 
             Debug.Log($"  Data array offset: {reader.Position:X}");
 
-            /*
             // 8 unknown shorts called "data".
             var dataArray = new short[8];
             for (var i = 0; i < dataArray.Length; i++)
@@ -72,7 +71,7 @@ namespace OpenTS2.Files.Formats.DBPF
             Debug.Log($"dataArray: [{string.Join(", ", dataArray)}]");
 
             // Next is a number of shorts that depends on the exact version of the file.
-            uint numShorts = 0x57 + 6;
+            uint numShorts = 0x58;
             for (var i = 0; i < numShorts; i++)
             {
                 reader.ReadInt16();
@@ -83,6 +82,17 @@ namespace OpenTS2.Files.Formats.DBPF
             {
                 reader.ReadInt16();
             }
+
+            // Inventory token.
+            var tokenGUID = reader.ReadUInt32();
+            var tokenFlags = reader.ReadUInt16();
+            var numTokenProperties = reader.ReadUInt32();
+            for (var i = 0; i < numTokenProperties; i++)
+            {
+                reader.ReadUInt16();
+            }
+            Debug.Log($"InventoryToken(tokenGUID={tokenGUID}, tokenFlags={tokenFlags}, numTokenProps={numTokenProperties})");
+
 
             // Next is the number of object arrays. Each being a short array itself.
             var numObjectArrays = reader.ReadInt16();
@@ -111,9 +121,9 @@ namespace OpenTS2.Files.Formats.DBPF
 
             Debug.Log($"  Position before strings: 0x{reader.Position:X}");
             // A number of material subsitution strings.
-            var numMaterialSubstitues = reader.ReadInt16();
-            Debug.Log($"  numMaterialSubstitues: {numMaterialSubstitues}");
-            for (var i = 0; i < numMaterialSubstitues; i++)
+            var materialSubstitutes = reader.ReadInt16();
+            Debug.Log($"  numMaterialSubstitues: {materialSubstitutes}");
+            for (var i = 0; i < materialSubstitutes; i++)
             {
                 var materialSubstitute = reader.ReadVariableLengthPascalString();
                 Debug.Log($"materialSubstitute: {materialSubstitute}");
@@ -122,21 +132,135 @@ namespace OpenTS2.Files.Formats.DBPF
             var persistentFlag = reader.ReadUInt16();
             Debug.Log($"persistentFlag: {persistentFlag}");
 
+            // Read the cTSTreeStack, a set of cTreeStackElems, probably the edith execution stack?
+            var numStackFrames = reader.ReadInt32();
+            Debug.Log($"  numStackFrames: {numStackFrames}");
+            reader.ReadUInt32(); // unknown
+            for (var i = 0; i < numStackFrames; i++)
+            {
+                var objectID = reader.ReadUInt16();
+                var treeID = reader.ReadUInt16();
+                var nodeNum = reader.ReadUInt16();
+
+                var numLocals = reader.ReadByte();
+                Debug.Log($"- numLocals: {numLocals}");
+
+                var numParams = reader.ReadByte();
+
+                var runningObjId = reader.ReadUInt16();
+                var runningOnObjId = reader.ReadUInt16();
+
+                var frameParams = new short[numParams];
+                for (var j = 0; j < frameParams.Length; j++)
+                {
+                    frameParams[j] = reader.ReadInt16();
+                }
+
+                var locals = new short[numLocals];
+                for (var j = 0; j < locals.Length; j++)
+                {
+                    locals[j] = reader.ReadInt16();
+                }
+
+                var primState = reader.ReadInt32();
+
+                // next part is related to loading the cITSBehavior
+                var behavSaveType = reader.ReadUInt16();
+
+                Debug.Log($"- objectID: {objectID}, bhav: {behavSaveType}, runningObjID: {runningObjId}, runningOnObjID: {runningOnObjId}");
+                Debug.Log($"  locals: {string.Join(", ", locals)}");
+            }
+
+            Debug.Log($"[P] Position before cTSRelationshipTable: 0x{reader.Position:X}");
+            // Read the cTSRelationshipTable
+            var relationshipTableFlag = reader.ReadInt32();
+            Debug.Log($"  relationshipTableFlag: {relationshipTableFlag}");
+            if (relationshipTableFlag < 0)
+            {
+                var relationShipCount = reader.ReadInt32();
+                Debug.Log($"  relationShipCount: {relationShipCount}");
+                for (var i = 0; i < relationShipCount; i++)
+                {
+                    var isPresent = reader.ReadInt32();
+                    if (isPresent == 0)
+                    {
+                        continue;
+                    }
+
+                    var relationInstanceId = reader.ReadUInt32();
+
+                    // TODO: read the entry here
+                    var relationEntryCount = reader.ReadInt32();
+                    for (var j = 0; j < relationEntryCount; j++)
+                    {
+                        var entry = reader.ReadUInt32();
+                    }
+                }
+            } else if (relationshipTableFlag - 2 <= 1)
+            {
+                var relationShipCount = reader.ReadInt32();
+                Debug.Log($"  relationShipCount: {relationShipCount}");
+                for (var i = 0; i < relationShipCount; i++)
+                {
+                    var relationEntryId = reader.ReadUInt32();
+                }
+            }
+
             // Slots...
             var slotsFlag = reader.ReadInt16();
             Debug.Log($"slotsFlag: {slotsFlag}");
-
-            var numSlots = reader.ReadInt16();
-            for (var i = 0; i < numSlots; i++)
+            if (slotsFlag < 0)
             {
-                var slotValue = reader.ReadInt16();
+                if (slotsFlag == -100)
+                {
+                    // Unknown short.
+                    reader.ReadUInt16();
+                }
+
+                var numSlots = reader.ReadInt16();
+                for (var i = 0; i < numSlots; i++)
+                {
+                    var slotValue = reader.ReadInt16();
+                }
+                Debug.Log($"numSlots: {numSlots}");
             }
-            Debug.Log($"numSlots: {numSlots}");
+            else
+            {
+                if (slotsFlag > 0)
+                {
+                    // Two unknown shorts.
+                    reader.ReadUInt16();
+                    reader.ReadUInt16();
+                }
 
-            var numEffects = reader.ReadInt16();
-            Debug.Log($"numEffects: {numEffects}");
+                for (var i = 0; i < slotsFlag - 1; i++)
+                {
+                    // Two shorts per flag.
+                    reader.ReadInt16();
+                    reader.ReadInt16();
+                }
+            }
 
-            Debug.Log($"Position after numEffects: 0x{reader.Position:X}");
+            Debug.Log($"Position before readEffects: 0x{reader.Position:X}");
+
+            var effectsFlag = reader.ReadInt16();
+            Debug.Log($"effectsFlag: {effectsFlag}");
+            if (effectsFlag != 0)
+            {
+                var hasEffects = reader.ReadUInt16() == 1;
+                Debug.Log($"hasEffects: {hasEffects}");
+                if (hasEffects)
+                {
+                    var effectCount = reader.ReadUInt32();
+                    for (var i = 0; i < effectCount; i++)
+                    {
+                        reader.ReadVariableLengthPascalString();
+                        reader.ReadVariableLengthPascalString();
+                        reader.ReadUInt32();
+                        reader.ReadUInt32();
+                    }
+                }
+            }
 
             var numbOverrides = reader.ReadInt16();
             Debug.Log($"numOverides: {numbOverrides}");
@@ -147,7 +271,7 @@ namespace OpenTS2.Files.Formats.DBPF
                 var overrideString2 = reader.ReadVariableLengthPascalString();
                 var overrideString3 = reader.ReadVariableLengthPascalString();
                 Debug.Log($"{overrideString1} / {overrideString2} / {overrideString3}");
-            }*/
+            }
 
             return asset;
         }
