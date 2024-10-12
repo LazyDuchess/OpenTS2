@@ -21,10 +21,17 @@ namespace OpenTS2.Files.Formats.DBPF
             var stream = new MemoryStream(bytes);
             var reader = IoBuffer.FromStream(stream, ByteOrder.LITTLE_ENDIAN);
 
+            // This file needs a version that comes from the OBJM file. Without that, just default to 0xAD for now which
+            // seems to be what my ultimate collection lots are saved with.
+            return DeserializeWithVersion(reader, version: 0xAD);
+        }
+
+        private static SimsObjectAsset DeserializeWithVersion(IoBuffer reader, int version)
+        {
+            var asset = new SimsObjectAsset();
+
             // Skip first 64 bytes.
             reader.Seek(SeekOrigin.Begin, 64);
-
-            // TODO: this is for versions = 0xAD, see if we need to handle lower.
 
             // 4 skipped/unused floats
             for (int i = 0; i < 4; i++)
@@ -71,7 +78,11 @@ namespace OpenTS2.Files.Formats.DBPF
             Debug.Log($"dataArray: [{string.Join(", ", dataArray)}]");
 
             // Next is a number of shorts that depends on the exact version of the file.
-            uint numShorts = 0x58;
+            uint numShorts = version switch
+            {
+                0xAD => 0x58,
+                _ => throw new NotImplementedException($"SimObjectCodec not implemented for version {version:X}"),
+            };
             for (var i = 0; i < numShorts; i++)
             {
                 reader.ReadInt16();
