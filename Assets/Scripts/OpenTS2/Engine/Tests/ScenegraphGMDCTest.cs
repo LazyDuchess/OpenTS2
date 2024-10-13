@@ -2,6 +2,7 @@ using OpenTS2.Common;
 using OpenTS2.Components;
 using OpenTS2.Content;
 using OpenTS2.Content.DBPF.Scenegraph;
+using OpenTS2.Engine;
 using OpenTS2.Files;
 using OpenTS2.Files.Formats.DBPF;
 using UnityEngine;
@@ -10,6 +11,8 @@ public class ScenegraphGMDCTest : MonoBehaviour
 {
     private void Start()
     {
+        Core.InitializeCore();
+
         var contentManager = ContentManager.Instance;
 
         // Load base game assets.
