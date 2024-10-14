@@ -6,6 +6,7 @@ using OpenTS2.Content;
 using OpenTS2.Content.DBPF;
 using OpenTS2.Files;
 using OpenTS2.Files.Formats.DBPF;
+using OpenTS2.SimAntics;
 using UnityEngine;
 
 namespace OpenTS2.Engine.Tests
@@ -64,10 +65,28 @@ namespace OpenTS2.Engine.Tests
             Debug.Assert(objectDefinition != null, "Could not find objd.");
 
             // Now load the state of the object.
-            var objectState =
-                lotPackage.GetAssetByTGI<SimsObjectAsset>(
+            var objectState = lotPackage.GetAssetByTGI<SimsObjectAsset>(
                     new ResourceKey(instanceID: (uint)objectToLoad.saveType, GroupIDs.Local, TypeIDs.XOBJ));
-            Debug.Log($"object state: {objectState}");
+
+            // Create an entity for the object.
+            var vm = new VM();
+            var entity = new VMEntity(objectDefinition)
+            {
+                Attributes = objectState.Attrs,
+                SemiAttributes = objectState.SemiAttrs,
+                Temps = objectState.Temp,
+                ObjectData = objectState.Data
+            };
+
+            foreach (var frame in objectState.StackFrames)
+            {
+                var vmFrame = new VMStackFrame(entity.GetBHAV(frame.TreeId), entity.MainThread);
+                vmFrame.Arguments = frame.Params;
+                vmFrame.Locals = frame.Locals;
+                entity.MainThread.Frames.Push(vmFrame);
+            }
+
+            vm.Tick();
         }
     }
 }

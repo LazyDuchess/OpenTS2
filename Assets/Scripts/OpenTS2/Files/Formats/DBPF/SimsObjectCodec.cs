@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using OpenTS2.Common;
 using OpenTS2.Content;
 using OpenTS2.Content.DBPF;
@@ -10,14 +11,13 @@ using UnityEngine;
 namespace OpenTS2.Files.Formats.DBPF
 {
     /// <summary>
-    /// Codec for what is known in game as cTSObject. Contains attributes and locations of objects.
+    /// Codec for what is known in game as cTSObject. Contains state and locations of objects.
     /// </summary>
     [Codec(TypeIDs.XOBJ)]
     public class SimsObjectCodec : AbstractCodec
     {
         public override AbstractAsset Deserialize(byte[] bytes, ResourceKey tgi, DBPFFile sourceFile)
         {
-            var asset = new SimsObjectAsset();
             var stream = new MemoryStream(bytes);
             var reader = IoBuffer.FromStream(stream, ByteOrder.LITTLE_ENDIAN);
 
@@ -28,8 +28,6 @@ namespace OpenTS2.Files.Formats.DBPF
 
         private static SimsObjectAsset DeserializeWithVersion(IoBuffer reader, int version)
         {
-            var asset = new SimsObjectAsset();
-
             // Skip first 64 bytes.
             reader.Seek(SeekOrigin.Begin, 64);
 
@@ -46,10 +44,7 @@ namespace OpenTS2.Files.Formats.DBPF
             reader.ReadUInt16();
             var elevation = reader.ReadFloat();
             var objectGroupId = reader.ReadInt32();
-            var unknown = reader.ReadInt16();
-
-            Debug.Log($"tileLocationY: {tileLocationY}, tileLocationX: {tileLocationX}, level: {level}, " +
-                      $"elevation: {elevation}, objectGroupId: {objectGroupId}, unknown: {unknown}");
+            reader.ReadInt16(); // unknown
 
             var numAttrs = reader.ReadInt16();
             var attrs = new short[numAttrs];
@@ -57,7 +52,6 @@ namespace OpenTS2.Files.Formats.DBPF
             {
                 attrs[i] = reader.ReadInt16();
             }
-            Debug.Log($"numAttrs: {numAttrs}, attrs: [{string.Join(", ", attrs)}]");
 
             var numSemiAttrs = reader.ReadInt16();
             var semiAttrs = new short[numSemiAttrs];
@@ -65,7 +59,6 @@ namespace OpenTS2.Files.Formats.DBPF
             {
                 semiAttrs[i] = reader.ReadInt16();
             }
-            Debug.Log($"numSemiAttrs: {numAttrs}, semiAttrs: [{string.Join(", ", semiAttrs)}]");
 
             Debug.Log($"  Data array offset: {reader.Position:X}");
 
@@ -83,9 +76,16 @@ namespace OpenTS2.Files.Formats.DBPF
                 0xAD => 0x58,
                 _ => throw new NotImplementedException($"SimObjectCodec not implemented for version {version:X}"),
             };
-            for (var i = 0; i < numShorts; i++)
+
+            var temp = new short[8];
+            for (var i = 0; i < temp.Length; i++)
             {
-                reader.ReadInt16();
+                temp[i] = reader.ReadInt16();
+            }
+            var data = new short[numShorts - 8];
+            for (var i = 0; i < data.Length; i++)
+            {
+                data[i] = reader.ReadInt16();
             }
 
             // Another 8 shorts, called the "tempTokenFields".
@@ -145,7 +145,7 @@ namespace OpenTS2.Files.Formats.DBPF
 
             // Read the cTSTreeStack, a set of cTreeStackElems, probably the edith execution stack?
             var numStackFrames = reader.ReadInt32();
-            Debug.Log($"  numStackFrames: {numStackFrames}");
+            var frames = new SimsObjectStackFrame[numStackFrames];
             reader.ReadUInt32(); // unknown
             for (var i = 0; i < numStackFrames; i++)
             {
@@ -180,6 +180,13 @@ namespace OpenTS2.Files.Formats.DBPF
 
                 Debug.Log($"- objectID: {objectID}, bhav: {behavSaveType}, runningObjID: {runningObjId}, runningOnObjID: {runningOnObjId}");
                 Debug.Log($"  locals: {string.Join(", ", locals)}");
+                frames[i] = new SimsObjectStackFrame
+                {
+                    ObjectId = objectID,
+                    TreeId = treeID,
+                    Locals = locals,
+                    Params = frameParams
+                };
             }
 
             Debug.Log($"[P] Position before cTSRelationshipTable: 0x{reader.Position:X}");
@@ -284,7 +291,10 @@ namespace OpenTS2.Files.Formats.DBPF
                 Debug.Log($"{overrideString1} / {overrideString2} / {overrideString3}");
             }
 
-            return asset;
+            return new SimsObjectAsset(tileLocationY: tileLocationY, tileLocationX: tileLocationX, level: level,
+                elevation: elevation, objectGroupId: objectGroupId, attrs: attrs, semiAttrs: semiAttrs, temp: temp,
+                data: data,
+                stackFrames: frames);
         }
     }
 }
