@@ -43,6 +43,8 @@ We follow the layout of a normal Unity project except:
 
 * `Assets/Scripts/OpenTS2` - Contains the bulk of the C# code that deals with TS2 formats and files.
 * `Assets/Tests/OpenTS2/` - Unit tests following the same directory structure as the `Scripts` folder.
+* `Assets/Scenes/Test` - Tests but more at the integration level involving Unity scenes.
+  * `Assets/Scripts/OpenTS2/Engine/Tests` - Controller scripts for the above tests.
 
 ## Testing
 
