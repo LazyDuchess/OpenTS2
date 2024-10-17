@@ -26,14 +26,14 @@ namespace OpenTS2.Files.Formats.Ini
             return null;
         }
 
-        public string GetProperty(string sectionName, string propertyName)
+        public string GetProperty(string sectionName, string propertyName, string defaultValue = "")
         {
             var section = GetSection(sectionName);
             if (section == null)
-                return string.Empty;
+                return defaultValue;
             if (section.KeyValues.TryGetValue(propertyName, out var val))
                 return val;
-            return string.Empty;
+            return defaultValue;
         }
 
         private void Read(byte[] data)
@@ -42,12 +42,13 @@ namespace OpenTS2.Files.Formats.Ini
             using var reader = new StreamReader(ms);
             var sections = new Dictionary<string, Section>();
             Section currentSection = null;
-            while(ms.Position < ms.Length)
+            string readLine;
+            while ((readLine = reader.ReadLine()) != null)
             {
-                var line = reader.ReadLine().Trim();
+                var line = readLine.Trim();
                 if (string.IsNullOrEmpty(line)) continue;
                 if (line[0] == ';') continue;
-                if (line[0] == '[' && line[line.Length-1] == ']')
+                if (line[0] == '[' && line[line.Length - 1] == ']')
                 {
                     currentSection = new Section();
                     sections[line.Substring(1, line.Length - 2)] = currentSection;
