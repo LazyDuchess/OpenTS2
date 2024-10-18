@@ -113,12 +113,14 @@ namespace OpenTS2.SimAntics
         public BHAVAsset GetBHAV(ushort treeID)
         {
             // 0x0XXX is global scope, 0x1XXX is private scope and 0x2XXX is semiglobal scope.
-            var groupid = SemiGlobalGroupID;
+            uint groupid;
 
             if (treeID < 0x1000)
                 groupid = GroupIDs.Global;
             else if (treeID < 0x2000)
                 groupid = PrivateGroupID;
+            else
+                groupid = SemiGlobalGroupID;
 
             return VM.GetBHAV(treeID, groupid);
         }

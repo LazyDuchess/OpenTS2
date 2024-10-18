@@ -74,6 +74,11 @@ namespace OpenTS2.SimAntics
                 }
                 catch(Exception e)
                 {
+                    // If we don't have an exception handler just re-throw to avoid swallowing errors.
+                    if (ExceptionHandler == null)
+                    {
+                        throw;
+                    }
                     ExceptionHandler?.Invoke(e, entity);
                 }
             }
