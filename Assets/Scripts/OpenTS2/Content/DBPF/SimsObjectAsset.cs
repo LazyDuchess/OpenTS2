@@ -35,6 +35,7 @@ namespace OpenTS2.Content.DBPF
     {
         public ushort ObjectId;
         public ushort TreeId;
+        public ushort BhavSaveType;
 
         public short[] Params;
         public short[] Locals;

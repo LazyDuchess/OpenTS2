@@ -5,6 +5,7 @@ using OpenTS2.Files.Formats.DBPF;
 using OpenTS2.Lua.Disassembly.OpCodes;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -33,7 +34,7 @@ namespace OpenTS2.SimAntics
             {
                 var semiGlobal = ObjectDefinition.SemiGlobal;
                 if (semiGlobal == null)
-                    return 0;
+                    throw new FileNotFoundException($"Object {ObjectDefinition.FileName} ({ObjectDefinition.GlobalTGI}) has no semi-global file");
                 return semiGlobal.SemiGlobalGroupID;
             }
         }

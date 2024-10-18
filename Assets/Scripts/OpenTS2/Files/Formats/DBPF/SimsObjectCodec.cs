@@ -60,15 +60,12 @@ namespace OpenTS2.Files.Formats.DBPF
                 semiAttrs[i] = reader.ReadInt16();
             }
 
-            Debug.Log($"  Data array offset: {reader.Position:X}");
-
             // 8 unknown shorts called "data".
             var dataArray = new short[8];
             for (var i = 0; i < dataArray.Length; i++)
             {
                 dataArray[i] = reader.ReadInt16();
             }
-            Debug.Log($"dataArray: [{string.Join(", ", dataArray)}]");
 
             // Next is a number of shorts that depends on the exact version of the file.
             uint numShorts = version switch
@@ -103,7 +100,6 @@ namespace OpenTS2.Files.Formats.DBPF
                 reader.ReadUInt16();
             }
             Debug.Log($"InventoryToken(tokenGUID={tokenGUID}, tokenFlags={tokenFlags}, numTokenProps={numTokenProperties})");
-
 
             // Next is the number of object arrays. Each being a short array itself.
             var numObjectArrays = reader.ReadInt16();
@@ -184,6 +180,7 @@ namespace OpenTS2.Files.Formats.DBPF
                 {
                     ObjectId = objectID,
                     TreeId = treeID,
+                    BhavSaveType = behavSaveType,
                     Locals = locals,
                     Params = frameParams
                 };
