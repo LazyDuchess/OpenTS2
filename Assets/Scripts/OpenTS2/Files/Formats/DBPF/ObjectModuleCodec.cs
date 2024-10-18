@@ -16,7 +16,6 @@ namespace OpenTS2.Files.Formats.DBPF
     {
         public override AbstractAsset Deserialize(byte[] bytes, ResourceKey tgi, DBPFFile sourceFile)
         {
-            var asset = new ObjectModuleAsset();
             var stream = new MemoryStream(bytes);
             var reader = IoBuffer.FromStream(stream, ByteOrder.LITTLE_ENDIAN);
 
@@ -48,7 +47,7 @@ namespace OpenTS2.Files.Formats.DBPF
                 break;
             }
 
-            return asset;
+            return new ObjectModuleAsset(version: version);
         }
     }
 }

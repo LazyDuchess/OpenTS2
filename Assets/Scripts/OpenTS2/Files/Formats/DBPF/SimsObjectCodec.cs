@@ -26,6 +26,13 @@ namespace OpenTS2.Files.Formats.DBPF
             return DeserializeWithVersion(reader, version: 0xAD);
         }
 
+        public static SimsObjectAsset DeserializeFromBytesAndVersion(byte[] bytes, int version)
+        {
+            var stream = new MemoryStream(bytes);
+            var reader = IoBuffer.FromStream(stream, ByteOrder.LITTLE_ENDIAN);
+            return DeserializeWithVersion(reader, version);
+        }
+
         private static SimsObjectAsset DeserializeWithVersion(IoBuffer reader, int version)
         {
             // Skip first 64 bytes.

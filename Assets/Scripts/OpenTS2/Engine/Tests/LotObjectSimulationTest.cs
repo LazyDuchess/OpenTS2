@@ -80,9 +80,15 @@ namespace OpenTS2.Engine.Tests
             var objectDefinition = ObjectManager.Instance.GetObjectByGUID(objectToLoad.objectGuid);
             Debug.Assert(objectDefinition != null, "Could not find objd.");
 
+            // Get the version of objects from the Edith Object module file OBJM.
+            var objectModule =
+                lotPackage.GetAssetByTGI<ObjectModuleAsset>(new ResourceKey(instanceID: 1, groupID: GroupIDs.Local,
+                    TypeIDs.OBJM));
+
             // Now load the state of the object.
-            var objectState = lotPackage.GetAssetByTGI<SimsObjectAsset>(
+            var objectStateBytes = lotPackage.GetBytesByTGI(
                     new ResourceKey(instanceID: (uint)objectToLoad.saveType, GroupIDs.Local, TypeIDs.XOBJ));
+            var objectState = SimsObjectCodec.DeserializeFromBytesAndVersion(objectStateBytes, objectModule.Version);
 
             // Create an entity for the object.
             var vm = new VM();

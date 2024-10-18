@@ -5,6 +5,11 @@ namespace OpenTS2.Content.DBPF
     /// </summary>
     public class ObjectModuleAsset : AbstractAsset
     {
+        public ObjectModuleAsset(int version)
+        {
+            Version = version;
+        }
 
+        public int Version { get; }
     }
 }
