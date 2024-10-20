@@ -52,6 +52,10 @@ namespace OpenTS2.Files.Formats.DBPF
             var elevation = reader.ReadFloat();
             var objectGroupId = reader.ReadInt32();
             reader.ReadInt16(); // unknown
+            if (version > 0xD6)
+            {
+                reader.ReadFloat(); // unknown
+            }
 
             var numAttrs = reader.ReadInt16();
             var attrs = new short[numAttrs];
@@ -78,6 +82,7 @@ namespace OpenTS2.Files.Formats.DBPF
             uint numShorts = version switch
             {
                 0xAD => 0x58,
+                0xD8 => 0x72,
                 _ => throw new NotImplementedException($"SimObjectCodec not implemented for version {version:X}"),
             };
 
@@ -101,7 +106,14 @@ namespace OpenTS2.Files.Formats.DBPF
             // Inventory token.
             var tokenGUID = reader.ReadUInt32();
             var tokenFlags = reader.ReadUInt16();
+            if (version > 0xCA)
+            {
+                var stackId = reader.ReadInt16();
+                var personalInventoryInstanceId = reader.ReadInt32();
+                var tokenCategory = reader.ReadUInt16();
+            }
             var numTokenProperties = reader.ReadUInt32();
+
             for (var i = 0; i < numTokenProperties; i++)
             {
                 reader.ReadUInt16();
