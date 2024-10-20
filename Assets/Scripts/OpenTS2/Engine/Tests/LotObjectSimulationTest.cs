@@ -54,6 +54,18 @@ namespace OpenTS2.Engine.Tests
             }
 
             var lotPackage = contentManager.AddPackage(lotFullPath);
+
+            // Get the version of objects and their IDs from the Edith Object module file OBJM.
+            var objectModule =
+                lotPackage.GetAssetByTGI<ObjectModuleAsset>(new ResourceKey(instanceID: 1, groupID: GroupIDs.Local,
+                    TypeIDs.OBJM));
+            foreach (var key in objectModule.ObjectIdToSaveType.Keys)
+            {
+                Debug.Log($"item id: {key}");
+            }
+            Debug.Log($"ItemIndex: {ItemIndex}");
+            var objectToLoadSaveType = objectModule.ObjectIdToSaveType[ItemIndex];
+
             // Get the lot's OBJT / object save type table.
             var saveTable =
                 lotPackage.GetAssetByTGI<ObjectSaveTypeTableAsset>(new ResourceKey(instanceID: 0, GroupIDs.Local,
@@ -70,24 +82,20 @@ namespace OpenTS2.Engine.Tests
                 }
 
                 saveTypeToGuid[selector.saveType] = selector.objectGuid;
-
-                Debug.Log($"{index}: saveType: {selector.saveType} resource name: {selector.catalogResourceName}, Obj name: {def.FileName}");
+                //Debug.Log($"{index}: saveType: {selector.saveType} resource name: {selector.catalogResourceName}, Obj name: {def.FileName}");
             }
 
-            var objectToLoad = saveTable.Selectors[ItemIndex];
-            Debug.Log($"Loading object {objectToLoad.catalogResourceName} with guid {objectToLoad.objectGuid:X}");
+            Debug.Log($"ItemIndex: {ItemIndex}, saveType: {objectToLoadSaveType}");
+            var objectToLoad = saveTable.Selectors[objectToLoadSaveType];
 
             var objectDefinition = ObjectManager.Instance.GetObjectByGUID(objectToLoad.objectGuid);
             Debug.Assert(objectDefinition != null, "Could not find objd.");
 
-            // Get the version of objects from the Edith Object module file OBJM.
-            var objectModule =
-                lotPackage.GetAssetByTGI<ObjectModuleAsset>(new ResourceKey(instanceID: 1, groupID: GroupIDs.Local,
-                    TypeIDs.OBJM));
+            Debug.Log($"Loading object {objectToLoad.catalogResourceName} with guid {objectToLoad.objectGuid:X} group: {objectDefinition.GlobalTGI.GroupID:X}");
 
             // Now load the state of the object.
             var objectStateBytes = lotPackage.GetBytesByTGI(
-                    new ResourceKey(instanceID: (uint)objectToLoad.saveType, GroupIDs.Local, TypeIDs.XOBJ));
+                    new ResourceKey(instanceID: (uint)ItemIndex, GroupIDs.Local, TypeIDs.XOBJ));
             var objectState = SimsObjectCodec.DeserializeFromBytesAndVersion(objectStateBytes, objectModule.Version);
 
             // Create an entity for the object.

@@ -154,7 +154,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   NeighborhoodPrefix: N002
   LotID: 22
-  ItemIdx: 1
+  ItemIndex: 22
 --- !u!4 &457597079
 Transform:
   m_ObjectHideFlags: 0

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using OpenTS2.Common;
 using OpenTS2.Content;
@@ -35,19 +36,18 @@ namespace OpenTS2.Files.Formats.DBPF
                 throw new NotImplementedException("ObjM file does not have `ObjM` magic bytes");
             }
 
+            var objectIdToSaveType = new Dictionary<int, int>();
             // Next is the number of objects.
-            int numObjects = reader.ReadInt32();
-            Debug.Log($"numObjects: {numObjects}");
+            var numObjects = reader.ReadInt32();
             for (var i = 0; i < numObjects; i++)
             {
-                int selectorSaveType = reader.ReadInt32();
-                int missingObjectSaveType = reader.ReadInt32();
-
-                Debug.Log($"selectorSaveType: {selectorSaveType}, missingObjectSaveType: {missingObjectSaveType}");
-                break;
+                // Data attribute 0x13, might be object id.
+                int dataAttr = reader.ReadInt32();
+                int objectSaveType = reader.ReadInt32();
+                objectIdToSaveType[dataAttr] = objectSaveType;
             }
 
-            return new ObjectModuleAsset(version: version);
+            return new ObjectModuleAsset(version: version, objectIdToSaveType: objectIdToSaveType);
         }
     }
 }
