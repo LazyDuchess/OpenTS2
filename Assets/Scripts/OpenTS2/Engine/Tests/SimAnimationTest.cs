@@ -45,7 +45,7 @@ namespace OpenTS2.Engine.Tests
                     continue;
                 }
 
-                _animations[animationAsset.AnimResource.ScenegraphResource.ResourceName] = animationAsset;
+                _animations[animationAsset.AnimResource.ScenegraphResource.ResourceName.ToLowerInvariant()] = animationAsset;
             }
             UpdateAnimationsListAndGetSelection();
 
@@ -121,6 +121,7 @@ namespace OpenTS2.Engine.Tests
                 _animationObj.AddClip(clip, animName);
             }
 
+            _animationObj.Play(animName);
             StartCoroutine(PlayClipFrameDelayed(animName, anim));
         }
 
@@ -135,7 +136,7 @@ namespace OpenTS2.Engine.Tests
 
         private ScenegraphAnimationAsset UpdateAnimationsListAndGetSelection()
         {
-            var matchedAnimations = _animations.Where(pair => pair.Key.StartsWith(animationName));
+            var matchedAnimations = _animations.Where(pair => pair.Key.Contains(animationName.ToLowerInvariant()));
             var tenMatchedAnimations = matchedAnimations.Take(10).ToArray();
 
             // Display 10 matching animations.
