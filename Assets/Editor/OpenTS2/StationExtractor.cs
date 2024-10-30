@@ -6,6 +6,7 @@ using OpenTS2.Engine;
 using OpenTS2.Files;
 using OpenTS2.Files.Formats.DBPF;
 using OpenTS2.Files.Formats.SPX;
+using OpenTS2.Files.Formats.XA;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,6 +21,21 @@ namespace OpenTS2
 {
     public class StationExtractor
     {
+        [MenuItem("OpenTS2/Experiments/Extract Splash Music")]
+        private static void ExtractSplash()
+        {
+            Core.CoreInitialized = false;
+            Core.InitializeCore();
+            var bgDir = Filesystem.GetPathForProduct(ProductFlags.BaseGame);
+            var splashDir = Path.Combine(bgDir, "TSData/Res/Sound/Splash.package");
+            var pack = new DBPFFile(splashDir);
+            foreach(var splash in pack.Entries)
+            {
+                var splashData = new XAFile(splash.GetBytes());
+                Directory.CreateDirectory("Splash");
+                File.WriteAllBytes($"Splash/{splash.GlobalTGI.InstanceID.ToString("X")}.wav", splashData.DecompressedData);
+            }
+        }
         [MenuItem("OpenTS2/Experiments/Extract Stations")]
         private static void ExtractStations()
         {
