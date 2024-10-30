@@ -43,7 +43,7 @@ namespace OpenTS2
             foreach(var cat in music.MusicCategoryByHash)
             {
                 var folder = Path.Combine("Stations", cat.Value.Name);
-                var playlist = cat.Value.CurrentPlaylist;
+                var playlist = music.GetPlaylist(cat.Value.Name);
                 foreach(var song in playlist)
                 {
                     var entry = ContentManager.Instance.GetEntry(song.Key);
