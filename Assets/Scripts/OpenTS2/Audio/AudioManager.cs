@@ -40,7 +40,7 @@ namespace OpenTS2.Audio
             Core.OnFinishedLoading += OnFinishedLoading;
         }
 
-        private void OnFinishedLoading()
+        public void OnFinishedLoading()
         {
             _contentManager = ContentManager.Instance;
             LoadCustomMusic();

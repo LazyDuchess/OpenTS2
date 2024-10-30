@@ -191,7 +191,7 @@ namespace OpenTS2.Audio
             AudioManager.OnInitialized += Initialize;
         }
 
-        private void Initialize()
+        public void Initialize()
         {
             var musicTitles = GetMusicTitles();
             LoadMusicCategories();
