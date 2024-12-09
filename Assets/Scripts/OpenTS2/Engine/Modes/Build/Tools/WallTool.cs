@@ -40,10 +40,12 @@ namespace OpenTS2.Engine.Modes.Build.Tools
         public WallTool(BuildModeServer Server) : base(Server) { }     
 
         public override string ToolName => "Wall Tool";
+        public override BuildTools ToolType => BuildTools.Wall;
+
         /// <summary>
         /// Updates <see cref="wallCreateMode"/> depending on the player's current input
         /// </summary>
-        protected override void CheckMode()
+        protected override void CheckDeleteMode()
         {
             //creation mode
             WallCreationModes mode = WallCreationModes.Single;
@@ -51,7 +53,7 @@ namespace OpenTS2.Engine.Modes.Build.Tools
             wallCreateMode = mode;
 
             //check delete mode
-            base.CheckMode();
+            base.CheckDeleteMode();
         }
 
         /// <summary>
@@ -95,7 +97,11 @@ namespace OpenTS2.Engine.Modes.Build.Tools
                     if (createdWallIDs != null)
                         Array.ForEach(createdWallIDs, (int item) => facadeWallIDs.Add(item));
                 }
-                else if(facadeWallIDs.Any()) facadeWallIDs.Clear();
+                else if (facadeWallIDs.Any())
+                {
+                    facadeWallIDs.Clear();
+                    buildModeServer.SignalRoomsInvalidate();
+                }
             }
             else
             {

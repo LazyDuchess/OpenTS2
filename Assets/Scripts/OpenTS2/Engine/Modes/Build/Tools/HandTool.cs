@@ -17,6 +17,7 @@ namespace OpenTS2.Engine.Modes.Build.Tools
         bool IsHoldingObject => holdingObjectReference != null;
 
         public override string ToolName => "Hand Tool";
+        public override BuildTools ToolType => BuildTools.Hand;
 
         /// <summary>
         /// Creates a new <see cref="HandTool"/> on the specified lot

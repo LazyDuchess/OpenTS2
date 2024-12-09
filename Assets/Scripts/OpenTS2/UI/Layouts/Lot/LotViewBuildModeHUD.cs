@@ -151,8 +151,32 @@ namespace OpenTS2.UI.Layouts.Lot
             /// <param name="PageNumber"></param>
             void SwitchPage(int PageNumber)
             {
+                void EnableButtons()
+                {
+                    var button = rootElement.GetChildByID<UIButtonComponent>(PreviousButton);
+                    button.gameObject.SetActive(true);
+                    button = rootElement.GetChildByID<UIButtonComponent>(NextButton);
+                    button.gameObject.SetActive(true);
+                }
+                void DisableForward()
+                {
+                    var button = rootElement.GetChildByID<UIButtonComponent>(NextButton);
+                    button.gameObject.SetActive(false);
+                }
+                void DisableBackward()
+                {
+                    var button = rootElement.GetChildByID<UIButtonComponent>(PreviousButton);
+                    button.gameObject.SetActive(false);
+                }
+
+                EnableButtons(); // any buttons that are disabled should be re-enabled for safety.
+
                 currentPage = PageNumber;
-                if (currentPage < 0) currentPage = 0;
+                if (currentPage <= 0)
+                {
+                    currentPage = 0;
+                    DisableBackward(); // first page, disable back button
+                }
 
                 int startIndex = currentPage * itemsPerPage;
 
@@ -177,6 +201,9 @@ namespace OpenTS2.UI.Layouts.Lot
                     control.Components[0].gameObject.SetActive(true);
                     control.Display(assetRef);
                 }
+
+                if (startIndex + itemsPerPage >= itemsFilter.Count()) // end of last page
+                    DisableForward(); // disable forward button
             }
 
             public void Close()
@@ -457,7 +484,7 @@ namespace OpenTS2.UI.Layouts.Lot
                 { (uint)BuildHUD_FloorsSubsortButtons.OtherButton, delegate { ActionInvokeSubSort("other"); } },
                 { (uint)BuildHUD_FloorsSubsortButtons.AllButton, delegate { ActionInvokeSubSort("all"); } },
                 { (uint)BuildHUD_FloorsSubsortButtons.TileButton, delegate { ActionInvokeSubSort("tile"); } },
-                { (uint)BuildHUD_FloorsSubsortButtons.LinoleumButton, delegate { ActionInvokeSubSort("linoleum"); } },
+                { (uint)BuildHUD_FloorsSubsortButtons.LinoleumButton, delegate { ActionInvokeSubSort("lino"); } },
             };
         }
 
@@ -512,7 +539,12 @@ namespace OpenTS2.UI.Layouts.Lot
             
             BuildModeServer.Get().ChangeTool(Tool);
         }   
-
+        /// <summary>
+        /// Updates the User Interface to show the selected sort
+        /// <para/>See: <see cref="ActionInvokeSubSort(string)"/> to change the Subsort for this Sort
+        /// <para/> Note: This will cause whatever tool is currently being used to be cancelled.
+        /// </summary>
+        /// <param name="SortPage"></param>
         void ActionChangeSort(BuildHUD_Sorts SortPage)
         {            
             ActionChangeTool(BuildTools.None); // drop current tool
@@ -558,14 +590,20 @@ namespace OpenTS2.UI.Layouts.Lot
             Catalog.SetSubsort(Subsort);
             CurrentButtonEventContext.SetToggled(true);
         }
-
+        /// <summary>
+        /// Invokes the Terrain brush tool and sets the size to Small by default
+        /// </summary>
+        /// <param name="BrushMode"></param>
         void ActionSetTerrainBrushTool(BuildModeServer.TerrainModificationModes BrushMode)
         {
             ActionChangeTool(BuildTools.TerrainBrush);
             (BuildModeServer.Get().CurrentTool as TerrainBrushTool).CurrentBrushMode = BrushMode;
             ActionModifyTerrainBrushSize(TerrainBrushTool.TerrainBrushSizes.Small);
         }
-
+        /// <summary>
+        /// Updates the User Interface and the Terrain tool to match the selected size
+        /// </summary>
+        /// <param name="Size"></param>
         void ActionModifyTerrainBrushSize(TerrainBrushTool.TerrainBrushSizes Size)
         {
             EnsureGroupToggled(typeof(BuildHUD_TerrainBrushSizeButtons));

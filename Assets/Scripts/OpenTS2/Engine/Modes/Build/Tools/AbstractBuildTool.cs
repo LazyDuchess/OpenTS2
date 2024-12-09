@@ -47,26 +47,61 @@ namespace OpenTS2.Engine.Modes.Build.Tools
         /// The name of this tool
         /// </summary>
         public abstract string ToolName { get; }
-
+        /// <summary>
+        /// The current type of tool this instance is acting as
+        /// </summary>
+        public abstract BuildTools ToolType { get; }
+        /// <summary>
+        /// True when the tool is actively being used by the user. (A wall is being created, for instance)
+        /// </summary>
         public bool IsHolding { get; protected set; }
+        /// <summary>
+        /// True when the tool is not being actively used but is ready for user input
+        /// </summary>
         public bool IsActive { get; private set; } = false;
+        /// <summary>
+        /// The position within the lot boundaries of the tool at the current time
+        /// </summary>
         public Vector3 ToolLotPosition { get; protected set; }
+        /// <summary>
+        /// The position on the grid that the tool is currently nearest to
+        /// </summary>
         public Vector2 ToolGridPosition { get; protected set; }
-
+        /// <summary>
+        /// Sets the <see cref="IsActive"/> property
+        /// </summary>
+        /// <param name="Activated"></param>
         public void SetActive(bool Activated)
         {
             IsActive = Activated;
             OnActiveChanged(Activated);
         }
         protected abstract void OnActiveChanged(bool NewValue);
-
+        /// <summary>
+        /// Called once per frame for the tool to process changes between frames
+        /// </summary>
+        /// <param name="Context"></param>
         public virtual void OnToolUpdate(BuildToolContext Context)
         {
             ToolLotPosition = Context.WandPosition;
             ToolGridPosition = Context.GridPosition;
         }
+        /// <summary>
+        /// Called when a tool begins to be used by the user
+        /// </summary>
+        /// <param name="Context"></param>
         public abstract void OnToolStart(BuildToolContext Context);   
+        /// <summary>
+        /// Called when a tool is cancelled.
+        /// <para/>Note: Calling this at any time will immediately cancel the current tool action, you can give a reason to add clarity
+        /// to why this was called.
+        /// </summary>
+        /// <param name="Reason"></param>
         public abstract void OnToolCancel(string Reason = null);
+        /// <summary>
+        /// Called when the user commits to an action. (Left click)
+        /// </summary>
+        /// <param name="Context"></param>
         public virtual void OnToolFinalize(BuildToolContext Context) => OnFinalizeTool?.Invoke(this);
     }
 
@@ -188,7 +223,7 @@ namespace OpenTS2.Engine.Modes.Build.Tools
             }
 
             //check if player change wall creation type
-            CheckMode();
+            CheckDeleteMode();
 
             if(dirtyToolDragEnd != toolDragEnd)
                 //clear any created wall facades
@@ -219,7 +254,7 @@ namespace OpenTS2.Engine.Modes.Build.Tools
             }            
 
             //check if player change creation type
-            CheckMode();
+            CheckDeleteMode();
             //Create / Delete the area
             DoAction();
 
@@ -239,13 +274,23 @@ namespace OpenTS2.Engine.Modes.Build.Tools
             Debug.Log($"{ToolName} cancelled. Reason: {Reason ?? "none given"}");
         }
 
-        protected virtual void CheckMode()
+        protected virtual void CheckDeleteMode()
         {
             //check if deleting objects
             DeleteMode = false;
             if (Input.GetKey(KeyCode.LeftControl)) DeleteMode = true;
         }
+        /// <summary>
+        /// Performs the action that this tool advertises.
+        /// <para/>Note: This is not the same thing as <see cref="OnToolFinalize(BuildToolContext)"/> as that is distinctly
+        /// when the user finishes the action. <see cref="DoAction(bool)"/> can be called many times depending on the implementation.
+        /// </summary>
+        /// <param name="Undo"></param>
         protected abstract void DoAction(bool Undo = false);
+        /// <summary>
+        /// Same as <see cref="DoAction(bool)"/> except with the intention of previewing the action before committing it
+        /// </summary>
+        /// <param name="Undo"></param>
         protected virtual void DoHoverAction(bool Undo = false) => DoAction(Undo);
     }
 }
