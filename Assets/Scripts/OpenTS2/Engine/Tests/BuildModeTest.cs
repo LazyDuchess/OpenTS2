@@ -30,7 +30,7 @@ public class BuildModeTest : MonoBehaviour
 {    
     // Init
     LotLoad _loadedLotProvider;
-    LotArchitecture _architectrue => _loadedLotProvider.architecture;
+    LotArchitecture _architectrue => _loadedLotProvider.Architecture;
     TestLotViewCamera viewCamera;
     BuildModeServer buildServer;
     LotViewHUDController hudController;

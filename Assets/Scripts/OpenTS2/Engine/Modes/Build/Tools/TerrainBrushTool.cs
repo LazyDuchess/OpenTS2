@@ -53,6 +53,7 @@ namespace OpenTS2.Engine.Modes.Build.Tools
         }
 
         public override string ToolName => "Terrain Tool";
+        public override BuildTools ToolType => BuildTools.TerrainBrush;
 
         protected override void OnActiveChanged(bool NewValue)
         {

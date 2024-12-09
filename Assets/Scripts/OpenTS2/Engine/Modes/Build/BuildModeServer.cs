@@ -16,15 +16,6 @@ using OpenTS2.Diagnostic;
 
 namespace OpenTS2.Engine.Modes.Build
 {
-    internal enum BuildTools
-    {
-        None, 
-        Hand, 
-        Wall,
-        TerrainBrush,
-        Foundation,
-        Floor,
-    }
 
     /// <summary>
     /// Controls the flow of changes to the lot architecture and serves the functionality for Build Mode
@@ -96,8 +87,7 @@ namespace OpenTS2.Engine.Modes.Build
         private readonly StringBuilder lotHistory = new StringBuilder();
 
         private readonly LotLoad loadedLot;
-        private LotArchitecture architecture => loadedLot.architecture;
-
+        private LotArchitecture architecture => loadedLot.Architecture;
         private bool ConstrainedFloorElevation => CheatSystem.GetProperty("constrainfloorelevation").GetStringValue().ToLower() == "true";
 
         //PUBLIC
@@ -162,14 +152,24 @@ namespace OpenTS2.Engine.Modes.Build
             //set drywall design pattern (used so frequently we can save a little time frontloading it)
             architecture.EnsurePatternReferenced("blank", LotArchitecture.ArchitectureGameObjectTypes.wall, out dryWallDesignPattern, out _);
         }
-
+        /// <summary>
+        /// Changes the currently used tool by the User.
+        /// <para/>Passing <see cref="BuildTools.None"/> will drop the current tool, if held.
+        /// </summary>
+        /// <param name="Tool"></param>
         public void ChangeTool(BuildTools Tool)
         {
-            if (CurrentTool != null) CurrentTool.SetActive(false);
+            if (CurrentTool != null)
+            { // A tool is currently being used.
+                if (Tool == SelectedTool)
+                    return; // the newly selected tool is the same as the one currently held, exit.
+                CurrentTool.OnToolCancel(Tool != BuildTools.None ? "The user selected a different tool." : "The current tool has been dropped.");
+                CurrentTool.SetActive(false);
+            }
             switch(Tool)
             {
                 default:                
-                case BuildTools.None:
+                case BuildTools.None:                    
                     CurrentTool = null; break;
                 case BuildTools.Foundation:
                 case BuildTools.Hand:
@@ -246,7 +246,7 @@ namespace OpenTS2.Engine.Modes.Build
                 createdWallIDs = architecture.CreateWall(wall.A, wall.B, Floor, Type, front, back);
 
             if (createdWallIDs != null) // walls were placed here
-            {
+            {                
                 loadedLot.InvalidateWalls();
                 LogHistory($"Created wall(s). {argsStr}", "Create Walls");
                 return createdWallIDs;
@@ -254,6 +254,10 @@ namespace OpenTS2.Engine.Modes.Build
             else LogHistory($"Could not create wall(s). {argsStr}", "Create Walls");
             return null;
         }
+        /// <summary>
+        /// Causes the room detection system to re-evaluate the lot.
+        /// </summary>
+        public void SignalRoomsInvalidate() => loadedLot.EvaluateRoomMap();
         /// <summary>
         /// Clears out all walls in the specified region with the given wall creation options
         /// </summary>

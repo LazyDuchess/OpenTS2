@@ -45,7 +45,7 @@
     internal class FloorTool : AbstractRegionSelectBuildTool, IPatternSelectableBuildTool
     {
         public override string ToolName => "Floor Tool";
-
+        public override BuildTools ToolType => BuildTools.Floor;
         public bool IDPainting { get; private set; }
         public string PatternName { get; private set; }
         public ushort PatternID { get; private set; }

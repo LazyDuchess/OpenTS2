@@ -4,18 +4,16 @@
 #undef NEW_INVALIDATE
 
 using OpenTS2.Common;
-using OpenTS2.Content.DBPF.Scenegraph;
-using OpenTS2.Content.DBPF;
 using OpenTS2.Content;
-using OpenTS2.Files.Formats.DBPF;
+using OpenTS2.Content.DBPF;
+using OpenTS2.Content.DBPF.Scenegraph;
 using OpenTS2.Files;
+using OpenTS2.Files.Formats.DBPF;
 using OpenTS2.Scenes.Lot.State;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace OpenTS2.Scenes.Lot
@@ -26,42 +24,95 @@ namespace OpenTS2.Scenes.Lot
     /// </summary>
     public class LotLoad : MonoBehaviour
     {
+        #region private
+        private WorldState _state = new WorldState(1, WallsMode.Roof);
+
+        private string _nhood;
+        private int _lotId;
+
+        private DBPFFile _lotPackage;
+
+        private List<GameObject> _lotObject = new List<GameObject>();
+        private List<GameObject> _testObjects = new List<GameObject>();
+
+        private RuntimeWallController _wallController = new RuntimeWallController();
+        #endregion
+
+        #region public
         /// <summary>
-        /// Settings for how the lot should be loaded
+        /// Settings to dictate how the lot should be loaded
         /// </summary>
         public struct LotLoadSettings
         {
             [Flags]
             public enum LotViewLayers : int
             {
+                /// <summary>
+                /// Default - Do not display any architecture or objects
+                /// </summary>
                 None = 0,
+                /// <summary>
+                /// Flag - Loads terrain when set
+                /// </summary>
                 Terrain = 1,
+                /// <summary>
+                /// Flag - Loads walls when set
+                /// </summary>
                 Walls = 2,
+                /// <summary>
+                /// Flag - Loads floors when set
+                /// </summary>
                 Floors = 4,
+                /// <summary>
+                /// Flag - Loads objects when set
+                /// </summary>
                 Objects = 8
             }
+            /// <summary>
+            /// Generates the flags necessary to load all layers
+            /// </summary>
             public const LotViewLayers AllLayers = 
                 LotViewLayers.None | LotViewLayers.Terrain | LotViewLayers.Walls | LotViewLayers.Floors | LotViewLayers.Objects;
             /// <summary>
             /// Specifies which layers of the lot geometry should be loaded
             /// </summary>
             public LotViewLayers LoadLayers;
-
+            /// <summary>
+            /// Makes a new <see cref="LotLoadSettings"/> using the specified layers.
+            /// <para/> Default is <see cref="AllLayers"/> value -- to load all layers on the lot
+            /// </summary>
+            /// <param name="loadLayers"></param>
             public LotLoadSettings(LotViewLayers loadLayers = AllLayers)
             {
                 LoadLayers = loadLayers;
             }
         }
-
+        /// <summary>
+        /// (Debug) <c>N001</c>
+        /// </summary>
         public const string Default_NeighborhoodPrefix = "N001";
+        /// <summary>
+        /// (Debug) <c>82</c>
+        /// </summary>
         public const int Default_LotID = 82;
 
+        /// <summary>
+        /// The current floor selected in the <see cref="WorldState"/>
+        /// </summary>
         public int Floor => _state.Level;
-        public WallsMode Mode = WallsMode.Roof;
+        /// <summary>
+        /// The current ViewMode in the <see cref="WorldState"/>
+        /// <para/><see cref="WorldState.Walls"/>
+        /// </summary>
+        public WallsMode ViewMode = WallsMode.Roof;
 
-        public int BaseFloor => architecture?.BaseFloor ?? 0;
-        public int MaxFloor => architecture?.FloorPatterns.Depth ?? 1;
-
+        public int BaseFloor => Architecture?.BaseFloor ?? 0;
+        public int MaxFloor => Architecture?.FloorPatterns.Depth ?? 1;
+        /// <summary>
+        /// The current <see cref="WorldState"/> which indicates how the level should appear
+        /// <para/>Changing this directly will log in the console, but should be followed up with <see cref="InvalidateState"/> to ensure 
+        /// changes can be perceived in the world.
+        /// </summary>
         public WorldState WorldState
         {
             get => _state;
@@ -70,14 +121,7 @@ namespace OpenTS2.Scenes.Lot
                 _state = value;
                 Debug.Log($"World state updated: {value}");
             }
-        }
-
-        private WorldState _state = new WorldState(1, WallsMode.Roof);
-
-        private string _nhood;
-        private int _lotId;
-
-        private DBPFFile lotPackage;
+        }        
 
         /// <summary>
         /// The currently selected Neighborhood Prefix (N001 by default)
@@ -87,10 +131,11 @@ namespace OpenTS2.Scenes.Lot
         /// The currently selected Lot ID in the <see cref="NeighborhoodPrefix"/> selected (82 by default)
         /// </summary>
         public int LotID => _lotId;
-
-        private List<GameObject> _lotObject = new List<GameObject>();
-        private List<GameObject> _testObjects = new List<GameObject>();
-        public LotArchitecture architecture;
+        /// <summary>
+        /// The <see cref="LotArchitecture"/> base that this <see cref="LotLoad"/> instance used to load the scene
+        /// </summary>
+        public LotArchitecture Architecture { get; private set; }
+        #endregion
 
         /// <summary>
         /// Loads the default lot <para/>
@@ -106,7 +151,9 @@ namespace OpenTS2.Scenes.Lot
         {            
             LoadLot(Nhood, LotID);
         }
-
+        /// <summary>
+        /// Unloads the current lot and destroys each object instance in memory.
+        /// </summary>
         public void UnloadLot()
         {
             foreach (var obj in _lotObject)
@@ -120,7 +167,7 @@ namespace OpenTS2.Scenes.Lot
 
         /// <summary>
         /// Updates <see cref="NeighborhoodPrefix"/> and <see cref="LotID"/> and loads the lot.
-        /// <see cref="LoadLot()"/>
+        /// See: <see cref="LoadLot(LotLoadSettings)"/>
         /// </summary>
         /// <param name="neighborhoodPrefix"></param>
         /// <param name="id"></param>
@@ -131,46 +178,43 @@ namespace OpenTS2.Scenes.Lot
 
             LoadLot(Settings);
         }
-
+        /// <summary>
+        /// Unloads the current lot (if applicable) and loads the lot provided by <paramref name="Settings"/>
+        /// </summary>
+        /// <param name="Settings">The settings to use to load the lot</param>
         public void LoadLot(LotLoadSettings Settings = default)
         {
             //Unload previous session
             UnloadLot();
 
             var contentProvider = ContentProvider.Get();
-
+            //Find package file for the lot given
             var lotsFolderPath = Path.Combine(Filesystem.GetUserPath(), $"Neighborhoods/{NeighborhoodPrefix}/Lots");
             var lotFilename = $"{NeighborhoodPrefix}_Lot{LotID}.package";
             var lotFullPath = Path.Combine(lotsFolderPath, lotFilename);
 
             if (!File.Exists(lotFullPath))
             {
-                return;
+                throw new FileNotFoundException($"LoadLot(): File not found. {lotFullPath}");
             }
 
-            lotPackage = contentProvider.AddPackage(lotFullPath);
+            _lotPackage = contentProvider.AddPackage(lotFullPath);
 
             //add objects from scenegraph (primitive need to change to more robust solution later)
             InvalidateObjects();
 
-            architecture = new LotArchitecture();
+            Architecture = new LotArchitecture();
 
-            architecture.LoadFromPackage(lotPackage);
-#if DEBUG
-            ArchitecturePreBakeDebug();
-#endif 
-            architecture.CreateGameObjects(_lotObject);
+            Architecture.LoadFromPackage(_lotPackage);
+            Architecture.CreateGameObjects(_lotObject);
 
-            Mode = WallsMode.Roof;
-            _state = new WorldState(Floor, Mode);
-            architecture.UpdateState(_state);
+            ViewMode = WallsMode.Roof; // Default value is Roof
+            _state = new WorldState(Floor, ViewMode);
+            InvalidateState();
         }
-
-        void ArchitecturePreBakeDebug()
-        { // Bisquicks testing playground :D
-
-        }
-
+        /// <summary>
+        /// Flushes all currently loaded objects and reloads them from package
+        /// </summary>
         public void InvalidateObjects()
         {
             //Clear any objects on the scene
@@ -178,7 +222,7 @@ namespace OpenTS2.Scenes.Lot
 
             var contentProvider = ContentProvider.Get();
             // Go through each lot object.
-            foreach (var entry in lotPackage.Entries)
+            foreach (var entry in _lotPackage.Entries)
             {
                 if (entry.GlobalTGI.TypeID != TypeIDs.LOT_OBJECT)
                 {
@@ -210,8 +254,11 @@ namespace OpenTS2.Scenes.Lot
                 }
             }
         }
-
-        void baseInvalidateGroup(LotArchitecture.ArchitectureGameObjectTypes group)
+        /// <summary>
+        /// Invalidates the specified group supplied by <paramref name="group"/>
+        /// </summary>
+        /// <param name="group"></param>
+        void BaseInvalidateGroup(LotArchitecture.ArchitectureGameObjectTypes group)
         {
 #if NEW_INVALIDATE
             architecture.InvalidateComponent(group);
@@ -219,7 +266,7 @@ namespace OpenTS2.Scenes.Lot
 #endif
             if (group == LotArchitecture.ArchitectureGameObjectTypes.roof)
             {
-                architecture.InvalidateComponent(group);
+                Architecture.InvalidateComponent(group);
                 return;
             }
             //old
@@ -232,26 +279,30 @@ namespace OpenTS2.Scenes.Lot
                 _lotObject.Remove(groupParent);
             }
             //rebuild new mesh from memory
-            architecture.CreateGameObjectsOfType(_lotObject, group);
+            Architecture.CreateGameObjectsOfType(_lotObject, group);
         }
 
         public void InvalidateFloors()
         {
-            baseInvalidateGroup(LotArchitecture.ArchitectureGameObjectTypes.floor);
+            BaseInvalidateGroup(LotArchitecture.ArchitectureGameObjectTypes.floor);
             InvalidateTerrain();
         }
-        public void InvalidateWalls() => baseInvalidateGroup(LotArchitecture.ArchitectureGameObjectTypes.wall);
-        void InvalidateTerrain() => baseInvalidateGroup(LotArchitecture.ArchitectureGameObjectTypes.terrain);
+        public void InvalidateWalls() => BaseInvalidateGroup(LotArchitecture.ArchitectureGameObjectTypes.wall);
+        public void InvalidateTerrain() => BaseInvalidateGroup(LotArchitecture.ArchitectureGameObjectTypes.terrain);
 
         /// <summary>
         /// After changing the <see cref="WorldState"/>, use this method to update the visual
         /// </summary>
-        internal void InvalidateState()
+        public void InvalidateState()
         {
-            architecture.UpdateState(_state);
+            Architecture.UpdateState(_state);
             UpdateObjectVisibility(_state.Level);
         }
-
+        /// <summary>
+        /// Sets the given object's visibility to be Visible/Invisible
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="visible"></param>
         private void SetObjectVisiblity(GameObject obj, bool visible)
         {
             foreach (MeshRenderer renderer in obj.GetComponentsInChildren<MeshRenderer>())
@@ -264,15 +315,27 @@ namespace OpenTS2.Scenes.Lot
                 renderer.shadowCastingMode = visible ? UnityEngine.Rendering.ShadowCastingMode.On : UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
             }
         }
-
+        /// <summary>
+        /// Sets objects to be visible based on if they should be seen by the player or not.
+        /// <para/>This uses the <paramref name="viewLevel"/> to determine up to which floor an object should be viewable.
+        /// </summary>
+        /// <param name="viewLevel"></param>
         private void UpdateObjectVisibility(int viewLevel)
         {
             foreach (GameObject obj in _testObjects)
             {
-                int level = architecture.GetLevelAt(obj.transform.GetChild(0).localPosition);
+                int level = Architecture.GetLevelAt(obj.transform.GetChild(0).localPosition);
 
                 SetObjectVisiblity(obj, level < viewLevel);
             }
         }        
+
+        /// <summary>
+        /// Regenerates the RoomMap from scratch. [BETA]
+        /// </summary>
+        internal void EvaluateRoomMap()
+        {
+            _wallController.GenerateAll(Architecture);
+        }
     }
 }
