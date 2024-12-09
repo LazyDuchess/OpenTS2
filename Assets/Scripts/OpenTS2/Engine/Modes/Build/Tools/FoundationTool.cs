@@ -35,6 +35,7 @@ namespace OpenTS2.Engine.Modes.Build.Tools
         }
 
         public override string ToolName => "Foundation Tool";
+        public override BuildTools ToolType => BuildTools.Foundation;
 
         //**PATTERN 
         /// <summary>
