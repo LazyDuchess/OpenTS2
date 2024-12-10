@@ -35,7 +35,7 @@ namespace OpenTS2.Scenes.Lot
                 Component.EnableExtraUV();
             }
 
-            Object.transform.SetParent(parent.transform);
+            Object.transform.SetParent(parent.transform);            
             Component.Initialize(_material);
         }
 

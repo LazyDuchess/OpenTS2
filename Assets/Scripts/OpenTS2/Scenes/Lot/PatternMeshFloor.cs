@@ -88,13 +88,13 @@ namespace OpenTS2.Scenes.Lot
                         Object,
                         $"{descriptor.Name}_{variant.Name}",
                         variant.MaterialTransform != null ? variant.MaterialTransform(descriptor.Material) : descriptor.Material,
-                        _matConfig);
+                        _matConfig);                    
                 }
                 else
                 {
                     result = new PatternMesh(Object, descriptor.Name, descriptor.Material, _matConfig);
                 }
-
+                result.Object.AddComponent<MeshCollider>(); // add collider to floors                
                 _patternMeshes[key] = result;
             }
 

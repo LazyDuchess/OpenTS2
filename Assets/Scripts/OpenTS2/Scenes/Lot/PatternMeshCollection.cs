@@ -54,6 +54,7 @@ namespace OpenTS2.Scenes.Lot
 
         public void UpdatePatterns(PatternDescriptor[] patterns)
         {
+            _patterns = patterns;
             foreach (var floor in _floors)
             {
                 floor?.UpdatePatterns(patterns);
