@@ -14,125 +14,188 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
+using NAudio;
 
 namespace OpenTS2
 {
     public class SPXConverter
     {
+        private static async Task ConvertSPXForProduct(ProductFlags product, bool compressed, bool mp3)
+        {
+            var productDir = Filesystem.GetPathForProduct(product);
+            var soundDir = Path.Combine(productDir, "TSData/Res/Sound");
+            var packages = Filesystem.GetPackagesInDirectory(soundDir);
+
+            var dbpfFiles = new List<DBPFFile>();
+
+            foreach(var package in packages)
+            {
+                var dbpf = new DBPFFile(package);
+                dbpfFiles.Add(dbpf);
+            }
+
+            foreach(var package in dbpfFiles)
+            {
+                var packageName = Path.GetFileName(package.FilePath);
+                var newPackage = new DBPFFile();
+                newPackage.FilePath = Path.Combine("SPX2WAV", product.ToString(), $"z{packageName}");
+                var audioEntries = package.Entries.Where(entry => entry.TGI.TypeID == TypeIDs.AUDIO);
+                var speechEntries = new List<DBPFEntry>();
+                foreach(var audioEntry in audioEntries)
+                {
+                    var audioData = audioEntry.GetBytes();
+                    var magic = Encoding.UTF8.GetString(audioData, 0, 2);
+                    if (magic == "SP")
+                    {
+                        try
+                        {
+                            speechEntries.Add(audioEntry);
+                        }
+                        catch (Exception) { }
+                    }
+                }
+                if (speechEntries.Count <= 0) continue;
+                Debug.Log($"Starting work on {packageName}");
+                Debug.Log($"Found {speechEntries.Count} SPX audio resources.");
+                var tasks = new List<Task>();
+                var centry = 0;
+                foreach (var entry in speechEntries)
+                {
+                    centry += 1;
+                    var capturedEntry = centry;
+                    tasks.Add(Task.Run(() =>
+                    {
+                        if (capturedEntry % 500 == 0)
+                            Debug.Log($"Progress: {capturedEntry}/{speechEntries.Count}");
+                        try
+                        {
+                            var spxFile = new SPXFile(entry.GetBytes());
+                            if (spxFile != null && spxFile.DecompressedData != null && spxFile.DecompressedData.Length > 0)
+                            {
+                                if (mp3)
+                                {
+                                    var guid = Guid.NewGuid().ToString();
+                                    File.WriteAllBytes($"{guid}.wav", spxFile.DecompressedData);
+                                    var processAttempts = 0;
+                                    System.Diagnostics.Process proc = null;
+                                    while (processAttempts < 5)
+                                    {
+                                        try
+                                        {
+                                            proc = new System.Diagnostics.Process();
+                                            proc.StartInfo.RedirectStandardOutput = true;
+                                            proc.StartInfo.UseShellExecute = false;
+                                            proc.StartInfo.CreateNoWindow = true;
+                                            proc.StartInfo.FileName = "ffmpeg";
+                                            proc.StartInfo.Arguments = $"-i {guid}.wav {guid}.mp3";
+                                            proc.Start();
+                                            proc.WaitForExit();
+                                            break;
+                                        }
+                                        catch(Exception e)
+                                        {
+                                            Debug.LogError(e);
+                                            try
+                                            {
+                                                if (proc != null && !proc.HasExited)
+                                                    proc.Kill();
+                                            }
+                                            catch (Exception) { }
+                                            proc = null;
+                                        }
+                                        processAttempts++;
+                                        try
+                                        {
+                                            if (proc != null && !proc.HasExited)
+                                                proc.Kill();
+                                        }
+                                        catch (Exception) { }
+                                        proc = null;
+                                    }
+                                    try
+                                    {
+                                        if (proc != null && !proc.HasExited)
+                                            proc.Kill();
+                                    }
+                                    catch (Exception) { }
+                                    proc = null;
+                                    if (File.Exists($"{guid}.wav"))
+                                    {
+                                        Task.Run(() =>
+                                        {
+                                            File.Delete($"{guid}.wav");
+                                        });
+                                    }
+                                    if (File.Exists($"{guid}.mp3"))
+                                    {
+                                        var mp3Data = File.ReadAllBytes($"{guid}.mp3");
+                                        Task.Run(() =>
+                                        {
+                                            File.Delete($"{guid}.mp3");
+                                        });
+                                        newPackage.Changes.Set(mp3Data, entry.TGI, compressed);
+                                    }
+                                }
+                                else
+                                {
+                                    newPackage.Changes.Set(spxFile.DecompressedData, entry.TGI, compressed);
+                                }
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Debug.LogError(e);
+                        }
+                    }));
+                }
+                await Task.WhenAll(tasks).ContinueWith((task) =>
+                {
+                    try
+                    {
+                        Debug.Log("Writing to disk...");
+                        newPackage.WriteToFile();
+                        Debug.Log($"Completed {packageName}!");
+                        GC.Collect();
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError(e);
+                    }
+                }, TaskScheduler.Default);
+            }
+        }
+
         [MenuItem("OpenTS2/Experiments/Convert all SPX to WAV")]
         private static void ConvertSPX()
         {
             var baseGameOnly = false;
             var compressed = false;
+            var mp3 = false;
             if (!EditorUtility.DisplayDialog("SPX to WAV", "This operation will convert ALL SPX resources to WAV. This will take a while and use a lot of resources. Proceed?", "Yes", "No"))
                 return;
+            mp3 = EditorUtility.DisplayDialog("SPX to WAV", "Choose Format", "MP3", "WAV");
             baseGameOnly = EditorUtility.DisplayDialog("SPX to WAV", "Which products do you want to convert?", "Base-Game only", "All products");
             compressed = EditorUtility.DisplayDialog("SPX to WAV", "Do you want to compress the resulting packages?", "Yes", "No");
             Core.CoreInitialized = false;
             Core.InitializeCore();
-            if (baseGameOnly)
-                EPManager.Instance.InstalledProducts = (int)ProductFlags.BaseGame;
-            var epManager = EPManager.Instance;
-            var products = Filesystem.GetProductDirectories();
-            var contentManager = ContentManager.Instance;
-
-            foreach (var product in products)
-            {
-                var packages = Filesystem.GetPackagesInDirectory(Path.Combine(product, "TSData/Res/Sound"));
-                contentManager.AddPackages(packages);
-            }
-
-            var audioResources = contentManager.ResourceMap.Where(x => x.Key.TypeID == TypeIDs.AUDIO);
-            var speechResources = new List<DBPFEntry>();
-            var speechPackages = new HashSet<string>();
-            Debug.Log($"Found {audioResources.Count()} Audio Resources.");
-            Debug.Log($"Looking for speech resources...");
 
             new Thread(async () =>
             {
-                foreach (var audioResource in audioResources)
+                var productFlags = Enum.GetValues(typeof(ProductFlags));
+                var tasks = new List<Task>();
+                foreach(ProductFlags productFlag in productFlags)
                 {
-                    try
+                    if (baseGameOnly && productFlag != ProductFlags.BaseGame)
+                        continue;
+                    tasks.Add(Task.Run(async () =>
                     {
-                        var audioData = audioResource.Value.GetBytes();
-                        var magic = Encoding.UTF8.GetString(audioData, 0, 2);
-                        if (magic == "SP")
-                        {
-                            speechResources.Add(audioResource.Value);
-                            var packageFileName = Path.GetFileName(audioResource.Value.Package.FilePath);
-                            speechPackages.Add(packageFileName);
-                        }
-                    }
-                    catch (Exception) { }
+                        await ConvertSPXForProduct(productFlag, compressed, mp3);
+                    }));
                 }
-
-                Debug.Log($"Found {speechResources.Count} SPX audio resources, in {speechPackages.Count} packages.");
-                var packagesStr = "Packages:";
-                foreach (var package in speechPackages)
+                await Task.WhenAll(tasks).ContinueWith((task) =>
                 {
-                    packagesStr += $"\n{package}";
-                }
-                Debug.Log(packagesStr);
-
-                GC.Collect();
-                foreach (var package in speechPackages)
-                {
-                    Debug.Log($"Starting work on {package}");
-                    var newPackage = new DBPFFile();
-                    newPackage.FilePath = Path.Combine("SPX to WAV", package);
-                    var entriesToDoForThisPackage = new List<DBPFEntry>();
-                    foreach (var spx in speechResources)
-                    {
-                        try
-                        {
-                            if (spx.Package == null) continue;
-                            if (Path.GetFileName(spx.Package.FilePath) != package) continue;
-                            entriesToDoForThisPackage.Add(spx);
-                        }
-                        catch (Exception e)
-                        {
-                            Debug.LogError(e);
-                        }
-                    }
-                    Debug.Log($"Will convert {entriesToDoForThisPackage.Count} Entries");
-                    var tasks = new List<Task>();
-                    var centry = 0;
-                    foreach (var entry in entriesToDoForThisPackage)
-                    {
-                        centry += 1;
-                        var capturedEntry = centry;
-                        tasks.Add(Task.Run(() =>
-                        {
-                            if (capturedEntry % 500 == 0)
-                                Debug.Log($"Progress: {capturedEntry}/{entriesToDoForThisPackage.Count}");
-                            try
-                            {
-                                var spxFile = new SPXFile(entry.GetBytes());
-                                if (spxFile != null && spxFile.DecompressedData != null && spxFile.DecompressedData.Length > 0)
-                                    newPackage.Changes.Set(spxFile.DecompressedData, entry.TGI, compressed);
-                            }
-                            catch (Exception e)
-                            {
-                                Debug.LogError(e);
-                            }
-                        }));
-                    }
-                    await Task.WhenAll(tasks).ContinueWith((task) =>
-                    {
-                        try
-                        {
-                            Debug.Log("Writing to disk...");
-                            newPackage.WriteToFile();
-                            Debug.Log($"Completed {package}!");
-                            GC.Collect();
-                        }
-                        catch (Exception e)
-                        {
-                            Debug.LogError(e);
-                        }
-                    }, TaskScheduler.Default);
-                }
-                Debug.Log("All SPX has been converted to WAV! Resulting packages have been written to the SPX to WAV folder.");
+                    Debug.Log("All SPX has been converted to WAV! Resulting packages have been written to the SPX to WAV folder.");
+                }, TaskScheduler.Default);
             }).Start();
         }
     }
