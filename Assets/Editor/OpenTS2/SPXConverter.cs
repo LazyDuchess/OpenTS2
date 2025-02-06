@@ -37,8 +37,10 @@ namespace OpenTS2
             foreach(var package in dbpfFiles)
             {
                 var packageName = Path.GetFileName(package.FilePath);
+                var newPackagePath = Path.Combine("SPX2WAV", product.ToString(), $"z{packageName}");
+                if (File.Exists(newPackagePath)) continue;
                 var newPackage = new DBPFFile();
-                newPackage.FilePath = Path.Combine("SPX2WAV", product.ToString(), $"z{packageName}");
+                newPackage.FilePath = newPackagePath;
                 var audioEntries = package.Entries.Where(entry => entry.TGI.TypeID == TypeIDs.AUDIO);
                 var speechEntries = new List<DBPFEntry>();
                 foreach(var audioEntry in audioEntries)
