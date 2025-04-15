@@ -5,6 +5,7 @@ using OpenTS2.Files.Formats.DBPF;
 using OpenTS2.Lua.Disassembly.OpCodes;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -33,7 +34,7 @@ namespace OpenTS2.SimAntics
             {
                 var semiGlobal = ObjectDefinition.SemiGlobal;
                 if (semiGlobal == null)
-                    return 0;
+                    throw new FileNotFoundException($"Object {ObjectDefinition.FileName} ({ObjectDefinition.GlobalTGI}) has no semi-global file");
                 return semiGlobal.SemiGlobalGroupID;
             }
         }
@@ -112,12 +113,14 @@ namespace OpenTS2.SimAntics
         public BHAVAsset GetBHAV(ushort treeID)
         {
             // 0x0XXX is global scope, 0x1XXX is private scope and 0x2XXX is semiglobal scope.
-            var groupid = SemiGlobalGroupID;
+            uint groupid;
 
             if (treeID < 0x1000)
                 groupid = GroupIDs.Global;
             else if (treeID < 0x2000)
                 groupid = PrivateGroupID;
+            else
+                groupid = SemiGlobalGroupID;
 
             return VM.GetBHAV(treeID, groupid);
         }

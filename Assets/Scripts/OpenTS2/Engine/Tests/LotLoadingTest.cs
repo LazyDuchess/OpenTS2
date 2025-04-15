@@ -47,6 +47,8 @@ namespace OpenTS2.Engine.Tests
 
         private void Start()
         {
+            Core.InitializeCore();
+
             // Load effects.
             EffectsManager.Instance.Initialize();
 

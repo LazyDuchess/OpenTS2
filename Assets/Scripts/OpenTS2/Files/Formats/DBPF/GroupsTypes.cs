@@ -54,6 +54,11 @@ namespace OpenTS2.Files.Formats.DBPF
         public const uint EFFECTS = 0xEA5118B0;
         public const uint DIR = 0xE86B1EEF;
         public const uint AUDIO = 0x2026960B;
+        public const uint OBJ_SAVE_TYPE_TABLE = 0x6f626a74;
+        /// cTSObject
+        public const uint XOBJ = 0x584f424a;
+        /// cEdithObjectModule
+        public const uint OBJM = 0x4F626A4D;
         public const uint OBJD = 0x4F424A44;
         /// dynamiclinklibrary CRC32 hash
         public const uint DLL = 0x7582DEC6;
