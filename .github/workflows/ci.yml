@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
   pull_request_target:
     types: [labeled]
-  
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -13,18 +13,18 @@ jobs:
     steps:
       - name: Checkout repository
         if: ${{ github.event_name != 'pull_request_target' }}
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Checkout repository (Pull Request Target)
         if: ${{ github.event_name == 'pull_request_target' }}
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
-          ref: "refs/pull/${{ github.event.number }}/merge"
+          ref: refs/pull/${{ github.event.number }}/merge
 
-      - uses: actions/cache@v2
+      - uses: actions/cache@v4
         with:
-          path: ./Library
+          path: Library
           key: Library
-      - uses: game-ci/unity-test-runner@v2
+      - uses: game-ci/unity-test-runner@v4
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
