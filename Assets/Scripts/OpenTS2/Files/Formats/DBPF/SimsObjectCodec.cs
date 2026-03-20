@@ -71,11 +71,11 @@ namespace OpenTS2.Files.Formats.DBPF
                 semiAttrs[i] = reader.ReadInt16();
             }
 
-            // 8 unknown shorts called "data".
-            var dataArray = new short[8];
-            for (var i = 0; i < dataArray.Length; i++)
+            // 8 shorts, read as the beginning of "data", this is called "temp"
+            var temp = new short[8];
+            for (var i = 0; i < temp.Length; i++)
             {
-                dataArray[i] = reader.ReadInt16();
+                temp[i] = reader.ReadInt16();
             }
 
             // Next is a number of shorts that depends on the exact version of the file.
@@ -86,12 +86,7 @@ namespace OpenTS2.Files.Formats.DBPF
                 _ => throw new NotImplementedException($"SimObjectCodec not implemented for version {version:X}"),
             };
 
-            var temp = new short[8];
-            for (var i = 0; i < temp.Length; i++)
-            {
-                temp[i] = reader.ReadInt16();
-            }
-            var data = new short[numShorts - 8];
+            var data = new short[numShorts];
             for (var i = 0; i < data.Length; i++)
             {
                 data[i] = reader.ReadInt16();
@@ -122,6 +117,7 @@ namespace OpenTS2.Files.Formats.DBPF
 
             // Next is the number of object arrays. Each being a short array itself.
             var numObjectArrays = reader.ReadInt16();
+            Debug.Log($"numObjectArrays: {numObjectArrays}");
             var shortArrays = new List<short[]>(numObjectArrays);
             for (var i = 0; i < numObjectArrays; i++)
             {
@@ -132,15 +128,15 @@ namespace OpenTS2.Files.Formats.DBPF
                 }
                 shortArrays.Add(objectArray);
             }
-            Debug.Log($"numObjectArrays: {numObjectArrays}");
 
             // An array of shorts. Unknown.
+            Debug.Log($"  Position before numSecondShortArray: 0x{reader.Position:X}");
             var numSecondShortArray = reader.ReadInt16();
+            Debug.Log($"numSecondShortArrays: {numSecondShortArray}");
             for (var i = 0; i < numSecondShortArray; i++)
             {
                 reader.ReadInt16();
             }
-            Debug.Log($"numSecondShortArrays: {numSecondShortArray}");
 
             var ownershipValue = reader.ReadInt32();
             Debug.Log($"ownershipValue: {ownershipValue}");
@@ -160,6 +156,7 @@ namespace OpenTS2.Files.Formats.DBPF
 
             // Read the cTSTreeStack, a set of cTreeStackElems, probably the edith execution stack?
             var numStackFrames = reader.ReadInt32();
+            Debug.Log($"numStackFrames: {numStackFrames}");
             var frames = new SimsObjectStackFrame[numStackFrames];
             reader.ReadUInt32(); // unknown
             for (var i = 0; i < numStackFrames; i++)
@@ -306,6 +303,24 @@ namespace OpenTS2.Files.Formats.DBPF
                 var overrideString3 = reader.ReadVariableLengthPascalString();
                 Debug.Log($"{overrideString1} / {overrideString2} / {overrideString3}");
             }
+
+            // Timers
+            var numTimers = reader.ReadUInt32();
+            for (var i = 0; i < numTimers; i++)
+            {
+                reader.ReadUInt32();
+                reader.ReadUInt32();
+                reader.ReadUInt16();
+                reader.ReadUInt32();
+                reader.ReadInt32();
+                reader.ReadInt32();
+                for (var j = 0; j < 8; j++)
+                {
+                    reader.ReadInt16();
+                }
+            }
+
+            // Maybe 6 int32s and 1 int16 here dependent on some flag in the file.
 
             return new SimsObjectAsset(tileLocationY: tileLocationY, tileLocationX: tileLocationX, level: level,
                 elevation: elevation, objectGroupId: objectGroupId, attrs: attrs, semiAttrs: semiAttrs, temp: temp,
