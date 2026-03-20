@@ -61,7 +61,7 @@ namespace OpenTS2.Engine.Tests
                     TypeIDs.OBJM));
             foreach (var key in objectModule.ObjectIdToSaveType.Keys)
             {
-                Debug.Log($"item id: {key}");
+                //Debug.Log($"item id: {key}");
             }
             Debug.Log($"ItemIndex: {ItemIndex}");
             var objectToLoadSaveType = objectModule.ObjectIdToSaveType[ItemIndex];
@@ -82,7 +82,7 @@ namespace OpenTS2.Engine.Tests
                 }
 
                 saveTypeToGuid[selector.saveType] = selector.objectGuid;
-                //Debug.Log($"{index}: saveType: {selector.saveType} resource name: {selector.catalogResourceName}, Obj name: {def.FileName}");
+                Debug.Log($"{index}: saveType: {selector.saveType} resource name: {selector.catalogResourceName}, Obj name: {def.FileName}");
             }
 
             Debug.Log($"ItemIndex: {ItemIndex}, saveType: {objectToLoadSaveType}");
@@ -91,7 +91,7 @@ namespace OpenTS2.Engine.Tests
             var objectDefinition = ObjectManager.Instance.GetObjectByGUID(objectToLoad.objectGuid);
             Debug.Assert(objectDefinition != null, "Could not find objd.");
 
-            Debug.Log($"Loading object {objectToLoad.catalogResourceName} with guid {objectToLoad.objectGuid:X} group: {objectDefinition.GlobalTGI.GroupID:X}");
+            Debug.Log($"Loading object {objectToLoad.catalogResourceName} with guid {objectToLoad.objectGuid:X} group: {objectDefinition.GlobalTGI.GroupID:X}, version: {objectModule.Version}");
 
             // Now load the state of the object.
             var objectStateBytes = lotPackage.GetBytesByTGI(
@@ -125,7 +125,7 @@ namespace OpenTS2.Engine.Tests
                 };
                 entity.MainThread.Frames.Push(vmFrame);
 
-                Debug.Log($"  BHAV TGI: {entity.MainThread.Frames.Peek().BHAV.GlobalTGI}");
+                Debug.Log($"  BHAV TGI: {entity.MainThread.Frames.Peek().BHAV.GlobalTGI} - {bhav.FileName}");
                 Debug.Log($"  params: ({string.Join(", ", vmFrame.Arguments)})");
             }
 
