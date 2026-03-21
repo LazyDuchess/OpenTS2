@@ -88,7 +88,8 @@ namespace OpenTS2.Engine.Modes.Build
 
         private LotLoad loadedLot;
         private LotArchitecture architecture => loadedLot.Architecture;
-        private bool ConstrainedFloorElevation => CheatSystem.GetProperty("constrainfloorelevation").GetStringValue().ToLower() == "true";
+        [GameProperty("constrainfloorelevation", userProp:true)]
+        private static bool ConstrainedFloorElevation = false;
 
         //PUBLIC
         /// <summary>

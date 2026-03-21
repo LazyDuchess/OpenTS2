@@ -1,8 +1,5 @@
 ﻿// JDrocks450 11-22-2023 on GitHub
 
-#define NEW_INVALIDATE
-#undef NEW_INVALIDATE
-
 using OpenTS2.Content.DBPF;
 using System;
 using System.Collections.Generic;
@@ -158,8 +155,7 @@ namespace OpenTS2.Scenes.Lot
                     Width = Width,
                     Height = Height
                 }, typeof(RoomPackage));
-                File.WriteAllText("C:\\Users\\xXJDr\\OneDrive\\Desktop\\roommapts2.txt", strJson.ToString());
-            }            
+            }
         }
 
         /// <summary>
