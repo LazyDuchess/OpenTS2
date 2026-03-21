@@ -17,8 +17,8 @@ using static OpenTS2.Content.DBPF.LotObjectAsset;
 using OpenTS2.Scenes.Lot.Extensions;
 using OpenTS2.Engine.Modes.Build;
 using OpenTS2.UI.Layouts;
-using OpenTS2.Client;
 using System.Linq;
+using OpenTS2.Engine;
 using OpenTS2.UI.Layouts.Lot;
 using UnityEditor.SearchService;
 using OpenTS2.Engine.Modes.Build.Tools;
@@ -37,20 +37,18 @@ public class BuildModeTest : MonoBehaviour
 
     void ContentStartup(bool LoadGameContent = true)
     {
-        EPManager.Get().InstalledProducts = 0x3EFFF;
+        EPManager.Instance.InstalledProducts = 0x3EFFF;
         ContentLoading.LoadContentStartup();
 
-        var settings = Settings.Get();
-        settings.CustomContentEnabled = false;
+        GameGlobals.allowCustomContent = false;
 
         if (!LoadGameContent) return;
 
-        // Load effects.
-        EffectsManager.Get().Initialize();
         //load the game content
         ContentLoading.LoadGameContentSync();
-
-        CatalogManager.Get().Initialize();
+        CatalogManager.Instance.Initialize();
+        // Load effects.
+        EffectsManager.Instance.Initialize();
     }
 
     void Awake()
@@ -62,7 +60,7 @@ public class BuildModeTest : MonoBehaviour
     void Start()
     {        
         //load the default lot for now
-        _loadedLotProvider = new LotLoad("N001", 80); 
+        _loadedLotProvider = new LotLoad("N001", 80);
 
         //create the build mode server
         buildServer = new BuildModeServer(_loadedLotProvider);

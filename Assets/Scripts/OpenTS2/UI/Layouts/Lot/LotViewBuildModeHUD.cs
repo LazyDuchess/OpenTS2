@@ -62,7 +62,7 @@ namespace OpenTS2.UI.Layouts.Lot
 
                 item = Asset;
 
-                var content = ContentProvider.Get();
+                var content = ContentManager.Instance;
                 var material = content.GetAsset<ScenegraphMaterialDefinitionAsset>(
                     new ResourceKey($"{Asset.Material}_txmt", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXMT));
 
@@ -221,7 +221,7 @@ namespace OpenTS2.UI.Layouts.Lot
 
                 //Update the selection of items to match the definition
                 subsort = Subsort;
-                UpdateItemsSource(CatalogManager.Get().Objects.Where(x => x.Type == CatelogItemType));
+                UpdateItemsSource(CatalogManager.Instance.Objects.Where(x => x.Type == CatelogItemType));
             }
             public void SetLocalPosition(Vector3 Position) => 
                 rootElement.RectTransformComponent.localPosition = Position;

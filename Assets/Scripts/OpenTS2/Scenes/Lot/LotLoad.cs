@@ -187,9 +187,9 @@ namespace OpenTS2.Scenes.Lot
             //Unload previous session
             UnloadLot();
 
-            var contentProvider = ContentProvider.Get();
+            var contentProvider = ContentManager.Instance;
             //Find package file for the lot given
-            var lotsFolderPath = Path.Combine(Filesystem.GetUserPath(), $"Neighborhoods/{NeighborhoodPrefix}/Lots");
+            var lotsFolderPath = Path.Combine(Filesystem.UserDataDirectory, $"Neighborhoods/{NeighborhoodPrefix}/Lots");
             var lotFilename = $"{NeighborhoodPrefix}_Lot{LotID}.package";
             var lotFullPath = Path.Combine(lotsFolderPath, lotFilename);
 
@@ -220,7 +220,7 @@ namespace OpenTS2.Scenes.Lot
             //Clear any objects on the scene
             UnloadLot();
 
-            var contentProvider = ContentProvider.Get();
+            var contentProvider = ContentManager.Instance;
             // Go through each lot object.
             foreach (var entry in _lotPackage.Entries)
             {

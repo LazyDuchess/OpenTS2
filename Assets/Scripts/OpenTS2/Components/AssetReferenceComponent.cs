@@ -63,8 +63,8 @@ namespace OpenTS2.Components
         /// </summary>
         protected virtual void LoadPatterns()
         {
-            var contentProvider = ContentProvider.Get();
-            var catalogManager = CatalogManager.Get();
+            var contentProvider = ContentManager.Instance;
+            var catalogManager = CatalogManager.Instance;
             var patternMap = Map;
 
             ushort highestId = patternMap.Count == 0 ? (ushort)0 : patternMap.Keys.Max();
@@ -137,7 +137,7 @@ namespace OpenTS2.Components
             //_patterns = new PatternMeshCollection(gameObject, patterns, Array.Empty<PatternVariant>(), this, FloorCount);
         }
 
-        protected virtual ScenegraphMaterialDefinitionAsset LoadMaterial(ContentProvider contentProvider, string name)
+        protected virtual ScenegraphMaterialDefinitionAsset LoadMaterial(ContentManager contentProvider, string name)
         {
             var material = contentProvider.GetAsset<ScenegraphMaterialDefinitionAsset>(new ResourceKey($"{name}_txmt", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXMT));
 
@@ -146,7 +146,7 @@ namespace OpenTS2.Components
             return material;
         }
 
-        protected virtual void PostLoadPatterns(ContentProvider contentProvider, ref PatternDescriptor[] patterns)
+        protected virtual void PostLoadPatterns(ContentManager contentProvider, ref PatternDescriptor[] patterns)
         {
 
         }

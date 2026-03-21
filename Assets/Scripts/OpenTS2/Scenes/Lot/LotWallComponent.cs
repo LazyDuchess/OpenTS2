@@ -90,7 +90,7 @@ namespace OpenTS2.Scenes.Lot
             AddFencePosts();
         }
 
-        private ScenegraphMaterialDefinitionAsset LoadMaterial(ContentProvider contentProvider, string name)
+        private ScenegraphMaterialDefinitionAsset LoadMaterial(ContentManager contentManager, string name)
         {
             var material = contentManager.GetAsset<ScenegraphMaterialDefinitionAsset>(new ResourceKey($"{name}_txmt", GroupIDs.Scenegraph, TypeIDs.SCENEGRAPH_TXMT));
 

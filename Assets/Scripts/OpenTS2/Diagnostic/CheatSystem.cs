@@ -4,6 +4,8 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Assets.Scripts.OpenTS2.Diagnostic;
+using OpenTS2.Engine;
 using UnityEngine;
 
 namespace OpenTS2.Diagnostic
