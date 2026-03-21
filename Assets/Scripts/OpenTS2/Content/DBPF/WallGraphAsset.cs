@@ -63,40 +63,44 @@ namespace OpenTS2.Content.DBPF
 
             return result;
         }
-        bool getJuncIdByPosition(Vector2 Position, int Floor, out int juncId, bool createIfNull = true)
+
+        bool GetJuncIdByPosition(Vector2 position, int floor, out int juncId, bool createIfNull = true)
         {
             bool existed = false;
-            var junctions = Positions.Where(x => x.Value.XPos == Position.x && x.Value.YPos == Position.y && x.Value.Level == Floor);
+            var junctions = Positions.Where(x =>
+                x.Value.XPos == position.x && x.Value.YPos == position.y && x.Value.Level == floor);
             juncId = -1;
             if (junctions.Any())
             {
-                juncId = junctions.First().Key;   // found a matching position         
+                juncId = junctions.First().Key; // found a matching position
                 existed = true;
             }
             else if (createIfNull)
-            { // make a new position
+            {
+                // make a new position
                 if (Positions.Any())
                     juncId = Positions.Select(x => x.Key).Max() + 1;
                 else juncId = 0;
                 Positions.Add(juncId, new WallGraphPositionEntry()
                 {
                     Id = juncId,
-                    Level = Floor,
-                    XPos = Position.x,
-                    YPos = Position.y,
+                    Level = floor,
+                    XPos = position.x,
+                    YPos = position.y,
                 });
             }
+
             return existed;
         }
 
-        public bool PushWall(Vector2 Pos1, Vector2 Pos2, int Floor, out int LayerID)
+        public bool PushWall(Vector2 pos1, Vector2 pos2, int floor, out int layerID)
         {            
-            LayerID = -1;
+            layerID = -1;
 
-            bool fromExistedAlready = getJuncIdByPosition(Pos1, Floor, out int fromId);
+            bool fromExistedAlready = GetJuncIdByPosition(pos1, floor, out int fromId);
             if (fromId == -1) // unable to create !!
                 return false;
-            bool toExistedAlready = getJuncIdByPosition(Pos2, Floor, out int toId);
+            bool toExistedAlready = GetJuncIdByPosition(pos2, floor, out int toId);
             if (toId == -1) // unable to create !!
                 return false;
 
@@ -121,8 +125,8 @@ namespace OpenTS2.Content.DBPF
                 ToId = toId,
             };
             _lines[_lines.Length - 1] = line;
-            LayerID = layerId;
-            if (Floors <= Floor)
+            layerID = layerId;
+            if (Floors <= floor)
                 Floors++;
             return true;
         }
@@ -136,14 +140,14 @@ namespace OpenTS2.Content.DBPF
             Array.Resize(ref _lines, _lines.Length - 1); // shorten array by one
         }
 
-        internal bool RemoveWall(Vector2 From, Vector2 To, int Floor, out int LayerID)
+        internal bool RemoveWall(Vector2 from, Vector2 to, int floor, out int layerID)
         { // should be refactored to batch delete a set of segments instead of one at a time due to iterations being potentially large
-            LayerID = -1;
+            layerID = -1;
 
-            getJuncIdByPosition(From, Floor, out int fromId, false);
+            GetJuncIdByPosition(from, floor, out int fromId, false);
             if (fromId == -1) // wall index doesn't exist?
                 return false;
-            getJuncIdByPosition(To, Floor, out int toId, false);
+            GetJuncIdByPosition(to, floor, out int toId, false);
             if (toId == -1) // wall index doesn't exist?
                 return false;
 
@@ -156,7 +160,7 @@ namespace OpenTS2.Content.DBPF
                 if (line.FromId != toId && line.FromId != fromId) continue;
 
                 _delWall(i);
-                LayerID = line.LayerId;
+                layerID = line.LayerId;
                 return true;
             }
             return false; // not found
@@ -164,18 +168,17 @@ namespace OpenTS2.Content.DBPF
         /// <summary>
         /// Deletes all the wall lines from the selected floor by their LayerID.
         /// </summary>
-        /// <param name="Floor"></param>
-        /// <param name="WallLayerIDs"></param>
+        /// <param name="wallLayerIDs"></param>
         /// <returns></returns>
-        internal int RemoveWalls(params int[] WallLayerIDs)
+        internal int RemoveWalls(params int[] wallLayerIDs)
         {
             int index = -1;
             int found = 0;
-            HashSet<int> deletionIndices = new HashSet<int>();
+            var deletionIndices = new HashSet<int>();
             foreach(var line in _lines)
             {
                 index++;
-                if (!WallLayerIDs.Contains(line.LayerId)) continue;
+                if (!wallLayerIDs.Contains(line.LayerId)) continue;
                 found++;
                 deletionIndices.Add(index);
             }

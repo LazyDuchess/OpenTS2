@@ -6,12 +6,12 @@ using UnityEngine;
 
 public class TestLotViewCamera : MonoBehaviour
 {
-    const int HitscanLength = 2000;
+    private const int HitscanLength = 2000;
 
-    Camera _camera;
-    Transform _camTransform;
-    Vector3 mouseholdPosition;
-    float initialXCamRot;
+    private Camera _camera;
+    private Transform _camTransform;
+    private Vector3 _mouseHoldPosition;
+    private float _initialXCamRot;
 
     //level detection system
     /// <summary>
@@ -19,27 +19,27 @@ public class TestLotViewCamera : MonoBehaviour
     /// and also where the floor is to adjust its Y position to see the floor appropriately
     /// <para/>See: <see cref="SetCameraDetectionMeshes(int, IEnumerable{MeshCollider})"/>
     /// </summary>
-    Dictionary<int, Collider[]> floorElevationMeshes;
+    Dictionary<int, Collider[]> _floorElevationMeshes;
 
     // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
-        floorElevationMeshes = new Dictionary<int, Collider[]>();
+        _floorElevationMeshes = new Dictionary<int, Collider[]>();
         _camTransform = GetComponentInParent<Transform>();
         _camera = GetComponentInParent<Camera>();        
     }
 
     // Update is called once per frame
-    void Update()
+    private void Update()
     {
         if (Input.GetMouseButtonDown(1) || Input.GetMouseButtonDown(2)) // right or middle click
         {
-            mouseholdPosition = Input.mousePosition;
+            _mouseHoldPosition = Input.mousePosition;
             if (Input.GetMouseButtonDown(2))
-                initialXCamRot = _camTransform.rotation.eulerAngles.x;
+                _initialXCamRot = _camTransform.rotation.eulerAngles.x;
         }
 
-        var mouseChange = mouseholdPosition - Input.mousePosition;
+        var mouseChange = _mouseHoldPosition - Input.mousePosition;
 
         if (Input.GetMouseButton(1)) // Right Click camera translation
         {
@@ -55,7 +55,7 @@ public class TestLotViewCamera : MonoBehaviour
         else if (Input.GetMouseButton(2)) // Middle Mouse Click Camera pitch
         {
             float pitchChange = (mouseChange / 1).y;
-            var transformedXRot = Math.Max(0, Math.Min(90, initialXCamRot - pitchChange));
+            var transformedXRot = Math.Max(0, Math.Min(90, _initialXCamRot - pitchChange));
             var currentAngle = _camTransform.rotation.eulerAngles;
             currentAngle = new Vector3(transformedXRot, currentAngle.y, currentAngle.z);
             _camTransform.rotation = Quaternion.Euler(currentAngle);
@@ -66,14 +66,14 @@ public class TestLotViewCamera : MonoBehaviour
     /// Sets the mesh colliders used to detect the height of the floor the camera is looking at.
     /// <para/>
     /// </summary>
-    /// <param name="Colliders"></param>
-    public void SetCameraDetectionMeshes(int Floor, IEnumerable<Collider> Colliders)
+    /// <param name="colliders"></param>
+    public void SetCameraDetectionMeshes(int floor, IEnumerable<Collider> colliders)
     {
-        floorElevationMeshes.Remove(Floor);
-        floorElevationMeshes.Add(Floor, Colliders.Where(x => x != default).ToArray());
+        _floorElevationMeshes.Remove(floor);
+        _floorElevationMeshes.Add(floor, colliders.Where(x => x != default).ToArray());
     }
 
-    public static Ray GetMouseCursor3DRay(Camera SelectedCamera)
+    public static Ray GetMouseCursor3DRay(Camera selectedCamera)
     {
         //transform scr pos to world
         Vector3 mousePosition = Input.mousePosition;
@@ -81,24 +81,24 @@ public class TestLotViewCamera : MonoBehaviour
         mousePosition = Camera.main.ScreenToWorldPoint(mousePosition);
 
         //get directional vector 
-        var direction = (mousePosition - SelectedCamera.transform.position); direction.Normalize();
+        var direction = (mousePosition - selectedCamera.transform.position); direction.Normalize();
 
         //build a ray from camera to terrain
-        return new Ray(SelectedCamera.transform.position, direction);
+        return new Ray(selectedCamera.transform.position, direction);
     }
 
     /// <summary>
     /// Potentially expensive!! use with caution
     /// </summary>
-    /// <param name="MaxFloor"></param>
-    /// <param name="WorldPosition"></param>
+    /// <param name="maxFloor"></param>
+    /// <param name="worldPosition"></param>
     /// <returns></returns>
-    public bool TranslateScreen2WorldPos(int MaxFloor, out Vector3 WorldPosition, out int Floor)
+    public bool TranslateScreen2WorldPos(int maxFloor, out Vector3 worldPosition, out int floor)
     {
-        WorldPosition = new Vector3();
-        Floor = -1;
+        worldPosition = new Vector3();
+        floor = -1;
         
-        if (!floorElevationMeshes.Any())
+        if (!_floorElevationMeshes.Any())
         {
             Debug.LogWarning("No terrain meshes added to the lot camera so hit detection is disabled!");
             return false;
@@ -113,10 +113,10 @@ public class TestLotViewCamera : MonoBehaviour
         bool hitComplete = false;
 
         //go top down searching for which floor we're looking at
-        for(int floor = MaxFloor; floor >= floorElevationMeshes.Keys.Min(); floor--)
+        for(int candidateFloor = maxFloor; candidateFloor >= _floorElevationMeshes.Keys.Min(); candidateFloor--)
         {
-            if (!floorElevationMeshes.ContainsKey(floor)) continue;
-            foreach(var collider in floorElevationMeshes[floor])
+            if (!_floorElevationMeshes.ContainsKey(candidateFloor)) continue;
+            foreach(var collider in _floorElevationMeshes[candidateFloor])
             {
                 if (collider is MeshCollider mCollider)
                 {
@@ -126,7 +126,7 @@ public class TestLotViewCamera : MonoBehaviour
                 if (collider.Raycast(camRay, out hitInfo, HitscanLength))
                 {
                     hitComplete = true;
-                    Floor = floor;
+                    floor = candidateFloor;
                     break;
                 }
             }
@@ -134,7 +134,7 @@ public class TestLotViewCamera : MonoBehaviour
         }
         if (!hitComplete) return false;
 
-        WorldPosition = hitInfo.point;
+        worldPosition = hitInfo.point;
         return true;
     }
 }
