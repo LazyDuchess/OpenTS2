@@ -141,13 +141,17 @@ namespace OpenTS2.Scenes.Lot
         /// Loads the default lot <para/>
         /// See: <see cref="Default_NeighborhoodPrefix"/> and <see cref="Default_LotID"/>
         /// </summary>
-        public LotLoad() : this(Default_NeighborhoodPrefix, Default_LotID) { }
+        public void Load()
+        {
+            Load(Default_NeighborhoodPrefix, Default_LotID);
+        }
+
         /// <summary>
         /// Creates a new <see cref="LotLoad"/> instance (that can be reused) with the specified Neighborhood and LotID to load
         /// </summary>
         /// <param name="Nhood"></param>
         /// <param name="LotID"></param>
-        public LotLoad(string Nhood, int LotID)
+        public void Load(string Nhood, int LotID)
         {            
             LoadLot(Nhood, LotID);
         }

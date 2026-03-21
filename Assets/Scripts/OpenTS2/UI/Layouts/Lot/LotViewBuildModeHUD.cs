@@ -494,6 +494,11 @@ namespace OpenTS2.UI.Layouts.Lot
             {
                 uint compID = keyValuePair.Key;
                 var button = rootElement.GetChildByID<UIButtonComponent>(compID);
+                if (!button)
+                {
+                    Debug.Log($"No button for 0x{compID:X}");
+                    continue;
+                }
                 button.OnClick += delegate
                 {
                     //Set context

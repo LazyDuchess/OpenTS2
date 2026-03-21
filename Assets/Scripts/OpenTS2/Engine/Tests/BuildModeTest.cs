@@ -46,9 +46,8 @@ public class BuildModeTest : MonoBehaviour
 
         //load the game content
         ContentLoading.LoadGameContentSync();
+        Core.OnFinishedLoading.Invoke();
         CatalogManager.Instance.Initialize();
-        // Load effects.
-        EffectsManager.Instance.Initialize();
     }
 
     void Awake()
@@ -60,10 +59,12 @@ public class BuildModeTest : MonoBehaviour
     void Start()
     {        
         //load the default lot for now
-        _loadedLotProvider = new LotLoad("N001", 80);
+        _loadedLotProvider = gameObject.AddComponent<LotLoad>();
+        _loadedLotProvider.LoadLot("N001", 80);
 
         //create the build mode server
-        buildServer = new BuildModeServer(_loadedLotProvider);
+        buildServer = gameObject.AddComponent<BuildModeServer>();
+        buildServer.Initialize(_loadedLotProvider);
         buildServer.ChangeTool(BuildTools.None);
 
         //set the camera transform

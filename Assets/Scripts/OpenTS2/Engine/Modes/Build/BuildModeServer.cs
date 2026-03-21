@@ -86,7 +86,7 @@ namespace OpenTS2.Engine.Modes.Build
         //PRIVATE
         private readonly StringBuilder lotHistory = new StringBuilder();
 
-        private readonly LotLoad loadedLot;
+        private LotLoad loadedLot;
         private LotArchitecture architecture => loadedLot.Architecture;
         private bool ConstrainedFloorElevation => CheatSystem.GetProperty("constrainfloorelevation").GetStringValue().ToLower() == "true";
 
@@ -122,7 +122,7 @@ namespace OpenTS2.Engine.Modes.Build
             Debug.Log(msgTxt);
         }
 
-        internal BuildModeServer(LotLoad LoadedLot)
+        public void Initialize(LotLoad LoadedLot)
         {
             Current = this;
 
