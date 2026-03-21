@@ -97,7 +97,7 @@ namespace OpenTS2.Scenes.Lot
             PatternDescriptor[] patterns = new PatternDescriptor[highestId + 2];
 
             foreach (StringMapEntry entry in patternMap.Values)
-            {                
+            {
                 string materialName;
                 if (uint.TryParse(entry.Value, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out uint guid))
                 {
@@ -194,7 +194,7 @@ namespace OpenTS2.Scenes.Lot
                         {
                             if (floor == null)
                             {
-                                // Lazy init - don't create the floor unless it's actually being used.                                
+                                // Lazy init - don't create the floor unless it's actually being used.
                                 floor = _patterns.GetFloor(i);
                                 PatternMesh thickness = floor.Get(0);
                                 thickComp = thickness.Component;

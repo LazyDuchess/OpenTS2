@@ -10,7 +10,6 @@ using OpenTS2.Scenes.Lot.Roof;
 using System.Collections.Generic;
 using System;
 using OpenTS2.Scenes.Lot.State;
-using UnityEngine;
 
 namespace OpenTS2.Scenes.Lot
 {
@@ -75,11 +74,6 @@ namespace OpenTS2.Scenes.Lot
 
             if (roof == null)
             {
-                if (guid == RoofCollection.DefaultGUID)
-                {
-                    Debug.LogWarning($"Could not load roof pattern for default guid: {RoofCollection.DefaultGUID:X}");
-                    return;
-                }
                 LoadPatterns(RoofCollection.DefaultGUID);
                 return;
             }

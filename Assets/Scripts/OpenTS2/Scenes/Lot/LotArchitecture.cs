@@ -271,6 +271,6 @@ namespace OpenTS2.Scenes.Lot
             _roofComponent.UpdateDisplay(state);
             _wallComponent.UpdateDisplay(state);
             _floorComponent.UpdateDisplay(state);
-        }        
+        }
     }
 }
