@@ -16,5 +16,10 @@ namespace OpenTS2.Components
         {
             References.AddRange(assets);
         }
+
+        /// <summary>
+        /// Indicates that this component should re-evaluate itself for changes made at runtime
+        /// </summary>
+        public virtual void Invalidate() { }
     }
 }

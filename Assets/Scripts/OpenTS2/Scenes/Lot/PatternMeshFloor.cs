@@ -95,6 +95,7 @@ namespace OpenTS2.Scenes.Lot
                     result = new PatternMesh(Object, descriptor.Name, descriptor.Material, _matConfig);
                 }
 
+                result.Object.AddComponent<MeshCollider>(); // add collider to floors
                 _patternMeshes[key] = result;
             }
 
