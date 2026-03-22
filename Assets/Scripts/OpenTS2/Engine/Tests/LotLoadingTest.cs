@@ -49,11 +49,10 @@ namespace OpenTS2.Engine.Tests
         {
             Core.InitializeCore();
 
-            // Load effects.
-            EffectsManager.Instance.Initialize();
-
             ContentLoading.LoadGameContentSync();
 
+            // Load effects.
+            EffectsManager.Instance.Initialize();
             CatalogManager.Instance.Initialize();
 
             LoadLot(NeighborhoodPrefix, LotID);
@@ -149,7 +148,7 @@ namespace OpenTS2.Engine.Tests
                             TypeIDs.SCENEGRAPH_CRES));
                     if (resource == null)
                     {
-                        Debug.Log($"Could not find lot object: {lotObject.Object.ResourceName}");
+                        Debug.Log($"Could not find lot object: {lotObject.Object.ResourceName} / TGI: {entry.GlobalTGI}");
                         continue;
                     }
 

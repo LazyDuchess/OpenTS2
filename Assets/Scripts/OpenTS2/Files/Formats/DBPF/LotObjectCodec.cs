@@ -34,6 +34,8 @@ namespace OpenTS2.Files.Formats.DBPF
             {
                 "cObject" => ReadBaseObject(reader, version),
                 "cAnimatable" => ReadAnimatableObject(reader, version),
+                "cLocomotable" => ReadLocomotableObject(reader, version),
+                "cPerson" => ReadPersonObject(reader, version),
                 _ => throw new NotImplementedException($"Invalid LotObject type {blockName}")
             };
         }
@@ -71,6 +73,17 @@ namespace OpenTS2.Files.Formats.DBPF
                 var boneRotation = QuaternionSerializer.Deserialize(reader);
             }
 
+            if (version > 15)
+            {
+                var numBlends = reader.ReadUInt32();
+                for (var i = 0; i < numBlends; i++)
+                {
+                    var blendTargetMaybe = reader.ReadVariableLengthPascalString();
+                    var blendName = reader.ReadVariableLengthPascalString();
+                    var blendValue = reader.ReadFloat();
+                }
+            }
+
             return new LotObjectAsset.LotObject(resourceName, position, rotation);
         }
 
@@ -79,7 +92,93 @@ namespace OpenTS2.Files.Formats.DBPF
             // cAnimatable starts with a cObject.
             var baseObject = ReadObject(reader);
 
+            Debug.Assert(version < 17);
+            var skeletonStretch = reader.ReadFloat();
+
+            if (reader.ReadInt32() != 0)
+            {
+                var objectTransform = Vector3Serializer.Deserialize(reader);
+                var objectRotation = QuaternionSerializer.Deserialize(reader);
+
+                var globalTransform = Vector3Serializer.Deserialize(reader);
+                var globalRotation = QuaternionSerializer.Deserialize(reader);
+            }
+
+            if (version < 15)
+            {
+                // two choreo requests, we don't implement deserializing these yet.
+                Debug.Assert(reader.ReadInt32() == 0);
+                Debug.Assert(reader.ReadInt32() == 0);
+
+                reader.ReadInt32();
+                reader.ReadInt32();
+            }
+
+            var animateSimInstanceCounter = reader.ReadUInt32();
+            if (version > 11)
+            {
+                var newReachInstanceCounter = reader.ReadUInt32();
+            }
+
+            if (version < 10)
+            {
+                reader.ReadUInt32();
+            }
+            if (version > 8)
+            {
+                reader.ReadInt32();
+            }
+            if (version > 10)
+            {
+                reader.ReadInt32();
+            }
+            if (version > 12)
+            {
+                reader.ReadFloat();
+            }
+
+            if (version > 13)
+            {
+                if (version >= 16)
+                {
+                    reader.ReadUInt32();
+                }
+                reader.ReadUInt32();
+            }
+
+            var unknownVec = Vector3Serializer.Deserialize(reader);
+            var unknownQuat = QuaternionSerializer.Deserialize(reader);
+
+            var numberOfAnimRequests = reader.ReadUInt32();
+            for (int i = 0; i < numberOfAnimRequests; i++)
+            {
+                var animRequestType = reader.ReadInt32();
+                if (animRequestType == 0)
+                {
+                    continue;
+                }
+                // TODO: handle this.
+            }
+
             return new LotObjectAsset.AnimatableObject(baseObject);
+        }
+
+        private static LotObjectAsset.LocomotableObject ReadLocomotableObject(IoBuffer reader, uint version)
+        {
+            // cLocomotable starts with a cAnimatable.
+            var animatable = ReadObject(reader);
+            Debug.Assert(animatable is LotObjectAsset.AnimatableObject);
+
+            return new LotObjectAsset.LocomotableObject(animatable);
+        }
+
+        private static LotObjectAsset.PersonObject ReadPersonObject(IoBuffer reader, uint version)
+        {
+            // cPerson starts with a cLocomotable.
+            var locomotable = ReadObject(reader);
+            Debug.Assert(locomotable is LotObjectAsset.LocomotableObject);
+
+            return new LotObjectAsset.PersonObject(locomotable);
         }
 
     }

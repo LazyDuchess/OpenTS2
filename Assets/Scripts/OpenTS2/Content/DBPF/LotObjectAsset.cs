@@ -26,12 +26,30 @@ namespace OpenTS2.Content.DBPF
                 Position = position;
                 Rotation = rotation;
             }
+
+            public LotObject(LotObject other) : this(other.ResourceName, other.Position, other.Rotation) { }
         }
 
         public class AnimatableObject : LotObject
         {
-            public AnimatableObject(LotObject baseObject) : base(baseObject.ResourceName, baseObject.Position, baseObject.Rotation)
+            public AnimatableObject(LotObject baseObject) : base(baseObject)
             {
+            }
+        }
+
+        public class LocomotableObject : AnimatableObject
+        {
+            public LocomotableObject(LotObject baseObject) : base(baseObject)
+            {
+
+            }
+        }
+
+        public class PersonObject : LotObject
+        {
+            public PersonObject(LotObject baseObject) : base(baseObject)
+            {
+
             }
         }
     }
