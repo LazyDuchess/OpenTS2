@@ -143,6 +143,11 @@ namespace OpenTS2.Engine.Tests
                 try
                 {
                     var lotObject = entry.GetAsset<LotObjectAsset>();
+                    // Empty resource name implies no scenegraph resource.
+                    if (lotObject.Object.ResourceName == "")
+                    {
+                        continue;
+                    }
                     var resource = contentManager.GetAsset<ScenegraphResourceAsset>(
                         new ResourceKey(lotObject.Object.ResourceName + "_cres", GroupIDs.Scenegraph,
                             TypeIDs.SCENEGRAPH_CRES));
