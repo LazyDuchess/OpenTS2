@@ -48,6 +48,8 @@ namespace OpenTS2.Files.Formats.DBPF
         public const uint CATALOG_OBJECT = 0xCCA8E925;
         public const uint CATALOG_FENCE = 0x2CB230B8;
         public const uint CATALOG_ROOF = 0xACA8EA06;
+        // cTSSimOutfitData in game.
+        public const uint SIM_APPEARANCE = 0xAC598EAC;
         public const uint STR = 0x53545223;
         public const uint IMG = 0x856DDBAC;
         public const uint IMG2 = 0x8C3CE95A;
