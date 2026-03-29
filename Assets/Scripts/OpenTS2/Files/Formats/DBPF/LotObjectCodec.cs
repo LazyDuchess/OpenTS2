@@ -51,14 +51,14 @@ namespace OpenTS2.Files.Formats.DBPF
                 var skinName = reader.ReadVariableLengthPascalString();
                 if (version > 16)
                 {
-                    reader.ReadUInt32(); // unknown
+                    var skinType = reader.ReadUInt32();
                 }
 
-                var unknownPairCount = reader.ReadInt32();
-                for (var j = 0; j < unknownPairCount; j++)
+                var numOverrides = reader.ReadInt32();
+                for (var j = 0; j < numOverrides; j++)
                 {
-                    var str1 = reader.ReadVariableLengthPascalString();
-                    var str2 = reader.ReadVariableLengthPascalString();
+                    var nameMaterialOverride = reader.ReadVariableLengthPascalString();
+                    var subsetNameOverride = reader.ReadVariableLengthPascalString();
                 }
             }
 

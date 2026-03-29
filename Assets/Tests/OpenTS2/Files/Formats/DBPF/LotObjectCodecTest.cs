@@ -45,4 +45,15 @@ public class LotObjectCodecTest
         Assert.That(lotObject, Is.InstanceOf<LotObjectAsset.AnimatableObject>());
         Assert.That(lotObject.ResourceName, Is.EqualTo("flowerDaisy"));
     }
+
+    [Test]
+    public void TestSuccessfullyLoadsPersonObject()
+    {
+        var lotObjectAsset = ContentManager.Instance
+            .GetAsset<LotObjectAsset>(new ResourceKey(149, _groupID, TypeIDs.LOT_OBJECT));
+
+        var lotObject = lotObjectAsset.Object;
+        Assert.That(lotObject, Is.InstanceOf<LotObjectAsset.PersonObject>());
+        Assert.That(lotObject.ResourceName, Is.EqualTo(""));
+    }
 }

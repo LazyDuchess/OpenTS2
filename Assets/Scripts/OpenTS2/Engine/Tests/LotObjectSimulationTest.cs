@@ -75,14 +75,10 @@ namespace OpenTS2.Engine.Tests
             for (var index = 0; index < saveTable.Selectors.Count; index++)
             {
                 var selector = saveTable.Selectors[index];
-                var def = ObjectManager.Instance.GetObjectByGUID(selector.objectGuid);
-                if (def == null)
-                {
-                    continue;
-                }
-
                 saveTypeToGuid[selector.saveType] = selector.objectGuid;
-                Debug.Log($"{index}: saveType: {selector.saveType} resource name: {selector.catalogResourceName}, Obj name: {def.FileName}");
+
+                var def = ObjectManager.Instance.GetObjectByGUID(selector.objectGuid);
+                Debug.Log($"{index}: saveType: {selector.saveType} resource name: {selector.catalogResourceName}, guid: {selector.objectGuid}, Obj name: {def?.FileName}");
             }
 
             Debug.Log($"ItemIndex: {ItemIndex}, saveType: {objectToLoadSaveType}");
