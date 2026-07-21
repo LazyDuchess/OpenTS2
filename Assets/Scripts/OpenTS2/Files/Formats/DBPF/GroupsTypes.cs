@@ -50,6 +50,9 @@ namespace OpenTS2.Files.Formats.DBPF
         public const uint CATALOG_ROOF = 0xACA8EA06;
         // cTSSimOutfitData in game.
         public const uint SIM_APPEARANCE = 0xAC598EAC;
+        // cTSPersistResKeyList in game. A sidecar resource, sharing group/instance with the resource it
+        // belongs to, holding a flat list of resource keys referenced by index from that resource.
+        public const uint RES_KEY_LIST = 0xAC506764;
         public const uint STR = 0x53545223;
         public const uint IMG = 0x856DDBAC;
         public const uint IMG2 = 0x8C3CE95A;
