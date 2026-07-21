@@ -24,4 +24,22 @@ public class SimAppearanceCodecTest
         Assert.IsNotNull(simAppearanceAsset);
         Assert.AreEqual(simAppearanceAsset.Stretch, 0.94, delta:.01);
     }
+
+    [Test]
+    public void TestParsesEntryLists()
+    {
+        var simAppearanceAsset = ContentManager.Instance
+            .GetAsset<SimAppearanceAsset>(new ResourceKey(1, _groupID, TypeIDs.SIM_APPEARANCE));
+
+        Assert.AreEqual(32, simAppearanceAsset.EntryLists.Count);
+
+        var entries = simAppearanceAsset.EntryLists[new OutfitCategoryKey(OutfitType.Casual1, OutfitCategory.Hair)];
+        Assert.AreEqual(1, entries.Count);
+        Assert.IsInstanceOf<ResourceKeyIndexProp>(entries[0]);
+        Assert.AreEqual(3, ((ResourceKeyIndexProp)entries[0]).Value);
+
+        var sleepBodyEntries = simAppearanceAsset.EntryLists[new OutfitCategoryKey(OutfitType.Sleep, OutfitCategory.Body)];
+        Assert.AreEqual(1, sleepBodyEntries.Count);
+        Assert.AreEqual(8, ((ResourceKeyIndexProp)sleepBodyEntries[0]).Value);
+    }
 }
