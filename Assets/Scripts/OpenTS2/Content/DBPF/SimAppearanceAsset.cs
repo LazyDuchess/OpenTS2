@@ -34,11 +34,11 @@ namespace OpenTS2.Content.DBPF
             if (!properties.Properties.TryGetValue("listcnt", out var listCntProp))
                 return result;
 
-            var listCount = ReadUInt32(listCntProp);
+            var listCount = PropertySet.ParsePropAsUint32(listCntProp);
             for (uint i = 0; i < listCount; i++)
             {
-                var entryCount = ReadUInt32(properties.Properties[$"ls{i}"]);
-                var compositeKey = ReadUInt32(properties.Properties[$"lk{i}"]);
+                var entryCount = PropertySet.ParsePropAsUint32(properties.Properties[$"ls{i}"]);
+                var compositeKey = PropertySet.ParsePropAsUint32(properties.Properties[$"lk{i}"]);
 
                 var entries = new List<IResourceKeyOrIndex>((int)entryCount);
                 for (uint j = 0; j < entryCount; j++)
@@ -67,17 +67,7 @@ namespace OpenTS2.Content.DBPF
                 return new ResourceKeyProp { Value = new ResourceKey(instance, group, type) };
             }
 
-            return new ResourceKeyIndexProp { Value = (int)ReadUInt32(property) };
-        }
-
-        private static uint ReadUInt32(IPropertyType property)
-        {
-            return property switch
-            {
-                Uint32Prop uint32Prop => uint32Prop.Value,
-                StringProp stringProp => uint.Parse(stringProp.Value),
-                _ => throw new ArgumentException($"Unexpected property type {property.GetType()}")
-            };
+            return new ResourceKeyIndexProp { Value = (int)PropertySet.ParsePropAsUint32(property) };
         }
     }
 

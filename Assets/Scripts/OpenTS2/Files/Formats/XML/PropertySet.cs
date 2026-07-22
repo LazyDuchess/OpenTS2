@@ -117,6 +117,17 @@ namespace OpenTS2.Files.Formats.XML
                 Properties[key] = value;
             }
         }
+
+        /// Handle reading a property as a uint32, both directly stored as int or as a string.
+        public static uint ParsePropAsUint32(IPropertyType property)
+        {
+            return property switch
+            {
+                Uint32Prop uint32Prop => uint32Prop.Value,
+                StringProp stringProp => uint.Parse(stringProp.Value),
+                _ => throw new ArgumentException($"Unexpected property type {property.GetType()}")
+            };
+        }
     }
 
     public interface IPropertyType

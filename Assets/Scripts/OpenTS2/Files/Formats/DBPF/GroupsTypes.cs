@@ -53,6 +53,8 @@ namespace OpenTS2.Files.Formats.DBPF
         // cTSPersistResKeyList in game. A sidecar resource, sharing group/instance with the resource it
         // belongs to, holding a flat list of resource keys referenced by index from that resource.
         public const uint RES_KEY_LIST = 0xAC506764;
+        // cTSSkinEntry in game.
+        public const uint SKIN_ENTRY = 0xEBCF3E27;
         public const uint STR = 0x53545223;
         public const uint IMG = 0x856DDBAC;
         public const uint IMG2 = 0x8C3CE95A;
