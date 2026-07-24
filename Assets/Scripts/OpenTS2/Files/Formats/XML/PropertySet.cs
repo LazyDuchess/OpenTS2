@@ -111,11 +111,27 @@ namespace OpenTS2.Files.Formats.XML
                 IPropertyType value = property.Name.LocalName switch
                 {
                     "AnyString" => new StringProp { Value = innerText },
-                    "AnyUint32" => new Uint32Prop { Value = uint.Parse(innerText) },
+                    "AnyUint32" => new Uint32Prop { Value = ParseGameUint32(innerText) },
                     _ => null
                 };
                 Properties[key] = value;
             }
+        }
+
+        /// <summary>
+        /// Mirrors the game's behavior for AnyUint32 text: optional 0x/0X hex prefix, optional leading sign, and
+        /// negative values wrap around to a uint32 instead of throwing.
+        /// </summary>
+        private static uint ParseGameUint32(string text)
+        {
+            text = text.Trim();
+            var numBase = 10;
+            if (text.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+            {
+                text = text.Substring(2);
+                numBase = 16;
+            }
+            return unchecked((uint)Convert.ToInt64(text, numBase));
         }
 
         /// Handle reading a property as a uint32, both directly stored as int or as a string.

@@ -23,6 +23,20 @@ public class PropertySetTest
     }
 
     [Test]
+    public void ParsesNegativeAnyUint32ByWrappingLikeTheGame()
+    {
+        // The real game passes this straight to strtoul(), which accepts the leading '-'
+        // and wraps the result to a uint32 rather than rejecting it.
+        const string xml = @"<?xml version=""1.0"" encoding=""UTF-8""?>
+<cGZPropertySetString>
+  <AnyUint32 key=""key-with-int"" type=""0xeb61e4f7"">-9373251</AnyUint32>
+</cGZPropertySetString>";
+        var set = new PropertySet(xml);
+
+        Assert.That(set.GetProperty<Uint32Prop>("key-with-int").Value, Is.EqualTo(4285594045));
+    }
+
+    [Test]
     public void GetPropertyThrowsWhenTypeDoesNotMatch()
     {
         const string xml = @"
