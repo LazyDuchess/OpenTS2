@@ -249,6 +249,23 @@ namespace OpenTS2.Content
         }
 
         /// <summary>
+        /// Finds an entry matching type/instance while ignoring group. Some content is referenced
+        /// purely by name across the whole engine regardless of which package/group holds it.
+        /// </summary>
+        /// <param name="key">TGI of the resource; GroupID is ignored.</param>
+        /// <returns>The found asset or null</returns>
+        public DBPFEntry GetEntryIgnoringGroup(ResourceKey key)
+        {
+            foreach (var entry in ResourceMap.Values)
+            {
+                var tgi = entry.GlobalTGI;
+                if (tgi.TypeID == key.TypeID && tgi.InstanceID == key.InstanceID && tgi.InstanceHigh == key.InstanceHigh)
+                    return entry;
+            }
+            return null;
+        }
+
+        /// <summary>
         /// Adds all entries from a package into the resource map, at the top of the stack.
         /// </summary>
         /// <param name="package">Package to add entries from.</param>

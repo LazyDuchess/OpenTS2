@@ -1,6 +1,7 @@
 ﻿using OpenTS2.Common;
 using OpenTS2.Content;
 using OpenTS2.Content.DBPF.Scenegraph;
+using OpenTS2.Engine;
 using OpenTS2.Files.Formats.DBPF;
 using System;
 using System.Collections.Generic;
@@ -38,6 +39,82 @@ namespace OpenTS2.Rendering.Materials
             }
         }
 
+        /// <summary>
+        /// Textures are resolved by name alone in the real engine, independent of the group of the
+        /// material referencing them. Shared/CAS textures commonly live in a different package/group than
+        /// the material that references them. Try the referencing material's own group first since
+        /// that covers the common case cheaply, then fall back to a group-agnostic search.
+        /// </summary>
+        private static ScenegraphTextureAsset GetTextureAssetByName(string name, uint referencingGroupID)
+        {
+            var key = new ResourceKey(name + "_txtr", referencingGroupID, TypeIDs.SCENEGRAPH_TXTR);
+            var texture = ContentManager.Instance.GetAsset<ScenegraphTextureAsset>(key);
+            return texture ?? ContentManager.Instance.GetEntryIgnoringGroup(key)?.GetAsset<ScenegraphTextureAsset>();
+        }
+
+        /// <summary>
+        /// Composites "baseTexture0".."baseTexture{N-1}" into one texture by alpha-blending each layer
+        /// over the previous one using the layer's own alpha channel.
+        /// A base skin texture (e.g. "amface-s2", painted with transparent/cutout regions for eyes/eyebrows) has
+        /// genetics overlays (e.g. "uuface-eye-ltblue", "uuface-browtweased-red") blended on top.
+        /// </summary>
+        private static Texture2D GetCompositedBaseTexture(ScenegraphMaterialDefinitionAsset definition, int numTexturesToComposite)
+        {
+            // TODO: there may be a way to speed this up with Graphics.Blit to offload this to the GPU.
+            var compositeName = definition.GetProperty("compositeBaseTextureName", defaultValue: null);
+
+            Texture2D result = null;
+            for (var i = 0; i < numTexturesToComposite; i++)
+            {
+                var layerName = definition.GetProperty($"baseTexture{i}", defaultValue: null);
+                if (layerName == null)
+                {
+                    continue;
+                }
+
+                var layerAsset = GetTextureAssetByName(layerName, definition.GlobalTGI.GroupID);
+                if (layerAsset == null)
+                {
+                    Debug.LogWarning($"Unable to find composite layer texture with name: {layerName}");
+                    continue;
+                }
+
+                var layerTexture = layerAsset.GetSelectedImageAsUnityTexture();
+                if (result == null)
+                {
+                    // The base layer - copied rather than used directly since it's a shared, cached
+                    // asset we shouldn't mutate.
+                    result = new Texture2D(layerTexture.width, layerTexture.height, TextureFormat.RGBA32, mipChain: false);
+                    result.SetPixels32(layerTexture.GetPixels32());
+                    continue;
+                }
+
+                if (layerTexture.width != result.width || layerTexture.height != result.height)
+                {
+                    Debug.LogWarning($"Composite layer '{layerName}' is {layerTexture.width}x{layerTexture.height}, " +
+                        $"expected {result.width}x{result.height} - skipping");
+                    continue;
+                }
+
+                var basePixels = result.GetPixels32();
+                var overlayPixels = layerTexture.GetPixels32();
+                var maxOverlayAlpha = 0;
+                for (var p = 0; p < basePixels.Length; p++)
+                {
+                    if (overlayPixels[p].a > maxOverlayAlpha)
+                    {
+                        maxOverlayAlpha = overlayPixels[p].a;
+                    }
+                    var blended = Color32.Lerp(basePixels[p], overlayPixels[p], overlayPixels[p].a / 255f);
+                    basePixels[p] = blended;
+                }
+                result.SetPixels32(basePixels);
+            }
+
+            result?.Apply();
+            return result;
+        }
+
         public override Material Parse(ScenegraphMaterialDefinitionAsset definition)
         {
             Shader shader = GetShader(definition);
@@ -58,9 +135,7 @@ namespace OpenTS2.Rendering.Materials
                             bumpMapEnabled = true;
                         break;
                     case "stdMatNormalMapTextureName":
-                        bumpMapTexture = ContentManager.Instance.GetAsset<ScenegraphTextureAsset>(
-                            new ResourceKey(property.Value + "_txtr", definition.GlobalTGI.GroupID, TypeIDs.SCENEGRAPH_TXTR)
-                        );
+                        bumpMapTexture = GetTextureAssetByName(property.Value, definition.GlobalTGI.GroupID);
                         if (bumpMapTexture == null)
                         {
                             Debug.Log($"Unable to find bump map texture with name: {bumpMapTexture}");
@@ -73,9 +148,21 @@ namespace OpenTS2.Rendering.Materials
                         break;
                     case "stdMatBaseTextureName":
                         var textureName = property.Value;
-                        var texture = ContentManager.Instance.GetAsset<ScenegraphTextureAsset>(
-                            new ResourceKey(textureName + "_txtr", definition.GlobalTGI.GroupID, TypeIDs.SCENEGRAPH_TXTR)
-                        );
+                        // Genetics (eye/eyebrow color, etc.) come from compositing multiple named
+                        // textures together rather than a plain single base texture - see
+                        // GetCompositedBaseTexture and SimGeometry.md.
+                        var numToComposite = definition.GetProperty("numTexturesToComposite", defaultValue: "1");
+                        if (int.Parse(numToComposite) > 1)
+                        {
+                            var compositedTexture = GetCompositedBaseTexture(definition, int.Parse(numToComposite));
+                            if (compositedTexture != null)
+                            {
+                                material.mainTexture = compositedTexture;
+                                break;
+                            }
+                            Debug.LogWarning($"Unable to composite base texture for: {textureName} - falling back to base layer alone");
+                        }
+                        var texture = GetTextureAssetByName(textureName, definition.GlobalTGI.GroupID);
                         if (texture == null)
                         {
                             Debug.Log($"Unable to find texture with name: {textureName}");
