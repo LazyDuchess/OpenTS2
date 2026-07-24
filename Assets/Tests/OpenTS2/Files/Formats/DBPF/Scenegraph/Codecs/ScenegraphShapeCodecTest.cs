@@ -22,6 +22,7 @@ public class ScenegraphShapeCodecTest
             .GetAsset<ScenegraphShapeAsset>(new ResourceKey("ufoCrash_ufo_shpe", 0x1C0532FA, TypeIDs.SCENEGRAPH_SHPE));
 
         Assert.That(node.ShapeBlock.Resource.ResourceName, Is.EqualTo("ufoCrash_ufo_shpe"));
+        Assert.That(node.ShapeBlock.Tag, Is.EqualTo(""));
 
         Assert.That(node.ShapeBlock.LodLevels.Length, Is.EqualTo(1));
         Assert.That(node.ShapeBlock.LodLevels, Is.EquivalentTo(ShapeBlockReader.LODLevels));

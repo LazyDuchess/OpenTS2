@@ -37,9 +37,14 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
         /// </summary>
         public Dictionary<string, string> Materials { get; }
 
+        /// <summary>
+        /// The Tag off this shape's wrapping cReferentNode. Empty string if it does not have a tag.
+        /// </summary>
+        public string Tag { get; }
+
         public ShapeBlock(PersistTypeInfo blockTypeInfo, ScenegraphResource resource, int[] lodLevels,
-            Dictionary<uint, IList<string>> meshesPerLod, Dictionary<string, string> materials) : base(blockTypeInfo) =>
-            (Resource, LodLevels, MeshesPerLod, Materials) = (resource, lodLevels, meshesPerLod, materials);
+            Dictionary<uint, IList<string>> meshesPerLod, Dictionary<string, string> materials, string tag) : base(blockTypeInfo) =>
+            (Resource, LodLevels, MeshesPerLod, Materials, Tag) = (resource, lodLevels, meshesPerLod, materials, tag);
 
         public override string ToString()
         {
@@ -134,7 +139,7 @@ namespace OpenTS2.Files.Formats.DBPF.Scenegraph.Block
                 var renderGroupId = reader.ReadUInt32();
             }
 
-            return new ShapeBlock(blockTypeInfo, resource, lodLevels, meshesPerLod, materials);
+            return new ShapeBlock(blockTypeInfo, resource, lodLevels, meshesPerLod, materials, graphNode.Tag);
         }
     }
 }
