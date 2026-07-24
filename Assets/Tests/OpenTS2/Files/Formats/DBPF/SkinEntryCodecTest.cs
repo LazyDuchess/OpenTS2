@@ -20,5 +20,11 @@ public class SkinEntryCodecTest
             .GetAsset<SkinEntryAsset>(new ResourceKey(0xF55A9384, 0x2C17B74A, TypeIDs.SKIN_ENTRY));
         Assert.IsNotNull(skinEntryAsset.ShapeResourceKey);
         Assert.IsInstanceOf<ResourceKeyIndexProp>(skinEntryAsset.ShapeResourceKey);
+
+        Assert.That(skinEntryAsset.MaterialOverrides.Count, Is.EqualTo(4));
+        Assert.That(skinEntryAsset.MaterialOverrides[0].SubsetName, Is.EqualTo("hair_alpha5"));
+        Assert.That(skinEntryAsset.MaterialOverrides[1].SubsetName, Is.EqualTo("hair_alpha3"));
+        Assert.That(skinEntryAsset.MaterialOverrides[2].SubsetName, Is.EqualTo("hat"));
+        Assert.That(skinEntryAsset.MaterialOverrides[3].SubsetName, Is.EqualTo("hair"));
     }
 }
