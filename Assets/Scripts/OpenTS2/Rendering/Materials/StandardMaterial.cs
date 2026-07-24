@@ -148,9 +148,6 @@ namespace OpenTS2.Rendering.Materials
                         break;
                     case "stdMatBaseTextureName":
                         var textureName = property.Value;
-                        // Genetics (eye/eyebrow color, etc.) come from compositing multiple named
-                        // textures together rather than a plain single base texture - see
-                        // GetCompositedBaseTexture and SimGeometry.md.
                         var numToComposite = definition.GetProperty("numTexturesToComposite", defaultValue: "1");
                         if (int.Parse(numToComposite) > 1)
                         {
